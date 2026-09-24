@@ -1,0 +1,681 @@
+{
+  "config": {
+    "model_id": "Qwen/Qwen2.5-VL-3B-Instruct",
+    "dataset_id": "vlm-modality-research/modality-conflict-arbitration-v2",
+    "pilot_n": 20,
+    "seed": 42
+  },
+  "dataset_stats": {
+    "total_examples": 12952,
+    "clean_pairs_degradation_0": 3238,
+    "sources": {
+      "gsm8k": 2638,
+      "svamp": 600
+    },
+    "conflict_types": {
+      "mismatch": 3238
+    }
+  },
+  "results": [
+    {
+      "item_index": 0,
+      "image_answer": "31",
+      "text_answer": "90",
+      "source": "gsm8k",
+      "direct": {
+        "generated_text": "60",
+        "extracted_answer": "60",
+        "follows_image": false,
+        "follows_text": false,
+        "n_tokens": 3,
+        "n_sentences": 1,
+        "wall_seconds": 4.6
+      },
+      "placebo": {
+        "generated_text": "The image contains a text problem about Ram using pens and saving money by mixing ink from empty pens. The problem states that Ram buys 25 pens and uses them to make new pens when the ink runs low. The question asks how many total pens Ram gets to have.",
+        "extracted_answer": "25",
+        "follows_image": false,
+        "follows_text": false,
+        "n_tokens": 56,
+        "n_sentences": 3,
+        "wall_seconds": 4.41
+      },
+      "conflict_verbalization": {
+        "generated_text": "The image and the text do not agree with each other. The image is about Ram using pens and making new ones from old ones, while the text is about Johnny's allowance and investment. Therefore, there is no direct connection between the two images and texts.\n\nThe numerical answer is $60.",
+        "extracted_answer": "60.",
+        "follows_image": false,
+        "follows_text": false,
+        "n_tokens": 61,
+        "n_sentences": 4,
+        "wall_seconds": 4.69
+      }
+    },
+    {
+      "item_index": 1,
+      "image_answer": "8",
+      "text_answer": "17",
+      "source": "svamp",
+      "direct": {
+        "generated_text": "3",
+        "extracted_answer": "3",
+        "follows_image": false,
+        "follows_text": false,
+        "n_tokens": 2,
+        "n_sentences": 1,
+        "wall_seconds": 1.23
+      },
+      "placebo": {
+        "generated_text": "The image contains a math word problem about Jack receiving emails and letters. The problem states that Jack received 3 emails and 64 letters in the morning, then 5 emails and 54 letters in the afternoon. The question asks how many emails Jack received in total.",
+        "extracted_answer": "54",
+        "follows_image": false,
+        "follows_text": false,
+        "n_tokens": 57,
+        "n_sentences": 3,
+        "wall_seconds": 4.52
+      },
+      "conflict_verbalization": {
+        "generated_text": "The image and the text do not agree with each other. The text is about Jack receiving emails and letters, while the image does not contain any information related to emails or letters. Therefore, there is no numerical answer to provide based on the given image.",
+        "extracted_answer": null,
+        "follows_image": null,
+        "follows_text": null,
+        "n_tokens": 52,
+        "n_sentences": 3,
+        "wall_seconds": 3.89
+      }
+    },
+    {
+      "item_index": 2,
+      "image_answer": "18",
+      "text_answer": "30",
+      "source": "svamp",
+      "direct": {
+        "generated_text": "24",
+        "extracted_answer": "24",
+        "follows_image": false,
+        "follows_text": false,
+        "n_tokens": 3,
+        "n_sentences": 1,
+        "wall_seconds": 1.23
+      },
+      "placebo": {
+        "generated_text": "The image contains a math word problem about marbles. The problem states that Josh had 20 marbles initially, but he gave 2 to Jack. The question asks how many marbles Josh has left now.",
+        "extracted_answer": "2",
+        "follows_image": false,
+        "follows_text": false,
+        "n_tokens": 45,
+        "n_sentences": 3,
+        "wall_seconds": 3.81
+      },
+      "conflict_verbalization": {
+        "generated_text": "The image and the text do not agree with each other. The image asks about Josh's marble collection, while the text is about push-ups done by different people. Therefore, there is no direct correlation between the image and the text to answer the question.\n\nNumerical answer: 24",
+        "extracted_answer": "24",
+        "follows_image": false,
+        "follows_text": false,
+        "n_tokens": 59,
+        "n_sentences": 4,
+        "wall_seconds": 4.27
+      }
+    },
+    {
+      "item_index": 3,
+      "image_answer": "3",
+      "text_answer": "25",
+      "source": "gsm8k",
+      "direct": {
+        "generated_text": "25",
+        "extracted_answer": "25",
+        "follows_image": false,
+        "follows_text": true,
+        "n_tokens": 3,
+        "n_sentences": 1,
+        "wall_seconds": 1.3
+      },
+      "placebo": {
+        "generated_text": "The image contains a math word problem about dividing a pizza with 12 slices among Jenny, Bill, and Mark. The problem states that Jenny gives 1/3 of the pizza to Bill and 1/4 to Mark. After eating 2 slices herself, the question asks how many slices are left.",
+        "extracted_answer": "2",
+        "follows_image": false,
+        "follows_text": false,
+        "n_tokens": 64,
+        "n_sentences": 3,
+        "wall_seconds": 4.65
+      },
+      "conflict_verbalization": {
+        "generated_text": "The image and the text do not agree with each other. The image is about dividing a pizza, while the text is about saving money to buy a bike. Therefore, there is no direct connection between the two images and texts.\n\nTo solve the problem, we need to calculate the total number of slices Jenny gives away and then subtract that from the total number of slices she originally had. After that, we can subtract the number of slices Jenny eats to find out how many slices are left.\n\nLet's start by calcul",
+        "extracted_answer": "7",
+        "follows_image": false,
+        "follows_text": false,
+        "n_tokens": 200,
+        "n_sentences": 6,
+        "wall_seconds": 12.56
+      }
+    },
+    {
+      "item_index": 4,
+      "image_answer": "50",
+      "text_answer": "10",
+      "source": "gsm8k",
+      "direct": {
+        "generated_text": "20",
+        "extracted_answer": "20",
+        "follows_image": false,
+        "follows_text": false,
+        "n_tokens": 3,
+        "n_sentences": 1,
+        "wall_seconds": 1.29
+      },
+      "placebo": {
+        "generated_text": "The image contains a math word problem about Rosie running for different speeds and times. The problem states that Rosie can run 10 miles per hour for 3 hours, then runs 5 miles per hour. The question asks how many miles Rosie can run in 7 hours.",
+        "extracted_answer": "7",
+        "follows_image": false,
+        "follows_text": false,
+        "n_tokens": 57,
+        "n_sentences": 3,
+        "wall_seconds": 4.39
+      },
+      "conflict_verbalization": {
+        "generated_text": "The image and the text do not agree with each other. The image contains a question about Rosie running for 7 hours, while the text does not mention Rosie or any running activity. Therefore, the answer to the question cannot be determined from the given information.\n\nAnswer: The text does not provide enough information to determine the number of letters in the pile when Jennie began.",
+        "extracted_answer": "7",
+        "follows_image": false,
+        "follows_text": false,
+        "n_tokens": 76,
+        "n_sentences": 4,
+        "wall_seconds": 5.16
+      }
+    },
+    {
+      "item_index": 5,
+      "image_answer": "1",
+      "text_answer": "17017",
+      "source": "svamp",
+      "direct": {
+        "generated_text": "16477",
+        "extracted_answer": "16477",
+        "follows_image": false,
+        "follows_text": false,
+        "n_tokens": 6,
+        "n_sentences": 1,
+        "wall_seconds": 1.53
+      },
+      "placebo": {
+        "generated_text": "The image contains a math word problem about Allan and Jake bringing balloons to the park. The text reads: \"Allan brought 2 balloons and Jake brought 4 balloons to the park. Allan then bought 3 more balloons at the park. How many more balloons did Allan have than Jake in the park?\"",
+        "extracted_answer": "3",
+        "follows_image": false,
+        "follows_text": false,
+        "n_tokens": 63,
+        "n_sentences": 4,
+        "wall_seconds": 5.15
+      },
+      "conflict_verbalization": {
+        "generated_text": "The image and the text do not agree with each other. The image is about balloons and people bringing them to the park, while the text is about picking grapes and filling drums. Therefore, there is no direct connection between the two images and texts.\n\nThe number of drums of grapes filled in 77 days is 16,497 drums.",
+        "extracted_answer": "16497",
+        "follows_image": false,
+        "follows_text": false,
+        "n_tokens": 73,
+        "n_sentences": 4,
+        "wall_seconds": 5.42
+      }
+    },
+    {
+      "item_index": 6,
+      "image_answer": "40",
+      "text_answer": "3",
+      "source": "gsm8k",
+      "direct": {
+        "generated_text": "1",
+        "extracted_answer": "1",
+        "follows_image": false,
+        "follows_text": false,
+        "n_tokens": 2,
+        "n_sentences": 1,
+        "wall_seconds": 1.32
+      },
+      "placebo": {
+        "generated_text": "The image contains a math word problem about Grade 5 students and their participation in girl scouts. The problem states that out of 200 Grade 5 students, 2/5 are boys and 2/3 of the girls are in the girl scout. The question asks how many girls are not in the girl scout.",
+        "extracted_answer": "3",
+        "follows_image": false,
+        "follows_text": true,
+        "n_tokens": 68,
+        "n_sentences": 3,
+        "wall_seconds": 5.48
+      },
+      "conflict_verbalization": {
+        "generated_text": "The image and the text do not agree with each other. The image asks about the number of girls in the girl scout, while the text asks about the difference in sleep time between Harry and James. Therefore, there is no direct correlation between the two questions.\n\nNumerical Answer: Harry slept 9 hours, and James slept 6 hours (2/3 of Harry's sleep). So, Harry slept 3 more hours than James.",
+        "extracted_answer": "3",
+        "follows_image": false,
+        "follows_text": true,
+        "n_tokens": 89,
+        "n_sentences": 5,
+        "wall_seconds": 6.1
+      }
+    },
+    {
+      "item_index": 7,
+      "image_answer": "120",
+      "text_answer": "79",
+      "source": "gsm8k",
+      "direct": {
+        "generated_text": "10",
+        "extracted_answer": "10",
+        "follows_image": false,
+        "follows_text": false,
+        "n_tokens": 3,
+        "n_sentences": 1,
+        "wall_seconds": 1.79
+      },
+      "placebo": {
+        "generated_text": "The image contains a text problem about Mrs. Harrington buying oranges from the market. The problem involves calculating how many oranges she sold after giving some to her mom and sister.",
+        "extracted_answer": null,
+        "follows_image": null,
+        "follows_text": null,
+        "n_tokens": 36,
+        "n_sentences": 3,
+        "wall_seconds": 3.86
+      },
+      "conflict_verbalization": {
+        "generated_text": "The image and the text do not agree with each other. The image is about Mrs. Harrington buying oranges, while the text is about India having more states than the USA. Therefore, there is no direct connection between the two images and texts.\n\nTo calculate the total number of states in both countries:\n\n1. Half the number of states in the USA = 50 / 2 = 25\n2. India has 4 more than half the number of states in the USA = 25 + 4 = 29\n\nTotal number of states in both countries = 50 (USA) + 29 (India) =",
+        "extracted_answer": "79.",
+        "follows_image": false,
+        "follows_text": false,
+        "n_tokens": 154,
+        "n_sentences": 7,
+        "wall_seconds": 10.36
+      }
+    },
+    {
+      "item_index": 8,
+      "image_answer": "270",
+      "text_answer": "240",
+      "source": "gsm8k",
+      "direct": {
+        "generated_text": "48",
+        "extracted_answer": "48",
+        "follows_image": false,
+        "follows_text": false,
+        "n_tokens": 3,
+        "n_sentences": 1,
+        "wall_seconds": 1.9
+      },
+      "placebo": {
+        "generated_text": "The image contains a text problem about two trains traveling in opposite directions from a station. The first train travels at 60 miles per hour, while the second train travels half that distance per hour. The question asks how far apart the trains are after 3 hours.\n\nAnswer: After 3 hours, the two trains are 180 miles apart.",
+        "extracted_answer": "180",
+        "follows_image": false,
+        "follows_text": false,
+        "n_tokens": 73,
+        "n_sentences": 4,
+        "wall_seconds": 5.77
+      },
+      "conflict_verbalization": {
+        "generated_text": "The image and the text are contradictory. The image contains a question about trains traveling in opposite directions, while the text discusses Billy volunteering to help people with taxes. There is no information in the image that relates to the content of the text.\n\nNumerical answer: 186 people",
+        "extracted_answer": "186",
+        "follows_image": false,
+        "follows_text": false,
+        "n_tokens": 58,
+        "n_sentences": 4,
+        "wall_seconds": 5.59
+      }
+    },
+    {
+      "item_index": 9,
+      "image_answer": "15",
+      "text_answer": "25",
+      "source": "gsm8k",
+      "direct": {
+        "generated_text": "25",
+        "extracted_answer": "25",
+        "follows_image": false,
+        "follows_text": true,
+        "n_tokens": 3,
+        "n_sentences": 1,
+        "wall_seconds": 1.45
+      },
+      "placebo": {
+        "generated_text": "The image contains a math word problem about Joelle's flowers on her balcony. The problem states that Joelle has 5 orchids with 5 petals each and 4 African daisies with 10 petals each. It asks how many more petals the daisies have compared to the orchids.",
+        "extracted_answer": "10",
+        "follows_image": false,
+        "follows_text": false,
+        "n_tokens": 64,
+        "n_sentences": 3,
+        "wall_seconds": 4.79
+      },
+      "conflict_verbalization": {
+        "generated_text": "The image and the text do not agree with each other. The image is about counting petals on flowers, while the text is about calculating percentages of different types of plants in a garden. Therefore, there is no need to provide a numerical answer for this question.",
+        "extracted_answer": null,
+        "follows_image": null,
+        "follows_text": null,
+        "n_tokens": 53,
+        "n_sentences": 3,
+        "wall_seconds": 4.47
+      }
+    },
+    {
+      "item_index": 10,
+      "image_answer": "2600",
+      "text_answer": "76",
+      "source": "gsm8k",
+      "direct": {
+        "generated_text": "120",
+        "extracted_answer": "120",
+        "follows_image": false,
+        "follows_text": false,
+        "n_tokens": 4,
+        "n_sentences": 1,
+        "wall_seconds": 1.88
+      },
+      "placebo": {
+        "generated_text": "The image contains a text problem about Joe's bag of Halloween candy. The problem states that Joe has 25 chocolate bars and 80 candied apples, with each chocolate bar weighing twice as much as each candied apple. It also mentions that each chocolate bar weighs 40 grams. The question asks for the total weight of Joe's bag of candy in grams.",
+        "extracted_answer": "40",
+        "follows_image": false,
+        "follows_text": false,
+        "n_tokens": 77,
+        "n_sentences": 4,
+        "wall_seconds": 5.88
+      },
+      "conflict_verbalization": {
+        "generated_text": "The image and the text do not agree with each other. The image contains a question about Joe's bag of Halloween candy, while the text describes Rose buying cakes over three days. Therefore, there is no direct connection between the image and the text.\n\nTo calculate the total weight of Joe's bag of candy:\n1. Each chocolate bar weighs 40g.\n2. There are 25 chocolate bars.\n3. Each candied apple weighs half the weight of a chocolate bar (since each chocolate bar weighs twice as much).\n\nFirst, calcula",
+        "extracted_answer": "80",
+        "follows_image": false,
+        "follows_text": false,
+        "n_tokens": 200,
+        "n_sentences": 10,
+        "wall_seconds": 13.01
+      }
+    },
+    {
+      "item_index": 11,
+      "image_answer": "2",
+      "text_answer": "4",
+      "source": "svamp",
+      "direct": {
+        "generated_text": "29",
+        "extracted_answer": "29",
+        "follows_image": false,
+        "follows_text": false,
+        "n_tokens": 3,
+        "n_sentences": 1,
+        "wall_seconds": 1.78
+      },
+      "placebo": {
+        "generated_text": "The image contains a math word problem about baking a cake. The text reads: \"Mary is baking a cake. The recipe calls for 11 cups of sugar 6 cups of flour and 9 cups of salt. She already put in 12 cups of flour. How many more cups of sugar than cups of salt does she need to add now?\"",
+        "extracted_answer": "12",
+        "follows_image": false,
+        "follows_text": false,
+        "n_tokens": 74,
+        "n_sentences": 5,
+        "wall_seconds": 6.2
+      },
+      "conflict_verbalization": {
+        "generated_text": "The image and the text do not agree with each other. The image is about baking a cake and the text is about Jessie's weight loss. Therefore, there is no need to provide a numerical answer as they are unrelated.",
+        "extracted_answer": null,
+        "follows_image": null,
+        "follows_text": null,
+        "n_tokens": 46,
+        "n_sentences": 3,
+        "wall_seconds": 4.2
+      }
+    },
+    {
+      "item_index": 12,
+      "image_answer": "50",
+      "text_answer": "12",
+      "source": "gsm8k",
+      "direct": {
+        "generated_text": "15",
+        "extracted_answer": "15",
+        "follows_image": false,
+        "follows_text": false,
+        "n_tokens": 3,
+        "n_sentences": 1,
+        "wall_seconds": 1.42
+      },
+      "placebo": {
+        "generated_text": "The image contains a math problem asking for the average speed Sid was traveling after traveling 110 miles in 2 hours and then an additional 140 miles in 3 hours. The numerical answer is 55 miles per hour.",
+        "extracted_answer": "55",
+        "follows_image": false,
+        "follows_text": false,
+        "n_tokens": 51,
+        "n_sentences": 2,
+        "wall_seconds": 4.62
+      },
+      "conflict_verbalization": {
+        "generated_text": "The image and the text do not agree. The image asks for the average speed Sid was traveling, while the text asks about the probability of both lottery tickets being winners. Therefore, there is no direct correlation between the two questions.\n\nTo calculate the probability that both tickets are winners:\n\n1. First, find the probability of each ticket being a winner:\n   - Ticket 1 has a 20% chance of winning, which is 0.20.\n   - Ticket 2 is three times more likely to win than Ticket 1, so it has a ",
+        "extracted_answer": "100",
+        "follows_image": false,
+        "follows_text": false,
+        "n_tokens": 200,
+        "n_sentences": 9,
+        "wall_seconds": 12.79
+      }
+    },
+    {
+      "item_index": 13,
+      "image_answer": "247",
+      "text_answer": "95",
+      "source": "gsm8k",
+      "direct": {
+        "generated_text": "75",
+        "extracted_answer": "75",
+        "follows_image": false,
+        "follows_text": false,
+        "n_tokens": 3,
+        "n_sentences": 1,
+        "wall_seconds": 1.59
+      },
+      "placebo": {
+        "generated_text": "The Science Center hosted field trips Monday through Friday last week. On Monday, 32 classes visited. Twice as many visited on Tuesday and three times as many visited on Wednesday. Another 30 classes visited on Thursday and 25 visited on Friday. In all, how many classes visited the Science Center last week?",
+        "extracted_answer": "25",
+        "follows_image": false,
+        "follows_text": false,
+        "n_tokens": 66,
+        "n_sentences": 5,
+        "wall_seconds": 5.12
+      },
+      "conflict_verbalization": {
+        "generated_text": "The image and the text do not agree with each other. The image is about field trips to the Science Center, while the text is about John's test scores. Therefore, there is no direct correlation between the two images and texts.\n\nTo calculate the average score across the 4 tests, we need to add up all the scores and divide by the number of tests:\n\n(100 + 100 + 100 + 80) / 4 = 480 / 4 = 120\n\nTherefore, the average score across the 4 tests is 120.",
+        "extracted_answer": "120.",
+        "follows_image": false,
+        "follows_text": false,
+        "n_tokens": 127,
+        "n_sentences": 4,
+        "wall_seconds": 9.21
+      }
+    },
+    {
+      "item_index": 14,
+      "image_answer": "54",
+      "text_answer": "162000",
+      "source": "gsm8k",
+      "direct": {
+        "generated_text": "34000",
+        "extracted_answer": "34000",
+        "follows_image": false,
+        "follows_text": false,
+        "n_tokens": 6,
+        "n_sentences": 1,
+        "wall_seconds": 1.94
+      },
+      "placebo": {
+        "generated_text": "The image contains a text problem about Howie buying cupcakes for his class. The problem states that he wants to buy one vanilla and one chocolate cupcake for each person in his class, including himself, his teacher, and 25 classmates.",
+        "extracted_answer": "25",
+        "follows_image": false,
+        "follows_text": false,
+        "n_tokens": 50,
+        "n_sentences": 2,
+        "wall_seconds": 4.47
+      },
+      "conflict_verbalization": {
+        "generated_text": "The image and the text do not agree with each other. The image is about cupcakes, while the text is about Instagram likes. Therefore, there is no direct correlation between the two images.\n\nNumerical answer: 80000",
+        "extracted_answer": "80000",
+        "follows_image": false,
+        "follows_text": false,
+        "n_tokens": 49,
+        "n_sentences": 4,
+        "wall_seconds": 4.36
+      }
+    },
+    {
+      "item_index": 15,
+      "image_answer": "120",
+      "text_answer": "300",
+      "source": "gsm8k",
+      "direct": {
+        "generated_text": "180",
+        "extracted_answer": "180",
+        "follows_image": false,
+        "follows_text": false,
+        "n_tokens": 4,
+        "n_sentences": 1,
+        "wall_seconds": 1.85
+      },
+      "placebo": {
+        "generated_text": "The image contains a text problem about Hannah's water intake while running. The problem states that Hannah needs to drink 60 ml of water for each kilometer she runs. If her gym teacher tells her to run 8 laps and each lap is 0.25 km, how many milliliters of water will Hannah need to drink?",
+        "extracted_answer": "0.25",
+        "follows_image": false,
+        "follows_text": false,
+        "n_tokens": 71,
+        "n_sentences": 3,
+        "wall_seconds": 5.49
+      },
+      "conflict_verbalization": {
+        "generated_text": "The image and the text do not agree with each other. The image is about Hannah's water intake while running, while the text is about Julie's spending habits. Therefore, there is no direct correlation between the two.\n\nTo calculate the amount of water Hannah needs to drink:\n\n1. Calculate the total distance she runs:\n   - Each lap is 0.25 km\n   - She runs 8 laps\n   - Total distance = 0.25 km/lap * 8 laps = 2 km\n\n2. Calculate the total water intake:\n   - She needs 60 ml of water per kilometer\n   - ",
+        "extracted_answer": "120",
+        "follows_image": true,
+        "follows_text": false,
+        "n_tokens": 169,
+        "n_sentences": 6,
+        "wall_seconds": 11.18
+      }
+    },
+    {
+      "item_index": 16,
+      "image_answer": "44",
+      "text_answer": "220",
+      "source": "gsm8k",
+      "direct": {
+        "generated_text": "340",
+        "extracted_answer": "340",
+        "follows_image": false,
+        "follows_text": false,
+        "n_tokens": 4,
+        "n_sentences": 1,
+        "wall_seconds": 1.92
+      },
+      "placebo": {
+        "generated_text": "The image contains a text problem about Lori wanting to buy shoes and a matching belt. The part-time job pays her $8.00 per hour. The question asks how many hours she needs to work before she can make her purchase.",
+        "extracted_answer": "8.00",
+        "follows_image": false,
+        "follows_text": false,
+        "n_tokens": 49,
+        "n_sentences": 3,
+        "wall_seconds": 4.5
+      },
+      "conflict_verbalization": {
+        "generated_text": "The image and the text do not agree. The image asks about Lori's work hours needed to buy shoes and a belt, while the text asks about Janeth's remaining balance after paying off her loan. Therefore, there is no direct correlation between the two questions.\n\nNumerical answer: Janeth's remaining balance will be $345.",
+        "extracted_answer": "345.",
+        "follows_image": false,
+        "follows_text": false,
+        "n_tokens": 70,
+        "n_sentences": 4,
+        "wall_seconds": 5.45
+      }
+    },
+    {
+      "item_index": 17,
+      "image_answer": "15",
+      "text_answer": "8",
+      "source": "gsm8k",
+      "direct": {
+        "generated_text": "10",
+        "extracted_answer": "10",
+        "follows_image": false,
+        "follows_text": false,
+        "n_tokens": 3,
+        "n_sentences": 1,
+        "wall_seconds": 1.75
+      },
+      "placebo": {
+        "generated_text": "The image contains a text problem about the ratio of electric poles to wires needed for electricity supply in a neighborhood. The problem states that the ratio is 1:3 and the total number of wires required is 45.",
+        "extracted_answer": "45.",
+        "follows_image": false,
+        "follows_text": false,
+        "n_tokens": 46,
+        "n_sentences": 2,
+        "wall_seconds": 4.45
+      },
+      "conflict_verbalization": {
+        "generated_text": "The image and the text do not agree with each other. The text is about calculating the number of electric poles required to supply electricity in a neighborhood, while the image is about a party with men and women leaving. Therefore, the correct answer is that the image and the text contradict each other.",
+        "extracted_answer": null,
+        "follows_image": null,
+        "follows_text": null,
+        "n_tokens": 60,
+        "n_sentences": 3,
+        "wall_seconds": 4.82
+      }
+    },
+    {
+      "item_index": 18,
+      "image_answer": "91",
+      "text_answer": "1375",
+      "source": "gsm8k",
+      "direct": {
+        "generated_text": "425",
+        "extracted_answer": "425",
+        "follows_image": false,
+        "follows_text": false,
+        "n_tokens": 4,
+        "n_sentences": 1,
+        "wall_seconds": 1.79
+      },
+      "placebo": {
+        "generated_text": "The image contains a text problem about cooking chicken with oil. The problem states that it takes 20 minutes to heat up the oil to 300 degrees, then 40% longer for the oil to reach 400 degrees, and after warming the oil, it takes 5 minutes less time to cook than it took to warm up the oil. The question asks how much time passes from starting the oil to having cooked chicken.",
+        "extracted_answer": "5",
+        "follows_image": false,
+        "follows_text": false,
+        "n_tokens": 92,
+        "n_sentences": 3,
+        "wall_seconds": 7.17
+      },
+      "conflict_verbalization": {
+        "generated_text": "The image and the text do not agree with each other. The image is about cooking oil, while the text is about buying ads for a real estate agent. Therefore, there is no direct connection between the two images and texts.\n\nTo calculate the total amount spent by the real estate agent on buying all the ads:\n\n1. Calculate the cost of newspaper ads:\n   - Cost per newspaper ad = $5\n   - Number of newspaper ads = 50\n   - Total cost for newspaper ads = $5 \u00d7 50 = $250\n\n2. Calculate the cost of television ",
+        "extracted_answer": "137",
+        "follows_image": false,
+        "follows_text": false,
+        "n_tokens": 200,
+        "n_sentences": 7,
+        "wall_seconds": 12.98
+      }
+    },
+    {
+      "item_index": 19,
+      "image_answer": "1",
+      "text_answer": "14",
+      "source": "svamp",
+      "direct": {
+        "generated_text": "14",
+        "extracted_answer": "14",
+        "follows_image": false,
+        "follows_text": true,
+        "n_tokens": 3,
+        "n_sentences": 1,
+        "wall_seconds": 1.79
+      },
+      "placebo": {
+        "generated_text": "The image contains a math word problem about nails used to secure planks of wood for a house wall. The problem states that 11 nails were used in total, with each plank needing 3 nails and an additional 8 nails being used. The question asks how many planks John needs for the house wall.",
+        "extracted_answer": "8",
+        "follows_image": false,
+        "follows_text": false,
+        "n_tokens": 65,
+        "n_sentences": 3,
+        "wall_seconds": 5.43
+      },
+      "conflict_verbalization": {
+        "generated_text": "The image and the text do not agree with each other. The image is about nails used to secure planks of wood for a house wall, while the text is about goldfish disappearing from a pond. Therefore, there is no direct correlation between the two images and texts.\n\nThe number of goldfish that disappeared cannot be determined from the given information.",
+        "extracted_answer": null,
+        "follows_image": null,
+        "follows_text": null,
+        "n_tokens": 71,
+        "n_sentences": 4,
+        "wall_seconds": 5.61
+      }
+    }
+  ]
+}
