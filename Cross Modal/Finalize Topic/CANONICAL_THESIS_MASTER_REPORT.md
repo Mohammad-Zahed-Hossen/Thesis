@@ -35,11 +35,11 @@ Across an exhaustive research arc comprising four candidate audits, two diagnost
 +---------------------------------------------------------------------------------------------------+
 ```
 
-### The "Smoking Gun": The Exact-Match Cross-Over Discovery
-While entity-based choice classification demonstrates the aggregate shift, our full-budget v3.0 run revealed the decisive proof that verbalization physically redirects the VLM's multi-step arithmetic circuit rather than inducing random drift:
-- **In Arm 2 (Placebo):** The model solves the **image arithmetic problem** with **$35.6\%$ exact match** ($576 / 1,619$) and the text problem with only **$4.7\%$ exact match** ($76 / 1,619$) — an image dominance of **$7.6\times$**.
-- **In Arm 3 (Conflict Verbalization):** The exact-match accuracy completely inverts: exact match on the **text problem** surges to **$35.8\%$** ($580 / 1,619$), while exact match on the image problem collapses to **$11.7\%$** ($189 / 1,619$) — a text dominance of **$3.1\times$**.
-- **Epistemic Abstention:** Emerges spontaneously in **$13.65\%$** of instances ($221 / 1,619$) in Arm 3 (versus $0.2\%$ in Arm 2), demonstrating that conflict verbalization unlocks legitimate epistemic refusal in contradictory settings.
+### The "Smoking Gun": Source-Conditioned Exact-Match Cross-Over
+While entity-based choice classification demonstrates the aggregate shift, our full-budget v3.0 run revealed decisive evidence that conflict verbalization redirects the model's observable computational problem-solving behavior toward the selected source's arithmetic problem rather than inducing random drift:
+- **In Arm 2 (Placebo):** The model solves the **image arithmetic problem** with **$35.6\%$ exact match** ($577 / 1,619$) and the text problem with only **$4.7\%$ exact match** ($76 / 1,619$).
+- **In Arm 3 (Conflict Verbalization):** The exact-match accuracy completely inverts: exact match on the **text problem** surges to **$35.8\%$** ($579 / 1,619$), while exact match on the image problem collapses to **$11.7\%$** ($190 / 1,619$).
+- **Contradiction-Conditioned Abstention:** Emerges in **$13.65\%$** of instances ($221 / 1,619$) in Arm 3 (versus $0.2\%$ in Arm 2), demonstrating that conflict verbalization induces a substantial increase in explicit refusal to arbitrate contradictory premises.
 
 ---
 
@@ -211,11 +211,27 @@ Executing four experimental arms across 1,619 multimodal items requires 8,095 fo
 | Latency per Item (sm_75 T4 GPU)    | 23.50 seconds         | 2.32 seconds       | 3.87 seconds*      |
 | Throughput (items / minute)        | 2.5 items / min       | 25.8 items / min   | 15.5 items / min   |
 | Projected Full Run Time (N=1619)   | 10.5 hours            | 1.04 hours         | 1.74 hours (Done!) |
-| Token Truncation Rate (Arms 2 & 3) | N/A                   | 94.3% (Severely C.)| 0.0% (Zero Trunc.) |
+| Answer Extraction Rate (Arms 2 & 3)| 95.0% / 75.0% (N=20)  | 5.2% / 8.6% (Trunc)| 94.5% / 98.0%      |
+| Generation Ceiling Rate (>=199 tok)| N/A                   | 94.3% (Severely C.)| 37.6% (A2) / 44.2% (A3)|
 | CUDA 13 NVRTC JIT Crash Fix        | Absent                | Absent             | Native Safe CPU Fall|
 +------------------------------------+-----------------------+--------------------+--------------------+
-*Note: v3.0 latency (3.87s) reflects the increased generation budget (200 tokens) required to eliminate truncation.
+*Note: v3.0 latency (3.87s) reflects the expanded generation budget (200 tokens) unlocking high answer extraction.
 ```
+
+### Truncation Sensitivity & Robustness Analysis
+In Harness v3.0, the generation budget was expanded to 200 tokens for Arms 2 and 3. In the dataset schema, an item is flagged as `truncated = True` if the generated token count reached $199$ or $200$ tokens (`tokens >= max_new_tokens - 1`). 
+
+Because GSM8K problems frequently require multi-step reasoning scratchpads, $37.6\%$ of Arm 2 ($608 / 1,619$) and $44.2\%$ of Arm 3 ($716 / 1,619$) reached this ceiling. To verify whether truncation distorts or creates the observed source arbitration shift, we conducted a rigorous sensitivity split:
+
+| Cohort / Subset | Sample Size ($N$) | Arm 2 Visual Capture | Arm 3 Visual Capture | Net Visual Shift ($\Delta_{\text{visual}}$) |
+| :--- | :---: | :---: | :---: | :---: |
+| **Full Population Census** | **$1,619$** | **$89.5\%$** ($1,449 / 1,619$) | **$25.8\%$** ($417 / 1,619$) | **$-63.7\text{ pp}$** |
+| **Arm-Specific Non-Truncated** | $1,011$ (A2) / $903$ (A3) | **$86.6\%$** ($876 / 1,011$) | **$21.6\%$** ($218 / 903$) | **$-65.0\text{ pp}$** |
+| **Strict Paired Non-Truncated** | $632$ (Neither truncated) | **$85.1\%$** ($538 / 632$) | **$25.3\%$** ($160 / 632$) | **$-59.8\text{ pp}$** |
+| **Arm-Specific Truncated** | $608$ (A2) / $716$ (A3) | **$94.2\%$** ($573 / 608$) | **$32.7\%$** ($199 / 716$) | **$-61.5\text{ pp}$** |
+
+**Empirical Conclusion:** Across every subset—whether strictly non-truncated, paired non-truncated, or truncated—the net visual reduction is virtually constant ($\sim 60\text{ to } 65\text{ percentage points}$). Truncation merely curtailed exact-match parsing on lengthy calculations; it did not inflate or create the arbitration shift.
+
 
 ---
 
@@ -266,24 +282,20 @@ To rigorously isolate causal mechanisms, each item is subjected to four experime
        Output 1         Output 2          Output 3  Output 4a         Output 4b
 ```
 
-### Formal Specification of Experimental Arms
+### Formal Specification & Literal Prompts of Experimental Arms
 
-#### Arm 1: Direct Zero-Shot Baseline
-* **Prompt:** `"Solve the math problem presented. Provide the final numerical answer after '#### '."`
-* **Purpose:** Measures raw, unprompted output distribution when no reasoning trace is elicited.
+| Arm | Purpose | Exact Literal Prompt / Prefix | Preamble Requirement | Source-Selection Instruction |
+| :--- | :--- | :--- | :---: | :---: |
+| **Arm 1: Direct Baseline** | Unprompted baseline | `Look at the image and read the text problem below.\n{text_question}\n\nSolve the problem. Conclude with: #### <answer>` | None | None (Recency defaults to text 85.5%) |
+| **Arm 2: Neutral Placebo** | Preamble & token control | `Look at the image and read the text problem below.\n{text_question}\n\nIn two sentences, neutrally describe what is presented in the image and what is stated in the text without comparing them. Then solve the problem. Conclude with: #### <answer>` | 2 Sentences (Neutral) | None (Ambiguity defaults to image 89.5%) |
+| **Arm 3: Conflict Intervention** | Causal Treatment | `Look at the image and read the text problem below.\n{text_question}\n\nIn two sentences, state whether the image and the text agree or contradict each other, and explain which source you consider more reliable. Then solve that problem. Conclude with: #### <answer>` | 2 Sentences (Evaluative) | Explicit ("state agreement/conflict, explain reliability, solve that problem") |
+| **Arm 4a: Prefill Image** | Exploratory probe | `The image and text contradict each other because they present different problems. Following the image problem, the answer is: #### ` | Prefilled Rationale | Forced Image Direction |
+| **Arm 4b: Prefill Text** | Exploratory probe | `The image and text describe consistent premises. Following the text problem, the answer is: #### ` | Prefilled Rationale | Forced Text Direction |
 
-#### Arm 2: Neutral Placebo Control
-* **Prompt:** `"First, provide a neutral two-sentence description of the visual and textual elements presented without comparing them. Then solve the problem and state your final answer after '#### '."`
-* **Purpose:** Establishes the baseline visual capture rate under equivalent token generation depth without activating conflict awareness.
+> [!IMPORTANT]
+> **Methodological Precision on the Causal Intervention:**  
+> The causal intervention is the **complete conflict-verbalization and source-arbitration prompt**, compared with the neutral verbalization control. Arm 2 and Arm 3 differ in task structure: Arm 3 explicitly directs the model to evaluate contradiction and source reliability, then solve "that problem." Instruction following is inherently part of the intervention.
 
-#### Arm 3: Conflict Verbalization (Causal Treatment)
-* **Prompt:** `"First, state whether the image and the text agree or contradict each other, and explain which source you consider more reliable in two sentences. Then solve the problem and state your final answer after '#### '."`
-* **Purpose:** Injects explicit conflict verbalization to test if meta-cognitive contradiction identification causally alters source selection.
-
-#### Arm 4: Causal Rationale Prefill Probes (Lanham-Style Intervention)
-* **Arm 4a (Forced Image Rationale):** System pre-populates the assistant response with: `"The image and text contradict each other. The image is clear and reliable, so I will solve the problem shown in the image. #### "`
-* **Arm 4b (Forced Text Rationale):** System pre-populates the assistant response with: `"The image and text agree on the core premise. The text is clear and reliable, so I will solve the problem in the text. #### "`
-* **Purpose:** Directly intervenes on the reasoning trace to test whether the output is causally bound to the prefilled rationale or whether the model ignores the prefill.
 
 ---
 
@@ -307,52 +319,53 @@ The complete census across all 1,619 clean image conflict pairs was executed on 
 
 ### Core Statistical Metrics & Hypothesis Testing
 
-| Metric / Hypothesis Test | Mathematical Formulation | Empirical Value | 95% Confidence Interval | Scientific Significance |
+Because each item was evaluated under all arms, the primary confirmatory inference is **McNemar’s paired test for repeated binary measures**:
+
+| Metric / Statistical Test | Mathematical Formulation | Empirical Value | 95% Confidence Interval | Methodological Role |
 |:---|:---|:---:|:---:|:---|
-| **Placebo Visual Capture** | $P_{\text{vis}}(\text{Arm 2}) = \frac{1449}{1619}$ | **$89.50\%$** | $[87.91\%, 90.93\%]$ | Overwhelming baseline visual dominance |
-| **Treatment Visual Capture** | $P_{\text{vis}}(\text{Arm 3}) = \frac{417}{1619}$ | **$25.76\%$** | $[23.66\%, 27.96\%]$ | Massive collapse of visual capture |
-| **Net Arbitration Shift ($\Delta_{\text{arb}}$)** | $P_{\text{vis}}(\text{Arm 2}) - P_{\text{vis}}(\text{Arm 3})$ | **$+63.74\text{ pp}$** | $[61.02\text{ pp}, 66.47\text{ pp}]$ | **Statistically Definitive ($p < 10^{-215}$)** |
-| **Relative Risk ($RR$)** | $\frac{P_{\text{vis}}(\text{Arm 3})}{P_{\text{vis}}(\text{Arm 2})}$ | **$0.2878$** | $[0.2625, 0.3155]$ | **$71.22\%$ reduction** in visual capture risk |
-| **Odds Ratio ($OR$)** | $\frac{1449 \times (954 + 221 + 27)}{417 \times (145 + 4 + 21)}$ | **$24.57$** | $[20.24, 29.83]$ | Odds of visual capture are **$24.6\times$ higher** in Placebo |
-| **Cohen's $h$ Effect Size** | $2 \arcsin\sqrt{P_2} - 2 \arcsin\sqrt{P_3}$ | **$1.4170$** | $[1.348, 1.486]$ | **"Very Large" Effect** (Benchmark $> 0.8$) |
-| **McNemar's Paired $\chi^2$** | $\frac{(|b - c| - 1)^2}{b + c} = \frac{(|1057 - 25| - 1)^2}{1082}$ | **$\chi^2 = 982.40$** | — | **$p = 1.20 \times 10^{-215}$** ($p < 0.001^{***}$) |
-| **Pearson's Chi-Square** | $\sum \frac{(O - E)^2}{E}$ | **$\chi^2 = 1347.01$** | — | **$p = 6.88 \times 10^{-295}$** |
-| **Fisher's Exact Test** | Hypergeometric Exact | **$p = 1.09 \times 10^{-322}$** | — | Infinitesimal probability of independence |
+| **Placebo Visual Capture** | $P_{\text{vis}}(\text{Arm 2}) = \frac{1449}{1619}$ | **$89.50\%$** | $[87.91\%, 90.93\%]$ | Baseline grounding under neutral preamble |
+| **Treatment Visual Capture** | $P_{\text{vis}}(\text{Arm 3}) = \frac{417}{1619}$ | **$25.76\%$** | $[23.66\%, 27.96\%]$ | Post-intervention visual capture |
+| **Net Visual Reduction ($\Delta_{\text{visual}}$)** | $P_{\text{vis}}(\text{Arm 2}) - P_{\text{vis}}(\text{Arm 3})$ | **$+63.74\text{ pp}$** | $[61.02\text{ pp}, 66.47\text{ pp}]$ | Primary treatment effect size |
+| **Paired Discordant Pairs** | $b = 1057$ (Vis $\rightarrow$ Non), $c = 25$ (Non $\rightarrow$ Vis) | $b=1057, c=25$ | — | Within-subject discordance |
+| **McNemar's Paired $\chi^2$** | $\frac{(|b - c| - 1)^2}{b + c} = \frac{(|1057 - 25| - 1)^2}{1082}$ | **$\chi^2 = 982.40$** | — | **Primary Inferential Test ($p = 1.20 \times 10^{-215}$)** |
+| **Paired Odds Ratio** | $\frac{b}{c} = \frac{1057}{25}$ | **$42.28$** | $[28.46, 62.81]$ | Discordance odds in favor of arbitration shift |
+| **Cohen's $h$ Effect Size** | $2 \arcsin\sqrt{P_2} - 2 \arcsin\sqrt{P_3}$ | **$1.4170$** | $[1.348, 1.486]$ | Very large standardized effect ($h > 0.8$) |
+| **Relative Risk ($RR$)** | $\frac{P_{\text{vis}}(\text{Arm 3})}{P_{\text{vis}}(\text{Arm 2})}$ | **$0.2878$** | $[0.2625, 0.3155]$ | $71.22\%$ reduction in visual capture risk |
+| *Marginal Fisher's Exact* | Hypergeometric Exact | $p = 1.09 \times 10^{-322}$ | — | Marginal reference (assumes independence) |
+| *Marginal Pearson $\chi^2$* | $\sum (O - E)^2 / E$ | $\chi^2 = 1347.01$ | — | Marginal reference ($p = 6.88 \times 10^{-295}$) |
 
 ---
 
 ### The Decisive Exact-Match Cross-Over Discovery
 
-The strongest piece of empirical evidence in this thesis is the **Exact-Match Cross-Over**. This metric bypasses all heuristic entity classifiers by matching the model's generated answer against ground truth:
+### Source-Conditioned Exact-Match Cross-Over
+
+To verify that the change in source selection corresponds to actual execution of the selected problem rather than superficial categorical labeling or random drift, we evaluated exact agreement with ground-truth mathematical answers:
+
+| Condition | Image Problem Exact Match | Text Problem Exact Match | Net Problem Alignment |
+|:---|:---:|:---:|:---:|
+| **Arm 2: Neutral Placebo** | **$577 / 1,619$ ($35.64\%$)** | **$76 / 1,619$ ($4.69\%$)** | Overwhelming Image Execution |
+| **Arm 3: Conflict Intervention** | **$190 / 1,619$ ($11.74\%$)** | **$579 / 1,619$ ($35.76\%$)** | Overwhelming Text Execution |
 
 ```
-               EXACT-MATCH ACCURACY CROSS-OVER (N = 1619)
+               SOURCE-CONDITIONED EXACT MATCH BEHAVIOR (N = 1619)
                
-      40% +-------------------------------------------------------+
-          |                                                       |
-      35% |  [Image Match: 35.6%]           [Text Match: 35.8%]   |
-          |         \                                   /         |
-      30% |          \                                 /          |
-          |           \                               /           |
-      25% |            \                             /            |
-          |             \                           /             |
-      20% |              \                         /              |
-          |               \                       /               |
-      15% |                \             [Image Match: 11.7%]     |
-          |                 \                     /               |
-      10% |                  \                   /                |
-          |                   \                 /                 |
-       5% |            [Text Match: 4.7%]      /                  |
-          |                                                       |
-       0% +-------------------------------------------------------+
-                     Arm 2 (Placebo)          Arm 3 (Conflict)
-                     
-   • Arm 2: Image solves exceed Text solves by 7.6x (576 vs 76)
-   • Arm 3: Text solves exceed Image solves by 3.1x (580 vs 189)
+       40% +-------------------------------------------------------+
+           |                                                       |
+       35% |  [Image Match: 35.6%]           [Text Match: 35.8%]   |
+       30% |          \                                 /          |
+       25% |           \                               /           |
+       20% |            \                             /            |
+       15% |             \                   [Image Match: 11.7%]  |
+       10% |              \                           /            |
+        5% |            [Text Match: 4.7%]           /             |
+        0% +-------------------------------------------------------+
+                      Arm 2 (Placebo)          Arm 3 (Conflict)
 ```
 
-#### Why This Discovery Is Methodologically Decisive:
-If conflict verbalization merely confused the model or triggered hallucinated numbers, both exact match rates would plummet toward zero. Instead, the accuracy on the text problem **surges by $760\%$** (from $4.7\%$ to $35.8\%$), while accuracy on the image problem collapses from $35.6\%$ to $11.7\%$. This proves that conflict verbalization **physically re-routes the internal attention heads and feed-forward pathways**, compelling the model to execute multi-step arithmetic over the text token sequence.
+#### Methodological Significance:
+In Arm 3, exact match on the text problem surges by $+31.1\text{ pp}$ ($4.69\% \rightarrow 35.76\%$), reaching the model's unconstrained mathematical problem-solving competence ceiling, while exact match on the image collapses from $35.64\%$ to $11.74\%$. This provides robust behavioral evidence that the conflict-verbalization prompt redirects the model's observable multi-step problem-solving execution toward the selected source's ground-truth problem, rather than inducing categorical labeling drift or arithmetic confusion.
+
 
 ---
 
@@ -391,12 +404,21 @@ Because our 4-arm factorial design is paired (evaluating all arms on every singl
 
 ---
 
-### Arm 4: Causal Rationale Steering Analysis
+### Arm 4: Exploratory Rationale Prefilling Analysis
 
-Arm 4 directly tests the causal sensitivity of the model to the reasoning prefix using Lanham-style counterfactual prefilling:
-* **Opposing Rationale Divergence Rate:** In **$41.4\%$** of items, forcing an "Image is reliable" prefix (Arm 4a) versus an "Agree / Text is reliable" prefix (Arm 4b) produced divergent final numerical answers.
-* **Directional Text Alignment Boost:** Arm 4b achieved a **$+5.3\text{ percentage point}$ increase** in exact text-answer matching over Arm 4a ($14.0\%$ vs $8.7\%$).
-* **Prefix Resistance:** In $58.6\%$ of items, the model output identical answers despite contradictory prefilled rationales, demonstrating that low-level token prefilling is a weaker causal lever than natural verbalization.
+Arm 4 serves as an exploratory diagnostic probe to evaluate how the model behaves when given short prefilled rationales without intermediate reasoning scratchpads:
+
+| Measure | Arm 4a: Forced Image Prefix | Arm 4b: Forced Text Prefix | Steering Difference |
+| :--- | :---: | :---: | :---: |
+| **Exact Image Alignment** | **$25 / 1,619$ ($1.54\%$)** | **$15 / 1,619$ ($0.93\%$)** | $-0.61\text{ pp}$ |
+| **Exact Text Alignment** | **$256 / 1,619$ ($15.81\%$)** | **$342 / 1,619$ ($21.12\%$)** | **$+5.31\text{ pp}$** |
+| **Identical Final Answers** | — | — | **$948 / 1,619$ ($58.55\%$)** |
+| **Divergent Final Answers** | — | — | **$671 / 1,619$ ($41.45\%$)** |
+
+> [!NOTE]
+> **Exploratory Interpretation Boundary:**  
+> In this experimental setup, short rationale prefilling produced substantially weaker and less consistent behavioral effects than the full conflict-verbalization intervention ($58.6\%$ identical outputs). We do **not** claim that intermediate CoT is universally "computationally necessary"; rather, short prefilled assertions without scratchpad computation provide a weak causal lever for multi-step multimodal arithmetic.
+
 
 ---
 
@@ -456,62 +478,100 @@ Finalize Topic/
 
 This section provides the comprehensive blueprint for writing Chapters 1 through 5 of the undergraduate thesis manuscript. Every table, figure, and paragraph is mapped directly to our empirical findings.
 
----
+### Formal Research Questions & Hypotheses
 
-### CHAPTER 1: Introduction & Research Problem
-* **1.1 The Multimodal Integration Paradigm:** Overview of Vision-Language Models (VLMs) combining cross-attention, visual projectors, and autoregressive LLM backbones.
-* **1.2 The Modality Bias Problem:** Systematic review of visual bias and text priors in VLMs (*Which Source Wins?*, *CLASH*). Explanation of how models default to visual evidence even when textual premises are contradictory.
-* **1.3 Research Question & Hypotheses:**
-  - *Primary RQ:* Does explicit verbalization of cross-modal contradiction causally redirect source arbitration, or does the reasoning trace merely rationalize entrenched visual capture?
-  - *Hypothesis $H_1$:* Conflict verbalization causally reduces visual capture ($\Delta_{\text{arb}} > 0$).
-  - *Null Hypothesis $H_0$:* Conflict verbalization has no causal effect on arbitration ($\Delta_{\text{arb}} = 0$).
-* **1.4 Summary of Contributions:**
-  1. The first placebo-controlled 4-arm factorial protocol for multimodal source arbitration.
-  2. Empirical discovery of the $+63.74\text{ pp}$ causal arbitration shift ($p = 1.20 \times 10^{-215}$).
-  3. Discovery of the Exact-Match Cross-Over, proving physical arithmetic redirection.
-  4. Identification of spontaneous epistemic abstention ($13.65\%$) under conflicting evidence.
+#### Primary Research Question
+* **RQ1 (Primary):** When a vision-language model receives contradictory visual and textual problems, does an explicit conflict-verbalization intervention causally change its subsequent source arbitration compared with a neutral verbalization control?
 
----
+#### Five Secondary Research Questions
+* **RQ2 (Arbitration Magnitude):** How much does conflict verbalization change the probability that the model follows the visual source rather than the textual source?  
+  $$\text{Primary Metric: } \Delta_{\text{visual}} = P(\text{visual}\mid A_2) - P(\text{visual}\mid A_3) = 89.50\% - 25.76\% = +63.74\text{ pp}$$
+* **RQ3 (Source-Execution Validity):** Does the change in source selection correspond to execution of the selected source's ground-truth answer, rather than merely a change in categorical source labels? (Evaluated via exact-match cross-over: Image $35.6\% \rightarrow 11.7\%$, Text $4.7\% \rightarrow 35.8\%$).
+* **RQ4 (Contradiction-Conditioned Abstention):** Does explicit conflict verbalization increase abstention when the two information sources provide contradictory premises? (Observed: Arm 2: $0.2\% \rightarrow$ Arm 3: $13.7\%$).
+* **RQ5 (Within-Item Behavioral Transitions):** How do individual items transition between source-following, abstention, and ambiguous states when moving from the neutral control to the conflict-verbalization condition? (57.4% flip to text, 13.9% transition to abstention, 27.1% persist in visual capture).
+* **RQ6 (Intervention Resistance & Exploratory Prefilling):** Which cases remain resistant to conflict-verbalization intervention (the 392 visual-persistent cases), and how does direct rationale prefilling compare with the full conflict-verbalization intervention?
 
-### CHAPTER 2: Related Work & Theoretical Foundations
-* **2.1 Modality Competition & Visual Capture:** In-depth review of *Which Source Wins?* (arXiv:2608.17205) and its explicit omission of conflict verbalization (§6). Review of *CLASH* (arXiv:2511.19199) and its limitation to abstention-only benchmarks.
-* **2.2 Faithfulness of Chain-of-Thought Reasoning:** Critical analysis of Lanham et al. (2023) and Turpin et al. (2023). Contrast between text-only CoT unfaithfulness and multimodal conflict arbitration.
-* **2.3 Mechanistic Interpretability & Representation Steering:** Critical review of Hasani et al. (ICML 2026) synthetic grid binding IDs, *BabelSteering* (2026), and why activation steering approaches carry higher failure risks than behavioral prompt interventions.
-
----
-
-### CHAPTER 3: Methodology & Experimental Framework
-* **3.1 Dataset Architecture:** Deep dive into `vlm-modality-research/modality-conflict-arbitration-v2`. Explain the clean image filtering criteria ($N = 1,619$) and why eliminating degradation removes perceptual confounds.
-* **3.2 The 4-Arm Factorial Protocol:**
-  - Arm 1 (Direct Baseline) specification.
-  - Arm 2 (Neutral Placebo Control) and the critical requirement of token-length matching.
-  - Arm 3 (Conflict Verbalization Treatment) design.
-  - Arm 4a & 4b (Counterfactual Prefill Probes) implementation.
-* **3.3 Production Inference Architecture:** Documenting the v3.0 optimizations: FP16 Tensor Core auto-selection, PyTorch SDPA kernel fusion, 3-group specialized token allocation, and the CUDA 13 NVRTC JIT patch.
-* **3.4 Evaluation Metrics & Hypothesis Testing Framework:** Mathematical formulation of McNemar’s paired test, Fisher’s exact test, Odds Ratios with $95\%$ confidence intervals, Cohen's $h$, and the dual-track classification engine (exact numerical parsing + entity-based presence).
+#### Formal Hypotheses
+* **Primary Hypothesis $H_0$ (Null):** Conflict verbalization does not change visual-source capture relative to the neutral verbalization control ($P(V\mid A_2) = P(V\mid A_3)$ or $\Delta_{\text{visual}} = 0$).
+* **Primary Hypothesis $H_1$ (Alternative):** Conflict verbalization changes visual-source capture relative to the neutral verbalization control ($P(V\mid A_2) \neq P(V\mid A_3)$). (Confirmed: two-sided McNemar $\chi^2 = 982.40, p = 1.20 \times 10^{-215}$).
+* **Secondary Hypotheses:**
+  - *H2 (Source-Execution Consistency):* Conflict verbalization changes exact-match performance conditional on the source selected by the model.
+  - *H3 (Abstention):* Conflict verbalization increases the frequency of abstention on contradictory multimodal items.
+  - *H4 (Transition Dynamics):* The neutral-control $\rightarrow$ conflict-verbalization intervention produces systematic within-item transitions between source-following states.
+  - *H5 (Intervention Resistance):* A non-trivial subset of items remains visually captured despite conflict verbalization, indicating heterogeneous intervention response.
 
 ---
 
-### CHAPTER 4: Empirical Results & Analysis
-* **4.1 Primary Finding: The $+63.74\text{ pp}$ Arbitration Shift:** Presentation of `thesis_contingency_table v3.0.tex`. Analysis of visual capture collapse from $89.50\%$ (Arm 2) to $25.76\%$ (Arm 3).
-* **4.2 Formal Statistical Significance:** Detailed reporting of McNemar's paired test ($\chi^2 = 982.40$, $p = 1.20 \times 10^{-215}$), Odds Ratio ($24.57$), and Cohen's $h$ ($1.4170$).
-* **4.3 The Exact-Match Cross-Over (The Smoking Gun):** Graphical presentation showing the inversion from $7.6\times$ image dominance in Arm 2 to $3.1\times$ text dominance in Arm 3. Detailed refutation of the "random confusion" counter-argument.
-* **4.4 Within-Subject State Migration Analysis:** Tracking the 1,449 placebo visual items across the $4\times 4$ transition matrix. Documenting the $57.41\%$ flip to text and the $13.87\%$ shift to abstention.
-* **4.5 Counterfactual Prefilling & Causal Sensitivity:** Results of Arm 4a vs Arm 4b. Analysis of the $41.4\%$ divergence rate and the $+5.3\text{ pp}$ text alignment boost.
+### Five Defensible Thesis Contributions
+
+1. **A Controlled Multimodal Source-Arbitration Protocol:** A controlled experimental protocol for measuring source arbitration under cross-modal contradiction, using a neutral verbalization control and paired evaluation of identical conflict items ($N = 1,619$).
+2. **Full-Population Empirical Evidence of Arbitration Change:** A full-population evaluation showing that explicit conflict verbalization substantially changes observable source-selection behavior in Qwen2.5-VL-3B-Instruct ($89.50\% \rightarrow 25.76\%$ visual capture, McNemar $\chi^2 = 982.40, p = 1.20 \times 10^{-215}$).
+3. **Source-Conditioned Exact-Match Validation:** An exact-match evaluation demonstrating that the observed source-selection shift is accompanied by corresponding changes in agreement with ground-truth mathematical answers (Placebo: $35.6\%$ Img / $4.7\%$ Txt; Conflict: $11.7\%$ Img / $35.8\%$ Txt), providing behavioral evidence that the intervention changes which problem is executed.
+4. **Characterization of Contradiction-Conditioned Abstention and Resistance:** A characterization of two non-exclusive behavioral responses to conflict verbalization: increased abstention ($13.65\%$) and persistent source capture ($27.05\%$).
+5. **Evidence on the Limits of Short Rationale Prefilling:** An exploratory comparison showing that short prefixed source-selection rationales produce substantially weaker and less consistent behavioral effects than the full conflict-verbalization intervention ($58.6\%$ identical outputs).
 
 ---
 
-### CHAPTER 5: Discussion, Implications, & Defense Preparation
-* **5.1 Is Multimodal CoT Faithful?** Synthesizing the evidence: because verbalizing conflict causes a massive, statistically definitive, and mathematically precise redirection to the alternate problem's arithmetic solution, multimodal CoT functions as an active computational driver rather than passive post-hoc rationalization.
-* **5.2 Safety & Epistemic Implications in Autonomous Systems:** Why unprompted visual capture ($89.5\%$) poses severe hazards in real-world deployment (e.g., medical robotics or autonomous navigation ignoring sensor telemetry in favor of misleading visual artifacts). How explicit conflict verbalization serves as a safety filter.
-* **5.3 Limitations & Future Work:**
-  - Evaluation focused on Qwen2.5-VL-3B-Instruct; cross-architecture validation on LLaVA-OneVision and Gemini is recommended.
-  - Extension from arithmetic conflicts to spatial, temporal, and commonsense reasoning conflicts.
-* **5.4 Anticipated Thesis Defense Questions & Rebuttals:**
-  - *Q: "Could the shift in Arm 3 be caused by prompt length rather than conflict awareness?"*  
-    *Rebuttal:* No. Arm 2 is a length-matched placebo that requires the exact same two-sentence preamble length without conflict phrasing, yet maintains $89.50\%$ visual capture.
-  - *Q: "Does the model actually understand the conflict or just follow the text question?"*  
-    *Rebuttal:* If it blindly followed text, it would do so in Arm 1 ($85.5\%$) and Arm 2 ($9.0\%$). Furthermore, Arm 3 triggers $13.65\%$ abstention, proving the model explicitly recognizes the incompatibility.
+### Methodological & Claim Boundaries
+
+| Scientific Claim | Empirical Status | Methodological Classification |
+| :--- | :---: | :--- |
+| Conflict-verbalization prompt changes observable source arbitration | **SUPPORTED** | Causal behavioral prompt effect ($+63.74\text{ pp}$) |
+| Effect survives truncation sensitivity analysis | **SUPPORTED** | Non-truncated: $-65.0\text{ pp}$, Truncated: $-61.5\text{ pp}$ |
+| Exact-match behavior changes toward selected competing source | **SUPPORTED** | Ground-truth integer agreement ($4.7\% \rightarrow 35.8\%$) |
+| Conflict verbalization increases abstention | **SUPPORTED** | Contradiction-conditioned refusal ($0.2\% \rightarrow 13.7\%$) |
+| Individual items exhibit heterogeneous transitions | **SUPPORTED** | Full paired $4\times 4$ transition matrix |
+| Some items resist the intervention | **SUPPORTED** | $27.05\%$ persistent visual capture |
+| Short prefill is weaker than full verbalization | **SUPPORTED** | Exploratory probe ($58.6\%$ invariant answers) |
+| Model internally changes attention routing | **NOT ESTABLISHED** | No internal mechanistic probing conducted |
+| Specific attention heads are rerouted | **NOT TESTED** | Out of scope for behavioral protocol |
+| Feed-forward pathways are redirected | **NOT TESTED** | Out of scope for behavioral protocol |
+| Verbalization is faithful internal reasoning | **NOT ESTABLISHED** | Behavioral consistency only |
+| Model possesses human-like epistemic competence | **NOT ESTABLISHED** | Model follows prompt-conditioned contradiction instruction |
+| Conflict verbalization is a general safety filter | **NOT ESTABLISHED** | Limited to rendered arithmetic conflict domain |
+| Results generalize to other VLMs | **NOT ESTABLISHED** | Primary model: Qwen2.5-VL-3B-Instruct |
+
+#### The "Do Not Write" Directives for Manuscript Drafting:
+* **Permanently Drop:** "physically reroutes internal attention heads", "feed-forward pathways", "internal circuit rewiring", "proves multimodal CoT is faithful", "epistemic competence", "legitimate epistemic refusal", "hardwired visual prior", "safety filter".
+* **Standard Replacements:** "observable source arbitration", "source-selection behavior", "source-conditioned exact-match behavior", "contradiction-conditioned abstention", "within-item behavioral transition", "prompt intervention", "intervention-induced behavioral change", "resistant cases".
+
+---
+
+### CHAPTER-BY-CHAPTER BLUEPRINT FOR THESIS MANUSCRIPT
+
+* **CHAPTER 1: Introduction & Research Problem**
+  - Contextualize multimodal integration in VLMs and unprompted visual bias.
+  - Formulate the primary research gap: does explicit conflict verbalization change observable source arbitration under contradiction?
+  - State Primary RQ1, Secondary RQs 2–6, and the formal hypotheses ($H_0$ vs $H_1$).
+  - Outline the 5 Defensible Thesis Contributions and explicit scope boundaries.
+
+* **CHAPTER 2: Related Work & Theoretical Foundations**
+  - Review modality competition literature (*Which Source Wins?*, *CLASH*) and their omission of verbalized arbitration.
+  - Review Chain-of-Thought faithfulness studies (Lanham et al., Turpin et al.) in text-only models and extend the question to multimodal conflict.
+  - Document why behavioral intervention protocols provide rigorous causal evidence without synthetic grid artifacts.
+
+* **CHAPTER 3: Experimental Methodology & Protocol Design**
+  - Dataset specification: `modality-conflict-arbitration-v2` clean-image census ($N = 1,619$).
+  - The 4-Arm factorial architecture: Direct Baseline (Arm 1), Neutral Placebo (Arm 2), Conflict Verbalization (Arm 3), and Exploratory Prefill Probes (Arm 4a & 4b).
+  - Explicit literal prompts table and analysis of task-instruction structure.
+  - Harness optimizations: PyTorch SDPA, FP16 Tensor Cores, and the CUDA 13 NVRTC JIT patch.
+  - Statistical framework: McNemar's paired test as primary inferential test, Odds Ratios, Cohen's $h$, and dual-track classification (entity keyword extraction + ground-truth exact matching).
+  - Operational definition of token truncation ($199+$ tokens) and sensitivity protocol.
+
+* **CHAPTER 4: Empirical Findings & Statistical Evaluation**
+  - Report the primary $+63.74\text{ pp}$ arbitration shift ($\text{McNemar } \chi^2 = 982.40, p = 1.20 \times 10^{-215}$).
+  - Present the Source-Conditioned Exact-Match Cross-Over (Image: $35.6\% \rightarrow 11.7\%$, Text: $4.7\% \rightarrow 35.8\%$).
+  - Analyze the full $4 \times 4$ paired within-item transition matrix ($832$ flip to text, $201$ transition to abstention, $392$ persist in visual capture).
+  - Present the Truncation Robustness Table confirming that the visual reduction holds across non-truncated ($-65.0\text{ pp}$) and truncated ($-61.5\text{ pp}$) cohorts.
+  - Report Exploratory Arm 4 findings showing that short rationale prefilling produces weak behavioral steering ($58.6\%$ invariant).
+
+* **CHAPTER 5: Discussion, Limitations, & Future Directions**
+  - Interpret observable source arbitration: conflict verbalization acts as a reliable behavioral prompt intervention.
+  - Discuss contradiction-conditioned abstention as a structured response to detected inconsistency.
+  - Address resistant cases ($27.1\%$) and potential causes (visual saliency, OCR grounding).
+  - Transparently document limitations: single model architecture (Qwen2.5-VL-3B-Instruct), rendered typographical arithmetic problems, and 200-token ceiling effects.
+  - Future work: activation patching and circuit discovery across natural image contradictions.
+
 
 ---
 
