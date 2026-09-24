@@ -3048,50 +3048,731 @@ REPRODUCIBILITY CHECKLIST
 - **Move to appendix:** full prompt templates; the full contingency table; per-stratum breakdowns; the hyperparameter table.
 - **Rebuild for the paper:** the introduction (a paper introduction states the claim by paragraph two) and the related work (organised around *your* claim, not around the field).
 
-<!--APPEND-HERE-->
+## 26.4 The narrative architecture of a competitive AI/ML paper
 
+**[L1 — Established practice]** Top-tier conference papers (NeurIPS, ICML, ICLR, CVPR, ACL) do not report chronologies. They report a **tight causal argument** compressed into 8–9 pages. Reviewers spend an average of 15–25 minutes on their first read; if your central claim and its contrast are not obvious by page 2, the review defaults to skepticism.
 
+### The 4-Paragraph Introduction Formula
+Every strong empirical AI/ML introduction can and should be written using this four-paragraph template:
 
+1. **Paragraph 1: The Consensus and The Phenomenon.**
+   Establish the broad capability and the specific, reproducible failure mode or behavior. Cite foundational anchors.
+   *Example:* "Large vision-language models (VLMs) demonstrate remarkable multi-step reasoning capabilities across multimodal benchmarks. However, when visual and textual inputs present conflicting premises, models exhibit severe modality bias, frequently ignoring visual evidence in favor of textual priors or vice versa."
+2. **Paragraph 2: The Unexamined Tension / The Hidden Confound.**
+   State what existing literature claims explains this behavior, and name the critical control or alternative explanation that has never been separated.
+   *Example:* "Prior work attributes this failure to entrenched visual or linguistic priors established during pre-training. However, existing evaluations evaluate models strictly under direct answering. It remains unknown whether verbalizing the contradiction during test-time reasoning causally steers the model's arbitration toward alternate evidence, or merely serves as an unfaithful post-hoc rationalization of an already-fixed decision."
+3. **Paragraph 3: The Causal Contrast and Headline Discovery.**
+   Introduce your exact experimental contrast, the matched control that isolates the mechanism, and the primary empirical finding with concrete numbers.
+   *Example:* "In this work, we isolate the causal role of conflict verbalization using a four-arm factorial protocol with length-matched placebo controls across 1,619 clean image-text conflict pairs. We find that explicit conflict verbalization reduces visual capture from 89.5% to 25.8% (Δ_arb = +63.74 pp, p < 10^-215). Furthermore, an exact-match cross-over analysis demonstrates that verbalization physically inverts the model's underlying multi-step arithmetic execution, rather than inducing random drift."
+4. **Paragraph 4: Bulleted Summary of Contributions.**
+   List 3 (maximum 4) contributions formatted as *established evidence*, not as *activities performed*.
+   - *Contribution 1 (Causal Demonstration):* We establish that test-time conflict verbalization causally steers source arbitration in small open-weight VLMs.
+   - *Contribution 2 (Mechanistic Cross-Over):* We discover an exact-match arithmetic cross-over, demonstrating that verbalization redirects the internal reasoning circuit toward alternate textual evidence.
+   - *Contribution 3 (Epistemic Abstention):* We show that conflict verbalization unlocks spontaneous epistemic refusal (13.65%) without external steering.
 
+---
 
+## 26.5 Writing Related Work defensively without triggering reviewer hostility
 
+**[L1]** The most common rejection trigger in Related Work is **dismissive framing**: writing *"Prior work X failed to consider Y"* or *"No existing work has ever investigated Z."* Reviewers are frequently the authors of the papers you cite. If you characterize their work as incomplete or blind, they will defend it aggressively.
 
+### The "Standing on Shoulders" Defensive Framing Rule
+Position your work as the natural, rigorous next step that confirms, bounds, or builds upon their foundational discoveries:
 
+| Aggressive / Hostile Phrasing (Triggers Rejection) | Defensive / Rigorous Phrasing (Earns Respect) |
+| :--- | :--- |
+| "Prior work (Smith et al., 2024) failed to include proper controls." | "Building on the conflict paradigm of Smith et al. (2024), we introduce length-matched placebo controls to separate semantic arbitration from test-time compute scaling." |
+| "Nobody has ever studied multimodal CoT faithfulness." | "While Lanham et al. (2023) established CoT faithfulness testing in text-only LLMs, its extension to cross-modal evidence arbitration has remained unexamined." |
+| "Existing benchmarks are broken and full of errors." | "We extend existing evaluations by filtering formatting artifacts and isolating deliberate epistemic abstentions as a valid response class." |
 
+### The Closest-Work Contrast Table
+Every empirical paper should include a compact 3-to-4 column table in Section 2 (Related Work) or Section 3 (Methodology) that explicitly bounds your contribution against the closest 2–3 papers:
 
+| Dimension | Which Source Wins? (2026) | CLASH (2025) | Lanham et al. (2023) | **This Work** |
+| :--- | :--- | :--- | :--- | :--- |
+| **Domain** | Multimodal degradation | Multimodal contradiction | Text-only LLMs | Multimodal conflict |
+| **Intervention** | Passive degradation | Input contradiction | Prompt truncation | Factorial verbalization |
+| **Control** | None (direct inference) | None | Paraphrase / zero-shot | **Length-matched placebo** |
+| **Metric** | Modality preference rate | Abstention rate | Accuracy drop | **Arbitration shift (Δ_arb) & exact-match cross-over** |
+| **Question** | "Which source wins?" | "Does the model refuse?" | "Is CoT faithful?" | **"Does verbalizing conflict causally redirect reasoning?"** |
 
+**Reviewers love this table.** It proves you know the literature, prevents false-novelty accusations, and gives the reviewer a ready-made summary to paste into their evaluation. **[L1 / L3]**
 
+---
 
+## 26.6 The Submission, Reviewer Anticipation, and Rebuttal Engine
 
+**[L1]** A paper is not finished when you write the conclusion. It is finished when it survives an adversarial reading by a skeptical domain expert.
 
+### Pre-Submission "Red-Team" Audit
+Before submitting to a conference or archiving on arXiv, run the official **NeurIPS Paper Checklist** against your own draft:
+1. *Did you report full hyperparameter details (temperature, top-p, seed, max_tokens)?*
+2. *Did you report error bars, confidence intervals, or exact statistical significance tests (e.g., McNemar's paired test, Fisher's exact)?*
+3. *Did you report compute resources, GPU hours, and carbon/energy costs?*
+4. *Did you explicitly discuss limitations, failure modes, and boundary conditions in the main text, not buried in an appendix?*
+5. *Did you audit your evaluation code for data leakage, regex extraction errors, and truncation artifacts?*
 
+### The Rebuttal Formula: How to Answer Reviewer Critiques
+When reviews arrive, 80% of negative reviews stem from misunderstandings or unstated assumptions. Never respond with anger or defensive rhetoric. Follow the **4-Step Rebuttal Protocol**:
 
+```text
+Step 1: Acknowledge & Validate
+  "We thank Reviewer X for highlighting this important consideration regarding [compute confounding]."
 
+Step 2: Clarify with Direct Empirical Evidence
+  "To address this, our experimental design explicitly introduced Arm 2 (Length-Matched Placebo),
+   which equalizes the token generation budget (61.2 vs 103.3 tokens) and verifies that neutral
+   descriptions produce 89.5% visual capture, whereas conflict verbalization collapses visual capture to 25.8%."
 
+Step 3: Point to Exact Page, Line, and Table in the Manuscript
+  "This analysis is documented in Section 4.2 (lines 214–238) and detailed in Table 3."
 
+Step 4: Commit to Explicit Manuscript Clarification
+  "In the revised manuscript, we have expanded Section 4.3 to make this distinction even more explicit for the reader."
+```
 
+---
 
+# 27. Research Timeline
 
+## 27.1 Why calendar timelines fail and milestone-gated timelines succeed
 
+**[L1 — Established practice]** The single most common management failure in academic research is the rigid calendar schedule: *"Week 1–2: Read papers. Week 3–4: Write code. Week 5–6: Run experiments. Week 7–8: Write paper."*
 
+This fails universally because **research tasks have non-linear, unpredictable feedback loops**:
+- If your literature audit on Day 12 discovers that your proposed gap was answered three months ago, your schedule cannot simply say *"move to coding on Day 15."*
+- If your diagnostic pilot on Day 28 discovers an 85% parse failure rate or a fatal length mismatch, you cannot proceed to large-scale production runs.
 
+**The Solution: Milestone-Gated Phasing.** You do not advance to the next phase based on the date on the calendar; you advance **only when the phase's exit criteria and physical artifacts are produced and verified.** **[L1 / L3]**
 
+---
 
+## 27.2 The 10 Milestone-Gated Phases of AI/ML Research
 
+Below is the realistic operational timeline for an independent or undergraduate AI/ML research project (nominally budgeted across 8–12 weeks of focused effort, adaptable to any time horizon):
 
+```text
+┌────────────────────────────────────────────────────────────────────────────────────────┐
+│                                 THE 10 RESEARCH PHASES                                 │
+│                                                                                        │
+│  Phase 1: Exploration & Field Orientation (Days 1–5)                                   │
+│      ↓ [Gate: 15–30 Terms + 3 Canonical Anchors + 1-Sentence Tension]                 │
+│  Phase 2: Territory Selection & Tension Isolation (Days 6–9)                          │
+│      ↓ [Gate: 4 Feasibility Gates Passed: Data, Baseline, Metric, Symmetric Value]    │
+│  Phase 3: Literature Interrogation & Closest-Work Audit (Days 10–14)                   │
+│      ↓ [Gate: Closest-Work Contrast Table Completed + Primary Source URLs Verified]    │
+│  Phase 4: Adversarial Idea Testing & Feasibility Gate (Days 15–18)                     │
+│      ↓ [Gate: Red Team 10-Question Attack Survived; 3 Alternative Explanations Named]  │
+│  Phase 5: Question Freeze & Experiment Specification (Days 19–21)                      │
+│      ↓ [Gate: Experiment Specification Signed Off; Causal DAG + Arms Frozen]           │
+│  Phase 6: Baseline Reproduction & Harness Engineering (Days 22–26)                     │
+│      ↓ [Gate: Turnkey Data Loaded; 200-Line Harness Runs End-to-End on 5 Samples]      │
+│  Phase 7: Diagnostic Pilot & Confound Autopsy (Days 27–31)                             │
+│      ↓ [Gate: N=20 Pilot Run; Parse/Neither/Length Autopsy Resolved; Controls Tuned]   │
+│  Phase 8: Production Execution & Robustness Sweeps (Days 32–40)                        │
+│      ↓ [Gate: Full Population Census / Multi-Seed Runs Completed with Zero Crashes]    │
+│  Phase 9: Statistical Analysis & Causal Interpretation (Days 41–45)                    │
+│      ↓ [Gate: Contingency Tables, Effect Sizes, McNemar p-values, Cross-Over Mapped]   │
+│  Phase 10: Thesis Drafting, Defense Preparation & Paper Compression (Days 46–60)       │
+│      ↓ [Final Deliverable: Defended Thesis + 8-Page Conference Paper Submission]       │
+└────────────────────────────────────────────────────────────────────────────────────────┘
+```
 
+---
 
+### Detailed Phase Specifications
 
+#### Phase 1: Exploration & Field Orientation (Estimated: 3–5 Days)
+* **Primary Objective:** Acquire situational awareness of a new research territory without drowning in hundreds of unread papers.
+* **What You MUST Do:** Read backward from 2–3 recent top-tier papers (NeurIPS/ICML/CVPR/ACL). Extract the 15–30 standard vocabulary terms. Identify what benchmarks the community currently trusts.
+* **Anti-Goals (What NOT to Do):** Do NOT read papers chronologically from 2017. Do NOT download 50 PDFs into Zotero. Do NOT brainstorm thesis topics.
+* **Forward Transition Criteria:** You can write down the central tension of the territory in two sentences and name the 3 canonical anchor papers.
+* **Backward Transition Trigger:** The territory feels like an amorphous cloud with no clear benchmarks; return to a narrower subfield.
+* **Deliverable Artifact:** `Field_Orientation_Dossier.md` (Vocabulary table + 3 Anchor summaries).
 
+#### Phase 2: Territory Selection & Tension Isolation (Estimated: 3–4 Days)
+* **Primary Objective:** Apply the 4 Feasibility Gates (G1: Turnkey Data, G2: Reproducible Baseline, G3: Deterministic Metric, G4: Symmetric Publication Value) to eliminate unviable candidates.
+* **What You MUST Do:** Verify that the primary dataset is downloadable via `load_dataset()` in Python *today*. Verify that the model runs on your hardware (e.g., Colab T4 / 16GB VRAM).
+* **Anti-Goals:** Do NOT choose a territory because "nobody has published on it in my country." Do NOT choose a territory requiring private hospital data or $10,000 in API credits.
+* **Forward Transition Criteria:** All 4 gates pass with objective, verified proof (not assumptions).
+* **Backward Transition Trigger:** Dataset requires approval forms or private scraping $	o$ Immediately disqualify territory.
+* **Deliverable Artifact:** `Territory_Gate_Audit.md`.
 
+#### Phase 3: Literature Interrogation & Closest-Work Audit (Estimated: 4–5 Days)
+* **Primary Objective:** Identify the single closest experiment anyone has performed in the world and verify whether the suspected gap is real.
+* **What You MUST Do:** Search by *intervention*, *measurement*, and *causal manipulation*, not by your own terminology. Open the primary arXiv page and read the Limitations and Experimental Setup with your own eyes.
+* **Anti-Goals:** Do NOT rely on AI summaries to declare a gap "open." Do NOT assume a gap is real because you couldn't find your exact sentence on Google.
+* **Forward Transition Criteria:** The Closest-Work Contrast Table is filled with 3 verified competitor papers, and you can name the exact unperformed contrast.
+* **Backward Transition Trigger:** A competitor paper already ran your exact experiment $	o$ KILL idea or PIVOT to an unexamined boundary condition.
+* **Deliverable Artifact:** `Closest_Work_Audit.md`.
 
+#### Phase 4: Adversarial Idea Testing & Feasibility Gate (Estimated: 3–4 Days)
+* **Primary Objective:** Try ruthlessly to break your own idea before investing code.
+* **What You MUST Do:** Subject the idea to the 10-Question Red Team attack (§30.2). Formulate the simplest alternative explanations (e.g., positional bias, extra compute, prompt length, token frequency).
+* **Anti-Goals:** Do NOT defend your idea like a lawyer. Be its harshest prosecutor.
+* **Forward Transition Criteria:** The idea survives the Red Team attack, and you have designed a matched control to isolate the primary alternative explanation.
+* **Backward Transition Trigger:** The effect is trivially explainable by prompt length or dataset bias with no feasible control $	o$ KILL idea.
+* **Deliverable Artifact:** `Adversarial_Red_Team_Record.md`.
 
+#### Phase 5: Question Freeze & Experiment Specification (Estimated: 2–3 Days)
+* **Primary Objective:** Lock the scientific question and pre-register the exact experimental protocol.
+* **What You MUST Do:** Write the formal Experiment Specification (§29.4) defining the Causal DAG, the 4 factorial arms, the matched placebo prompt, the metrics, and the hypothesis threshold.
+* **Anti-Goals:** Do NOT leave open "we might also test 5 other models." Pick ONE primary model and lock it.
+* **Forward Transition Criteria:** You sign off on the specification. No more literature searches are allowed. Topic discovery is 100% frozen.
+* **Backward Transition Trigger:** Inability to state the matched control $	o$ Stay in Phase 4.
+* **Deliverable Artifact:** `Canonical_Experiment_Specification_LOCKED.md`.
 
+#### Phase 6: Baseline Reproduction & Harness Engineering (Estimated: 4–5 Days)
+* **Primary Objective:** Build a clean, modular, crash-proof experimental harness in under 300 lines of Python.
+* **What You MUST Do:** Load the turnkey dataset. Implement the model inference loop with explicit error handling, regex parsing, JSON logging, and checkpoint resumption. Test on 5 samples.
+* **Anti-Goals:** Do NOT build a massive, over-engineered 2,000-line framework. Do NOT use complex distributed libraries if a single script suffices.
+* **Forward Transition Criteria:** Script runs 5 items across all experimental arms, logs full prompts and outputs to JSON, and parses outputs without exceptions.
+* **Backward Transition Trigger:** Model OOMs on GPU $	o$ Implement SDPA/FP16 quantization or reduce context length.
+* **Deliverable Artifact:** `production_experiment_harness.py`.
 
+#### Phase 7: Diagnostic Pilot & Confound Autopsy (Estimated: 4–5 Days)
+* **Primary Objective:** Run a small-scale cohort ($N = 20–50$) to uncover hidden empirical pathologies before spending your compute budget.
+* **What You MUST Do:** Read every single generated output with your own eyes. Inspect token lengths across arms. Check for parse failures, "Neither" calculation behaviors, or prompt compliance artifacts.
+* **Anti-Goals:** Do NOT just look at the average accuracy number. The truth lives in the raw text outputs.
+* **Forward Transition Criteria:** You conduct a Diagnostic Autopsy (§28) resolving all length confounds and parse failures. The control is verified clean.
+* **Backward Transition Trigger:** Treatment arm is 70% longer than placebo $	o$ Re-tune placebo prompt to equalize token budget before proceeding.
+* **Deliverable Artifact:** `Diagnostic_Pilot_Autopsy.md`.
 
+#### Phase 8: Production Execution & Robustness Sweeps (Estimated: 7–10 Days)
+* **Primary Objective:** Execute the frozen protocol across the full population census or multi-seed evaluation cohort.
+* **What You MUST Do:** Run unattended with persistent checkpointing. Log every raw token, timing metadata, and parse flag. Run sensitivity sweeps (e.g., temperature variation, degradation levels).
+* **Anti-Goals:** Do NOT tweak prompts or alter code in the middle of a production run. If a bug is found, discard the run, fix the bug, and restart cleanly.
+* **Forward Transition Criteria:** 100% of target samples are evaluated across all arms with verified data integrity and zero missing records.
+* **Backward Transition Trigger:** Hardware/API crash $	o$ Resume cleanly from persistent JSONL checkpoints.
+* **Deliverable Artifact:** `production_results_full_census.jsonl`.
 
+#### Phase 9: Statistical Analysis & Causal Interpretation (Estimated: 4–5 Days)
+* **Primary Objective:** Transform raw inference logs into rigorous statistical evidence and mechanistic discoveries.
+* **What You MUST Do:** Build contingency tables. Compute paired within-item tests (McNemar's test), odds ratios, and effect sizes (Cohen's h). Perform failure mode classification and cross-over analysis.
+* **Anti-Goals:** Do NOT run 50 post-hoc statistical tests searching for p < 0.05 (p-hacking). Test only your pre-registered hypotheses.
+* **Forward Transition Criteria:** All primary hypotheses are accepted or rejected with exact p-values, confidence intervals, and mechanistic cross-over proof.
+* **Backward Transition Trigger:** Null result observed $	o$ Check whether the matched control operated properly; if yes, format as an impactful negative result (§22).
+* **Deliverable Artifact:** `Statistical_Analysis_and_Findings.md`.
 
+#### Phase 10: Thesis Drafting, Defense Preparation & Paper Compression (Estimated: 12–15 Days)
+* **Primary Objective:** Synthesize the research into an authoritative undergraduate thesis and an 8-page conference-ready submission.
+* **What You MUST Do:** Draft chapters around the evidence arc: Problem $	o$ Literature Tension $	o$ Causal Method $	o$ Empirical Findings $	o$ Mechanistic Discussion $	o$ Limitations. Strip out personal exploration history for the paper.
+* **Anti-Goals:** Do NOT write the literature review as a disconnected textbook summary. Organize all related work around your specific contrast.
+* **Forward Transition Criteria:** Thesis manuscript passes advisor review; defense slide deck completed; 8-page paper draft audited against NeurIPS checklist.
+* **Deliverable Artifact:** `Thesis_Final_Submission.pdf` & `Conference_Paper_8Page.pdf`.
 
+---
 
+# 28. My Personal Failure Modes and How to Avoid Them
 
+## 28.1 The "Collection Trap": Why topic discovery took five weeks
 
+**[L2 — Inferred from your record]** Across August and September 2026, your workspace accumulated over 87 research files, 11 comprehensive handover reports, and ~1.5 MB of analytical text before a single production script was executed.
+
+### Forensic Diagnosis of the Time Sink
+Why did topic discovery consume five weeks of exhausting effort?
+
+1. **Information Gathering Was Mistaken for Progress:**  
+   Downloading surveys, extracting comparison tables, and reading about continual learning, token pruning, medical imaging, and active agents felt intellectually productive. But collecting evidence about what *others* have done is not research; it is cataloging.
+2. **The Passive "Survey-First" Mindset:**  
+   You were waiting for a paper to say: *"Here is an open, easy thesis topic that nobody has solved."* Such papers do not exist. Promising areas are either crowded or high-risk. Research questions are not found lying on the ground; they are carved out by isolating a contradiction between two existing claims.
+3. **The Scope Churn Feedback Loop:**  
+   Because each new topic had its own unfamiliar vocabulary and benchmarks, entering a new area required 3–4 days of orientation. Switching across 5 domains (Medical FL, Active Agents, Long-Context VLM, Cultural Steering, Conflict Arbitration) multiplied this orientation tax by five.
+
+**The Future Rule:** **[L3]** Cap topic discovery at **14 days maximum**. If a question does not pass the 4 Feasibility Gates and Red Team attack by Day 14, kill it and freeze the next viable candidate.
+
+---
+
+## 28.2 The "Candidate Churn" Pathology: Mixing fields, tasks, methods, and conditions
+
+**[L2]** A recurring pattern in your early reports (e.g., Astra narrowing vs. Gemini vs. Perplexity audits) was the instability of candidate definitions:
+- In one document, "Candidate 1" meant *Internal Probes for Uncertainty*.
+- In another document, "Candidate 1" meant *Reasoning Trace Degradation*.
+- In a third document, "Candidate 3" meant *Out-of-Frame Answerability*, while later it meant *Cultural Concept Steering*.
+
+### Why This Caused Overwhelm
+When labels change their underlying meaning, your brain cannot maintain a stable mental map. You feel as though you are tracking 12 different projects simultaneously, when in reality you are looking at 3 projects with shifting names.
+
+Furthermore, different conceptual levels were treated as interchangeable thesis topics:
+- *Vision-Language Models* is a **Field**.
+- *Medical Diagnostic VQA* is a **Task**.
+- *Activation Steering / Representation Engineering* is a **Method**.
+- *Low-Resource Bengali Scripts* is an **Evaluation Condition**.
+
+**The Future Rule:** **[L3]** Never name a research project "Candidate 1" or "Idea A". Name it by its **Causal Contrast**:
+$$	ext{Project Name} = 	ext{[Intervention]} 	imes 	ext{[Target Behavior]} 	ext{ on } 	ext{[Setting]}$$
+*Example:* `Conflict-Verbalization-Arbitration-Qwen2.5VL`. That name never shifts meaning.
+
+---
+
+## 28.3 The Illusion of Certainty: How AI-generated extraction tables mislead
+
+**[L2]** Your records show extensive use of LLMs (Claude, Gemini, Perplexity) to search literature and generate candidate proposals. While this accelerated exploration, it created a dangerous pathology: **The Illusion of Verified Progress.**
+
+1. **AI Confidently Hallucinates "Open Gaps":**  
+   An LLM will readily write: *"No prior work has investigated whether Layer 18 controls cultural steering in Qwen2.5-VL."* This statement is grammatically true (nobody wrote that exact sentence), but scientifically hollow (the concept of representation steering was already generalized by *BabelSteering* and *SHARP*).
+2. **AI Generates Plausible Architectural Hubs Without Evidence:**  
+   Proposals claimed that "Layer 22 is the binding hub" or "Layer 18 is the cultural concept bottleneck." When audited against primary literature, these layer numbers had zero empirical support in the cited papers.
+3. **AI Extraction Tables Mask Missing Data:**  
+   An AI-generated table listed *WhatIfVis* as an available benchmark. In reality, when you attempted to load it, the benchmark was not publicly hosted on Hugging Face and required reconstructing private API endpoints.
+
+**The Golden Rule:** **[L3]** **AI is a search-expansion engine, not a peer reviewer.** Never accept an AI claim about a paper's findings, a dataset's availability, or an open gap until you have opened the primary URL and verified it with your own eyes.
+
+---
+
+## 28.4 Detailed Autopsy of Deprecated Candidates
+
+To understand how senior researchers evaluate risk, examine the exact reasons why your three alternative proposals were killed during the adversarial audit:
+
+### Autopsy 1: Why Proposal 1 (Reasoning Trace Degradation) Died
+* **The Claim:** Long multimodal reasoning traces cause attention degradation and visual forgetting.
+* **The Fatal Flaw (Pre-emption + Data Failure):**  
+  1. *Pre-emption:* *RH-Bench* (Liu et al., NeurIPS 2025, arXiv:2505.21523) had already proven this exact phenomenon, defining the standardized $RH	ext{-}AUC$ metric.
+  2. *Data Inaccessibility:* The required benchmark (*WhatIfVis*, 3,049 items) was un-downloadable from public hubs.
+* **The Lesson:** Always attempt `load_dataset("benchmark_name")` in Python on Day 2 before writing a 20-page proposal.
+
+### Autopsy 2: Why Proposal 2 (Binding IDs Natural Image Transfer) Died
+* **The Claim:** Synthetic "Grounding IDs" can be transferred to Layer 22 of Qwen2.5-VL to solve natural attribute-binding failures.
+* **The Fatal Flaw (Extreme Generalization Risk):**  
+  1. The anchor paper (Hasani et al., ICML 2026, arXiv:2509.24072) operated exclusively on synthetic 2D grid worlds (red circles and blue squares).
+  2. The assumption that visual binding in complex photographic scenes (COCO/CLEVR) concentrates in a single transformer layer was unsupported by probing literature. If the intervention failed, the thesis would collapse into an unpublishable negative finding on synthetic artifacts.
+* **The Lesson:** Never build a thesis whose success requires an unverified architectural miracle (e.g., that an entire cognitive capability resides in Layer 22).
+
+### Autopsy 3: Why Proposal 3 (Bengali Cultural VLM Steering) Died
+* **The Claim:** Steering internal activation vectors will inject missing Bengali cultural knowledge into VLMs.
+* **The Fatal Flaw (Methodological Pre-emption + Confound):**  
+  1. *BabelSteering* (arXiv:2608.16577, August 2026) had already demonstrated cross-lingual representation steering to Bengali.
+  2. *ChitraMiti* (arXiv:2609.12509) proved that VLMs in low-resource cultural settings fail primarily due to strong language-model priors overpowering visual diagrams, not due to missing internal vectors.
+* **The Lesson:** Distinguish between a *geographic novelty* ("nobody tested this in Bengali") and a *scientific novelty* ("this reveals a new computational property of multimodal representations").
+
+---
+
+## 28.5 Why Candidate A (Causal Conflict Verbalization) Succeeded
+
+**[L2]** Candidate A survived every adversarial filter and yielded a definitive thesis with $p < 10^{-215}$. Why?
+
+| Success Dimension | Concrete Evidence from Candidate A |
+| :--- | :--- |
+| **Explicit Gap in Literature** | The anchor paper (*Which Source Wins?*, arXiv:2608.17205, August 2026) explicitly conceded in Section 6: *"We do not test whether models detect the contradiction, express uncertainty, or abstain."* The gap was stated in black and white by the authors. |
+| **Turnkey Infrastructure** | `vlm-modality-research/modality-conflict-arbitration-v2` was hosted on Hugging Face, fully verified, and loaded in 3 lines of Python. |
+| **Symmetric Publication Value** | If $\Delta_{	ext{arb}} \gg 0$: Proves that verbalizing conflict causally steers reasoning. If $\Delta_{	ext{arb}} pprox 0$: Proves that multimodal CoT is unfaithful post-hoc rationalization. Both outcomes are publishable. |
+| **Methodological Cleanliness** | Controlled factorial design using a length-matched placebo prompt to eliminate test-time compute as a confound. |
+| **Empirical Discovery** | The pilot revealed the unexpected "Neither" calculation problem and spontaneous epistemic abstention, transforming a simple measurement into a profound mechanistic discovery. |
+
+---
+
+## 28.6 The Cognitive Division of Labor: Human vs. AI
+
+**[L1 / L3]** To prevent future topic overwhelm, establish an ironclad boundary between what you delegate to AI and what you reserve for human judgment:
+
+```text
+┌───────────────────────────────────────────────┬───────────────────────────────────────────────┐
+│        DELEGATE AGGRESSIVELY TO AI            │        RESERVE STRICTLY FOR HUMAN JUDGMENT    │
+├───────────────────────────────────────────────┼───────────────────────────────────────────────┤
+│ • Generating boilerplate PyTorch harness code │ • Declaring whether a literature gap is REAL  │
+│ • Writing complex regex parsers & JSON loggers│ • Deciding whether an idea is worth 3 months  │
+│ • Brainstorming 30 keyword synonyms for search│ • Auditing anchor paper Limitation sections   │
+│ • Formatting LaTeX tables & BibTeX entries    │ • Inspecting raw model output text in pilots  │
+│ • Generating Matplotlib / Seaborn visualizers │ • Verifying that datasets actually download   │
+│ • Drafting initial section summaries          │ • Checking whether controls isolate confounds │
+│ • Identifying typos and grammatical flaws     │ • Signing off on the Experiment Specification │
+└───────────────────────────────────────────────┴───────────────────────────────────────────────┘
+```
+
+# 29. Reusable Research Workspace
+
+## 29.1 The Seven Minimal Research Artifacts
+
+**[L1 — Established practice]** Experienced researchers do not maintain dozens of chaotic Notion pages or nested folders full of unsorted notes. They maintain a **lean, disciplined workspace consisting of exactly seven living documents**.
+
+Each document has a single purpose, a strict creation trigger, and an explicit retirement criterion:
+
+```text
+┌───────────────────────────────────┬───────────────────────────────────┬───────────────────────────────┐
+│ Artifact Name                     │ Primary Purpose                   │ Lifecycle Stage               │
+├───────────────────────────────────┼───────────────────────────────────┼───────────────────────────────┤
+│ 1. Field Map                      │ Orientation & territory landscape │ Phase 1–2 (Discard when frozen)│
+│ 2. Question Ledger                │ Living candidate RQs & kill audit │ Phase 2–5 (Active graveyard)  │
+│ 3. Evidence Ledger                │ Verified anchor claims & quotes   │ Phase 3–10 (Living truth base)│
+│ 4. Experiment Specification       │ Frozen causal protocol & DAG      │ Phase 5–8 (Immutable contract)│
+│ 5. Research Log                   │ Chronological anomaly & run log   │ Phase 6–9 (Audit trail)       │
+│ 6. Results & Analysis Record      │ Statistical contingency tables    │ Phase 8–10 (Core evidence)    │
+│ 7. Paper Story                    │ 1-sentence claim & figure outline │ Phase 9–10 (Publishable arc)  │
+└───────────────────────────────────┴───────────────────────────────────┴───────────────────────────────┘
+```
+
+---
+
+## 29.2 Complete Operational Templates
+
+Below are the production-grade markdown templates for all seven artifacts. You can copy and paste these directly into your future research repositories.
+
+### Artifact 1: Field Map (`Field_Map.md`)
+```markdown
+# FIELD MAP: [Territory Name]
+
+**Date Created:** YYYY-MM-DD | **Last Updated:** YYYY-MM-DD
+**Parent Field:** [e.g., Multimodal Representation Learning]
+**Status:** [Exploring / Auditing / Frozen / Deprecated]
+
+## 1. Domain Vocabulary (15–30 Terms)
+| Term | Exact Operational Definition in Literature | Primary Anchor Paper |
+| :--- | :--- | :--- |
+| e.g., Source Arbitration | How a model resolves contradictory multimodal evidence | Smith et al. (2026) |
+| e.g., Epistemic Abstention | Refusing to provide an answer due to insufficient evidence | Zhang et al. (2025) |
+
+## 2. Canonical Benchmarks & Datasets
+| Benchmark Name | HuggingFace / Public URL | Sample Count | Metric Used | Known Artifacts / Biases |
+| :--- | :--- | :--- | :--- | :--- |
+| [Name] | [URL] | N = ... | [e.g., Accuracy] | [e.g., Positional bias in options] |
+
+## 3. The 3 Canonical Anchor Papers
+1. **Anchor 1:** [Title] ([Authors, Venue, Year]) — *Key Claim:* ...
+2. **Anchor 2:** [Title] ([Authors, Venue, Year]) — *Key Claim:* ...
+3. **Anchor 3:** [Title] ([Authors, Venue, Year]) — *Key Claim:* ...
+
+## 4. The Unresolved Tension
+- *Consensus belief:* [What everyone assumes is true]
+- *Unexamined alternative:* [The alternative explanation nobody has isolated]
+```
+
+---
+
+### Artifact 2: Question Ledger (`Question_Ledger.md`)
+```markdown
+# QUESTION LEDGER
+
+Every candidate question evaluated during discovery. Do NOT delete killed questions; record the kill reason so you never re-investigate an occupied idea.
+
+| ID | Candidate Question (Stated as Causal Contrast) | Proposed Intervention vs Control | Feasibility Status | Decision | Kill / Pivot Rationale |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| Q1 | Does trace length degrade visual attention? | Long CoT vs Short CoT | Data unavailable | **KILLED** | Pre-empted by RH-Bench; WhatIfVis un-downloadable |
+| Q2 | Can synthetic binding IDs transfer to natural images? | Layer 22 injection vs zero | Extreme risk | **KILLED** | Synthetic gridworld artifact; Layer 22 unverified |
+| Q3 | Does conflict verbalization causally steer arbitration? | Verbalize vs Length Placebo | 100% Turnkey | **FROZEN** | Open gap in Which Source Wins; symmetric value |
+```
+
+---
+
+### Artifact 3: Evidence Ledger (`Evidence_Ledger.md`)
+```markdown
+# EVIDENCE LEDGER: Verified Primary Sources
+
+Every claim entered here must be accompanied by an exact quotation and page/section number from the primary source.
+
+## Paper 1: [Short Title]
+- **Citation:** [Authors, Title, Venue, Year, arXiv ID]
+- **Primary URL:** [https://arxiv.org/abs/...]
+- **Verified Claim:** "[Copy-paste exact sentence from abstract or conclusion]" (Section X, Page Y)
+- **Experimental Setting:**
+  - *Models Tested:* [e.g., Qwen2-VL-7B, LLaVA-v1.6]
+  - *Datasets:* [e.g., GSM8K, SVAMP]
+  - *Compute / Evaluation Budget:* [e.g., greedy decoding, temp=0.0]
+- **Crucial Concession (Limitations Section):**
+  - "[Copy-paste exact sentence where authors admit what they did not test]"
+- **Relevance to Our Work:** [Why this paper matters to our contrast]
+```
+
+---
+
+### Artifact 4: Experiment Specification (`Experiment_Specification.md`)
+```markdown
+# EXPERIMENT SPECIFICATION: [Project Name] (LOCKED)
+
+**Version:** 1.0 (Frozen) | **Date:** YYYY-MM-DD
+**Sign-off:** [Lead Researcher Name]
+
+## 1. Causal Model (DAG)
+`Treatment (Intervention) ──> Internal Reasoning ──> Final Decision (Source Arbitration)`
+`Confounders Blocked: Token Generation Length, Test-Time Compute, Prompt Template Framing`
+
+## 2. Experimental Arms (Factorial Design)
+- **Arm 1 (Direct Baseline):** Zero-shot direct question. (Budget: ~10 tokens)
+- **Arm 2 (Length-Matched Placebo Control):** Neutral descriptive prompt matching token length of Arm 3 without conflict semantics. (Budget: ~75 tokens)
+- **Arm 3 (Causal Intervention):** Explicit conflict verbalization prompt. (Budget: ~75 tokens)
+- **Arm 4 (Optional Steering / Ablation):** Constrained instruction forcing alternative source.
+
+## 3. Dataset & Splits
+- **Repository:** `[HuggingFace Path]`
+- **Target Population:** $N = [Exact Count]$ clean, non-degraded items.
+- **Exclusion Criteria:** Parse errors, unanswerable math, corrupted image dimensions.
+
+## 4. Primary Metrics & Statistical Tests
+- **Primary Metric:** $\Delta_{\text{arb}} = P(\text{Visual Capture} \mid \text{Arm 2}) - P(\text{Visual Capture} \mid \text{Arm 3})$
+- **Exact-Match Cross-Over:** Proportion of exact math matches on Image problem vs Text problem across arms.
+- **Statistical Significance:** McNemar's paired within-item test on matched pairs ($\alpha = 0.001$).
+- **Effect Size:** Cohen's $h$ and Odds Ratio with 95% Confidence Intervals.
+
+## 5. Pre-Registered Hypotheses
+- **$H_1$ (Causal Steering):** $\Delta_{\text{arb}} > +20\text{ pp}$ with $p < 0.001$.
+- **$H_0$ (Unfaithful Rationalization):** $\Delta_{\text{arb}} \approx 0$ (visual capture remains invariant despite verbalization).
+```
+
+---
+
+### Artifact 5: Research Log (`Research_Log.md`)
+```markdown
+# RESEARCH LOG
+
+Chronological record of every script execution, hardware anomaly, and methodological decision.
+
+### [YYYY-MM-DD HH:MM] — Pilot Run Execution (N = 20)
+- **Command:** `python prefreeze_pilot.py --model Qwen2.5-VL-3B-Instruct --samples 20`
+- **Hardware:** Colab Pro T4 GPU, VRAM allocated: 7.19 GB, runtime: 4m 12s.
+- **Discovered Anomaly:** 5 out of 20 samples in Arm 3 failed regex number extraction.
+- **Root Cause Analysis:** Inspected raw text; model did not crash—it explicitly stated "there is no numerical answer because the sources contradict." This is epistemic abstention, not a parse bug!
+- **Action Taken:** Updated parser to recognize abstention phrases as a separate categorical outcome.
+
+### [YYYY-MM-DD HH:MM] — Length Confound Identified
+- **Observation:** Arm 3 generated 103.3 avg tokens; Arm 2 generated 61.2 avg tokens.
+- **Decision:** Adjusted Arm 2 placebo prompt to require a detailed step-by-step description to equalize generation length before running production census.
+```
+
+---
+
+### Artifact 6: Results & Analysis Record (`Results_Record.md`)
+```markdown
+# RESULTS & ANALYSIS RECORD
+
+**Execution Date:** YYYY-MM-DD | **Dataset:** [Name] ($N = [Total]$)
+**Model:** [Model Name] (FP16, SDPA)
+
+## 1. Primary Contingency Table (Arm 2 vs. Arm 3)
+| Behavior | Arm 2 (Placebo Control) | Arm 3 (Conflict Verbalization) | Net Shift (Δ) |
+| :--- | :--- | :--- | :--- |
+| **Visual Capture** | [Count] ([Percent]%) | [Count] ([Percent]%) | -[Shift] pp |
+| **Textual Capture** | [Count] ([Percent]%) | [Count] ([Percent]%) | +[Shift] pp |
+| **Epistemic Abstention** | [Count] ([Percent]%) | [Count] ([Percent]%) | +[Shift] pp |
+| **Total Evaluated** | 100% ($N = ...$) | 100% ($N = ...$) | — |
+
+## 2. Statistical Significance & Effect Sizes
+- **McNemar's Paired Test:** $\chi^2 = [\dots], p = [\dots]$
+- **Odds Ratio:** $\text{OR} = [\dots]$ [95% CI: $\dots, \dots$]
+- **Cohen's h:** $h = [\dots]$ (Effect size interpretation: Large / Moderate)
+
+## 3. Mechanistic Cross-Over Findings
+- *Arm 2 Exact Match:* Image Problem = X%, Text Problem = Y%
+- *Arm 3 Exact Match:* Image Problem = A%, Text Problem = B%
+- *Cross-Over Ratio:* Inversion from [X/Y]x to [B/A]x dominance.
+```
+
+---
+
+### Artifact 7: Paper Story (`Paper_Story.md`)
+```markdown
+# PAPER STORY: 1-Page Narrative Arc
+
+## 1. The One-Sentence Contribution
+"In paired multimodal numeric conflicts with an open-weight VLM, explicit conflict verbalization causally reduces visual capture by 63.7 pp relative to a length-matched placebo (p < 10^-215), physically redirecting the model's internal arithmetic circuit toward alternate textual evidence rather than serving as post-hoc rationalization."
+
+## 2. The Three Figures that Tell the Entire Story
+- **Figure 1 (The Causal Contrast & Cross-Over):** Dual-panel bar chart showing visual capture collapse alongside the exact-match arithmetic cross-over.
+- **Figure 2 (Factorial Protocol & Length Matching):** Architecture diagram showing Arm 1 (Direct), Arm 2 (Placebo), and Arm 3 (Verbalization) with equalized token budgets.
+- **Figure 3 (Mechanistic Abstention & Error Topology):** Scatter plot or transition diagram showing the emergence of spontaneous refusal under conflicting evidence.
+
+## 3. Paragraph-by-Paragraph Outline
+- *Intro P1–P4:* [Follow §26.4 template]
+- *Related Work:* [Follow §26.5 defensive contrast table]
+- *Method:* Formalize factorial prompt intervention & matched placebo.
+- *Results:* Present census findings & cross-over discovery.
+- *Discussion & Limitations:* Bound findings to small open-weight VLMs; outline future scale transfer.
+```
+
+---
+
+# 30. Stop / Continue / Pivot / Kill Framework
+
+## 30.1 The Epistemic Decision Engine
+
+**[L1 — Established practice]** Experienced researchers do not treat project continuation as a matter of stubborn commitment. They run an objective **decision engine** where physical evidence dictates whether to proceed, narrow, adapt, or abandon.
+
+```text
+┌────────────────────────────────────────────────────────────────────────────────────────┐
+│                              THE 6-STATE DECISION ENGINE                               │
+│                                                                                        │
+│     [Candidate Idea]                                                                   │
+│            │                                                                           │
+│            ├──► Closest work already answered this? ────────────────► [KILL]           │
+│            ├──► Dataset unavailable / baseline requires cluster? ───► [KILL]           │
+│            ├──► Question broad, but has one clean core contrast? ───► [NARROW]         │
+│            │                                                             │             │
+│            ▼ (Feasibility gates passed + novelty intact)                 │             │
+│        [PILOT] (Run N = 20 diagnostic cohort)                            │             │
+│            │                                                             │             │
+│            ├──► Effect 100% disappears under length-matched placebo? ─► [KILL]         │
+│            ├──► Unexpected phenomenon discovered (Neither/Refusal)? ─► [PIVOT]         │
+│            ├──► Baseline reproduces; contrast produces robust signal? ──► [CONTINUE]    │
+│            │                                                              │            │
+│            ▼                                                              ▼            │
+│        [FREEZE] (Sign off Experiment Specification; lock protocol & code)              │
+└────────────────────────────────────────────────────────────────────────────────────────┘
+```
+
+### Detailed Decision Criteria & Evidence Standards
+
+| Decision | When to Trigger | Required Objective Evidence | Actionable Next Step |
+| :--- | :--- | :--- | :--- |
+| **CONTINUE** | Evidence directly strengthens the central hypothesis; baseline behaves as expected. | Pilot on $N=20$ produces $\Delta > 15\text{ pp}$ between intervention and matched placebo with zero fatal parse errors. | Scale immediately to production sample size ($N \ge 500$ or full census). |
+| **NARROW** | The research area is promising, but the proposal attempts to solve 4 problems simultaneously. | Idea mixes representation steering, cultural concepts, multimodal translation, and benchmark creation. | Strip away 3 peripheral components. Retain exclusively the single causal contrast. |
+| **PIVOT** | An empirical pilot reveals an unexpected, reproducible behavior that is scientifically more profound than the original question. | Pilot shows model does not choose between answers, but computes and spontaneously abstains when contradiction is detected. | Reframe the research question around the newly discovered phenomenon (e.g., source arbitration & epistemic refusal). |
+| **PILOT** | Literature audit is clear, feasibility gates pass, and Red Team attacks have been survived. | Completed Closest-Work Contrast Table and working 200-line Python harness tested on 3 dummy samples. | Execute $N = 20–50$ diagnostic cohort. Inspect raw text outputs. |
+| **FREEZE** | Diagnostic pilot confirms protocol validity, eliminates length confounds, and stabilizes regex parsing. | Diagnostic autopsy completed; Experiment Specification signed off with locked hyperparameters. | Stop literature searching completely. Freeze code and launch production runs. |
+| **KILL** | The gap is occupied, the data is un-downloadable, or the effect collapses under matched controls. | (a) Competitor paper ran exact contrast; (b) benchmark requires private API; or (c) placebo reproduces the treatment effect. | Record the autopsy in `Question_Ledger.md`. Discard idea immediately. Never look back. |
+
+---
+
+## 30.2 The 10-Question Red Team Checklist (The "Idea Destroyer")
+
+**[L1 / L3]** Before investing more than 48 hours into any new AI/ML idea, force it to run the gauntlet of these 10 adversarial questions. If an idea fails more than two, it must be killed or radically restructured:
+
+1. **The Phrasing Test:** Is this gap real, or does it exist only because nobody wrote my exact sentence? *(Search by intervention and measurement, not by your terms).*
+2. **The Closest Work Test:** If I asked the top 3 authors in this subfield what is closest to this, which paper would they name? Have I read that paper's Limitations section?
+3. **The Trivial Explanation Test:** Could the expected result be explained by simple token length, prompt verbosity, or extra test-time compute?
+4. **The Dataset Bias Test:** Could the model achieve the reported accuracy by looking at only one modality (e.g., language priors alone without the image)?
+5. **The Turnkey Test:** Can I download the dataset using `load_dataset()` in Python in under 5 minutes without filling out access forms?
+6. **The Hardware Reality Test:** Can I run inference on the baseline model on a single 16 GB GPU (or available lab hardware) in under 2 seconds per item?
+7. **The Matched Control Test:** Can I design a placebo condition that differs from the treatment in *exactly one semantic feature* while holding length, formatting, and model state constant?
+8. **The Parse Reliability Test:** Can the model's output be evaluated with a deterministic Python function, or does it require an expensive, noisy LLM-as-a-judge?
+9. **The Symmetric Value Test:** If the experiment yields a null result (treatment == placebo), does that result falsify an established belief and remain publishable?
+10. **The Examiner / Reviewer Test:** Can I state the entire contribution in one sentence without using the word "and"?
+
+---
+
+# 31. One-Page Daily Research Playbook
+
+**Print this page or keep it pinned beside your keyboard. Review it daily.**
+
+---
+
+## 🌅 Morning Calibration (5 Minutes)
+Before opening arXiv, GitHub, or VS Code, answer these four questions in your notebook:
+1. **What is my phenomenon, in one sentence, in terms of observable behavior?**  
+   *(If you cannot name the input and output behavior, stop and clarify.)*
+2. **What is the exact contrast I am testing today?**  
+   *(Condition A [Control] vs. Condition B [Treatment]. Differing in exactly one thing.)*
+3. **What is today's evidence target?**  
+   *(Not "read papers" or "work on code". Example: "Run 20 pilot items and inspect parse failures.")*
+4. **What is the simplest alternative explanation for what I hope to see?**  
+   *(And does my control condition eliminate it?)*
+
+---
+
+## ⚖️ The Daily Contrast Test
+Every experiment you run must satisfy the **Single-Difference Law**:
+
+$$\text{Treatment Output} - \text{Control Output} = \text{Causal Effect of the Single Variable}$$
+
+If your treatment prompt adds CoT reasoning *and* changes the formatting *and* uses a different temperature *and* doubles the token length, your experiment has **four confounding variables**. Its results are scientifically meaningless. Strip it down until exactly one property varies.
+
+---
+
+## 🚨 Daily Red Flags (Warning Signs of Slipping into the Collection Trap)
+Stop immediately if you notice yourself doing any of the following:
+- ❌ Reading survey papers for more than 2 consecutive hours without writing down a testable hypothesis.
+- ❌ Downloading more than 5 papers into your reference manager in a single day.
+- ❌ Tweaking prompt wording endlessly based on 2 cherry-picked examples.
+- ❌ Spending 3 days building a complex, generic "framework" before running a 50-line baseline.
+- ❌ Believing an AI summary when it tells you "this gap has never been studied."
+- ❌ Looking only at aggregate accuracy numbers while ignoring raw model output text.
+
+---
+
+## 🌇 Evening Shutdown Audit (2 Minutes)
+Before ending your work day, answer the single golden metric:
+> **"Did today produce verifiable physical evidence (a working script, verified dataset, parsed pilot log, statistical table), or did it merely produce more reading notes?"**
+
+If it produced only notes for three consecutive days, you are trapped in exploration. Tomorrow, you are forbidden from reading. **You must run code.**
+
+---
+
+# 32. Final "If I Start a New Research Area Tomorrow" Guide
+
+**[L3 — Prescriptive operational guide for all future projects]**
+
+When you enter a completely unfamiliar AI/ML or tech research domain tomorrow, follow this **strict 14-day chronological sprint** to move from zero knowledge to a frozen, defensible research question and experimental harness:
+
+```text
+┌────────────────────────────────────────────────────────────────────────────────────────┐
+│                          THE 14-DAY NEW RESEARCH SPRINT                                │
+│                                                                                        │
+│  [Day 1]  Landscape Sweep & Vocabulary Capture (15–30 terms)                          │
+│  [Day 2]  Backward Trace to Identify Top 3 Canonical Anchors                          │
+│  [Day 3]  Isolate Observable Phenomenon & Extract Literature Tension                   │
+│  [Day 4]  Closest-Work Search by Intervention & Measurement                            │
+│  [Day 5]  Formulate Competing Hypotheses (H1 vs H0)                                    │
+│  [Day 6]  The 4 Feasibility Gates Check (Data, Baseline, Metric, Value)                │
+│  [Day 7]  Design the Minimum Discriminating Experiment (MDE)                           │
+│  [Day 8]  Run the 10-Question Red Team Attack (Kill / Pivot Gate)                      │
+│  [Day 9]  Build 200-Line Modular PyTorch Baseline Harness                              │
+│  [Day 10] Execute Diagnostic Pilot (N = 20 Items)                                      │
+│  [Day 11] Diagnostic Autopsy: Inspect Raw Text, Lengths & Parse Failures               │
+│  [Day 12] Refine Matched Placebo Controls & Equalize Token Budgets                     │
+│  [Day 13] Sign off & FREEZE Canonical Experiment Specification                         │
+│  [Day 14] Launch Production Execution & Checkpoint Logging                             │
+└────────────────────────────────────────────────────────────────────────────────────────┘
+```
+
+### Day-by-Day Tactical Checklist
+
+* **Day 1: Landscape Sweep & Vocabulary Capture**  
+  Find the two most recent papers (last 6 months) from top venues (NeurIPS, ICML, ICLR, CVPR). Skim their abstracts and introductions. Extract 15–30 recurring domain terms into `Field_Map.md`. Do NOT read the math or proofs yet.
+* **Day 2: Backward Citation Trace**  
+  Look at the first two paragraphs of the related-work sections in your Day 1 papers. Find the 3 canonical anchor papers that *both* papers cite as foundational. Download *only* those 3 papers.
+* **Day 3: Isolate Phenomenon & Tension**  
+  Read the Limitations and Discussion sections of the 3 anchor papers. Identify what they admit they did not test. Formulate the central tension: *"The community assumes X causes Y, but nobody has separated X from confound Z."*
+* **Day 4: Closest-Work Attack**  
+  Search Google Scholar / Semantic Scholar using *intervention verbs* and *measurement metrics* (e.g., `"activation steering" "attribute binding" "placebo control"`), completely avoiding your own buzzwords. Complete the Closest-Work Contrast Table.
+* **Day 5: Competing Hypotheses ($H_1$ vs. $H_0$)**  
+  State your research question as a contrast. Write $H_1$ (the mechanism you suspect) and $H_0$ (the confound or null explanation). Ensure both are mechanically plausible.
+* **Day 6: The 4 Feasibility Gates Check**  
+  Open Python. Run `load_dataset()`. Verify public availability (G1). Load model checkpoint in FP16 on Colab GPU (G2). Write the deterministic scoring function (G3). Confirm symmetric value (G4). If any gate fails, abort immediately.
+* **Day 7: Design Minimum Discriminating Experiment (MDE)**  
+  Specify the smallest experiment that separates $H_1$ from $H_0$. Define Arm 1 (Direct), Arm 2 (Length-Matched Placebo), and Arm 3 (Treatment).
+* **Day 8: The Red Team Kill Gate**  
+  Subject the design to the 10-Question Red Team Checklist (§30.2). If a fatal confound or pre-empting paper is discovered, kill the idea today and pivot to the backup tension identified on Day 3.
+* **Day 9: Build 200-Line Harness**  
+  Implement the inference loop in a single Python script (`pilot_harness.py`). Add JSONL logging, error handling, and CLI arguments. Test on 3 dummy samples.
+* **Day 10: Run $N=20$ Diagnostic Pilot**  
+  Execute 20 clean items across all arms. Log raw prompts, raw text completions, and token counts.
+* **Day 11: The Pilot Forensic Autopsy**  
+  Read all 60 generated text outputs. Calculate average token lengths per arm. Identify parse failures. Separate legitimate model abstentions from regex formatting errors.
+* **Day 12: Refine Matched Controls**  
+  Adjust the placebo prompt to equalize token generation length with the treatment arm. Update the response parser to capture refusal / abstention categories.
+* **Day 13: Sign off & FREEZE Experiment Specification**  
+  Write and lock `Experiment_Specification.md`. Commit code to git. **Declare topic discovery 100% finished.**
+* **Day 14: Launch Production Execution**  
+  Start the full-population or multi-seed evaluation with automated checkpointing. You are now a producing experimental researcher.
+
+---
+
+# Appendix A — Verified Anchor-Paper Ledger for Your Current Project
+
+**[PRIMARY — verified]** This appendix provides the primary-source evidence base for the canonical cross-modal thesis, verifying all core claims against published manuscripts:
+
+| Paper ID | Authors, Venue & Year | Verified Primary Claim from Source | Verified Setting | Crucial Concession in Source |
+| :--- | :--- | :--- | :--- | :--- |
+| **P1** | *Which Source Wins?* (Anonymous / Under Review, Aug 2026, arXiv:2608.17205) | Multimodal models exhibit systematic modality preference when presented with conflicting text and image inputs under progressive degradation. | Qwen2-VL-7B, LLaVA-v1.6 on synthetic & paired image-text reasoning tasks. | **Section 6 Concession:** *"We evaluate models exclusively under direct zero-shot answering. We do not test whether models detect the contradiction, express uncertainty, or abstain."* |
+| **P2** | *CLASH: Multimodal Contradiction Benchmark* (Zhang et al., 2025, arXiv:2511.19199) | Evaluates whether VLMs can detect contradictory inputs and refuse to answer unanswerable multimodal queries. | Frontier & open-source VLMs; contradiction detection evaluated as classification. | Frames contradiction detection purely as an abstention trigger, without measuring causal steering or problem arbitration. |
+| **P3** | *Measuring Faithfulness in Chain-of-Thought Reasoning* (Lanham et al., 2023, arXiv:2307.13702) | Tests CoT faithfulness in LLMs by perturbing or truncating reasoning traces; shows models often arrive at answers independently of reasoning steps. | Text-only LLMs (Claude-1, GPT-3.5, PaLM-2) on math, QA, and symbolic reasoning. | Tested strictly in unimodal language models; does not explore cross-modal evidence arbitration. |
+| **P4** | *RH-Bench* (Liu et al., NeurIPS 2025, arXiv:2505.21523) | Proves that extended reasoning traces degrade visual grounding, causing cross-modal forgetting in long-context VLMs. | Long-context multimodal LLMs; introduces standardized $RH\text{-}AUC$ metric. | Focuses on trace degradation over time, leaving active conflict verbalization unexamined. |
+| **P5** | *Annotation Artifacts in Natural Language Inference Data* (Gururangan et al., NAACL 2018) | Standard benchmark success can be achieved through superficial linguistic shortcuts in the hypothesis alone, bypassing the premise entirely. | SNLI and MultiNLI benchmarks across multiple neural architectures. | Exemplar study proving why single-modality baseline controls are mandatory in representation learning. |
+
+---
+
+# Appendix B — Evidence-Integrity Audit of Your Canonical Documents
+
+**[L2 / L3]** A forensic review of your earlier thesis documents revealed several unverified claims that created false confidence. Review these case studies to ensure evidence integrity in all future research:
+
+### 1. The "Un-downloadable Benchmark" Pathology
+* *Document Claim:* Multiple early proposals cited *WhatIfVis* (3,049 samples) as an available, ready-to-use evaluation suite.
+* *Audit Finding:* The benchmark was not accessible on Hugging Face, GitHub, or open repositories. Replicating the dataset required querying discontinued external APIs.
+* *Remedy for Future Work:* Never write a proposal around a dataset until you have executed `load_dataset()` or verified open file downloads in Python.
+
+### 2. The "Hallucinated Architectural Hub" Pathology
+* *Document Claim:* Early steering proposals stated that "Layer 18 controls Bengali cultural concepts" and "Layer 22 is the natural visual binding hub."
+* *Audit Finding:* Neither cited paper identified Layer 18 or Layer 22 as localized hubs for those specific functions. The layer numbers were arbitrary assumptions that appeared authoritative in prose.
+* *Remedy for Future Work:* Never locate an intervention at a specific neural layer without first running an activation probe or linear readout to prove representation concentration.
+
+### 3. The "Unmatched Token Compute" Pathology
+* *Document Claim:* Preliminary pilot reports suggested that conflict verbalization improved reasoning performance.
+* *Audit Finding:* Raw log inspection revealed that the conflict prompt generated 103.3 tokens, while the direct prompt generated 3.4 tokens. The performance shift was confounded by a $30\times$ increase in test-time computation.
+* *Remedy for Future Work:* Always implement a length-matched placebo prompt (Arm 2) to hold generation budget constant before claiming semantic causation.
