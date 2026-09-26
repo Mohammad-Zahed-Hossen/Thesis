@@ -1,4 +1,3 @@
-
 # AI/ML Research Playbook
 
 ### Reconstructing the End-to-End Working Process of an Experienced Researcher
