@@ -163,7 +163,7 @@ flowchart TD
   - Report Odds Ratio ($24.57$) and Cohen's $h$ ($1.4170$, Very Large Effect size).
 * **4.3 The Exact-Match Cross-Over Discovery (The Smoking Gun):**
   - Present Figure 2.
-  - Explain why the $760\%$ increase in text problem accuracy ($4.7\% \to 35.8\%$) conclusively proves physical arithmetic circuit redirection.
+  - Explain why the surge in text problem accuracy ($4.7\% \to 35.8\%$) conclusively demonstrates redirection of multi-step arithmetic problem execution toward the textual problem.
 * **4.4 Within-Subject State Migration Analysis:**
   - Present the full $4 \times 4$ transition matrix.
   - Track the 1,449 Arm 2 visual capture items: $57.41\%$ flipped to text, $13.87\%$ transitioned to abstention.
@@ -256,7 +256,7 @@ flowchart TD
 | Examiner Question / Challenge | Rigorous Scientific Rebuttal |
 |:---|:---|
 | *"Isn't the shift in Arm 3 simply caused by giving the model more reasoning tokens to think?"* | **No.** Arm 2 is a length-matched neutral placebo requiring the exact same two-sentence preamble length (~75 tokens) without contradiction semantics, yet maintains **$89.50\%$ visual capture**. The shift is strictly causal to conflict awareness. |
-| *"Could this shift just be random output confusion or noise?"* | **Definitively refuted by the Exact-Match Cross-Over.** If the model were confused, exact-match accuracy on both modalities would drop. Instead, exact accuracy on the text problem **surges by $760\%$** ($4.7\% \to 35.8\%$), proving physical computational circuit redirection. |
+| *"Could this shift just be random output confusion or noise?"* | **Definitively refuted by the Exact-Match Cross-Over.** If the model were confused, exact-match accuracy on both modalities would drop. Instead, exact accuracy on the text problem **surges to $35.8\%$** ($4.7\% \to 35.8\%$), demonstrating that the prompt redirects the model's active problem-solving execution toward the textual problem. |
 | *"Why didn't you test a larger 72B model or closed APIs?"* | Our research question is mechanistic: isolating whether CoT is causal in an open-weight foundation model. Qwen2.5-VL-3B has 36 layers and full autoregressive capability, fitting within the 16GB VRAM constraint of academic reproducibility. |
 | *"Why only evaluate clean images instead of degraded images?"* | In degraded images, physical illegibility acts as an unmodeled confounder—the model defaults to text simply because the pixels are unreadable. Pristine images isolate **pure cognitive source arbitration**. |
 

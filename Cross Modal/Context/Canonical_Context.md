@@ -254,44 +254,44 @@ For permanent reference and historical audit continuity, below is the status and
 
 ### 6.1 Problem Formulation & Intuition ("The Lie-Detector for AI Reasoning")
 
-When an image and accompanying text provide conflicting information (e.g., an invoice image shows \$50, but the prompt says \$20), VLMs display strong, uncalibrated modality bias—routinely trusting text and ignoring pixels regardless of ground truth.
-If prompted: *"Explain the contradiction, then answer,"* the VLM produces a fluent explanation: *"The image shows \$50, but the text says \$20. Therefore, the total is \$20."*
+When an image and accompanying text provide conflicting information, VLMs display strong, prompt-dependent modality arbitration—under unprompted direct conditions, they default heavily to text, whereas requesting a neutral description induces dramatic visual capture.
+
 **The Core Scientific Question:**
 
-> *When a vision-language model is presented with mutually contradictory visual and textual premises, does requiring it to explicitly verbalize and explain the contradiction causally alter its decisional arbitration, or does the explanation merely act as a post-hoc rationalization of an entrenched, early-layer modality preference?*
+> *When a vision-language model receives contradictory visual and textual problems, does an explicit conflict-verbalization intervention causally change its subsequent source arbitration compared with a neutral verbalization control?*
 
 ### 6.2 Competing Falsifiable Hypotheses
 
-- **Hypothesis $H_1$ (Deliberative Cognitive Control):** Generating intermediate tokens that explicitly articulate the contradiction dynamically forces cross-modal attention, breaking unimodal attentional capture and causally updating output logits toward the authoritative source.
-  - *Signature:* Net Arbitration Shift $\Delta_{\text{arb}} > 0$ ($p < 0.01$) relative to the length-matched neutral placebo.
-- **Hypothesis $H_0$ (Post-Hoc Rationalization / Attentional Inertia):** Decisional trajectory is locked in early layers by parametric priors. Conflict verbalization generates fluent text without steering the output distribution.
-  - *Signature:* $\Delta_{\text{arb}} \approx 0$; flip rates under conflict verbalization match the length-matched neutral placebo.
+- **Hypothesis $H_1$ (Deliberative Cognitive Control):** Explicit conflict verbalization and reliability assessment causally steer source selection away from default visual capture, breaking unimodal attentional capture and redirecting multi-step problem solving.
+  - *Signature:* Net Visual Reduction $\Delta_{\text{visual}} > 0$ ($p < 0.001$) relative to the length-matched neutral placebo, accompanied by exact-match problem solving inversion.
+- **Hypothesis $H_0$ (Post-Hoc Rationalization / Attentional Inertia):** Source selection is entrenched prior to intermediate reasoning. Conflict verbalization generates fluent text without steering the output distribution.
+  - *Signature:* $\Delta_{\text{visual}} \approx 0$; source-following distributions under conflict verbalization match the length-matched neutral placebo.
 
 ### 6.3 The Primary Literature Anchor & Unoccupied Gap
 
-- **Anchor Paper 1:** *Which Source Wins? Task-Dependent Reliance in VLMs* (`arXiv:2608.17205`, August 2026). The authors evaluated forced-choice reliance across arithmetic and chart tasks. In Section §6 (Limitations), the authors explicitly state:
+- **Anchor Paper 1:** *Which Source Wins? Task-Dependent Reliance in VLMs* (`arXiv:2608.17205`, August 2026). The authors evaluated forced-choice reliance across arithmetic and chart tasks. In Section §5 (Limitations), the authors explicitly state:
   > *"our framework measures forced source arbitration under reduced legibility rather than factual reliability or conflict awareness. Consequently, we do not test whether models detect the contradiction, express uncertainty, or abstain."*
   >
-- **Anchor Paper 2:** *Lanham et al. — Measuring Faithfulness in Chain-of-Thought Reasoning* (`arXiv:2305.04388`). Pioneered rationale prefilling and truncation exclusively in text LLMs. Has never been applied to cross-modal sensory conflict arbitration.
+- **Anchor Paper 2:** *Lanham et al. — Measuring Faithfulness in Chain-of-Thought Reasoning* (`arXiv:2307.13702`). Pioneered rationale prefilling and truncation exclusively in text LLMs. Has never been applied to cross-modal sensory conflict arbitration.
 - **Anchor Paper 3:** *CLASH* (`arXiv:2511.19199`). Evaluated contradiction detection only as an abstention task (*"Cannot answer"*); never tested active resolution or causal arbitration.
 
 ### 6.4 The 4-Arm Factorial Experimental Protocol
 
-To eliminate the trivial confound of additional test-time compute (extra reasoning tokens), all evaluations compare four strictly controlled prompt arms on every sample:
+To eliminate the trivial confound of additional test-time compute (extra reasoning tokens), all evaluations compare four strictly controlled prompt arms on every sample using the frozen production prompts:
 
 1. **Arm 1 (Direct Zero-Shot Baseline):**
-   - *Prompt:* `"Solve the problem presented using the visual and textual evidence. Output format: #### <answer>"`
-   - *Token Budget:* $T \approx 10$ tokens. Establishes native unguided modality bias.
+   - *Literal Prompt:* `"Look at the image and read the text problem below.\n{text_question}\n\nSolve the problem. Conclude with: #### <answer>\n"`
+   - *Token Budget:* 80 tokens. Establishes native unguided modality bias (85.5% Text).
 2. **Arm 2 (Length-Matched Neutral Placebo Control):**
-   - *Prompt:* `"Examine both the image and the text carefully. In exactly two sentences, describe the visual content and state what the text says neutrally without comparing them. Then solve the problem. Conclude with: #### <answer>"`
-   - *Token Budget:* $T \approx 75$ tokens. Controls for extra forward passes and generation budget without contradiction cues.
+   - *Literal Prompt:* `"Look at the image and read the text problem below.\n{text_question}\n\nIn two sentences, neutrally describe what is presented in the image and what is stated in the text without comparing them. Then solve the problem. Conclude with: #### <answer>\n"`
+   - *Token Budget:* 200 tokens. Controls for extra forward passes and descriptive preamble (induces 89.5% Visual Capture).
 3. **Arm 3 (Conflict Verbalization Intervention):**
-   - *Prompt:* `"Examine both the image and the text carefully. In exactly two sentences, determine whether they agree or contradict and explain the contradiction. Then solve the problem. Conclude with: #### <answer>"`
-   - *Token Budget:* $T \approx 75$ tokens. Evaluates active conflict articulation.
+   - *Literal Prompt:* `"Look at the image and read the text problem below.\n{text_question}\n\nIn two sentences, state whether the image and the text agree or contradict each other, and explain which source you consider more reliable. Then solve that problem. Conclude with: #### <answer>\n"`
+   - *Token Budget:* 200 tokens. Directs conflict evaluation and source reliability (breaks visual capture to 25.8% Visual, 58.9% Text, 13.7% Abstain).
 4. **Arm 4 (Lanham-Style Rationale Prefilling):**
-   - Assistant output stream is teacher-prefilled with an explicit condition:
-     - *Condition A (Prefill Contradiction):* `"The image and text contradict each other because... Therefore, the answer is: #### "`
-     - *Condition B (Prefill Agreement - Counterfactual):* `"The image and text agree with each other because... Therefore, the answer is: #### "`
+   - Assistant output stream is teacher-prefilled with an explicit prefix (20 tokens):
+     - *Arm 4a (Prefill Contradiction):* `"The image and text contradict each other because they present different problems. Following the image problem, the answer is: #### "`
+     - *Arm 4b (Prefill Agreement):* `"The image and text describe consistent premises. Following the text problem, the answer is: #### "`
    - Directly measures the causal steering power of intermediate tokens on final logits.
 
 ### 6.5 Datasets, Models, and Metrics
@@ -446,8 +446,9 @@ The researcher actively utilizes three specialized platforms to ensure rigorous,
 
 | Citation Key        | Formal Title                                                                 | Venue / Identifier                | Core Finding & Significance to Thesis                                                                               |
 | :-------------------- | :----------------------------------------------------------------------------- | :---------------------------------- | :-------------------------------------------------------------------------------------------------------------------- |
-| **WhichSourceWins** | *Which Source Wins? Task-Dependent Reliance in Vision-Language Models*       | `arXiv:2608.17205` (Aug 2026)     | Proves task-dependent modality dominance; explicitly leaves conflict awareness and verbalization unstudied in §6.  |
-| **Lanham2023**      | *Measuring Faithfulness in Chain-of-Thought Reasoning*                       | `arXiv:2305.04388` (NeurIPS 2023) | Formalizes rationale prefilling, truncation, and corruption to test whether CoT is causal or post-hoc in LLMs.      |
+| **WhichSourceWins** | *Which Source Wins? Task-Dependent Reliance in Vision-Language Models*       | `arXiv:2608.17205` (Aug 2026)     | Proves task-dependent modality dominance; explicitly leaves conflict awareness and verbalization unstudied in §5.  |
+| **Lanham2023**      | *Measuring Faithfulness in Chain-of-Thought Reasoning*                       | `arXiv:2307.13702` (2023)         | Formalizes rationale prefilling, truncation, and corruption to test whether CoT is causal or post-hoc in LLMs.      |
+| **Turpin2023**      | *Language Models Don't Always Say What They Think: Unfaithful Explanations*  | `arXiv:2305.04388` (NeurIPS 2023) | Demonstrates biased explanations in CoT; CoT rationalizes answer choices without stating true cause.                |
 | **CLASH**           | *CLASH: A Benchmark for Cross-Modal Contradiction Detection*                 | `arXiv:2511.19199` (2025)         | Evaluates contradiction detection exclusively as an abstention task; zero active source arbitration.                |
 | **RHBench**         | *RH-Bench: More Thinking, Less Seeing? Limits of Long Multimodal Reasoning*  | `arXiv:2505.21523` (NeurIPS 2025) | Demonstrates visual attention decay during long CoT, but confounds reasoning with sequence length and RoPE.         |
 | **RememberR1**      | *Remember-R1: Mitigating Long-Context Visual Forgetting in MLLM CoT*         | `arXiv:2608.01314` (Aug 2026)     | Applies RL to prevent visual attention mass decay; treats raw attention as ground truth without dilution controls.  |

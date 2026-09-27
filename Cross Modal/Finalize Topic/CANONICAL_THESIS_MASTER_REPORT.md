@@ -16,7 +16,7 @@
 This report constitutes the complete, immutable scientific record and technical dossier for the thesis entitled:  
 **"Causal Conflict Verbalization and Source Arbitration in Vision-Language Models"**.
 
-Across an exhaustive research arc comprising four candidate audits, two diagnostic pilots, rigorous dataset reverse-engineering, progressive GPU inference optimization, and a full-population empirical census ($N = 1,619$), we have tested whether explicit conflict verbalization causally steers multimodal decision arbitration or merely rationalizes an entrenched visual modality preference.
+Across an exhaustive research arc comprising four candidate audits, two diagnostic pilots, rigorous dataset reverse-engineering, progressive GPU inference optimization, and a full-population empirical census ($N = 1,619$), we have tested whether explicit conflict verbalization causally steers multimodal decision arbitration or merely rationalizes prompt-induced visual capture.
 
 ```
 +---------------------------------------------------------------------------------------------------+
@@ -82,8 +82,8 @@ Before writing a single production script, four competing research candidates we
 1. **Pristine, Explicit Gap:** *Which Source Wins?* (arXiv:2608.17205, August 2026) exhaustively studied modality competition under degradation, but explicitly wrote in Section 6: *"We do not test whether models detect the contradiction, express uncertainty, or abstain."* Similarly, *CLASH* (arXiv:2511.19199) framed contradiction solely as an abstention trigger without measuring decision redirection. Lanham et al. (2023) established CoT faithfulness testing, but solely in text-only LLMs. The multimodal conflict domain remained untouched.
 2. **Turnkey Infrastructure:** `vlm-modality-research/modality-conflict-arbitration-v2` was fully hosted and verified on Hugging Face, containing high-quality math reasoning pairs derived from GSM8K and SVAMP.
 3. **The Symmetrical Value Guarantee:**
-   - *If $\Delta_{\text{arb}} \gg 0$:* Proves that verbalizing conflict causally breaks visual capture and steers reasoning toward alternate evidence, establishing Chain-of-Thought as a faithful computational intervention.
-   - *If $\Delta_{\text{arb}} \approx 0$:* Proves that multimodal Chain-of-Thought is unfaithful post-hoc rationalization, where the model verbalizes conflict but blindly follows its hardwired visual prior.
+   - *If $\Delta_{\text{arb}} \gg 0$:* Demonstrates that verbalizing conflict breaks default visual capture and causally redirects source selection toward alternate evidence.
+   - *If $\Delta_{\text{arb}} \approx 0$:* Demonstrates that multimodal explanation is unfaithful post-hoc commentary, where the model verbalizes conflict without altering its default visual capture state.
    - **Both outcomes represent top-tier, definitive publications.**
 
 ---

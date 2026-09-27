@@ -11,13 +11,15 @@
 
 - **Parent Field:** Multimodal / Vision-Language Learning and Systems (**FROZEN**)
 - **Locked Primary Research Topic:** Causal Conflict Verbalization and Source Arbitration in Vision-Language Models (**FROZEN & EMPIRICALLY CONFIRMED across $N = 1,619$**)
-- **Core Investigation:** Investigating whether explicit conflict verbalization causally steers multimodal decision arbitration or merely rationalizes an entrenched visual modality preference in MLLMs.
+- **Core Investigation:** Investigating whether explicit conflict verbalization causally steers multimodal decision arbitration or merely rationalizes prompt-induced visual capture in MLLMs.
 - **Reference Model:** `Qwen/Qwen2.5-VL-3B-Instruct`
-- **Primary Benchmark:** `vlm-modality-research/modality-conflict-arbitration-v2`
-- **Key Empirical Benchmark Result:**
+- **Primary Benchmark:** `vlm-modality-research/modality-conflict-arbitration-v2` ($N = 1,619$ clean pairs)
+- **Key Empirical Benchmark Results (Prompt-Arbitration Triad):**
+  - Arm 1 (Direct Baseline): 85.55% Text, 13.77% Image, 0.0% Abstain
   - Arm 2 (Placebo Prompt Baseline): 89.50% Visual Capture (1,449 / 1,619)
-  - Arm 3 (Conflict Verbalization): 25.76% Visual Capture (417 / 1,619)
-  - Net Causal Shift ($\Delta_{\text{arb}}$): +63.74% reduction in visual capture ($OR = 24.57$)
+  - Arm 3 (Conflict Verbalization): 25.76% Visual Capture (417 / 1,619), 58.93% Text, 13.65% Abstain
+  - Net Causal Shift ($\Delta_{\text{arb}}$): +63.74% reduction in visual capture ($OR = 24.57, p = 1.20 \times 10^{-215}$)
+  - Exact-Match Cross-Over: Arm 2 (35.6% Img / 4.7% Txt) $\rightarrow$ Arm 3 (11.7% Img / 35.8% Txt)
 
 ---
 
