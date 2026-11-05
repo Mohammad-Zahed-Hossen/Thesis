@@ -1,0 +1,2 @@
+User notified to check the terms at https://developers.openalex.org/ and to always check the license of the papers retrieved by the skill for any restrictions.
+Timestamp: 2026-09-27T11:36:30+06:00
