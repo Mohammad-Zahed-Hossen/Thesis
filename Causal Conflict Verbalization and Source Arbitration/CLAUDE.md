@@ -10,16 +10,18 @@ We test whether forcing a VLM to verbalize a cross-modal contradiction causally 
 ## Current Phase
 
 Topic selection is validated. We have completed extensive **feasibility & pilot testing** (including a large-scale N=1,619 pilot pass) to prove the viability of the harness and hypothesis. 
-**We are NOT at the final experimental conclusion yet.** We are transitioning from pilot validation into structured thesis drafting, refining experimental protocols for the formal benchmark evaluation, and planning next runs.
+**We are NOT at the final experimental conclusion yet.** The v4 harness is in its dev phase, and no confirmatory data exists.
+
+**For current status and next steps, read `Experiment/README.md` first.**
 
 ## Important: How To Treat Files In This Repo
 
 **Every `.md` document in `Docs/` was AI-generated** during preliminary research tracking. They are **not** ground truth and contain working notes, early ideas, or speculative plans. Do NOT treat them as settled fact.
 
 **The actual ground truth is:**
-- `Experiment/production_experiment_harness_v3.py` — the pilot test harness
-- `Experiment/Results/*` — **pilot empirical results** (preliminary evidence establishing viability)
-- `Experiment/statistical_analysis.py` — the statistical evaluation framework
+- `Experiment/results_v4/*.jsonl` and their manifests — **v4 dev runs** (tuning only, not findings)
+- `Experiment/results_v3/full_experiment_results v3.0.json` — **v3 pilot outputs** (exploratory)
+- `Experiment/*.py` — active code; `Experiment/archive/harness_v3/` holds the v3 harness
 
 When in doubt, **read the code and data, not the narrative documents.**
 
@@ -29,13 +31,18 @@ These pilot figures from `Qwen/Qwen2.5-VL-3B-Instruct` demonstrate that the expe
 - **Pilot Setup:** Tested on `vlm-modality-research/modality-conflict-arbitration-v2` pilot subset
 - **Observed Signal:** Strong contrast between length-matched placebo (~89.5% visual capture) and conflict verbalization (~25.8% visual capture), with noticeable arithmetic cross-over.
 - **Role in Project:** Serves as empirical justification that the research question is measurable and viable, justifying the full planned experimental study.
+- **Known limits:** This contrasts two instructions, not verbalization itself. The placebo isn't inert, and the run used `repetition_penalty` 1.05. See `Experiment/results_v3/README.md` before repeating these figures.
 
 ## Directory Layout
 
 ```
-├── Experiment/          ← CODE + DATA (ground truth)
-│   ├── *.py, *.ipynb    ← Experiment scripts and notebooks
-│   └── Results/         ← v3.0 canonical outputs (JSON, CSV, stats, LaTeX)
+├── Experiment/          ← CODE + DATA (ground truth); start at its README.md
+│   ├── *.py, tests/     ← Active v4 code and tests
+│   ├── RUNBOOK_v4.md    ← Exact commands, in order
+│   ├── results_v4/      ← v4 runs and dev analysis
+│   ├── results_v3/      ← v3 pilot outputs and re-analysis
+│   ├── coding_v3/       ← Human-coding sheets
+│   └── archive/         ← v3 harness and early pilots
 ├── Docs/                ← AI-GENERATED TRACKING (reference only, not gospel)
 │   ├── *.md             ← Topic spec, master report, roadmap
 │   ├── Context/         ← Historical context tracking

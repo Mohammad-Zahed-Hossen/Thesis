@@ -1,65 +1,41 @@
 # Causal Conflict Verbalization and Source Arbitration in Vision-Language Models
 
-> **Principal Researcher:** Mohammad Zahed Hossen (Final-Year BSc CSE, Bangladesh)  
-> **Status:** Topic frozen, full-population experiment complete (N=1,619), thesis writing in progress  
-> **Model:** `Qwen/Qwen2.5-VL-3B-Instruct`  
+> **Researcher:** Mohammad Zahed Hossen (Final-Year BSc CSE, Bangladesh)
+> **Status:** Exploratory v3 pilot done; v4 dev phase in progress; no confirmatory data; thesis not started
+> **Model:** `Qwen/Qwen2.5-VL-3B-Instruct`
 > **Dataset:** `vlm-modality-research/modality-conflict-arbitration-v2`
 
----
+**For current state and next steps, read [Experiment/README.md](Experiment/README.md).**
 
-## What This Research Investigates
+## The question
 
-When a VLM receives contradictory visual and textual inputs, does prompting it to explicitly verbalize the contradiction **causally change** which modality it follows? Or is the verbalization just a post-hoc rationalization for an already-entrenched bias?
+When a VLM gets conflicting image and text inputs, does stating the conflict causally change which source it follows? Or does the statement merely rationalize a choice made anyway?
 
-### Core Finding
+## Evidence so far
 
-Conflict verbalization reduced visual capture from **89.50%** (placebo) to **25.76%** (intervention), a net shift of **+63.74 percentage points** (OR=24.57, p<10⁻²¹⁵). This was confirmed by an exact-match mathematical cross-over.
+**Exploratory only.** Details and caveats are in [Experiment/results_v3/README.md](Experiment/results_v3/README.md) and [Experiment/results_v4/README.md](Experiment/results_v4/README.md).
 
----
+- **The v3 instruction contrast is large.** Answers matching the image problem fall from 35.7% to 11.8%, and answers matching the text problem rise from 4.2% to 36.1% (N = 1,600 with distinct answers).
+- **That doesn't show verbalization causes it.** v3 randomized the instruction only. The v4 transplant is designed to separate the two, and its first dev run was invalid.
+- **The neutral placebo in v3 isn't inert.** Direct prompting leans toward the text, so "reversing visual capture" isn't supported.
+- **Dev data suggest `repetition_penalty` matters.** v3 ran at the model's default of 1.05, and this appears to raise image answers and abstention labels. This still needs confirmatory testing.
 
-## Repository Structure
+## Repository
 
 ```
-├── Experiment/              Code + data (ground truth)
-│   ├── production_experiment_harness_v3.py    Full census harness
-│   ├── statistical_analysis.py                Hypothesis testing
-│   ├── prefreeze_pilot.py                     Pilot v1
-│   ├── prefreeze_pilot_v2.py                  Pilot v2
-│   ├── prefreeze_pilot.ipynb                  Colab notebook
-│   └── Results/
-│       ├── full_experiment_results v3.0.json  Item-level data (5.3 MB)
-│       ├── experiment_checkpoint v3.0.csv     Checkpoint data
-│       ├── statistical_report v3.0.md         Statistical outputs
-│       └── thesis_contingency_table v3.0.tex  LaTeX table
-│
-├── Docs/                    AI-generated tracking documents (reference only)
-│   ├── Canonical_Thesis_Topic_Specification (Locked).md
-│   ├── CANONICAL_THESIS_MASTER_REPORT.md
-│   ├── CANONICAL_THESIS_PIPELINE_ROADMAP.md
-│   ├── Context/             Historical project context
-│   ├── Decision_Audits/     Topic selection audit trail
-│   └── Parked_Proposals/    Deprecated proposal specifications
-│
-├── Thesis/                  Thesis chapters (in progress)
-│
-├── Archive/                 Parked explorations
-│   ├── Bengali VLM/         Cultural grounding (deprecated)
-│   ├── Medical Imaging & FL/ ISIC/FeTS (parked)
-│   ├── Multimodal Agent/    Active perception (parked)
-│   ├── VLM/                 Early VLM exploration
-│   ├── Paper/               Reference papers
-│   ├── Research_Playbook/   Methodology protocols
-│   └── Experiment_History/  Older experiment versions (v1, v2)
-│
-├── CLAUDE.md                Claude directives
-├── AGENTS.md                Universal agent instructions
-└── .agents/                 Antigravity workspace config
+├── Experiment/     Code and data; start at its README
+├── Thesis/         Thesis chapters; empty so far
+├── Docs/           AI-generated tracking; reference only, partly stale
+├── Archive/        Parked explorations (Bengali VLM, medical imaging, etc.)
+├── CLAUDE.md       Claude directives
+├── AGENTS.md       Instructions for other agents
+└── .agents/        Antigravity configuration
 ```
 
-## Hardware Constraints
+## Compute
 
-| Component | Spec | Usage |
-|:----------|:-----|:------|
-| Local | AMD Ryzen 5 5600G, 8 GB RAM, no CUDA | Code editing, docs, analysis |
-| GPU | Google Colab Pro (T4/V100, 16 GB VRAM) | All inference and experiments |
-| Model | ≤3B params, FP16/bfloat16 | Inference-first, no pretraining |
+| Component | Spec | Use |
+|---|---|---|
+| Local | AMD Ryzen 5 5600G, 8 GB RAM, no CUDA | Editing, tests, analysis |
+| GPU | Google Colab Pro (T4/V100) | All model runs |
+| Model | Up to 3B parameters | Inference only |

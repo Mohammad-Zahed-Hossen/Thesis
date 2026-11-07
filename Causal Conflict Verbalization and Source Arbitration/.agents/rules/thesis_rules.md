@@ -7,7 +7,7 @@
 - **Do not reopen** parked fields (Medical Imaging, Federated Learning, Bengali VQA) without new primary evidence.
 
 ## 2. File Trust Hierarchy
-- **Ground truth:** `Experiment/*.py` and `Experiment/Results/*` — actual code and raw data.
+- **Ground truth:** `Experiment/*.py`, `Experiment/results_v4/*` and `Experiment/results_v3/*` — actual code and raw data. Start at `Experiment/README.md`.
 - **Reference only:** `Docs/*.md` — AI-generated tracking documents, not settled facts.
 - **When Docs/ contradicts code/data, the code/data wins.**
 

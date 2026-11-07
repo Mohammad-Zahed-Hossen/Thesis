@@ -10,7 +10,7 @@
 ## 1. Project Overview
 
 - **Parent Field:** Multimodal / Vision-Language Learning and Systems (**FROZEN**)
-- **Locked Research Topic:** Causal Conflict Verbalization and Source Arbitration in VLMs (**FROZEN & EMPIRICALLY CONFIRMED, N=1,619**)
+- **Locked Research Topic:** Causal Conflict Verbalization and Source Arbitration in VLMs (**FROZEN; exploratory pilot only, N=1,619; not confirmed**)
 - **Core Question:** Does explicit conflict verbalization causally steer multimodal decision arbitration, or merely rationalize prompt-induced visual capture?
 - **Reference Model:** `Qwen/Qwen2.5-VL-3B-Instruct`
 - **Primary Benchmark:** `vlm-modality-research/modality-conflict-arbitration-v2`
@@ -30,8 +30,9 @@
 
 | Location | Trust Level | What It Contains |
 |:---------|:-----------|:-----------------|
-| `Experiment/*.py` | **Ground truth** | Production code that executed the experiments |
-| `Experiment/Results/` | **Ground truth** | Raw JSON/CSV data and statistical outputs |
+| `Experiment/*.py` | **Ground truth** | Active v4 code; start at `Experiment/README.md` |
+| `Experiment/results_v4/`, `Experiment/results_v3/` | **Ground truth** | Run outputs and analysis; each has a README |
+| `Experiment/archive/` | **Historical** | v3 harness and early pilots |
 | `Docs/` | **Reference only** | AI-generated narrative, tracking, and decision logs |
 | `Archive/` | **Historical** | Parked explorations, not active |
 
@@ -61,8 +62,12 @@
 
 ```
 ├── Experiment/          ← CODE + DATA (ground truth)
-│   ├── *.py, *.ipynb    ← Scripts and notebooks
-│   └── Results/         ← v3.0 canonical outputs
+│   ├── README.md        ← Current status; read first
+│   ├── *.py, tests/     ← Active v4 code and tests
+│   ├── results_v4/      ← v4 runs and dev analysis
+│   ├── results_v3/      ← v3 pilot outputs and re-analysis
+│   ├── coding_v3/       ← Human-coding sheets
+│   └── archive/         ← v3 harness and early pilots
 ├── Docs/                ← AI-generated tracking (reference only)
 │   ├── Context/         ← Historical context
 │   ├── Decision_Audits/ ← Topic selection audits

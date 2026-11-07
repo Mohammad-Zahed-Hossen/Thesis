@@ -1,25 +1,24 @@
 #!/usr/bin/env python3
-"""Statistical Hypothesis Testing Suite for Cross-Modal Conflict Verbalization Thesis.
+"""Paired statistics for the v3 pilot results. Standard library only.
 
-Computes:
-1. Arm 2 (Placebo) vs Arm 3 (Conflict Verbalization) Paired & Unpaired Significance:
-   - McNemar's Test (within-item paired transition test)
-   - Pearson's Chi-Squared Test with Yates' continuity correction
-   - Fisher's Exact Test (exact two-sided p-value + Odds Ratio with 95% CI)
-2. Standardized Effect Sizes:
-   - Net Arbitration Shift / Risk Difference (Delta_arb)
-   - Relative Risk / Risk Ratio (RR)
-   - Odds Ratio (OR)
-   - Cohen's h (standardized proportion difference effect size)
-3. 4x4 State Migration Matrix (from Arm 2 choice to Arm 3 choice)
-4. Arm 4 Causal Rationale Mediation Analysis (Arm 4a vs Arm 4b)
-5. Exportable Thesis-Ready Outputs:
-   - Terminal summary
-   - Markdown analysis report (statistical_report.md)
-   - Publication-ready LaTeX table (thesis_contingency_table.tex)
+Rewritten after the 2026-11-06 audit. What changed and why:
+
+  * Removed Fisher and Pearson tests. They assume independent observations, but every
+    item appears in both arms.
+  * Removed the scipy branch. The fallback had an absolute 1e-12 tolerance that returned
+    p = 3.81e-12 where the exact value is about 1e-322, so the reported p depended on
+    whether scipy was installed. All p-values now use exact integer arithmetic.
+  * Report p-values as log10, because they underflow a float.
+  * Removed fixed verdict strings ("causally", "Very Large", "p < 0.0001"). The report
+    now prints only numbers computed from the data.
+  * Intervals resample problems, because each problem appears in two items.
+
+The labels analysed here are the stored v3 labels. They are unvalidated heuristics; see
+`reanalyze_v3.py` for re-scoring. None of these tests can separate the effect of the
+instruction from the effect of the verbalization.
 
 Usage:
-    python statistical_analysis.py --results_file "Experiment_Result/full_experiment_results.json"
+    python statistical_analysis.py --results_file "results_v3/full_experiment_results v3.0.json" --output_dir results_v3/stats_v3_paired
 """
 from __future__ import annotations
 
@@ -27,417 +26,320 @@ import argparse
 import json
 import math
 import os
+import random
 import sys
 from collections import Counter
-from dataclasses import dataclass
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Sequence, Tuple
+
+ARMS = [
+    "arm1_direct",
+    "arm2_placebo",
+    "arm3_conflict",
+    "arm4_prefill_contradict",
+    "arm4_prefill_agree",
+]
+LABELED_ARMS = ARMS[:3]
+STATES = ["follows_image_problem", "follows_text_problem", "abstains", "ambiguous"]
 
 
-# ─── Self-Contained Statistical Engine ──────────────────────────────────────
-
-def norm_cdf(x: float) -> float:
-    """Standard normal cumulative distribution function using math.erf."""
-    return 0.5 * (1.0 + math.erf(x / math.sqrt(2.0)))
+# ─── Exact tests ─────────────────────────────────────────────────────────────
 
 
-def chi2_pvalue_1df(chi2_val: float) -> float:
-    """Exact p-value for Chi-square distribution with df=1: P(X >= chi2) = erfc(sqrt(chi2/2))."""
-    if chi2_val <= 0.0:
-        return 1.0
-    return math.erfc(math.sqrt(chi2_val / 2.0))
+def log10_ratio(numerator: int, denominator: int) -> float:
+    """log10(numerator / denominator) for arbitrarily large positive integers."""
+    if numerator <= 0:
+        return -math.inf
+    return math.log10(numerator) - math.log10(denominator)
 
 
-def fisher_exact_2x2(table: List[List[int]]) -> Tuple[float, float, Tuple[float, float]]:
-    """Calculates exact two-sided Fisher's test, Odds Ratio, and 95% Confidence Interval.
-    table: [[a, b], [c, d]]
+def mcnemar_exact_log10p(b: int, c: int) -> float:
+    """Two-sided exact McNemar test as log10(p), capped at p = 1.
+
+    Under H0 the discordant pairs split as Binomial(b + c, 1/2).
     """
-    try:
-        import scipy.stats as sp_stats
-        res = sp_stats.fisher_exact(table)
-        odds_ratio = float(res.statistic)
-        p_val = float(res.pvalue)
-    except Exception:
-        # Pure Python exact hypergeometric implementation
-        a, b = table[0][0], table[0][1]
-        c, d = table[1][0], table[1][1]
-        r1, r2 = a + b, c + d
-        c1, c2 = a + c, b + d
-        n = r1 + r2
-
-        def hypergeom_pmf(k: int) -> float:
-            if k < max(0, c1 - r2) or k > min(r1, c1):
-                return 0.0
-            return (math.comb(r1, k) * math.comb(r2, c1 - k)) / math.comb(n, c1)
-
-        p_obs = hypergeom_pmf(a)
-        min_k = max(0, c1 - r2)
-        max_k = min(r1, c1)
-        p_val = sum(hypergeom_pmf(k) for k in range(min_k, max_k + 1) if hypergeom_pmf(k) <= p_obs + 1e-12)
-        p_val = min(1.0, max(0.0, p_val))
-
-        # Odds Ratio
-        if b * c == 0:
-            odds_ratio = float("inf") if a * d > 0 else 1.0
-        else:
-            odds_ratio = (a * d) / (b * c)
-
-    # Calculate 95% Confidence Interval for Odds Ratio (Woolf's method with Haldane-Anscombe correction)
-    a, b = table[0][0], table[0][1]
-    c, d = table[1][0], table[1][1]
-    a_c = a + 0.5 if (a == 0 or b == 0 or c == 0 or d == 0) else a
-    b_c = b + 0.5 if (a == 0 or b == 0 or c == 0 or d == 0) else b
-    c_c = c + 0.5 if (a == 0 or b == 0 or c == 0 or d == 0) else c
-    d_c = d + 0.5 if (a == 0 or b == 0 or c == 0 or d == 0) else d
-
-    log_or = math.log((a_c * d_c) / (b_c * c_c))
-    se_log_or = math.sqrt(1.0 / a_c + 1.0 / b_c + 1.0 / c_c + 1.0 / d_c)
-    ci_lower = math.exp(log_or - 1.95996 * se_log_or)
-    ci_upper = math.exp(log_or + 1.95996 * se_log_or)
-
-    return odds_ratio, p_val, (ci_lower, ci_upper)
+    n = b + c
+    if n == 0:
+        return 0.0
+    tail = sum(math.comb(n, k) for k in range(min(b, c) + 1))
+    return min(0.0, log10_ratio(2 * tail, 2**n))
 
 
-def mcnemar_test_2x2(table: List[List[int]]) -> Tuple[float, float, float, float]:
-    """Calculates McNemar's test for paired nominal data.
-    table: [[both_yes, yes_no], [no_yes, both_no]]
-    Returns (chi2_uncorrected, p_uncorrected, chi2_corrected, p_corrected)
-    """
-    b = table[0][1]  # Discordant: Yes in Condition 1, No in Condition 2
-    c = table[1][0]  # Discordant: No in Condition 1, Yes in Condition 2
+def format_log10p(log10p: float) -> str:
+    """Readable p-value that does not underflow."""
+    if log10p == 0.0:
+        return "1"
+    if log10p > -3:
+        return f"{10 ** log10p:.4f}"
+    exponent = math.floor(log10p)
+    return f"{10 ** (log10p - exponent):.2f}e{exponent}"
 
-    if b + c == 0:
-        return 0.0, 1.0, 0.0, 1.0
 
-    chi2_uncorr = ((b - c) ** 2) / (b + c)
-    p_uncorr = chi2_pvalue_1df(chi2_uncorr)
-
-    # Edwards continuity correction
-    chi2_corr = (max(0.0, abs(b - c) - 1.0) ** 2) / (b + c)
-    p_corr = chi2_pvalue_1df(chi2_corr)
-
-    return chi2_uncorr, p_uncorr, chi2_corr, p_corr
+def paired_odds_ratio(b: int, c: int) -> Tuple[float, float, float]:
+    """b/c with a 95% Wald interval on the log scale; 0.5 added if a cell is empty."""
+    if b == 0 or c == 0:
+        b, c = b + 0.5, c + 0.5
+    ratio = b / c
+    se = math.sqrt(1 / b + 1 / c)
+    return ratio, math.exp(math.log(ratio) - 1.96 * se), math.exp(math.log(ratio) + 1.96 * se)
 
 
 def cohens_h(p1: float, p2: float) -> float:
-    """Calculates Cohen's h effect size for the difference between two proportions.
-    h = 2 * (arcsin(sqrt(p1)) - arcsin(sqrt(p2)))
-    Convention: 0.2 = small, 0.5 = medium, 0.8 = large.
+    return 2.0 * (math.asin(math.sqrt(p1)) - math.asin(math.sqrt(p2)))
+
+
+def holm_adjust_log10(log10ps: Sequence[float]) -> List[float]:
+    """Holm step-down adjustment, on log10 p-values, returned in input order."""
+    m = len(log10ps)
+    order = sorted(range(m), key=lambda i: log10ps[i])
+    adjusted = [0.0] * m
+    running = -math.inf
+    for rank, i in enumerate(order):
+        value = min(0.0, log10ps[i] + math.log10(m - rank))
+        running = max(running, value)
+        adjusted[i] = running
+    return adjusted
+
+
+# ─── Dependence-aware interval ───────────────────────────────────────────────
+
+
+def pigeonhole_ci(
+    values: Sequence[float],
+    cluster_a: Sequence[str],
+    cluster_b: Sequence[str],
+    reps: int = 2000,
+    seed: int = 20261106,
+) -> Tuple[float, float]:
+    """95% percentile interval for a mean under two-way clustering.
+
+    Each replicate draws multinomial weights over problems. An item's weight is the
+    product of the weights of its image problem and its text problem.
     """
-    p1_c = min(max(p1, 0.0), 1.0)
-    p2_c = min(max(p2, 0.0), 1.0)
-    phi1 = 2.0 * math.asin(math.sqrt(p1_c))
-    phi2 = 2.0 * math.asin(math.sqrt(p2_c))
-    return phi1 - phi2
+    keys = sorted(set(cluster_a) | set(cluster_b))
+    index = {k: i for i, k in enumerate(keys)}
+    ia = [index[k] for k in cluster_a]
+    ib = [index[k] for k in cluster_b]
+    rng = random.Random(seed)
+    k = len(keys)
+    estimates = []
+    for _ in range(reps):
+        w = [0] * k
+        for j in rng.choices(range(k), k=k):
+            w[j] += 1
+        num = den = 0.0
+        for v, a, b in zip(values, ia, ib):
+            weight = w[a] * w[b]
+            if weight:
+                num += weight * v
+                den += weight
+        if den:
+            estimates.append(num / den)
+    estimates.sort()
+    return estimates[int(0.025 * len(estimates))], estimates[int(0.975 * len(estimates))]
 
 
-# ─── Comprehensive Experiment Analyzer ──────────────────────────────────────
+# ─── Report ──────────────────────────────────────────────────────────────────
 
-def analyze_experiment(data: List[Dict[str, Any]], output_dir: str):
-    N = len(data)
-    print(f"\n=================================================================")
-    print(f"   STATISTICAL HYPOTHESIS TESTING SUITE: AUDIT OF {N} SAMPLES")
-    print(f"=================================================================\n")
 
-    # 1. Arm-level Descriptive Statistics
-    arm_names = ["arm1_direct", "arm2_placebo", "arm3_conflict", "arm4_prefill_contradict", "arm4_prefill_agree"]
-    arm_labels = {
-        "arm1_direct": "Arm 1: Direct Zero-Shot",
-        "arm2_placebo": "Arm 2: Neutral Placebo",
-        "arm3_conflict": "Arm 3: Conflict Verbalization",
-        "arm4_prefill_contradict": "Arm 4a: Prefill Contradiction",
-        "arm4_prefill_agree": "Arm 4b: Prefill Agreement",
-    }
+def validate(data: Any) -> None:
+    if not isinstance(data, list) or not data:
+        raise ValueError("results file must contain a non-empty list of items")
+    for item in data:
+        missing = [a for a in ARMS if a not in item.get("arms", {})]
+        if missing:
+            raise ValueError(f"item {item.get('id')} is missing arms {missing}")
 
-    arm_stats = {}
-    for arm in arm_names:
-        choices = Counter()
-        exact_img, exact_txt = 0, 0
-        ans_present, truncations = 0, 0
-        token_lengths = []
 
-        for item in data:
-            arm_data = item["arms"][arm]
-            if "choice" in arm_data:
-                choices[arm_data["choice"]] += 1
-            ans = arm_data.get("ans")
-            if ans is not None and ans != "":
-                ans_present += 1
-                if ans == item["image_answer"]:
-                    exact_img += 1
-                if ans == item["text_answer"]:
-                    exact_txt += 1
-            tok = arm_data.get("tokens", 0)
-            token_lengths.append(tok)
-            if arm_data.get("truncated", False):
-                truncations += 1
+def analyze_experiment(data: List[Dict[str, Any]], reps: int = 2000) -> Dict[str, Any]:
+    validate(data)
+    n = len(data)
+    choice = {a: [d["arms"][a]["choice"] for d in data] for a in LABELED_ARMS}
+    results: Dict[str, Any] = {"n": n, "arms": {}}
 
-        avg_tok = sum(token_lengths) / max(len(token_lengths), 1)
-        arm_stats[arm] = {
-            "choices": choices,
-            "exact_img": exact_img,
-            "exact_txt": exact_txt,
-            "ans_present": ans_present,
-            "truncations": truncations,
-            "avg_tokens": avg_tok,
-            "max_tokens": max(token_lengths) if token_lengths else 0,
+    for arm in ARMS:
+        rows = [d["arms"][arm] for d in data]
+        results["arms"][arm] = {
+            "choices": dict(Counter(r.get("choice", "n/a") for r in rows)),
+            "exact_image": sum(r["ans"] == d["image_answer"] for r, d in zip(rows, data)),
+            "exact_text": sum(r["ans"] == d["text_answer"] for r, d in zip(rows, data)),
+            "at_token_cap": sum(bool(r.get("truncated")) for r in rows),
+            "tokens_mean": sum(r["tokens"] for r in rows) / n,
         }
 
-    # Print Descriptive Table
-    print(f"{'Arm':<32} | {'Visual %':<9} | {'Text %':<9} | {'Abstain %':<9} | {'Ambiguous':<9} | {'Exact Img':<9} | {'Exact Txt':<9} | {'Truncated':<9}")
-    print("-" * 115)
-    for arm in ["arm1_direct", "arm2_placebo", "arm3_conflict"]:
-        st = arm_stats[arm]
-        ch = st["choices"]
-        v_pct = (ch.get("follows_image_problem", 0) / N) * 100
-        t_pct = (ch.get("follows_text_problem", 0) / N) * 100
-        a_pct = (ch.get("abstains", 0) / N) * 100
-        m_pct = (ch.get("ambiguous", 0) / N) * 100
-        ei_pct = (st["exact_img"] / N) * 100
-        et_pct = (st["exact_txt"] / N) * 100
-        tr_pct = (st["truncations"] / N) * 100
-        print(f"{arm_labels[arm]:<32} | {v_pct:>8.1f}% | {t_pct:>8.1f}% | {a_pct:>8.1f}% | {m_pct:>8.1f}% | {ei_pct:>8.1f}% | {et_pct:>8.1f}% | {tr_pct:>8.1f}%")
-
-    # 2. Central Hypothesis: Arm 2 (Placebo) vs Arm 3 (Conflict Verbalization)
-    # Define binary event: Visual Capture (follows_image_problem) vs Non-Visual (follows_text, abstains, ambiguous)
-    # Build 2x2 Paired Contingency Table for McNemar's Test:
-    #             Arm 3: Visual    Arm 3: Non-Visual
-    # Arm 2: Vis        a                 b
-    # Arm 2: Non        c                 d
-    a_vis_vis = 0
-    b_vis_non = 0
-    c_non_vis = 0
-    d_non_non = 0
-
-    # 4x4 State Migration Matrix
-    states = ["follows_image_problem", "follows_text_problem", "abstains", "ambiguous"]
-    migration_matrix = {s1: {s2: 0 for s2 in states} for s1 in states}
-
-    for item in data:
-        c2 = item["arms"]["arm2_placebo"].get("choice", "ambiguous")
-        c3 = item["arms"]["arm3_conflict"].get("choice", "ambiguous")
-        if c2 in migration_matrix and c3 in migration_matrix[c2]:
-            migration_matrix[c2][c3] += 1
-
-        is_vis_2 = (c2 == "follows_image_problem")
-        is_vis_3 = (c3 == "follows_image_problem")
-
-        if is_vis_2 and is_vis_3:
-            a_vis_vis += 1
-        elif is_vis_2 and not is_vis_3:
-            b_vis_non += 1
-        elif not is_vis_2 and is_vis_3:
-            c_non_vis += 1
-        else:
-            d_non_non += 1
-
-    paired_table = [[a_vis_vis, b_vis_non], [c_non_vis, d_non_non]]
-
-    # McNemar's Test
-    mcn_chi2, mcn_p, mcn_chi2_c, mcn_p_c = mcnemar_test_2x2(paired_table)
-
-    # Aggregate Independent 2x2 Table:
-    # Arm 2 vs Arm 3 on Visual Capture vs Non-Visual
-    arm2_vis = a_vis_vis + b_vis_non
-    arm2_non = c_non_vis + d_non_non
-    arm3_vis = a_vis_vis + c_non_vis
-    arm3_non = b_vis_non + d_non_non
-
-    indep_table = [[arm2_vis, arm2_non], [arm3_vis, arm3_non]]
-    odds_ratio, fisher_p, (ci_low, ci_high) = fisher_exact_2x2(indep_table)
-
-    # Pearson Chi-Square on Independent 2x2
-    # Observed: [[arm2_vis, arm2_non], [arm3_vis, arm3_non]]
-    tot_obs = 2 * N
-    r1, r2 = N, N
-    col1 = arm2_vis + arm3_vis
-    col2 = arm2_non + arm3_non
-    e_11 = (r1 * col1) / tot_obs
-    e_12 = (r1 * col2) / tot_obs
-    e_21 = (r2 * col1) / tot_obs
-    e_22 = (r2 * col2) / tot_obs
-    pearson_chi2 = (
-        ((arm2_vis - e_11) ** 2) / e_11 +
-        ((arm2_non - e_12) ** 2) / e_12 +
-        ((arm3_vis - e_21) ** 2) / e_21 +
-        ((arm3_non - e_22) ** 2) / e_22
+    v2 = [c == "follows_image_problem" for c in choice["arm2_placebo"]]
+    v3 = [c == "follows_image_problem" for c in choice["arm3_conflict"]]
+    a = sum(x and y for x, y in zip(v2, v3))
+    b = sum(x and not y for x, y in zip(v2, v3))
+    c = sum(y and not x for x, y in zip(v2, v3))
+    d_ = n - a - b - c
+    p2, p3 = (a + b) / n, (a + c) / n
+    ci = pigeonhole_ci(
+        [float(x) - float(y) for x, y in zip(v2, v3)],
+        [d["image_question"] for d in data],
+        [d["text_question"] for d in data],
+        reps=reps,
     )
-    pearson_p = chi2_pvalue_1df(pearson_chi2)
+    ratio, or_low, or_high = paired_odds_ratio(b, c)
+    results["primary"] = {
+        "table": {"both_visual": a, "arm2_only": b, "arm3_only": c, "neither": d_},
+        "arm2_visual": a + b,
+        "arm3_visual": a + c,
+        "difference_arm2_minus_arm3": p2 - p3,
+        "difference_ci95_problem_clustered": ci,
+        "mcnemar_exact_log10p": mcnemar_exact_log10p(b, c),
+        "paired_odds_ratio": ratio,
+        "paired_odds_ratio_ci95": (or_low, or_high),
+        "cohens_h": cohens_h(p2, p3),
+    }
 
-    # Effect Sizes
-    p_vis_arm2 = arm2_vis / N
-    p_vis_arm3 = arm3_vis / N
-    risk_diff = p_vis_arm2 - p_vis_arm3
-    relative_risk = p_vis_arm3 / max(p_vis_arm2, 1e-12)
-    h_effect = cohens_h(p_vis_arm2, p_vis_arm3)
+    results["migration"] = {
+        s1: {
+            s2: sum(x == s1 and y == s2 for x, y in zip(choice["arm2_placebo"], choice["arm3_conflict"]))
+            for s2 in STATES
+        }
+        for s1 in STATES
+    }
 
-    print(f"\n=================================================================")
-    print(f"   PRIMARY SCIENTIFIC FINDING: VISUAL CAPTURE ARBITRATION SHIFT")
-    print(f"=================================================================")
-    print(f"Arm 2 (Placebo Baseline Visual Capture):      {arm2_vis}/{N} ({p_vis_arm2*100:.2f}%)")
-    print(f"Arm 3 (Conflict Verbalization Visual Capture): {arm3_vis}/{N} ({p_vis_arm3*100:.2f}%)")
-    print(f"Net Arbitration Shift (Delta_arb):             {risk_diff*100:+.2f} percentage points (reduction)")
-    print(f"Relative Risk (RR):                            {relative_risk:.4f}")
-    print(f"Odds Ratio (OR):                               {odds_ratio:.4f} [95% CI: {ci_low:.4f}, {ci_high:.4f}]")
-    print(f"Cohen's h:                                     {h_effect:.4f} (Benchmark: 0.2=Small, 0.5=Medium, 0.8=Large)")
+    a4a = [d["arms"]["arm4_prefill_contradict"]["ans"] for d in data]
+    a4b = [d["arms"]["arm4_prefill_agree"]["ans"] for d in data]
+    ta = [x == d["text_answer"] for x, d in zip(a4a, data)]
+    tb = [x == d["text_answer"] for x, d in zip(a4b, data)]
+    ia = [x == d["image_answer"] for x, d in zip(a4a, data)]
+    ib = [x == d["image_answer"] for x, d in zip(a4b, data)]
+    tb_only = sum(y and not x for x, y in zip(ta, tb))
+    ta_only = sum(x and not y for x, y in zip(ta, tb))
+    ia_only = sum(x and not y for x, y in zip(ia, ib))
+    ib_only = sum(y and not x for x, y in zip(ia, ib))
+    results["arm4"] = {
+        "identical_answers": sum(x == y and x is not None for x, y in zip(a4a, a4b)),
+        "text_match_4b_only": tb_only,
+        "text_match_4a_only": ta_only,
+        "text_mcnemar_exact_log10p": mcnemar_exact_log10p(tb_only, ta_only),
+        "image_match_4a_only": ia_only,
+        "image_match_4b_only": ib_only,
+        "image_mcnemar_exact_log10p": mcnemar_exact_log10p(ia_only, ib_only),
+    }
+    return results
 
-    print(f"\n--- Statistical Significance Tests ---")
-    print(f"McNemar's Paired Test (Corrected):  chi2 = {mcn_chi2_c:.4f},  p = {mcn_p_c:.4e} {'(p < 0.001 ***)' if mcn_p_c < 0.001 else ''}")
-    print(f"McNemar's Paired Test (Standard):   chi2 = {mcn_chi2:.4f},    p = {mcn_p:.4e}")
-    print(f"Pearson Chi-Square Test (df=1):     chi2 = {pearson_chi2:.4f}, p = {pearson_p:.4e}")
-    print(f"Fisher's Exact Test (2-sided):      p = {fisher_p:.4e}")
 
-    # 3. 4x4 State Migration Table
-    print(f"\n=================================================================")
-    print(f"   STATE MIGRATION MATRIX: Arm 2 (Rows) -> Arm 3 (Columns)")
-    print(f"=================================================================")
-    header_states = ["Image", "Text", "Abstain", "Ambiguous"]
-    print(f"{'From (Arm 2) \\ To (Arm 3)':<25} | {'Image':<10} | {'Text':<10} | {'Abstain':<10} | {'Ambiguous':<10} | {'Total':<8}")
-    print("-" * 85)
-    for s1, label in zip(states, header_states):
-        row_vals = [migration_matrix[s1][s2] for s2 in states]
-        tot_row = sum(row_vals)
-        print(f"{label:<25} | {row_vals[0]:>9} | {row_vals[1]:>9} | {row_vals[2]:>9} | {row_vals[3]:>9} | {tot_row:>8}")
-
-    # 4. Arm 4 Causal Rationale Mediation Analysis
-    a4a_ans = [item["arms"]["arm4_prefill_contradict"].get("ans") for item in data]
-    a4b_ans = [item["arms"]["arm4_prefill_agree"].get("ans") for item in data]
-    same_answers = sum(1 for a, b in zip(a4a_ans, a4b_ans) if a == b and a is not None)
-    identical_pct = (same_answers / N) * 100
-
-    a4a_ei = arm_stats["arm4_prefill_contradict"]["exact_img"]
-    a4a_et = arm_stats["arm4_prefill_contradict"]["exact_txt"]
-    a4b_ei = arm_stats["arm4_prefill_agree"]["exact_img"]
-    a4b_et = arm_stats["arm4_prefill_agree"]["exact_txt"]
-
-    print(f"\n=================================================================")
-    print(f"   ARM 4 CAUSAL RATIONALE PREFILLING ANALYSIS")
-    print(f"=================================================================")
-    print(f"Items with Identical Answer across 4a & 4b:  {same_answers}/{N} ({identical_pct:.1f}%)")
-    print(f"Arm 4a ('Contradict -> Follow Image'): Match Image = {a4a_ei} ({a4a_ei/N*100:.1f}%), Match Text = {a4a_et} ({a4a_et/N*100:.1f}%)")
-    print(f"Arm 4b ('Agree -> Follow Text'):       Match Image = {a4b_ei} ({a4b_ei/N*100:.1f}%), Match Text = {a4b_et} ({a4b_et/N*100:.1f}%)")
-    steering_delta = (a4b_et - a4a_et) / N
-    print(f"Causal Text Steering Gain (Arm 4b - 4a):      {steering_delta*100:+.2f} percentage points")
-
-    # 5. Export Markdown & LaTeX Artifacts
-    md_report_path = os.path.join(output_dir, "statistical_report.md")
-    tex_table_path = os.path.join(output_dir, "thesis_contingency_table.tex")
-
-    # Generate Markdown Report
-    abstain_from_vis = migration_matrix['follows_image_problem']['abstains']
-    abstain_from_txt = migration_matrix['follows_text_problem']['abstains']
-    total_abstain_pct = ((abstain_from_vis + abstain_from_txt) / N) * 100
-
-    md_lines = [
-        "# Statistical Hypothesis Testing & Evidence Audit Report\n",
-        f"**Dataset Sample Size ($N$):** {N} clean image conflict pairs  ",
-        "**Model:** Qwen2.5-VL-3B-Instruct  ",
-        "**Protocol:** 4-Arm Causal Factorial Experiment  \n",
-        "---\n",
-        "## 1. Primary Empirical Findings & Hypothesis Tests\n",
-        "| Hypothesis / Metric | Value | Statistical Significance | Scientific Implication |",
-        "|:---|:---|:---|:---|",
-        f"| **Placebo Visual Capture Rate ($P_{{\\text{{vis}}}}(\\text{{Arm 2}})$)** | **{p_vis_arm2*100:.1f}%** ({arm2_vis}/{N}) | Baseline Grounding | Multimodal descriptive prompts exhibit extreme visual bias |",
-        f"| **Conflict Verbalization Visual Rate ($P_{{\\text{{vis}}}}(\\text{{Arm 3}})$)** | **{p_vis_arm3*100:.1f}%** ({arm3_vis}/{N}) | Post-Intervention | Conflict verbalization breaks default visual grounding |",
-        f"| **Net Arbitration Shift ($\\Delta_{{\\text{{arb}}}}$)** | **{risk_diff*100:+.1f} pp** | **p < 0.0001** | **Verbalization causally shifts decision arbitration** |",
-        f"| **McNemar's Paired Test ($\\chi^2_{{\\text{{McNemar}}}}$)** | **$\\chi^2 = {mcn_chi2_c:.2f}$** | **p = {mcn_p_c:.2e}** | Within-subject shift is statistically definitive |",
-        f"| **Fisher's Exact Test** | **p = {fisher_p:.2e}** | Two-sided exact | Reject independence of modality choice and verbalization |",
-        f"| **Odds Ratio ($OR$)** | **{odds_ratio:.2f}** | 95% CI: [{ci_low:.2f}, {ci_high:.2f}] | Odds of visual grounding are {odds_ratio:.1f}x higher in placebo |",
-        f"| **Cohen's $h$** | **{h_effect:.2f}** | **Very Large Effect** ($h > 0.8$) | Strongest possible effect size magnitude |",
-        f"| **Deliberative Abstention Rate** | **{total_abstain_pct:.1f}%** | Novel Category | Verbalization enables legitimate epistemic refusal |\n",
-        "---\n",
-        "## 2. 2x2 Paired Contingency Matrix (Within-Subject Transition)\n",
-        "| Condition | Arm 3: Visual Capture | Arm 3: Non-Visual | Total |",
-        "|:---|:---:|:---:|:---:|",
-        f"| **Arm 2: Visual Capture** | {a_vis_vis} (Persistent Visual) | {b_vis_non} (Arbitrated / Abstained) | **{arm2_vis}** |",
-        f"| **Arm 2: Non-Visual** | {c_non_vis} | {d_non_non} | **{arm2_non}** |",
-        f"| **Total** | **{arm3_vis}** | **{arm3_non}** | **{N}** |\n",
-        f"McNemar's Test Discordant Pairs: $b = {b_vis_non}$, $c = {c_non_vis}$.  ",
-        f"$\\chi^2_{{\\text{{McNemar}}}} = \\frac{{(|{b_vis_non} - {c_non_vis}| - 1)^2}}{{{b_vis_non} + {c_non_vis}}} = {mcn_chi2_c:.4f}$ ($p = {mcn_p_c:.4e}$).\n",
-        "---\n",
-        "## 3. Full 4x4 Choice Transition Matrix\n",
-        "```",
-        "                          Arm 3 Output Choice",
-        "Arm 2 Output Choice    Image       Text      Abstain    Ambiguous    Total",
-        f"Image                {migration_matrix['follows_image_problem']['follows_image_problem']:>7}    {migration_matrix['follows_image_problem']['follows_text_problem']:>7}    {migration_matrix['follows_image_problem']['abstains']:>7}    {migration_matrix['follows_image_problem']['ambiguous']:>9}    {sum(migration_matrix['follows_image_problem'].values()):>7}",
-        f"Text                 {migration_matrix['follows_text_problem']['follows_image_problem']:>7}    {migration_matrix['follows_text_problem']['follows_text_problem']:>7}    {migration_matrix['follows_text_problem']['abstains']:>7}    {migration_matrix['follows_text_problem']['ambiguous']:>9}    {sum(migration_matrix['follows_text_problem'].values()):>7}",
-        f"Abstain              {migration_matrix['abstains']['follows_image_problem']:>7}    {migration_matrix['abstains']['follows_text_problem']:>7}    {migration_matrix['abstains']['abstains']:>7}    {migration_matrix['abstains']['ambiguous']:>9}    {sum(migration_matrix['abstains'].values()):>7}",
-        f"Ambiguous            {migration_matrix['ambiguous']['follows_image_problem']:>7}    {migration_matrix['ambiguous']['follows_text_problem']:>7}    {migration_matrix['ambiguous']['abstains']:>7}    {migration_matrix['ambiguous']['ambiguous']:>9}    {sum(migration_matrix['ambiguous'].values()):>7}",
-        f"Total                {sum(migration_matrix[s]['follows_image_problem'] for s in states):>7}    {sum(migration_matrix[s]['follows_text_problem'] for s in states):>7}    {sum(migration_matrix[s]['abstains'] for s in states):>7}    {sum(migration_matrix[s]['ambiguous'] for s in states):>9}    {N:>7}",
-        "```\n",
-        "---\n",
-        "## 4. Arm 4 Causal Rationale Steering Power\n",
-        f"- **Divergence Rate ($1 - \\text{{Agreement}}$):** {100 - identical_pct:.1f}% of items produce divergent answers under opposing rationale prefills.",
-        f"- **Text Alignment Boost:** Arm 4b achieves a **{steering_delta*100:+.1f} pp** increase in exact text-answer matching over Arm 4a.\n",
+def render_markdown(r: Dict[str, Any]) -> str:
+    n, p = r["n"], r["primary"]
+    pct = lambda x: f"{100 * x / n:.1f}%"
+    t = p["table"]
+    lines = [
+        "# Paired analysis of stored v3 labels",
+        "",
+        f"N = {n}. Labels are the stored v3 heuristics, not validated against human coding.",
+        "This compares two instructions; it does not isolate the effect of the verbalization.",
+        "",
+        "## Arm summary",
+        "",
+        "| Arm | Image label | Text label | Abstain label | Ambiguous | Exact image | Exact text | At token cap | Mean tokens |",
+        "|---|---:|---:|---:|---:|---:|---:|---:|---:|",
     ]
+    for arm in ARMS:
+        s, ch = r["arms"][arm], r["arms"][arm]["choices"]
+        lines.append(
+            f"| {arm} | {ch.get('follows_image_problem', 0)} | {ch.get('follows_text_problem', 0)} "
+            f"| {ch.get('abstains', 0)} | {ch.get('ambiguous', 0)} "
+            f"| {s['exact_image']} ({pct(s['exact_image'])}) | {s['exact_text']} ({pct(s['exact_text'])}) "
+            f"| {s['at_token_cap']} ({pct(s['at_token_cap'])}) | {s['tokens_mean']:.1f} |"
+        )
+    lo, hi = p["difference_ci95_problem_clustered"]
+    ol, oh = p["paired_odds_ratio_ci95"]
+    lines += [
+        "",
+        "## Arm 2 vs Arm 3: image label",
+        "",
+        "| | Arm 3 image | Arm 3 other |",
+        "|---|---:|---:|",
+        f"| Arm 2 image | {t['both_visual']} | {t['arm2_only']} |",
+        f"| Arm 2 other | {t['arm3_only']} | {t['neither']} |",
+        "",
+        f"- Arm 2: {p['arm2_visual']} ({pct(p['arm2_visual'])}); Arm 3: {p['arm3_visual']} ({pct(p['arm3_visual'])})",
+        f"- Difference, Arm 2 minus Arm 3: {100 * p['difference_arm2_minus_arm3']:.1f} pp "
+        f"(problem-clustered 95% interval {100 * lo:.1f} to {100 * hi:.1f})",
+        f"- Exact McNemar p = {format_log10p(p['mcnemar_exact_log10p'])}",
+        f"- Paired odds ratio = {p['paired_odds_ratio']:.2f} (95% interval {ol:.2f} to {oh:.2f})",
+        f"- Cohen's h = {p['cohens_h']:.2f}",
+        "",
+        "## Label migration, Arm 2 (rows) to Arm 3 (columns)",
+        "",
+        "| | " + " | ".join(STATES) + " |",
+        "|---|" + "---:|" * len(STATES),
+    ]
+    for s1 in STATES:
+        lines.append(f"| {s1} | " + " | ".join(str(r["migration"][s1][s2]) for s2 in STATES) + " |")
+    a4 = r["arm4"]
+    lines += [
+        "",
+        "## Arm 4 prefills",
+        "",
+        "Arm 4a and 4b differ in rationale and named source together, so these contrasts can't separate the two.",
+        "",
+        f"- Identical answers: {a4['identical_answers']} ({pct(a4['identical_answers'])})",
+        f"- Text match, 4b only vs 4a only: {a4['text_match_4b_only']} vs {a4['text_match_4a_only']} "
+        f"(exact McNemar p = {format_log10p(a4['text_mcnemar_exact_log10p'])})",
+        f"- Image match, 4a only vs 4b only: {a4['image_match_4a_only']} vs {a4['image_match_4b_only']} "
+        f"(exact McNemar p = {format_log10p(a4['image_mcnemar_exact_log10p'])})",
+        "",
+    ]
+    return "\n".join(lines)
 
-    with open(md_report_path, "w", encoding="utf-8") as f:
-        f.write("\n".join(md_lines))
 
-    # Generate Publication-Ready LaTeX Table
-    a1_vis = arm_stats['arm1_direct']['choices'].get('follows_image_problem', 0)
-    a1_txt = arm_stats['arm1_direct']['choices'].get('follows_text_problem', 0)
-    a1_abs = arm_stats['arm1_direct']['choices'].get('abstains', 0)
-    a1_amb = arm_stats['arm1_direct']['choices'].get('ambiguous', 0)
-
-    a2_txt = arm_stats['arm2_placebo']['choices'].get('follows_text_problem', 0)
-    a2_abs = arm_stats['arm2_placebo']['choices'].get('abstains', 0)
-    a2_amb = arm_stats['arm2_placebo']['choices'].get('ambiguous', 0)
-
-    a3_txt = arm_stats['arm3_conflict']['choices'].get('follows_text_problem', 0)
-    a3_abs = arm_stats['arm3_conflict']['choices'].get('abstains', 0)
-    a3_amb = arm_stats['arm3_conflict']['choices'].get('ambiguous', 0)
-
-    tex_content = (
-        "% Table: Multimodal Source Arbitration Contingency Table & Effect Sizes\n"
-        "\\begin{table}[t]\n"
-        "\\centering\n"
-        "\\small\n"
-        f"\\caption{{Causal Effect of Conflict Verbalization on Source Arbitration ($N={N}$). Comparison of Visual Capture rates between Neutral Placebo (Arm 2) and Conflict Verbalization with Directive (Arm 3).}}\n"
-        "\\label{tab:source_arbitration_contingency}\n"
-        "\\begin{tabular}{lcccc}\n"
-        "\\hline\n"
-        "\\textbf{Condition} & \\textbf{Follows Image} & \\textbf{Follows Text} & \\textbf{Abstains} & \\textbf{Ambiguous} \\\\\n"
-        "\\hline\n"
-        f"Arm 1: Direct Zero-Shot & {a1_vis} ({a1_vis/N*100:.1f}\\%) & {a1_txt} ({a1_txt/N*100:.1f}\\%) & {a1_abs} ({a1_abs/N*100:.1f}\\%) & {a1_amb} ({a1_amb/N*100:.1f}\\%) \\\\\n"
-        f"Arm 2: Placebo (Neutral) & {arm2_vis} ({p_vis_arm2*100:.1f}\\%) & {a2_txt} ({a2_txt/N*100:.1f}\\%) & {a2_abs} ({a2_abs/N*100:.1f}\\%) & {a2_amb} ({a2_amb/N*100:.1f}\\%) \\\\\n"
-        f"Arm 3: Conflict Verbalization & {arm3_vis} ({p_vis_arm3*100:.1f}\\%) & {a3_txt} ({a3_txt/N*100:.1f}\\%) & {a3_abs} ({a3_abs/N*100:.1f}\\%) & {a3_amb} ({a3_amb/N*100:.1f}\\%) \\\\\n"
-        "\\hline\n"
-        "\\multicolumn{5}{l}{\\textbf{Causal Arbitration Metrics (Arm 2 $\\rightarrow$ Arm 3):}} \\\\\n"
-        f"\\multicolumn{{5}}{{l}}{{$\\Delta_{{\\text{{arb}}}}$ Shift: ${risk_diff*100:+.1f}$ percentage points (Relative Risk: ${relative_risk:.3f}$)}} \\\\\n"
-        f"\\multicolumn{{5}}{{l}}{{Odds Ratio: ${odds_ratio:.2f}$ [95\\% CI: ${ci_low:.2f}$, ${ci_high:.2f}$], Cohen's $h = {h_effect:.2f}$ (Very Large)}} \\\\\n"
-        f"\\multicolumn{{5}}{{l}}{{McNemar's Paired Test: $\\chi^2_{{\\text{{McNemar}}}} = {mcn_chi2_c:.2f}$, $p = {mcn_p_c:.2e}$ (Two-Sided)}} \\\\\n"
-        "\\hline\n"
-        "\\end{tabular}\n"
-        "\\end{table}\n"
+def render_latex(r: Dict[str, Any]) -> str:
+    n, p = r["n"], r["primary"]
+    lo, hi = p["difference_ci95_problem_clustered"]
+    rows = []
+    names = {"arm1_direct": "Arm 1: Direct", "arm2_placebo": "Arm 2: Description", "arm3_conflict": "Arm 3: Conflict"}
+    for arm in LABELED_ARMS:
+        ch = r["arms"][arm]["choices"]
+        cells = " & ".join(f"{ch.get(s, 0)} ({100 * ch.get(s, 0) / n:.1f}\\%)" for s in STATES)
+        rows.append(f"{names[arm]} & {cells} \\\\")
+    body = "\n".join(rows)
+    return (
+        "\\begin{table}[t]\n\\centering\n\\small\n"
+        f"\\caption{{Stored v3 labels by instruction ($N={n}$). Labels are unvalidated heuristics.}}\n"
+        "\\label{tab:v3_labels}\n\\begin{tabular}{lcccc}\n\\hline\n"
+        "Condition & Image & Text & Abstain & Ambiguous \\\\\n\\hline\n"
+        f"{body}\n\\hline\n"
+        f"\\multicolumn{{5}}{{l}}{{Arm 2 minus Arm 3, image label: {100 * p['difference_arm2_minus_arm3']:.1f} pp "
+        f"(problem-clustered 95\\% interval {100 * lo:.1f} to {100 * hi:.1f})}} \\\\\n"
+        f"\\multicolumn{{5}}{{l}}{{Exact McNemar $p = {format_log10p(p['mcnemar_exact_log10p'])}$; "
+        f"discordant pairs {p['table']['arm2_only']} and {p['table']['arm3_only']}}} \\\\\n"
+        "\\hline\n\\end{tabular}\n\\end{table}\n"
     )
 
-    with open(tex_table_path, "w", encoding="utf-8") as f:
-        f.write(tex_content)
 
-    print(f"\nSaved Markdown Report to: {md_report_path}")
-    print(f"Saved LaTeX Table to:     {tex_table_path}\n")
-
-
-def main():
-    parser = argparse.ArgumentParser(description="Run statistical hypothesis tests on experiment results.")
-    parser.add_argument("--results_file", type=str, default="experiment_results/full_experiment_results.json",
-                        help="Path to full_experiment_results.json")
-    parser.add_argument("--output_dir", type=str, default=None,
-                        help="Directory to save report and LaTeX table (default: results_file directory)")
+def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    parser.add_argument("--results_file", required=True)
+    parser.add_argument("--output_dir", required=True, help="Must be a new folder or one you mean to overwrite")
+    parser.add_argument("--bootstrap_reps", type=int, default=2000)
     args = parser.parse_args()
 
     if not os.path.exists(args.results_file):
-        print(f"Error: Results file '{args.results_file}' not found.")
-        sys.exit(1)
-
-    output_dir = args.output_dir or os.path.dirname(os.path.abspath(args.results_file)) or "."
-    os.makedirs(output_dir, exist_ok=True)
-
-    with open(args.results_file, "r", encoding="utf-8") as f:
+        print(f"Error: results file not found: {args.results_file}", file=sys.stderr)
+        return 2
+    with open(args.results_file, encoding="utf-8") as f:
         data = json.load(f)
+    try:
+        results = analyze_experiment(data, reps=args.bootstrap_reps)
+    except ValueError as exc:
+        print(f"Error: {exc}", file=sys.stderr)
+        return 2
 
-    analyze_experiment(data, output_dir)
+    os.makedirs(args.output_dir, exist_ok=True)
+    markdown = render_markdown(results)
+    with open(os.path.join(args.output_dir, "paired_report.md"), "w", encoding="utf-8") as f:
+        f.write(markdown)
+    with open(os.path.join(args.output_dir, "paired_table.tex"), "w", encoding="utf-8") as f:
+        f.write(render_latex(results))
+    with open(os.path.join(args.output_dir, "paired_results.json"), "w", encoding="utf-8") as f:
+        json.dump(results, f, indent=2)
+    print(markdown)
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

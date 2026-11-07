@@ -1,0 +1,11 @@
+# Claude Code worktrees and session data
+.claude/
+*/.claude/
+
+# Temporary and archive files
+Cross Modal.zip
+
+# Python caches
+__pycache__/
+*.py[cod]
+*$py.class
