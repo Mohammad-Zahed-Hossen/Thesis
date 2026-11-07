@@ -35,14 +35,15 @@ Experiment/
 | v3 pilot, N = 1,619 | Done; exploratory only | `results_v3/` |
 | v3 re-analysis | Done | `results_v3/reanalysis_v3/`, `results_v3/stats_v3_paired/` |
 | Harness on a real GPU | Works, T4 and transformers 5.22.0 | `results_v4/*.manifest.json` |
-| Dev run, 15 arms, 200 items | 16 rows missing in `direct_v3`; gates failing | `results_v4/dev_qwen25.jsonl` |
-| Penalty check, dev | Done | `results_v4/dev_qwen25_rp105.jsonl` |
-| Dev transplant | **Invalid, must rerun** | `results_v4/superseded/` |
-| Human coding of outputs | Not started; sheets are blank | `coding_v3/` |
-| Pre-registration | Not written | None |
-| Confirmatory run | Not started | None |
-| Qwen2-VL-2B, ChartQA, variance runs | Not started | None |
-| Mechanistic probe | Not started; no code yet | None |
+| Dev run (dev2), 15 arms, 200 items | **Complete** (3000 rows, CoT working enabled) | `results_v4/dev2_qwen25.jsonl` |
+| Penalty check (dev2) | **Complete** (600 rows, rp=1.05) | `results_v4/dev2_qwen25_rp105.jsonl` |
+| Dev transplant (dev2) | **Complete & Valid** (2800 rows, fidelity >95%) | `results_v4/dev2_transplant_qwen25.jsonl` |
+| Dev analysis (dev2) | Done; causal steering confirmed | `results_v4/analysis_dev2/` |
+| Human coding of outputs | Sheets generated; not yet coded | `coding_v3/` |
+| Pre-registration | Ready to draft & freeze contrasts | None |
+| Confirmatory run | Next phase | Colab GPU |
+| Qwen2-VL-2B, ChartQA, variance runs | Next phase | Colab GPU |
+| Mechanistic probe | Next phase | Colab GPU |
 
 ## Rules for working here
 
