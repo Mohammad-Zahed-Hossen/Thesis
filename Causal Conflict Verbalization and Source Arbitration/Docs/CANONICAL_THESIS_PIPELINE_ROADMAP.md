@@ -1,14 +1,14 @@
 # Master End-to-End Thesis Execution Roadmap & Pipeline
 
-**Document Status:** Primary Operational Pipeline & Execution Blueprint (Post-Freeze)  
-**Effective Date:** 24 September 2026  
-**Principal Researcher:** Mohammad Zahed Hossen (Technical Lead, Final-Year BSc CSE, Bangladesh)  
-**Thesis Title:** *Causal Conflict Verbalization and Source Arbitration in Vision-Language Models*  
-**Target Environment:** Local Workstation (LaTeX / Python analysis) + Google Colab Pro (GPU inference archives)  
-**Companion Documents:**  
-- Master Evidence Dossier: [`Finalize Topic/CANONICAL_THESIS_MASTER_REPORT.md`](file:///d:/Thesis/Important/Cross%20Modal/Finalize%20Topic/CANONICAL_THESIS_MASTER_REPORT.md)  
-- Operating Ground Truth: [`Context/Canonical_Context.md`](file:///d:/Thesis/Important/Cross%20Modal/Context/Canonical_Context.md)  
-- LaTeX Contingency Table: [`Finalize Topic/Experiment_Result/thesis_contingency_table v3.0.tex`](file:///d:/Thesis/Important/Cross%20Modal/Finalize%20Topic/Experiment_Result/thesis_contingency_table%20v3.0.tex)  
+**Document Status:** Primary Operational Pipeline & Execution Blueprint (Post-Freeze)
+
+**Effective Date:** 24 September 2026**Principal Researcher:** Mohammad Zahed Hossen (Technical Lead, Final-Year BSc CSE, Bangladesh)
+
+**Thesis Title:** *Causal Conflict Verbalization and Source Arbitration in Vision-Language Models***Target Environment:** Local Workstation (LaTeX / Python analysis) + Google Colab Pro (GPU inference archives)**Companion Documents:**
+
+- Master Evidence Dossier: [`Finalize Topic/CANONICAL_THESIS_MASTER_REPORT.md`](file:///d:/Thesis/Important/Cross%20Modal/Finalize%20Topic/CANONICAL_THESIS_MASTER_REPORT.md)
+- Operating Ground Truth: [`Context/Canonical_Context.md`](file:///d:/Thesis/Important/Cross%20Modal/Context/Canonical_Context.md)
+- LaTeX Contingency Table: [`Finalize Topic/Experiment_Result/thesis_contingency_table v3.0.tex`](file:///d:/Thesis/Important/Cross%20Modal/Finalize%20Topic/Experiment_Result/thesis_contingency_table%20v3.0.tex)
 
 ---
 
@@ -52,10 +52,12 @@ flowchart TD
 ---
 
 ### PHASE 1: Deep Data Mining & Stratified Sub-Group Analysis
-**Timeline:** Days 1–5 (Week 1)  
+
+**Timeline:** Days 1–5 (Week 1)
 **Primary Objective:** Extract rich qualitative and stratified insights from `full_experiment_results v3.0.json` and `experiment_checkpoint v3.0.csv` to enrich Chapter 4.
 
 #### Actionable Work Items:
+
 1. **GSM8K vs. SVAMP Stratified Breakdown:**
    - Write a lightweight Python script (`stratified_analysis.py`) to split the 1,619 items into:
      - 1,319 Multi-step GSM8K items
@@ -76,10 +78,12 @@ flowchart TD
 ---
 
 ### PHASE 2: Publication-Grade Figure Generation & Visual Assets
-**Timeline:** Days 6–8 (Week 2)  
+
+**Timeline:** Days 6–8 (Week 2)
 **Primary Objective:** Generate camera-ready vector figures (`.pdf` / `.png` at 300 DPI) using `matplotlib` and `seaborn`.
 
 #### Figures to Generate:
+
 1. **Figure 1: The Core Motivating Diagram (Conceptual Architecture)**
    - Illustration of a conflict instance (Image: 16 ducks, Text: 2 bolts of fiber).
    - Visual comparison of Arm 1 (Direct), Arm 2 (Placebo), Arm 3 (Conflict Verbalization), and Arm 4 (Prefilling).
@@ -100,10 +104,12 @@ flowchart TD
 ---
 
 ### PHASE 3: LaTeX Thesis Environment & BibTeX Setup
-**Timeline:** Days 9–10 (Week 2)  
+
+**Timeline:** Days 9–10 (Week 2)
 **Primary Objective:** Establish the local or Overleaf LaTeX repository and curate verified BibTeX citations.
 
 #### Actionable Work Items:
+
 1. **Workspace Setup:**
    - Clone or initialize the official university CSE undergraduate thesis LaTeX template.
    - Configure directory structure:
@@ -135,10 +141,12 @@ flowchart TD
 ---
 
 ### PHASE 4: Drafting Core Empirical Chapters (Chapters 3 & 4)
-**Timeline:** Days 11–24 (Weeks 3–4)  
+
+**Timeline:** Days 11–24 (Weeks 3–4)
 **Primary Objective:** Draft the technical and empirical core of the thesis first while experimental data is fresh.
 
 #### Chapter 3: Methodology & Experimental Framework (15–20 Pages)
+
 * **3.1 Problem Formalization:**
   - Mathematical definition of cross-modal conflict: $\mathcal{X} = (I, T)$ where $I \models \mathcal{P}_A$ and $T \models \mathcal{P}_B$ with $\mathcal{P}_A \cap \mathcal{P}_B = \emptyset$.
   - Defining source arbitration: $\hat{y} \in \{y_A, y_B, \varnothing\}$.
@@ -155,6 +163,7 @@ flowchart TD
   - Formulation of McNemar's test for paired within-subject shifts, Odds Ratios with 95% CIs, and Cohen's $h$.
 
 #### Chapter 4: Empirical Findings & Quantitative Analysis (15–20 Pages)
+
 * **4.1 Primary Finding: The $+63.74\text{ pp}$ Arbitration Shift:**
   - Insert `thesis_contingency_table v3.0.tex`.
   - Detailed narrative of visual capture collapse from $89.50\%$ (Arm 2) to $25.76\%$ (Arm 3).
@@ -175,10 +184,12 @@ flowchart TD
 ---
 
 ### PHASE 5: Drafting Foundational Chapters (Chapters 1 & 2)
-**Timeline:** Days 25–35 (Weeks 5–6)  
+
+**Timeline:** Days 25–35 (Weeks 5–6)
 **Primary Objective:** Draft the motivating introduction and comprehensive literature review.
 
 #### Chapter 1: Introduction (8–10 Pages)
+
 * **1.1 The Multimodal Integration Paradigm:** Cross-attention, vision projectors, and autoregressive generation.
 * **1.2 The Modality Bias Problem:** Why VLMs develop uncalibrated priors toward visual evidence.
 * **1.3 Motivating Dilemma:** Real-world consequences of visual capture in autonomous driving, robotic surgery, and multimodal financial analysis.
@@ -186,6 +197,7 @@ flowchart TD
 * **1.5 Summary of Contributions:** The 4 distinct contributions of the thesis.
 
 #### Chapter 2: Literature Review & Related Work (12–15 Pages)
+
 * **2.1 Modality Dominance & Sensory Conflict:**
   - Comprehensive review of *Which Source Wins?* (arXiv:2608.17205) and its explicit §6 gap.
   - Review of *CLASH* (arXiv:2511.19199) and why abstention-only benchmarks are insufficient.
@@ -198,10 +210,12 @@ flowchart TD
 ---
 
 ### PHASE 6: Discussion, Conclusion, & Final Manuscript Assembly
-**Timeline:** Days 36–45 (Week 7)  
+
+**Timeline:** Days 36–45 (Week 7)
 **Primary Objective:** Write Chapter 5, integrate all chapters, and compile the first complete draft.
 
 #### Chapter 5: Discussion, Implications, & Limitations (10–12 Pages)
+
 * **5.1 Is Multimodal CoT Truly Faithful?**
   - Synthesize the cross-over discovery: verbalization is an active computational operator, not decorative storytelling.
 * **5.2 Epistemic Safety in Autonomous Multi-Sensor Systems:**
@@ -214,10 +228,12 @@ flowchart TD
 ---
 
 ### PHASE 7: Supervisor Review & Revisions
-**Timeline:** Days 46–52 (Week 8)  
+
+**Timeline:** Days 46–52 (Week 8)
 **Primary Objective:** Present the complete draft to your thesis supervisor, collect feedback, and perform targeted revisions.
 
 #### Actionable Work Items:
+
 1. Provide the supervisor with an **Executive 2-Page Briefing** summarizing the thesis contributions and the LaTeX contingency table.
 2. Address supervisor comments regarding formatting, section transitions, or literature framing.
 3. Conduct automated grammar, formatting, and citation audits using LaTeX linter and word tools.
@@ -225,10 +241,12 @@ flowchart TD
 ---
 
 ### PHASE 8: Defense Slide Deck & Oral Viva Rehearsal
-**Timeline:** Days 53–60 (Weeks 9–10)  
+
+**Timeline:** Days 53–60 (Weeks 9–10)
 **Primary Objective:** Build an elite, publication-grade defense presentation and rehearse oral defense rebuttals.
 
 #### Defense Slide Deck Structure (18–20 Slides, 20 Minutes):
+
 * **Slide 1:** Title, Candidate Name, Supervisor, Department.
 * **Slide 2:** The Core Motivating Problem: When Eyes and Ears Disagree (Cross-Modal Conflict).
 * **Slide 3:** The Central Question: Cognitive Driver or Post-Hoc Storytelling?
@@ -253,13 +271,17 @@ flowchart TD
 
 ## Defense FAQ & Oral Rebuttal Cheat Sheet
 
-| Examiner Question / Challenge | Rigorous Scientific Rebuttal |
-|:---|:---|
-| *"Isn't the shift in Arm 3 simply caused by giving the model more reasoning tokens to think?"* | **No.** Arm 2 is a length-matched neutral placebo requiring the exact same two-sentence preamble length (~75 tokens) without contradiction semantics, yet maintains **$89.50\%$ visual capture**. The shift is strictly causal to conflict awareness. |
-| *"Could this shift just be random output confusion or noise?"* | **Definitively refuted by the Exact-Match Cross-Over.** If the model were confused, exact-match accuracy on both modalities would drop. Instead, exact accuracy on the text problem **surges to $35.8\%$** ($4.7\% \to 35.8\%$), demonstrating that the prompt redirects the model's active problem-solving execution toward the textual problem. |
-| *"Why didn't you test a larger 72B model or closed APIs?"* | Our research question is mechanistic: isolating whether CoT is causal in an open-weight foundation model. Qwen2.5-VL-3B has 36 layers and full autoregressive capability, fitting within the 16GB VRAM constraint of academic reproducibility. |
-| *"Why only evaluate clean images instead of degraded images?"* | In degraded images, physical illegibility acts as an unmodeled confounder—the model defaults to text simply because the pixels are unreadable. Pristine images isolate **pure cognitive source arbitration**. |
+
+| Examiner Question / Challenge                                                                  | Rigorous Scientific Rebuttal                                                                                                                                                                                                                                                                                                                      |
+| :----------------------------------------------------------------------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| *"Isn't the shift in Arm 3 simply caused by giving the model more reasoning tokens to think?"* | **No.** Arm 2 is a length-matched neutral placebo requiring the exact same two-sentence preamble length (~75 tokens) without contradiction semantics, yet maintains **$89.50\%$ visual capture**. The shift is strictly causal to conflict awareness.                                                                                             |
+| *"Could this shift just be random output confusion or noise?"*                                 | **Definitively refuted by the Exact-Match Cross-Over.** If the model were confused, exact-match accuracy on both modalities would drop. Instead, exact accuracy on the text problem **surges to $35.8\%$** ($4.7\% \to 35.8\%$), demonstrating that the prompt redirects the model's active problem-solving execution toward the textual problem. |
+| *"Why didn't you test a larger 72B model or closed APIs?"*                                     | Our research question is mechanistic: isolating whether CoT is causal in an open-weight foundation model. Qwen2.5-VL-3B has 36 layers and full autoregressive capability, fitting within the 16GB VRAM constraint of academic reproducibility.                                                                                                    |
+| *"Why only evaluate clean images instead of degraded images?"*                                 | In degraded images, physical illegibility acts as an unmodeled confounder—the model defaults to text simply because the pixels are unreadable. Pristine images isolate **pure cognitive source arbitration**.                                                                                                                                    |
 
 ---
-**END OF MASTER ROADMAP**  
+
+**END OF MASTER ROADMAP**
 *You are equipped with the complete plan. Begin Phase 1 tomorrow morning!*
+
+N.B: Don't overly follow this pipeline. It is AI generated using the codbase context.

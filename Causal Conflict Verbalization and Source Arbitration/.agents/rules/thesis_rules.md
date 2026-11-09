@@ -20,10 +20,16 @@
 ## 4. Hardware Constraints
 - **Local:** AMD Ryzen 5 5600G, 8 GB RAM, no CUDA. Code editing and docs only.
 - **Colab Pro:** NVIDIA T4/V100, 16 GB VRAM. All model-touching code targets this.
-- **Model:** `Qwen/Qwen2.5-VL-3B-Instruct` (≤3B, FP16/bfloat16/4-bit). No full pretraining.
+- **Models:** `Qwen/Qwen2.5-VL-3B-Instruct` and `Qwen/Qwen2-VL-2B-Instruct` (≤3B, FP16/bfloat16/4-bit). No full pretraining.
 
 ## 5. Experimental Rules
-- **Placebo controls** for all prompt interventions (length-matched).
+- **Design spec:** `Docs/PREREGISTRATION_VERDICT_TRANSPLANT.md`. Its invariants are mandatory:
+  - counterbalanced evidence order;
+  - a binding arm plus explicit single-source ceilings;
+  - minimal-edit verdicts;
+  - competency-conditioned primary results;
+  - a short-horizon primary outcome.
+- **Controls** for all prompt interventions: a wording-paraphrase noise floor and an inert filler. Report token lengths; "length-matched" is only claimed when it is actually measured.
 - **Deterministic metrics:** Regex exact match, ground-truth labels. No uncalibrated LLM-as-judge.
 - **Falsifiability:** Competing H₁ vs H₀ capable of rejecting either.
 - **No hallucinated citations.** Flag unknown assets as [Unknown].
