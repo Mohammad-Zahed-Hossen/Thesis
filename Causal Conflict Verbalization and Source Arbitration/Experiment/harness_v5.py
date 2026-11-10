@@ -154,12 +154,38 @@ def distinct(items) -> List[Item]:
     return [it for it in items if not sc.answers_match(it.y_image, it.y_text)]
 
 
+# The Hub release has 230 rows. Which Source Wins? (arXiv:2608.17205, §3.2.2) analyses 229:
+# a post-run audit removed one item whose report did not support its answer. The paper's
+# artifact names it in data/chartqa_conflict/excluded_items.json and MANIFEST.json
+# ("chartqa_excluded_compiled_item_ids": [45]). Row 45 asks for a March 2021 value; its
+# report gives 1.81 for March 2021 and puts the "report answer" 2.81 under September 2019.
+CHARTQA_EXCLUDED_IDS = frozenset({"45"})
+CHARTQA_PINNED_ROWS = 230
+CHARTQA_ANALYSED_ITEMS = 229
+
+
+def chartqa_analysis_set(items: Sequence[Item], pinned: bool = True) -> List[Item]:
+    """Drop the audited exclusion, then equal-answer pairs. With the pinned revision the counts are checked."""
+    items = list(items)
+    present = CHARTQA_EXCLUDED_IDS & {it.id for it in items}
+    kept = distinct(it for it in items if it.id not in CHARTQA_EXCLUDED_IDS)
+    if pinned:
+        if len(items) != CHARTQA_PINNED_ROWS or present != CHARTQA_EXCLUDED_IDS or len(kept) != CHARTQA_ANALYSED_ITEMS:
+            raise SystemExit(
+                f"ChartQA-Conflict: expected {CHARTQA_PINNED_ROWS} rows including id(s) {sorted(CHARTQA_EXCLUDED_IDS)} "
+                f"and {CHARTQA_ANALYSED_ITEMS} items after exclusion; got {len(items)} rows, "
+                f"excluded ids present: {sorted(present)}, {len(kept)} items kept. The dataset is not the pinned release."
+            )
+    return kept
+
+
 def load_items(split: str, dataset_revision: Optional[str]) -> List[Item]:
     if split == "chartqa":
         from datasets import load_dataset  # Colab only
 
         ds = load_dataset(h4.CHARTQA_DATASET, split="test", revision=dataset_revision)
-        return distinct(item_from_chartqa_row(ds[i]) for i in range(len(ds)))
+        pinned = dataset_revision == DATASET_PINS.get(h4.CHARTQA_DATASET)
+        return chartqa_analysis_set([item_from_chartqa_row(ds[i]) for i in range(len(ds))], pinned=pinned)
     return h4.load_items(split, dataset_revision)
 
 
@@ -649,7 +675,7 @@ def add_common_args(parser: argparse.ArgumentParser) -> None:
 def config_from_args(args: argparse.Namespace, stage: str, **extra: Any) -> V5Config:
     dev_size = args.dev_size if args.dev_size is not None else (30 if args.split == "chartqa" else 200)
     if args.split == "chartqa" and dev_size >= 100:
-        raise SystemExit("ChartQA has 229 items; --dev_size must be small (prereg §3.2 uses 30).")
+        raise SystemExit("ChartQA has 229 analysed items; --dev_size must be small (prereg §3.2 uses 30).")
     cfg = V5Config(
         run_tag=args.run_tag,
         stage=stage,

@@ -46,6 +46,9 @@ from typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple
 import score_v5 as sc
 
 EPSILON = 0.05  # behavioural TOST margin (R4)
+MAX_CHURN = EPSILON  # wording-floor gate on the share of answers a paraphrase changes (prereg §7.6)
+ALPHA = 0.05
+POWER_TARGET = 0.80
 RHO_BOUND = 0.25  # graded margin (R4)
 N_BOOT = 10_000
 N_PERM = 10_000
@@ -170,12 +173,65 @@ def tost_reading(ci90: Tuple[float, float], eps: float = EPSILON) -> str:
     return "equivalent" if -eps < ci90[0] and ci90[1] < eps else "not equivalent"
 
 
-def combined_reading(rho: str, tost: str, floor_ok: bool) -> str:
-    """§2 table, under binding."""
+def normal_cdf(z: float) -> float:
+    return 0.5 * (1 + math.erf(z / math.sqrt(2)))
+
+
+def tost_power(sd: float, n: int, eps: float = EPSILON) -> float:
+    """Power of the TOST at margin eps when the true effect is 0 (normal approximation).
+
+    sd is the standard deviation of the per-item differences. Power is
+    2Φ(eps/SE − z_0.95) − 1, floored at 0, with SE = sd/√n.
+    """
+    if n < 2:
+        return 0.0
+    if sd <= 0:
+        return 1.0
+    return max(0.0, 2 * normal_cdf(eps / (sd / math.sqrt(n)) - 1.6448536269514722) - 1)
+
+
+def sample_sd(xs: Sequence[float]) -> float:
+    m = mean(xs)
+    return math.sqrt(sum((x - m) ** 2 for x in xs) / (len(xs) - 1)) if len(xs) > 1 else 0.0
+
+
+def wording_floor(diffs: Sequence[float], churn: Optional[float]) -> Dict[str, Any]:
+    """Both halves of the wording-floor gate for m_para vs. m_own (prereg §7.6).
+
+    signed_mean   mean per-item difference; opposite changes cancel in it
+    churn_rate    share of (item, order) cells whose answer source changed at all
+    The gate fails if either exceeds its limit. The churn rate bounds |signed_mean|, so
+    symmetric churn (as many answers moving one way as the other) cannot pass unseen.
+    """
+    fm = mean(diffs)
+    sd = sample_sd(diffs)
+    power = tost_power(sd, len(diffs))
+    signed_bad = abs(fm) > EPSILON
+    churn_bad = churn is not None and churn > MAX_CHURN
+    return {
+        "n": len(diffs),
+        "signed_mean": fm,
+        "mean": fm,  # kept for earlier readers of this file
+        "signed_mean_exceeds_epsilon": signed_bad,
+        "exceeds_epsilon": signed_bad,
+        "churn_rate": churn,
+        "max_churn": MAX_CHURN,
+        "churn_exceeds_max": churn_bad,
+        "sd_item_difference": sd,
+        "tost_power_at_this_noise": power,
+        "power_below_target": power < POWER_TARGET,
+        "floor_ok": not (signed_bad or churn_bad),
+    }
+
+
+def combined_reading(rho: str, tost: str, floor_ok: bool, t1_significant: bool = False) -> str:
+    """§2 decision table, under binding. T1 qualifies an H1 reading; it never decides one."""
     if rho.startswith("undetermined"):
         return "undetermined"
     if rho == "decision-relevant":
-        return "H1: the verdict decides"
+        if t1_significant:
+            return "H1: the verdict decides, and binding strengthens it"
+        return "H1: the verdict decides; no evidence that binding strengthens it"
     if rho == "equivalent to no effect":
         if not floor_ok:
             return "graded equivalence only; behavioural test uninterpretable (wording floor > ε)"
@@ -229,6 +285,16 @@ def cde_fn(dl, fam: str, pair=("flip", "own")):
         if a is None or b is None:
             return None
         return orientation(dl[(i, fam, pair[0], k, o)]) * (a - b)
+
+    return f
+
+
+def abs_gap_fn(dl, fam: str, a: str, b: str):
+    """|Δℓ(a) − Δℓ(b)| per cell, for the descriptive noise floor (§7.6)."""
+
+    def f(i, k, o):
+        x, y = _get(dl, i, fam, a, k, o), _get(dl, i, fam, b, k, o)
+        return None if x is None or y is None else abs(x - y)
 
     return f
 
@@ -500,16 +566,23 @@ def analyze_group(
         if len(delta) > 1:
             ci = summarize_ci(list(delta.values()), reps, seed, 0.90)
             entry["delta_flip_minus_own"] = {**ci, "reading": tost_reading(tuple(ci["ci90"]))}
-        if len(floor) > 1:
-            fm = mean(list(floor.values()))
-            entry["wording_floor_para_minus_own"] = {"n": len(floor), "mean": fm, "exceeds_epsilon": abs(fm) > EPSILON}
-            if fam == "binding" and abs(fm) > EPSILON:
-                floor_ok = False
+        for other in ("para", "flip"):  # §7.6: mean |ΔΔℓ| against the own verdict
+            gap = per_item(dl, ids, abs_gap_fn(dl, fam, other, "own"))
+            entry[f"mean_abs_dl_gap_own_vs_{other}"] = mean(list(gap.values())) if gap else None
         entry["change_rate_own_vs_para"] = change_rate(beh, ids, fam, "own", "para")
         entry["change_rate_own_vs_flip"] = change_rate(beh, ids, fam, "own", "flip")
+        if len(floor) > 1:
+            entry["wording_floor_para_minus_own"] = wording_floor(list(floor.values()), entry["change_rate_own_vs_para"])
+            if fam == "binding" and not entry["wording_floor_para_minus_own"]["floor_ok"]:
+                floor_ok = False
         res[f"behaviour_{fam}"] = entry
     tost = res.get("behaviour_binding", {}).get("delta_flip_minus_own", {}).get("reading", "not available")
-    res["reading_binding"] = combined_reading(res["T2_rho_binding"]["reading"], tost, floor_ok)
+    res["wording_floor_ok_binding"] = floor_ok
+    # Readings use the unadjusted criteria, with Holm-adjusted values beside them (prereg §7.2).
+    res["T1_did"]["holm_p"] = res["holm_adjusted"]["T1"]
+    res["T1_did"]["significant"] = res["T1_did"]["p"] <= ALPHA
+    res["T1_did"]["significant_after_holm"] = res["holm_adjusted"]["T1"] <= ALPHA
+    res["reading_binding"] = combined_reading(res["T2_rho_binding"]["reading"], tost, floor_ok, res["T1_did"]["significant"])
 
     # Secondary: matched pair, order, saturation, neither-rate.
     sec: Dict[str, Any] = {}
@@ -645,7 +718,11 @@ def render(results: Sequence[Dict[str, Any]], gates: Dict[str, Any]) -> str:
             if c:
                 lines += [f"  - {wd} direction vs non-binding: {fmt(c['mean'])}, 95% CI {fmt(c['ci95'])}"]
         t1 = r["T1_did"]
-        lines += [f"- **T1** DiD = {fmt(t1['mean'])} (95% CI {fmt(t1['ci95'])}), sign-flip p = {fmt(t1['p'], 4)}"]
+        lines += [
+            f"- **T1** DiD = {fmt(t1['mean'])} (95% CI {fmt(t1['ci95'])}), sign-flip p = {fmt(t1['p'], 4)}, "
+            f"Holm-adjusted p = {fmt(t1['holm_p'], 4)}: binding {'strengthens' if t1['significant'] else 'is not shown to strengthen'} the verdict's effect"
+            f"{'' if t1['significant'] == t1['significant_after_holm'] else ' (this changes after Holm correction)'}"
+        ]
         for name in ("T2_rho_binding", "T3_rho_nonbinding"):
             e = r[name]
             rho = f"ρ = {fmt(e.get('rho'))}, 90% CI {fmt(e.get('rho_ci90'))}" if "rho" in e else "ρ not computed"
@@ -657,9 +734,14 @@ def render(results: Sequence[Dict[str, Any]], gates: Dict[str, Any]) -> str:
             fl = b.get("wording_floor_para_minus_own")
             lines += [
                 f"- Behavioural, {fam}: Δ = {fmt(d and d['mean'])}, 90% CI {fmt(d and d['ci90'])}, TOST: {d and d['reading']}; "
-                f"wording floor {fmt(fl and fl['mean'])}; change rate own vs para {fmt(b.get('change_rate_own_vs_para'))}, "
-                f"own vs flip {fmt(b.get('change_rate_own_vs_flip'))}"
+                f"change rate own vs flip {fmt(b.get('change_rate_own_vs_flip'))}"
             ]
+            if fl:
+                lines += [
+                    f"  - Wording floor (para vs own): signed mean {fmt(fl['signed_mean'])} (limit ±{EPSILON}), "
+                    f"churn rate {fmt(fl['churn_rate'])} (limit {MAX_CHURN}), gate: **{'pass' if fl['floor_ok'] else 'FAIL'}**; "
+                    f"TOST power at this noise {fmt(fl['tost_power_at_this_noise'], 2)}"
+                ]
         lines += [f"- **Combined reading under binding: {r['reading_binding']}**", "", "Secondary:", ""]
         for k, v in r["secondary"].items():
             lines += [f"- {k}: {fmt(v) if not isinstance(v, dict) else json.dumps({a: (round(b, 4) if isinstance(b, float) else b) for a, b in v.items()})}"]

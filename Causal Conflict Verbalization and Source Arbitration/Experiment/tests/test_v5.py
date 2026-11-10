@@ -447,6 +447,52 @@ class TestStages(unittest.TestCase):
         self.assertEqual(set(donors), {("gsm8k-1", o) for o in h5.ORDERS})
 
 
+class TestChartQASet(unittest.TestCase):
+    def rows(self, n=230, same_answer=()):
+        return [
+            h5.item_from_chartqa_row(
+                {"conflict_id": i, "image": None, "text_report": f"report {i}", "question": f"q{i}",
+                 "chart_answer": "7" if i in same_answer else str(1000 + i), "report_answer": "7" if i in same_answer else str(5000 + i)}
+            )
+            for i in range(n)
+        ]
+
+    def test_pinned_release_gives_229_without_item_45(self):
+        kept = h5.chartqa_analysis_set(self.rows())
+        self.assertEqual(len(kept), 229)
+        self.assertEqual(len(kept), h5.CHARTQA_ANALYSED_ITEMS)
+        self.assertNotIn("45", {it.id for it in kept})
+        self.assertEqual({it.id for it in kept}, {str(i) for i in range(230)} - {"45"})
+        self.assertEqual(len(h5.distinct(kept)), 229)  # distinct() removes nothing further
+
+    def test_wrong_row_count_is_refused(self):
+        with self.assertRaises(SystemExit):
+            h5.chartqa_analysis_set(self.rows(229))
+        with self.assertRaises(SystemExit):
+            h5.chartqa_analysis_set(self.rows(231))
+
+    def test_missing_excluded_item_is_refused(self):
+        rows = [r for r in self.rows(231) if r.id != "45"]  # 230 rows, but id 45 is absent
+        with self.assertRaises(SystemExit):
+            h5.chartqa_analysis_set(rows)
+
+    def test_equal_answer_pair_breaks_the_count(self):
+        with self.assertRaises(SystemExit):
+            h5.chartqa_analysis_set(self.rows(same_answer={3}))
+
+    def test_unpinned_revision_is_filtered_but_not_counted(self):
+        kept = h5.chartqa_analysis_set(self.rows(60), pinned=False)
+        self.assertEqual(len(kept), 59)
+        self.assertNotIn("45", {it.id for it in kept})
+
+    def test_dev_and_confirm_sizes(self):
+        kept = h5.chartqa_analysis_set(self.rows())
+        dev = h5.h4.split_phase(kept, "dev", 30)
+        confirm = h5.h4.split_phase(kept, "confirm", 30)
+        self.assertEqual((len(dev), len(confirm)), (30, 199))
+        self.assertFalse({it.id for it in dev} & {it.id for it in confirm})
+
+
 class TestConfig(unittest.TestCase):
     def args(self, **kw):
         base = dict(run_tag="t", model_id="Qwen/Qwen2-VL-2B-Instruct", model_revision=None, dataset_revision=None, split="chartqa",

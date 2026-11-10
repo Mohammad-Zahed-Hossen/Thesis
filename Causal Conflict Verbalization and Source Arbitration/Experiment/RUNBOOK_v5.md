@@ -74,6 +74,7 @@ python transplant_v5.py --split $SPLIT --phase dev --model_id $MODEL \
 
 Notes:
 - ChartQA uses `--dev_size 30` automatically. The harness refuses values of 100 or more.
+- ChartQA loads 230 rows and drops `conflict_id` 45, leaving 229 (30 dev, 199 confirm). If the counts differ, the harness stops: the dataset is not the pinned release.
 - Every stage resumes if it is interrupted: rerun the same command with the same `--run_tag`. A new tag is needed only after changing code, prompts or settings.
 - To see the gate counts without decoding anything, add `--gates_only` to the transplant command. It writes `results_v5/<run_tag>.gates.json`.
 - `--batch_size` applies to generation only. Margin scoring runs one request at a time; each request is two teacher-forced forward passes.
@@ -91,7 +92,7 @@ Copy `results_v5/` to the local machine. For each block, record these into the p
 | Competency yield | `gates.json`: `competent` out of `items` |
 | Edit-gate pass rate | `gates.json`: `passed` out of `competent`, plus `fail_reasons_by_order` |
 | ChartQA answer-only decodes matching *a_I* or *a_T* | `beh` rows, scored with `score_v5.behavioural_source` |
-| Dev wording floor | `beh` rows: change rate and mean difference, `para` vs `own`, per binding level |
+| Dev wording floor | `beh` rows, `para` vs `own`, per binding level: the signed mean (limit ±5.0 pp) and the churn rate (limit 5.0%). The gate fails if either is exceeded |
 | Boundary mismatches | Share of `dl` rows with `boundary_mismatch: true` (gate: ≤ 1%) |
 | Whitespace token | `ws_skipped` in `dl` rows: 2 means a separate space token was skipped for both candidates, 0 means the tokenizer has none |
 | Manipulation check | `free_binding` vs `donor` rows of the donor file: share of answers that follow the stated verdict |

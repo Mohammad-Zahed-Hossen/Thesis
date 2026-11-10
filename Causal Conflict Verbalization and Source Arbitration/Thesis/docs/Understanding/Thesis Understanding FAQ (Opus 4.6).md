@@ -1,9 +1,12 @@
 # Thesis Understanding FAQ
 
-**Document Purpose:** A comprehensive, evidence-grounded Q&A reference for understanding the thesis *"Does the Verdict Decide?"*. Every claim is cross-referenced against the actual codebase and data files. This document is suitable for sharing with collaborators, supervisors, or AI assistants for context loading.
+**Document purpose:** A Q&A reference for understanding the thesis *"Does the Verdict Decide?"*. It is suitable for sharing with collaborators, supervisors or AI assistants for context loading.
 
-**Last Updated:** 2026-11-11  
-**Ground Truth:** All references verified against the codebase at `Experiment/` and `Docs/PREREGISTRATION_VERDICT_TRANSPLANT.md`.
+**Status of this document:** AI-generated (originally by Opus 4.6), then audited line by line on 2026-11-11 against the code, the raw v4 dev rows, the pre-registration and the primary papers. It is a reference aid, not ground truth. The companion file `Thesis Understanding FAQ (Gemini 3.8 Flash).md` covers the same material in a longer teaching style; the two were harmonized in the same audit and share the numbers in §10.1.
+
+**What "audited" means here:** file and line references were opened and checked; dev numbers were recomputed from `Experiment/results_v4/dev2_*.jsonl`; paper claims were checked against the arXiv text. The audit was done by an AI session inside this project. It is not an outside review.
+
+**Epistemic tags:** [Verified] = checked against code, data or the paper itself. [Inferred] = a conclusion drawn from verified facts. [Hypothesis] = awaiting the confirmatory run. [Unknown] = cannot be stated without new data.
 
 ---
 
@@ -12,16 +15,17 @@
 1. [The Research Question](#1-the-research-question)
 2. [Title Evolution: Old vs. New](#2-title-evolution-old-vs-new)
 3. [The Experimental Method: Prefix-Forcing](#3-the-experimental-method-prefix-forcing)
-4. [Version History: V2 → V3 → V4 → V5](#4-version-history-v2--v3--v4--v5)
+4. [Version History: Pilots → V3 → V4 → V5](#4-version-history-pilots--v3--v4--v5)
 5. [The Dataset Choice](#5-the-dataset-choice)
-6. [Prompt Engineering vs. Causal Interpretability](#6-prompt-engineering-vs-causal-interpretability)
+6. [Prompt Engineering vs. Intervening on the Model's Own Text](#6-prompt-engineering-vs-intervening-on-the-models-own-text)
 7. [Why Not Build a New Architecture?](#7-why-not-build-a-new-architecture)
 8. [The Base Paper and Theoretical Foundations](#8-the-base-paper-and-theoretical-foundations)
 9. [Why a 3B Model Matters](#9-why-a-3b-model-matters)
 10. [What the Evidence Actually Shows (So Far)](#10-what-the-evidence-actually-shows-so-far)
-11. [Key Technical Concepts Glossary](#11-key-technical-concepts-glossary)
-12. [File Trust Levels and Navigation](#12-file-trust-levels-and-navigation)
-13. [Defence Preparation](#13-defence-preparation)
+11. [Open Risks and Possible Negative Outcomes](#11-open-risks-and-possible-negative-outcomes)
+12. [Key Technical Concepts Glossary](#12-key-technical-concepts-glossary)
+13. [File Trust Levels and Navigation](#13-file-trust-levels-and-navigation)
+14. [Defence Preparation](#14-defence-preparation)
 
 ---
 
@@ -29,34 +33,34 @@
 
 ### Q: What is the core research question of this thesis?
 
-**A:** When a Vision-Language Model (VLM) is shown contradictory information from an image and a typed text, and it writes a Chain-of-Thought (CoT) that includes a reliability verdict such as *"I consider the typed text more reliable"*—**did that stated verdict actually steer the model's final answer, or is it a post-hoc rationalization of a pre-existing bias?**
+**A:** When a Vision-Language Model (VLM) is shown an image and a typed text that support different answers, and it writes a reliability verdict such as *"I consider the typed text more reliable"*, **does that stated verdict steer which source's answer the model then gives?** The alternative is that the verdict is commentary that does not affect the answer.
 
-> **Source:** Pre-registration §1 — *"When an image and a typed text support different answers, does a vision-language model's verbalized verdict about which source is more reliable causally determine which source its answer follows?"*  
-> **File:** [`Docs/PREREGISTRATION_VERDICT_TRANSPLANT.md`, line 25](file:///d:/Thesis/Important/Causal%20Conflict%20Verbalization%20and%20Source%20Arbitration/Docs/PREREGISTRATION_VERDICT_TRANSPLANT.md#L25)
+> **Source:** Pre-registration §1 — *"When an image and a typed text support different answers, does a vision-language model's verbalized verdict about which source is more reliable causally determine which source its answer follows?"*
+> **File:** [`Docs/PREREGISTRATION_VERDICT_TRANSPLANT.md`, line 25](../../../Docs/PREREGISTRATION_VERDICT_TRANSPLANT.md#L25) [Verified]
 
 ### Q: What does "Does the Verdict Decide?" mean exactly?
 
-**A:** 
-- **"The Verdict"** = the specific sentence where the model declares one source more reliable (e.g., *"The typed text is more reliable"*).
-- **"Decide"** = does that sentence have **causal decision-making power** over the final numerical answer, or is it completely inert (a story the model tells after it has already decided)?
+**A:**
+- **"The Verdict"** = the one sentence in which the model declares a source more reliable.
+- **"Decide"** = when that sentence is reversed by intervention, does the answer move toward the source it now names?
 
-The full working title is: *"Does the Verdict Decide? Testing Whether Stated Source Reliability Steers Vision-Language Models under Image–Text Conflict"*.
-
-> **Source:** [`Docs/PREREGISTRATION_VERDICT_TRANSPLANT.md`, line 3](file:///d:/Thesis/Important/Causal%20Conflict%20Verbalization%20and%20Source%20Arbitration/Docs/PREREGISTRATION_VERDICT_TRANSPLANT.md#L3)
+The full working title is *"Does the Verdict Decide? Testing Whether Stated Source Reliability Steers Vision-Language Models under Image–Text Conflict"* ([prereg line 3](../../../Docs/PREREGISTRATION_VERDICT_TRANSPLANT.md#L3)).
 
 ### Q: What is the formal estimand?
 
-**A:** The **Controlled Direct Effect (CDE)** of reversing the model's own stated verdict on the log-likelihood margin Δℓ:
+**A:** The **Controlled Direct Effect (CDE)** of reversing the model's own stated verdict on the log-likelihood margin Δℓ, at a fixed binding level *b*, order *o* and wording template *k*:
 
 $$\mathrm{CDE}_{\ell,b,o,k}=E\big[\Delta\ell\mid do(M{=}m_{flip}),b,o,k\big]-E\big[\Delta\ell\mid do(M{=}m_{own}),b,o,k\big]$$
 
-A positive CDE means the answer moves toward the source the flipped verdict names.
+A positive CDE means the answer moves toward the source the flipped verdict names ([prereg lines 34–38](../../../Docs/PREREGISTRATION_VERDICT_TRANSPLANT.md#L34-L38)).
 
-> **Source:** [`Docs/PREREGISTRATION_VERDICT_TRANSPLANT.md`, lines 34–38](file:///d:/Thesis/Important/Causal%20Conflict%20Verbalization%20and%20Source%20Arbitration/Docs/PREREGISTRATION_VERDICT_TRANSPLANT.md#L34-L38)
+**Three boundaries on what this estimand can support:**
 
-**Important distinction:** This is **not** a natural indirect effect. The words "mediation" and "mediates" are not used. Forced verdicts are off-policy, so effects may not transfer to free generation.
+1. **It is not mediation.** It is not a natural indirect effect, and the words "mediation" and "mediates" are not used for it ([prereg line 42](../../../Docs/PREREGISTRATION_VERDICT_TRANSPLANT.md#L42)).
+2. **It is off-policy.** A forced verdict is not one the model chose. The effect may not transfer to free generation (prereg line 42, dossier §2.3). A CDE says what happens when the text is set by hand; it does not say what role the verdict plays when the model writes it itself.
+3. **It is a population average.** The CDE is a mean over items. A positive average does not show that the verdict decides the answer on any particular item, and a zero average does not show it never does (opposite effects on different items can cancel). The confirmatory tests are item-level means, so the thesis makes average claims only. [Inferred from prereg §7.1]
 
-> **Source:** [`Docs/PREREGISTRATION_VERDICT_TRANSPLANT.md`, line 42](file:///d:/Thesis/Important/Causal%20Conflict%20Verbalization%20and%20Source%20Arbitration/Docs/PREREGISTRATION_VERDICT_TRANSPLANT.md#L42)
+**Why "reversing the model's own verdict" and not "image verdict vs. text verdict":** on v4 dev, 94 of 96 parseable verdicts name the typed text. "The verdict names the image" is therefore almost the same variable as "the verdict was edited" ([prereg line 40](../../../Docs/PREREGISTRATION_VERDICT_TRANSPLANT.md#L40)). The matched pair `para` / `para_flip`, in which both verdicts are edited, is the pre-registered check for this.
 
 ---
 
@@ -64,438 +68,450 @@ A positive CDE means the answer moves toward the source the flipped verdict name
 
 ### Q: What was the original title, and why did it change?
 
-**A:** The original title was **"Causal Conflict Verbalization and Source Arbitration in VLMs"**, defined in September 2026.
+**A:** The original title was **"Causal Conflict Verbalization and Source Arbitration in VLMs"**. It comes from the September 2026 topic synthesis, where the research question was headed *"RQ 1: Causality of Conflict Verbalization in Cross-Modal Decision Arbitration"* (`Archive/VLM/Canonical_Cross_Modal_Thesis_Synthesis.md`, line 159, dated 20 September 2026). [Verified]
 
-> **Source:** `Archive/VLM/Canonical_Cross_Modal_Thesis_Synthesis.md`, line 159 — *"RQ 1: Causality of Conflict Verbalization in Cross-Modal Decision Arbitration"*
-
-| Dimension | Old Title | Current Title |
+| Dimension | Old title | Current title |
 |:---|:---|:---|
-| **What it sounds like** | Building a new system, architecture, or grand theory of how VLMs arbitrate data | Asking a sharp, measurable, hypothesis-driven scientific question |
-| **The core object** | "Verbalization" & "Arbitration" (vague, multi-step processes) | "The Verdict" (the specific reliability sentence) |
-| **The core action** | Descriptive: observing how the model verbalizes conflict | Causal: **intervening** to see if changing the verdict steers the answer |
-| **Manipulated variable** | The instruction (Z): asking for a conflict statement or not | The verdict content (M), via prefix-forcing, at fixed Z, order, and wording |
-| **Can it detect rationalization?** | **No.** A large prompt effect is compatible with the verbalization being epiphenomenal | **Partly.** Tests the controlled direct effect of the verdict |
-| **Is it falsifiable?** | Hard to answer with a clean "Yes" or "No" | Clean and testable: the verdict either steers the answer or it doesn't |
+| **What it sounds like** | Building an arbitration system or a general theory | One measurable, hypothesis-driven question |
+| **The core object** | "Verbalization" and "arbitration" (broad processes) | "The verdict" (one reliability sentence) |
+| **Manipulated variable** | The instruction (Z): ask for a conflict statement or not | The verdict content (M), by prefix-forcing, at fixed Z, order and wording |
+| **Can it detect rationalization?** | **No.** A large instruction effect is compatible with the verbalization doing nothing | **Partly.** It tests the controlled direct effect of a forced verdict, with the limits in §1 |
+| **Possible outcomes** | Hard to state in advance | Five pre-registered readings (§10.3), two of which are "inconclusive" and "undetermined" |
 
 ### Q: Why exactly is the old title no longer accurate?
 
-**A:** Three specific reasons, each verified against the codebase:
+**A:** Three reasons:
 
-1. **"Conflict Verbalization" named the instruction-level manipulation that was abandoned.** V1 and V3 changed the user prompt, not the model's generated text. The current design holds the prompt constant.
-   > **Verified:** [`Experiment/results_v3/README.md`, line 41](file:///d:/Thesis/Important/Causal%20Conflict%20Verbalization%20and%20Source%20Arbitration/Experiment/results_v3/README.md#L41) — *"Only the instruction was randomized"*
+1. **"Conflict Verbalization" named an instruction-level manipulation.** The pilots and v3 changed the user prompt, not the model's generated text.
+   > [`Experiment/results_v3/README.md`, line 41](../../../Experiment/results_v3/README.md#L41): the claim "Verbalization causes the shift" fails because *"Only the instruction was randomized"*. [Verified]
 
-2. **"Causal" in the old title referred to the instruction effect.** Changing the prompt and seeing different answers only proves the model follows instructions—something everyone already knows.
+2. **"Causal" referred to the instruction effect.** That effect is real and randomized, but it is the effect of an instruction. It cannot show whether the words the model then writes do any work.
 
-3. **The contributions attached to the old title were retracted by the project's own re-analysis.** The claimed "13.65% abstention" was actually only ~2.3%, and "visual capture reversal" was not supported.
-   > **Verified:** [`Experiment/results_v3/README.md`, lines 38–39](file:///d:/Thesis/Important/Causal%20Conflict%20Verbalization%20and%20Source%20Arbitration/Experiment/results_v3/README.md#L38-L39) — *"`score_v4.py` finds 38 (2.3%). Most say 'cannot determine if they agree', then solve."*
+3. **Claims attached to the old title did not survive re-analysis.** "13.65% refusals" is 38 items (2.3%) under `score_v4.py`, and "reverses default visual capture" is not supported (Arm 1 is 13.8% visual).
+   > [`Experiment/results_v3/README.md`, lines 37–38](../../../Experiment/results_v3/README.md#L37-L38); `results_v3/reanalysis_v3/reanalysis_v3.md`, row `arm3_conflict`: 38 (2.3%). The 2.3% label is itself an unvalidated heuristic. [Verified]
+
+4. **"Arbitration" is ill-posed for GSM8K/SVAMP.** Both problems are valid; neither source is wrong. Reliability claims belong to ChartQA-Conflict (prereg §3.1).
 
 ### Q: Isn't the new title just a shortcut or downgrade from the original idea?
 
-**A:** **No. The new title is the surgical repair that makes the original idea scientifically testable.**
+**A:** No, but the history is less tidy than "the pilots took a shortcut".
 
-The original September hypothesis was literally: *"Is the model's verbalized reason faithful, or is it a post-hoc rationalization of an entrenched modality preference?"* — which is the exact same question the current design tests. The original idea was never executed by V1 or V3; those experiments took a shortcut by changing the prompt instruction instead of intervening on the model's own generated words.
+The September specification asked: *"does requiring it to explicitly verbalize and explain the contradiction causally change its decisional arbitration, or does the explanation merely act as a post-hoc rationalization of an entrenched modality preference?"* (`Canonical_Cross_Modal_Thesis_Synthesis.md`, §12, line 347). So the post-hoc rationalization question was the founding motivation. [Verified]
 
-The current prefix-forcing method is **the first design in the repository that can actually test the original September question**.
+However, the same specification stated its own H₁/H₀ predictions as a **conflict prompt vs. length-matched placebo prompt** contrast (lines 350–353). That is an instruction contrast. It also listed a "Lanham-style prefilling" condition (lines 171 and 380–385), but with an authored contradiction statement, not a reversal of the model's own reliability verdict. [Verified]
 
-> **Source:** `Archive/VLM/Canonical_Cross_Modal_Thesis_Synthesis.md`, §8 — The Post-Hoc Rationalization Hypothesis (September 2026)
+So the pilots and v3 mostly ran what the September plan specified. The weakness was in the plan's primary contrast, and the v3 re-analysis exposed it. The current design is the first in the repository that holds the instruction fixed and intervenes on the model's own verdict. [Inferred]
 
 ---
 
 ## 3. The Experimental Method: Prefix-Forcing
 
-### Q: How does the experiment work mechanistically?
+### Q: How does the experiment work?
 
-**A:** The method is **prefix-forcing (prefilling)**. Instead of letting the model freely generate its opening words, you inject specific tokens into the assistant turn before generation begins:
+**A:** The method is **prefix-forcing (prefilling)**. The start of the assistant turn is written by the experimenter, and the model continues from it.
 
 ```
-PROMPT ENGINEERING (what V1/V3 did — NOT what we do now):
-  User Input Prompt [CHANGES]  →  Model Output [CHANGES]
-  (Tests instruction-following, not faithfulness.)
+INSTRUCTION CONTRAST (pilots and v3 — not what v5 does):
+  User prompt [CHANGES]  →  model output [CHANGES]
+  (Measures the effect of the instruction.)
 
-PREFIX-FORCING (what V4/V5 does — CAUSAL INTERPRETABILITY):
-  User Input Prompt [HELD 100% IDENTICAL]
+PREFIX-FORCING (v4/v5):
+  User prompt [identical within a contrast]
            │
            ▼
-  Model starts speaking:
-    Force Verdict: "IMAGE is more reliable"  →  Does Answer = Image Answer?
-    Force Verdict: "TEXT is more reliable"   →  Does Answer = Text Answer?
-  (Intervenes on the MODEL'S OWN reasoning trace.)
+  Assistant turn starts with the model's OWN earlier verbalization, either
+    unchanged (own)            → margin Δℓ at "####"
+    or with the source noun in its reliability sentence swapped (flip)
+                               → margin Δℓ at "####"
+  (Measures the effect of the verdict text at a fixed instruction.)
 ```
 
-In Judea Pearl's causal inference framework, prefix-forcing is an empirical do-operator: $do(M = m)$. You hold the environment (prompt, images, text, order) totally frozen and surgically manipulate a single intermediate variable (the verdict).
+In Pearl's notation this is treated as $do(M = m)$: the instruction, the image, the typed text, the evidence order and the wording template stay fixed, and only the verdict sentence changes. What it identifies is the controlled direct effect in §1, no more.
 
-> **Verified in code:** [`Experiment/harness_v5.py`, lines 224–237](file:///d:/Thesis/Important/Causal%20Conflict%20Verbalization%20and%20Source%20Arbitration/Experiment/harness_v5.py#L224-L237) — `render_chat()` injects the prefill into the assistant turn and strips the closing token, verifying the intervention wasn't altered by the chat template.
+> **Code:** [`Experiment/harness_v5.py`, lines 224–237](../../../Experiment/harness_v5.py#L224-L237) — `render_chat()` appends the prefill as the assistant turn, strips the closing `<|im_end|>`, and raises an error if the chat template altered the prefill. [Verified]
 
-### Q: What are the verdict variants used?
+**The primary measurement is not a decoded answer.** After the prefill `{m}\n\n####`, the two candidate answers are teacher-forced and their length-normalized log-probabilities compared (Δℓ, image minus text). Generated answers are a secondary outcome (prereg §6).
 
-**A:** Five variants are constructed from the model's own donor verbalization (prereg §5.2):
+### Q: What are the verdict variants?
+
+**A:** Five variants are built from the model's own donor verbalization (prereg §5.2):
 
 | Variant | Description | Purpose |
 |:---|:---|:---|
-| `own` | The model's verbalization unchanged | Baseline |
-| `flip` | Source nouns swapped inside the reliability sentence only | Primary intervention |
-| `none` | The reliability sentence deleted entirely | No-verdict control |
-| `para` | Reliability sentence replaced by a template naming the own source | Wording robustness check |
-| `para_flip` | Same template naming the opposite source | Matched wording pair |
+| `own` | The model's verbalization, unchanged | Baseline |
+| `flip` | Source noun phrases swapped inside the reliability sentence only | Primary intervention |
+| `none` | The reliability sentence deleted | Prefill for the explicit-source ceilings |
+| `para` | Reliability sentence replaced by a template naming the own source | Wording floor; matched pair |
+| `para_flip` | The same template naming the opposite source | Matched pair (both verdicts edited) |
 
-> **Verified in code:** [`Experiment/transplant_v5.py`, line 49](file:///d:/Thesis/Important/Causal%20Conflict%20Verbalization%20and%20Source%20Arbitration/Experiment/transplant_v5.py#L49) — `VERDICTS = ("own", "flip", "none", "para", "para_flip")`
+> **Code:** [`Experiment/transplant_v5.py`, line 49](../../../Experiment/transplant_v5.py#L49) — `VERDICTS = ("own", "flip", "none", "para", "para_flip")`. [Verified]
 
-The paraphrase templates are:
+The paraphrase templates ([`transplant_v5.py`, lines 50–55](../../../Experiment/transplant_v5.py#L50-L55)) [Verified]:
 1. "I consider {X} more reliable."
 2. "{X} seems more reliable to me."
 3. "I would treat {X} as more reliable."
 4. "{X} is the more reliable source."
 
-> **Verified in code:** [`Experiment/transplant_v5.py`, lines 50–55](file:///d:/Thesis/Important/Causal%20Conflict%20Verbalization%20and%20Source%20Arbitration/Experiment/transplant_v5.py#L50-L55)
+Authored sentences from v4 (`rel_image` / `rel_text`) are not run in v5 (prereg §5.2, step 3).
 
 ---
 
-## 4. Version History: V2 → V3 → V4 → V5
+## 4. Version History: Pilots → V3 → V4 → V5
 
-### Q: Why do V2, V3, V4, and V5 exist? What did each version fix?
+### Q: What did each stage do, and what did it get wrong?
 
-**A:** Each version exposed a methodological flaw that the next version was engineered to eliminate:
+> **Correction from the audit:** earlier versions of this FAQ described a "V2 stimulus layer". There is no such stage. The "-v2" is part of the Hugging Face dataset names. In the repository, v1 and v2 are two 20-item pre-freeze pilots (`Experiment/archive/pilots_v1_v2/`), and a 500-item production run is stored in `Archive/Experiment_History/`. [Verified]
 
 ```mermaid
 flowchart TD
-    V2["V2: Stimuli & Datasets<br>• Modality conflict dataset pairs<br>• GSM8K/SVAMP + ChartQA"] --> V3["V3: Pilot (N=1,619)<br>• Compared 'placebo' vs 'conflict' prompts<br>• FLAW: Randomized the instruction, NOT verbalization"]
-    V3 --> V4["V4: Prefix-Forced Transplants (Dev N=200)<br>• Transplanted model's own CoT / authored verdicts<br>• FLAW: Recency bias (~15pp), coarse swaps, instruction dominance"]
-    V4 --> V5["V5: Confirmatory Rigor Harness<br>• Counterbalanced order (Img-Txt / Txt-Img)<br>• Binding arm & explicit ceilings<br>• Minimal-edit verdict flips & Δℓ log-likelihood margin"]
+    P["Pilots (Sept 2026)<br>• Two 20-item pre-freeze pilots, then N=500<br>• Instruction contrast"] --> V3["V3 pilot (N=1,619)<br>• Placebo vs. conflict instruction<br>• FLAW: the instruction was randomized, not the verbalization"]
+    V3 --> V4["V4 prefix-forced transplants (dev N=200)<br>• Instruction fixed; verbalization transplanted<br>• FLAWS: fixed evidence order, whole-text swaps, authored verdicts, high wording churn"]
+    V4 --> V5["V5 harness (written, CPU-tested, not yet run on GPU)<br>• Both evidence orders<br>• Binding arm and explicit ceilings<br>• Minimal-edit flips; Δℓ margin as primary outcome"]
 ```
 
-#### V2 — The Stimulus Layer
-- **What:** Input data generation from *Which Source Wins?* (arXiv:2608.17205). Math image of problem *i* paired with text of problem *(i+1) mod N*.
-- **Datasets:** `vlm-modality-research/modality-conflict-arbitration-v2` and `vlm-modality-research/chartqa-evidence-conflict-v2`
-> **Verified:** [`Experiment/harness_v4.py`, lines 50–54](file:///d:/Thesis/Important/Causal%20Conflict%20Verbalization%20and%20Source%20Arbitration/Experiment/harness_v4.py#L50-L54) — dataset pins with exact revision hashes
+#### Stimuli (all stages)
+- From *Which Source Wins?* (Ghosh, Gupta & Wang, arXiv:2608.17205): the rendered image of problem *i* paired with the typed text of problem *(i+1) mod N*; equal-answer pairs excluded.
+- Dataset and revision pins: [`Experiment/harness_v4.py`, lines 49–54](../../../Experiment/harness_v4.py#L49-L54). [Verified]
 
-#### V3 — The Prompt Contrast Pilot (N = 1,619)
-- **What it did:** Fed conflict stimuli under two conditions: (1) Placebo prompt ("Solve the problem..."), (2) Conflict prompt ("Check for conflicts and state which is more reliable").
-- **Result:** +63.7 pp swing toward text.
-- **Fatal Flaw:** The **prompt instruction** was randomized, not the model's verbalization. This proved the model follows instructions, not that the CoT is causally faithful.
-- **Additional retracted claims:**
-  - "13.65% refusals" → actually 2.3% [Verified]
-  - "Zero truncation" → 98.1%, 37.6%, 44.2% hit the cap [Verified]
-  - "Deterministic #### parsing" → exact matches via `####` were 1, 0, 0 in Arms 1–3 [Verified]
+#### V3 — the instruction-contrast pilot (N = 1,619; 1,600 distinct-answer items)
+- **What it did:** the same conflict stimuli under different instructions, including a placebo (describe) instruction and a conflict instruction (state whether the sources conflict and which is more reliable).
+- **Result that holds:** v3's "visual" label fell from 89.5% to 25.8%, a 63.7 pp shift (problem-clustered 95% interval 59.4 to 68.0 pp). On exact answers, text-matching answers rose from 4.2% to 36.1%.
+- **Why it cannot test faithfulness:** only the instruction was randomized.
+- **Claims that did not hold:**
+  - "13.65% refusals" → 38 items (2.3%) [Verified]
+  - "Zero truncation" → 98.1%, 37.6% and 44.2% of Arms 1–3 hit the token cap [Verified]
+  - "Deterministic #### parsing" → exact matches via a numeric `####` were 1, 0 and 0 in Arms 1–3; the last-number fallback did the work [Verified]
+- v3 also ran with `repetition_penalty` 1.05, which the dev penalty check shows raises image answers and abstention labels.
 
-> **Verified:** [`Experiment/results_v3/README.md`, lines 30–43](file:///d:/Thesis/Important/Causal%20Conflict%20Verbalization%20and%20Source%20Arbitration/Experiment/results_v3/README.md#L30-L43) — "What holds up" and "What doesn't" sections
-> **Code:** [`Experiment/archive/harness_v3/`](file:///d:/Thesis/Important/Causal%20Conflict%20Verbalization%20and%20Source%20Arbitration/Experiment/archive/harness_v3/)
+> [`Experiment/results_v3/README.md`, lines 28–44](../../../Experiment/results_v3/README.md#L28-L44); code in `Experiment/archive/harness_v3/`.
 
-#### V4 — Prefix-Forced Transplants (Dev N = 200)
-- **Breakthrough:** Held the prompt constant and injected/prefilled the model's opening sentence.
-- **Flaws discovered in dev:**
-  1. **Recency Bias (~15 pp):** Whichever source was placed second pulled the model's preference, regardless of content.
-  2. **Coarse Swaps:** Comparing `m0` (description CoT) to `m1` (conflict CoT) swapped hundreds of tokens, confounding content, length, and verdict.
-  3. **Instruction Dominance:** Under the conflict prompt, authored verdicts (`rel_image` vs `rel_text`) had near-zero effect because the strong instruction overwhelmed the prefix.
+#### V4 — prefix-forced transplants (dev, N = 200, Qwen2.5-VL-3B only)
+- **Step forward:** the instruction is held fixed and the opening of the model's response is prefilled.
+- **Limitations found:**
+  1. **Evidence order was fixed.** The v4 prompt always puts the image first. Order was never varied in v4, so no recency effect was measured in this project. The concern comes from the literature: with the instruction fixed, placing an image after conflicting text raised image-matching answers for Qwen2.5-VL-3B by +16.7 pp (GQA) and +15.0 pp (VQAv2) on natural images (arXiv:2609.26986, Table 1). Whether a similar effect exists on these stimuli is [Unknown] until the v5 dev pass.
+  2. **Whole-text swaps.** The `m0` vs. `m1` contrasts replace the entire verbalization, so content, length and verdict are confounded.
+  3. **Authored verdicts.** `rel_image` / `rel_text` are sentences written by the experimenter, not edits of the model's own words.
+  4. **High wording churn.** Two same-meaning prefills changed the answer-source label on 23–25% of the 110 competent items (§10.1).
+  5. **No verdict effect under the conflict instruction** (−1.8 pp). Instruction dominance is one explanation; unfaithfulness is another. Dev data cannot separate them. [Hypothesis]
 
-> **Verified:** [`Experiment/results_v4/README.md`, lines 37–46](file:///d:/Thesis/Important/Causal%20Conflict%20Verbalization%20and%20Source%20Arbitration/Experiment/results_v4/README.md#L37-L46) — dev2 results
-> **Code:** [`Experiment/harness_v4.py`](file:///d:/Thesis/Important/Causal%20Conflict%20Verbalization%20and%20Source%20Arbitration/Experiment/harness_v4.py), [`Experiment/transplant_v4.py`](file:///d:/Thesis/Important/Causal%20Conflict%20Verbalization%20and%20Source%20Arbitration/Experiment/transplant_v4.py)
+> [`Experiment/results_v4/README.md`](../../../Experiment/results_v4/README.md); `Experiment/results_v4/analysis_dev2/analysis_v4.md`; code in `Experiment/harness_v4.py` and `Experiment/transplant_v4.py`.
 
 > [!WARNING]
-> `results_v4/README.md` §3 says these dev numbers "confirm the central causal hypothesis." **That is an overclaim.** They swap the whole verbalization (content + length + verdict confounded), not a minimal edit. These are dev data only, not findings.
+> `results_v4/README.md` §3 used to say the dev numbers "confirm the central causal hypothesis". **That was an overclaim**, corrected on 2026-11-11: those contrasts swap the whole verbalization. They are dev data for tuning, not findings.
 
-#### V5 — The Rigorous Confirmatory Harness
-- **Status:** Written and CPU-tested. Not yet run on a GPU. No confirmatory data exists.
-- **Key design rules (all mandatory):**
+#### V5 — the confirmatory harness
+- **Status:** written; CPU tests pass (re-run in this audit: `python -m unittest discover tests` from `Experiment/` → OK). Not yet run on a GPU. No v5 data of any kind exists.
+- **Design rules:**
 
-| Rule | What It Fixes |
+| Rule | What it addresses |
 |:---|:---|
-| **Counterbalanced order** | Half `⟨image⟩⟨text⟩`, half `⟨text⟩⟨image⟩`. Eliminates recency bias. |
-| **Minimal-edit verdict flips** | Swap only the source noun in the model's own reliability clause. Token Jaccard ≥ 0.85, at most 2 noun phrases swapped. |
-| **Binding arm** | "Solve only the problem from the source you named as more reliable." Tests whether the verdict works when explicitly authorized. |
-| **Single-source ceilings** | `explicit_image` / `explicit_text` with `none` prefill. Maximum achievable movement. |
-| **Competency filtering** | Only evaluate items where the model solves both the image and text problems in isolation. |
-| **Δℓ (log-likelihood margin)** | Primary outcome. Teacher-forced at `####`, image minus text. Not dependent on messy regex string matching. |
-| **K = 4 wording templates** | Four paraphrased instruction wordings to measure wording noise floor. |
+| **Counterbalanced order** | Every item is run in both `<image><text>` and `<text><image>`. This balances any order effect across the contrast and lets it be estimated. It does not remove it. |
+| **Minimal-edit verdict flips** | Only source noun phrases inside the model's own reliability sentence are swapped. Gates: one sentence changed; the parsed source reverses; token Jaccard ≥ 0.85; at most two noun phrases swapped; grammar check. |
+| **Binding arm** | "Then solve only the problem from the source you named as more reliable, and ignore the other problem." Without it, a null cannot be told apart from the instruction dominating. |
+| **Explicit-source ceilings** | `explicit_image` / `explicit_text` with the `none` prefill. A reference for how far a direct instruction moves Δℓ. It is a yardstick, not a proven maximum. |
+| **Competency filter** | Only items the model solves from the image alone and from the text alone enter the transplant. |
+| **Δℓ as primary outcome** | Teacher-forced at `####`, image minus text, length-normalized. |
+| **K = 4 instruction templates** | Four wordings of each instruction, so the result does not rest on one phrasing. (The wording *floor* is a different thing: it is `own` vs. `para`.) |
+| **Greedy decoding, repetition penalty 1.0, pinned revisions** | Reproducibility; avoids the v3 penalty artefact. |
 
-> **Verified:** [`Experiment/README.md`, lines 10–16](file:///d:/Thesis/Important/Causal%20Conflict%20Verbalization%20and%20Source%20Arbitration/Experiment/README.md#L10-L16) — what v5 adds
-> **Code:** [`Experiment/harness_v5.py`](file:///d:/Thesis/Important/Causal%20Conflict%20Verbalization%20and%20Source%20Arbitration/Experiment/harness_v5.py), [`Experiment/transplant_v5.py`](file:///d:/Thesis/Important/Causal%20Conflict%20Verbalization%20and%20Source%20Arbitration/Experiment/transplant_v5.py), [`Experiment/score_v5.py`](file:///d:/Thesis/Important/Causal%20Conflict%20Verbalization%20and%20Source%20Arbitration/Experiment/score_v5.py)
-> **Design spec:** [`Docs/PREREGISTRATION_VERDICT_TRANSPLANT.md`](file:///d:/Thesis/Important/Causal%20Conflict%20Verbalization%20and%20Source%20Arbitration/Docs/PREREGISTRATION_VERDICT_TRANSPLANT.md)
+> [`Experiment/README.md`, lines 10–16](../../../Experiment/README.md#L10-L16); code in [`harness_v5.py`](../../../Experiment/harness_v5.py), [`transplant_v5.py`](../../../Experiment/transplant_v5.py), [`score_v5.py`](../../../Experiment/score_v5.py), [`analyze_v5.py`](../../../Experiment/analyze_v5.py). [Verified]
 
 ---
 
 ## 5. The Dataset Choice
 
-### Q: Why were these specific datasets chosen?
+### Q: Which datasets are used, and why?
 
-**A:** Two datasets are used, each serving a different purpose:
-
-| Dataset | HuggingFace ID | Items | Type of Conflict | What "Reliability" Means |
+| Dataset | Hugging Face ID | Size | Type of conflict | What "reliability" means |
 |:---|:---|:---|:---|:---|
-| **GSM8K/SVAMP Math** | `vlm-modality-research/modality-conflict-arbitration-v2` | 200 dev + confirm pool | Task-selection: two different valid math problems | Neither source is "wrong." Results are described as **source-following**, not reliability judgement. |
-| **ChartQA-Conflict** | `vlm-modality-research/chartqa-evidence-conflict-v2` | 229 total (30 dev) | Evidence: chart shows one value, report claims another | The chart is the correct source. **Genuine factual reliability.** |
+| **GSM8K/SVAMP** | `vlm-modality-research/modality-conflict-arbitration-v2` | 13.0K rows in split `train` (all degradation levels and channels). Filtered to clean image-channel rows: 1,304 GSM8K + 296 SVAMP distinct-answer pairs. 200 are spent as dev. | Task selection: two different valid problems | Nothing. Neither source is wrong. Results are described as **source following**. |
+| **ChartQA-Conflict** | `vlm-modality-research/chartqa-evidence-conflict-v2` | Split `test`. The paper analyses 229 items; the Hub viewer currently shows 230 rows (see note). 30 dev. | Evidence: the chart supports one answer, a counterfactual report another | The chart is the original evidence. This is the regime where a reliability claim is meaningful. |
 
-> **Verified:** [`Docs/PREREGISTRATION_VERDICT_TRANSPLANT.md`, lines 83–85](file:///d:/Thesis/Important/Causal%20Conflict%20Verbalization%20and%20Source%20Arbitration/Docs/PREREGISTRATION_VERDICT_TRANSPLANT.md#L83-L85) and [lines 93–97](file:///d:/Thesis/Important/Causal%20Conflict%20Verbalization%20and%20Source%20Arbitration/Docs/PREREGISTRATION_VERDICT_TRANSPLANT.md#L93-L97)
-> **Code:** [`Experiment/harness_v4.py`, lines 49–54](file:///d:/Thesis/Important/Causal%20Conflict%20Verbalization%20and%20Source%20Arbitration/Experiment/harness_v4.py#L49-L54) — dataset IDs and revision pins
+> Prereg [lines 83–86](../../../Docs/PREREGISTRATION_VERDICT_TRANSPLANT.md#L83-L86) and [lines 95–98](../../../Docs/PREREGISTRATION_VERDICT_TRANSPLANT.md#L95-L98); Hub dataset viewer, read 2026-11-11; arXiv:2608.17205 §3.4. [Verified]
 
-### Q: Is the dataset the problem? What if I chose another dataset?
+> **229 vs. 230 [Unknown]:** the dataset card says "230 reviewed conflicts" and the Hub viewer shows 230 rows at the current head. The paper removed one item after an audit, leaving 229. `harness_v5.load_items` drops only equal-answer pairs. Count the rows at the pinned revision during the dev pass; if it is 230, the prereg's "229" and "199 confirm items" need a one-line correction before the freeze.
 
-**A:** The dataset is not the problem—it is one of the strongest available for this kind of research:
+### Q: Is the dataset the problem? What if I chose another one?
 
-1. **Discrete, automatable answers:** Both datasets produce single numerical answers (e.g., 15 vs. 24), enabling 100% objective, automated scoring. Open-ended text datasets (VQA, POPE) would require human judges or another LLM, introducing massive subjective noise.
+**A:** The datasets are a reasonable fit, with known limits:
 
-2. **Comparability with published work:** *Which Source Wins?* (arXiv:2608.17205) established this benchmark. Using their dataset lets the thesis directly challenge and refine published findings.
+1. **Two known candidate answers per item.** Each item carries the image-supported and the text-supported answer, so the response shows which source was followed and a margin between the two can be scored. GSM8K/SVAMP answers are numbers. ChartQA answers are not all numbers (they include labels and yes/no), which is why v5 has a typed normalizer and a strict parser (prereg §4.4).
+2. **A published reference point.** *Which Source Wins?* built these stimuli. Direct numerical comparison is limited, though: that paper tested Qwen2-VL-2B and Qwen2.5-VL-**7B** (not the 3B), used "Source A/B" labels, and reports its margin as text minus image. [Verified, arXiv:2608.17205 §3.1, §3.3]
+3. **The fix was reframing.** Calling GSM8K/SVAMP "arbitration" was the error. Treated as source choice under conflict, it is well defined.
 
-3. **The real fix was reframing, not replacing:** The problem wasn't the dataset—it was the old title calling GSM8K "arbitration." Once you stop asking the model to judge "reliability" on math problems and treat it as **source choice under conflict**, the math dataset works cleanly. ChartQA remains the test for actual factual reliability.
-
-> **Source:** [`Docs/PREREGISTRATION_VERDICT_TRANSPLANT.md`, line 85](file:///d:/Thesis/Important/Causal%20Conflict%20Verbalization%20and%20Source%20Arbitration/Docs/PREREGISTRATION_VERDICT_TRANSPLANT.md#L85) — *"Interpretation: neither source is wrong. Results are described as source following, not reliability judgement."*
+Other datasets are possible. Barua et al. (arXiv:2610.19407) score candidate-answer log-odds on DocVQA, VQAv2 and RealworldQA. Switching would mean building new conflict pairs and re-doing the competency and dev work, not that the method breaks.
 
 ### Q: What is the known limitation of ChartQA-Conflict?
 
-**A:** The report states values directly, while the chart requires visual reading. This makes text evidence 1.4–3.8× stronger structurally, independent of content.
-
-> **Source:** [`Docs/PREREGISTRATION_VERDICT_TRANSPLANT.md`, line 97](file:///d:/Thesis/Important/Causal%20Conflict%20Verbalization%20and%20Source%20Arbitration/Docs/PREREGISTRATION_VERDICT_TRANSPLANT.md#L97) — cites arXiv:2610.19407, pp. 7–8
+**A:** The report states the value directly; the chart has to be read. Text is therefore likely to be the stronger evidence for a reason unrelated to trust. Barua et al. measured this kind of asymmetry on other datasets (DocVQA, VQAv2, RealworldQA): on clean inputs, mean text evidence exceeded mean visual evidence by a factor of 1.4–3.8, "expected given how the stimuli are constructed: the text states the answer while the image must be interpreted" (arXiv:2610.19407, pp. 7–8). That figure was not measured on ChartQA-Conflict; it is cited by analogy. [Verified for the paper; Inferred for this dataset]
 
 ---
 
-## 6. Prompt Engineering vs. Causal Interpretability
+## 6. Prompt Engineering vs. Intervening on the Model's Own Text
 
 ### Q: Am I just doing prompt engineering?
 
-**A:** It depends on which version of the experiment you're asking about:
-
-| Version | Honest Assessment | Why |
+| Stage | Assessment | Why |
 |:---|:---|:---|
-| **V1 & V3** | **Yes, 100% prompt engineering.** | Changed the user prompt between conditions. Measuring output shifts from different prompts is textbook prompt engineering. |
-| **V4 & V5** | **No. This is causal interpretability (prefix-forcing).** | The user prompt is held 100% identical. The intervention is on the model's own generated reasoning trace. |
+| **Pilots and v3** | An instruction contrast | The user prompt differs between conditions. That measures the effect of the instruction. |
+| **v4 and v5** | An intervention on the response prefix | Within each contrast the user prompt is identical. What differs is text in the assistant turn. |
 
-The critical distinction:
-- **Prompt engineering** changes what **you say** to the model → tests instruction-following.
-- **Prefix-forcing** changes what **the model says** at the start of its response → tests whether the model's own intermediate reasoning causally steers its conclusion.
+The distinction:
+- **Changing the instruction** tests how the model responds to what it is told.
+- **Prefix-forcing** tests whether text in the model's own turn (here, a verdict it wrote, minimally edited) changes what follows.
 
-Top labs (Anthropic, NYU, Oxford) use this exact technique. The key papers establishing this method:
-- Lanham et al. (2023) — *Measuring Faithfulness in Chain-of-Thought Reasoning*
-- Turpin et al. (NeurIPS 2023) — *Language Models Don't Always Say What They Think*
+Be precise about the limit: prefix-forcing edits *output tokens*. It does not read or edit internal representations. It is a behavioural intervention, not mechanistic interpretability.
+
+**Related methods (checked against the papers):**
+- Lanham et al. (2023), *Measuring Faithfulness in Chain-of-Thought Reasoning* (arXiv:2307.13702): intervene on the CoT itself (truncation, inserted mistakes, paraphrasing, filler tokens) and measure whether the answer changes. This is the direct methodological ancestor.
+- Turpin et al. (NeurIPS 2023), *Language Models Don't Always Say What They Think* (arXiv:2305.04388): perturb the **input** with biasing features and show the CoT does not mention them. This motivates the question but is not prefix-forcing.
+- CoT-Mediate (arXiv:2607.27304): prefix-forces an edited version of the model's own CoT in medical VQA. The dossier identifies it as the closest method.
 
 > [!IMPORTANT]
-> If you ever slip and change the prompt wording between conditions, you immediately degrade back to prompt engineering. The v5 harness enforces identical prompts via literal template strings verified by tests.
-> **Verified:** [`Experiment/harness_v5.py`, lines 57–109](file:///d:/Thesis/Important/Causal%20Conflict%20Verbalization%20and%20Source%20Arbitration/Experiment/harness_v5.py#L57-L109) — K=4 literal templates, identical across verdict conditions
-> **Test enforcement:** [`Experiment/tests/test_v5.py`](file:///d:/Thesis/Important/Causal%20Conflict%20Verbalization%20and%20Source%20Arbitration/Experiment/tests/test_v5.py)
+> If the instruction wording differs between the two sides of a contrast, the comparison is an instruction contrast again. In v5 the templates are literal strings ([`harness_v5.py`, lines 57–109](../../../Experiment/harness_v5.py#L57-L109)) and [`tests/test_v5.py`](../../../Experiment/tests/test_v5.py) checks them against the pre-registration text. Note that the binding and non-binding arms *do* differ in instruction by design; the verdict contrast is always made within one arm.
 
 ---
 
 ## 7. Why Not Build a New Architecture?
 
-### Q: Why am I not building a new system/architecture? Isn't that higher value?
+### Q: Why am I not building a new system? Isn't that higher value?
 
-**A:** This is the classic "Engineer vs. Scientist" trap. In modern AI research, **diagnostic science often has higher impact than toy architectures.**
+**A:**
 
-#### Reason 1: Compute Reality
-Building a competitive VLM architecture requires hundreds of thousands of dollars in GPU clusters, terabytes of multimodal data, and massive engineering teams. A thesis on a 16 GB Colab GPU building a "novel architecture" would produce a toy model that no reviewer takes seriously.
-
-#### Reason 2: The Most Cited AI Papers Are Often Diagnostic
-Papers that did **not** propose new architectures but became foundational:
-- **Lanham et al. (2023):** Proved models don't rely on their own CoT reasoning. No new model built.
-- **Turpin et al. (NeurIPS 2023):** Showed larger models are better at generating plausible lies. No new architecture.
-
-#### Reason 3: Diagnosis Must Precede Design
-You cannot build an "arbitration system" without first knowing whether the model's current reasoning mechanism is faithful or illusory. If the verdict has zero causal power, prompt engineering fixes are impossible—deeper architectural intervention is needed. If the verdict IS faithful under binding, standard decoding suppresses latent capabilities.
-
-**Either result gives the community actionable, foundational knowledge.**
+1. **Compute.** The project runs on a 16 GB Colab GPU. Training a competitive VLM is out of reach at that scale; inference-only experiments on open-weight models are not.
+2. **Diagnostic work is an established contribution type.** Lanham et al. (2023) and Turpin et al. (2023) proposed no new model. Lanham et al. found "large variation across tasks in how strongly [models] condition on the CoT"; Turpin et al. found that biasing features changed answers (accuracy drops of up to 36%) without being mentioned in the explanation. [Verified]
+3. **Diagnosis informs design.** Whether a stated verdict carries any decision weight is useful to know before building anything that relies on such statements. Either outcome is informative, within the scope of two small models and two datasets. It would not by itself show that architectural change is needed.
 
 ---
 
 ## 8. The Base Paper and Theoretical Foundations
 
-### Q: Is *"Which Source Wins?"* the base paper of my work?
+### Q: Is *Which Source Wins?* the base paper?
 
-**A:** **Yes for the stimulus, but NO for the scientific question.**
+**A:** For the stimuli, yes. For the scientific question, no.
 
-| Role | Paper | What It Provides |
+| Role | Paper | What it provides |
 |:---|:---|:---|
-| **Stimulus testbed** | *Which Source Wins?* (arXiv:2608.17205) | The paired image-text conflicts (GSM8K/SVAMP, ChartQA). The raw phenomenon: models have built-in modality biases. |
-| **Theoretical foundation** | Lanham et al. (2023) | Chain-of-Thought faithfulness testing methodology. |
-| **Theoretical foundation** | Turpin et al. (NeurIPS 2023) | Demonstrated unfaithful rationalization in LLMs. The "faithfulness scaling paradox." |
-| **Methodological baseline** | Dassen et al. (arXiv:2610.33841) | Natural-language instruction for modality steering (replicated by our explicit-source ceiling arms, not claimed as new). |
-| **Evidence on text strength** | Barua et al. (arXiv:2610.19407) | Text evidence 1.4–3.8× stronger than chart evidence structurally. |
-
-**In short:** *Which Source Wins?* built the racetrack. Lanham and Turpin gave the engine to test whether the driver is actually steering.
+| **Stimuli** | *Which Source Wins?* — Ghosh, Gupta & Wang (arXiv:2608.17205) | The GSM8K/SVAMP conflict construction and ChartQA-Conflict. It measures how preference shifts as one source is degraded. Its margin is scored "with no chain-of-thought, so the margin measures direct-answer preference, not reasoning-trace attribution" (p. 5). It contains no faithfulness analysis. |
+| **Method ancestry** | Lanham et al. (arXiv:2307.13702) | Intervening on the CoT to test whether the answer depends on it. |
+| **Motivation** | Turpin et al. (arXiv:2305.04388, NeurIPS 2023) | CoT explanations can omit what actually drove the answer. |
+| **Closest method** | CoT-Mediate (arXiv:2607.27304) | Prefix-forced edits of the model's own CoT; paraphrase floors of 0.5–3.3%. |
+| **Order protocol** | Li et al., *Evidence Noncommutativity* (arXiv:2609.26986) | Fixed instruction, swapped evidence order. |
+| **Ceiling baseline** | Dassen et al., *Grounding on Request* (arXiv:2610.33841) | Natural-language modality requests; they give weak control, especially for image requests. Our explicit-source arms replicate this baseline and are not claimed as new. That paper does not prefix-force any model text. |
+| **Evidence strength** | Barua, Mahowald & Rudman (arXiv:2610.19407) | Text evidence 1.4–3.8× stronger than visual evidence on clean inputs in their datasets. |
 
 ### Q: What is the novelty boundary?
 
-**A:** From the pre-registration §1.1, verbatim:
+**A:** From pre-registration §1.1 ([line 48](../../../Docs/PREREGISTRATION_VERDICT_TRANSPLANT.md#L48)), verbatim:
 
 > *"Within the fourteen sources read, no study intervenes on a vision-language model's own stated source-reliability verdict, by prefix-forcing a minimally edited version of it, and measures whether the answer follows under image–text conflict with evidence order counterbalanced. Nor does any test whether an instruction that binds the answer to that verdict changes its effect."*
 
-> **Source:** [`Docs/PREREGISTRATION_VERDICT_TRANSPLANT.md`, lines 47–48](file:///d:/Thesis/Important/Causal%20Conflict%20Verbalization%20and%20Source%20Arbitration/Docs/PREREGISTRATION_VERDICT_TRANSPLANT.md#L47-L48)
+This is a statement about fourteen sources, not about the field. CMC-Bench (Catapang 2026) is still unread and must be read before the related-work chapter. Do not write "first" or "novel" beyond this boundary.
 
 ---
 
 ## 9. Why a 3B Model Matters
 
-### Q: There are trillion-parameter models. Why does work on a 3B model matter?
+### Q: Much larger models exist. Why does work on a ~3B model matter?
 
-**A:** Three concrete reasons:
+#### Reason A: the method needs continuation scoring
+The primary outcome requires (1) writing an arbitrary prefix into the assistant turn and (2) scoring the log-probability of two given continuations. *Which Source Wins?* reports that GPT-5.6-Luna, Gemini-3.5-Flash and InternVL2-8B "lack the continuation-scoring interface the CLL margin requires", so it used them for generated answers only (arXiv:2608.17205, §3.1). Open weights give both. [Verified]
 
-#### Reason A: Frontier Models Are Black Boxes
-To measure true causal faithfulness, you need **white-box access**:
-1. You must force arbitrary prefill tokens into the assistant turn.
-2. You must extract exact token log-probabilities (Δℓ) at the answer boundary.
+> **Code:** [`Experiment/harness_v5.py`, lines 479–508](../../../Experiment/harness_v5.py#L479-L508) — `HFBackend.score()` teacher-forces both candidates and returns `dl`.
 
-OpenAI and Google do not give logit-level prefix-forcing access on GPT-4o or Gemini. Top interpretability researchers *deliberately* use models like Qwen2.5-VL-3B because they are fully transparent.
+#### Reason B: the model can do the single-source tasks, most of the time
+On v4 dev, Qwen2.5-VL-3B solved 72.8% of problems from the image alone and 75.4% from the text alone (195 distinct problems; McNemar p = 0.51). Both from the same item: 110 of 200. So the competency filter keeps about 55% of items.
 
-> **Verified in code:** [`Experiment/harness_v5.py`, lines 479–508](file:///d:/Thesis/Important/Causal%20Conflict%20Verbalization%20and%20Source%20Arbitration/Experiment/harness_v5.py#L479-L508) — `HFBackend.score()` extracts token-level log-probabilities with teacher-forcing, which requires full model weights access.
+> `Experiment/results_v4/analysis_dev2/analysis_v4.md`, "Solvability"; 110/200 recomputed in this audit. [Verified]
 
-#### Reason B: 3B Models in 2026 Are Not Toys
-`Qwen2.5-VL-3B-Instruct` achieves 72.8% on image-only and 75.4% on text-only math problem solving. These are not trivial solve rates.
+Qwen2.5-VL-3B is also used by neighbouring work (arXiv:2609.26986, arXiv:2610.19407), which gives comparison points.
 
-> **Verified:** [`Experiment/results_v4/README.md`, lines 49–52](file:///d:/Thesis/Important/Causal%20Conflict%20Verbalization%20and%20Source%20Arbitration/Experiment/results_v4/README.md#L49-L52) — base arm solvability ceilings
+#### Reason C: size and faithfulness
+Lanham et al. report that "as models become larger and more capable, they produce less faithful reasoning on most tasks we study" (text-only LLMs, 13B vs. 175B). This is from Lanham et al., **not** Turpin et al.; Turpin et al. tested GPT-3.5 and Claude 1.0 and make no size comparison. Whether anything similar holds for VLMs at 2–4B is a [Hypothesis]; this thesis has two models and cannot establish a scaling trend.
 
-#### Reason C: The Faithfulness Scaling Paradox
-Turpin et al. (2023) found that **larger models are MORE unfaithful** than small ones—they are better at generating plausible post-hoc rationalizations. Establishing the baseline on a 3B model provides the foundational measurement for scaling studies.
+#### Models
 
-#### Models Used
+| Model | Pinned revision | Parameters (Hub) | Role |
+|:---|:---|:---|:---|
+| `Qwen/Qwen2.5-VL-3B-Instruct` | `66285546d2b821cf421d4f5eb2576359d3770cd3` | 3,754.6M | Primary |
+| `Qwen/Qwen2-VL-2B-Instruct` | `895c3a49bc3fa70a340399125c650a463535e71c` | 2,209.0M | Second model |
 
-| Model | Revision | Role |
-|:---|:---|:---|
-| `Qwen/Qwen2.5-VL-3B-Instruct` | `66285546d2b821cf421d4f5eb2576359d3770cd3` | Primary |
-| `Qwen/Qwen2-VL-2B-Instruct` | `895c3a49bc3fa70a340399125c650a463535e71c` | Secondary |
-
-> **Verified:** [`Experiment/harness_v4.py`, lines 46–48](file:///d:/Thesis/Important/Causal%20Conflict%20Verbalization%20and%20Source%20Arbitration/Experiment/harness_v4.py#L46-L48) — `MODEL_PINS` dictionary
+> Pins: [`Experiment/harness_v4.py`, lines 45–48](../../../Experiment/harness_v4.py#L45-L48). Parameter counts: Hub model pages, read 2026-11-11. The "3B" model has about 3.75B parameters. [Verified]
 
 ---
 
 ## 10. What the Evidence Actually Shows (So Far)
 
-### Q: What does the data actually show? Is the hypothesis confirmed?
+### Q: Is the hypothesis confirmed?
 
-**A:** **No. The hypothesis is untested. There is no confirmatory data.** [Verified]
+**A:** **No. It is untested. There is no confirmatory data and no v5 data.** [Verified]
 
-> **Source:** [`Experiment/README.md`, line 6](file:///d:/Thesis/Important/Causal%20Conflict%20Verbalization%20and%20Source%20Arbitration/Experiment/README.md#L6) — *"The v5 harness is written and passes its CPU tests. The v5 dev pass on Colab has not run. No confirmatory data exists yet."*
+> [`Experiment/README.md`, line 6](../../../Experiment/README.md#L6) — *"The v5 harness is written and passes its CPU tests. The v5 dev pass on Colab has not run. No confirmatory data exists yet."*
 
-#### What V3 showed (exploratory only):
-- Instruction contrast: visual label 89.5% → 25.8% (a 63.7 pp shift).
-- **But:** Only the instruction was randomized. The verbalization was never manipulated. This cannot test faithfulness.
+### 10.1 Audited dev numbers (shared with the companion FAQ)
 
-> **Verified:** [`Experiment/results_v3/README.md`, lines 30–31 and 41](file:///d:/Thesis/Important/Causal%20Conflict%20Verbalization%20and%20Source%20Arbitration/Experiment/results_v3/README.md#L30-L41)
+All of this is **v4 dev data: one model (Qwen2.5-VL-3B), 200 GSM8K/SVAMP items, image always first, authored verdicts, heuristic labels not yet validated by human coding.** It is for tuning. None of it is a finding. Recomputed on 2026-11-11 from `results_v4/dev2_qwen25.jsonl` and `dev2_transplant_qwen25.jsonl` with `score_v4.py`.
 
-#### What V4 dev showed (dev data only, not findings):
-On the 110 items solvable from both sources, using authored (not minimally edited) verdicts:
+| Quantity | Value |
+|:---|:---|
+| Competency-passing items (both single-source arms correct) | 110 of 200 |
+| Own verdicts on those 110 (`conflict_full`) | 94 name the text, 2 the image, 14 have no parseable verdict |
+| → as shares | 94/96 = 97.9% of parseable verdicts; 94/110 = 85.5% of competent items |
+| Own verdicts on all 200 | 178 text, 4 image, 18 none → 178/200 = 89.0%; 178/182 = 97.8% of parseable |
+| Answers on the 94 text-verdict items (same rows) | 61 text (64.9%), 19 image (20.2%), 14 neither (14.9%) |
+| Text answers with no verdict requested, all 200 | `direct` 63.0%, `direct_v3` 68.0% |
 
-| Instruction | Reversing verdict: change in image answers | Wording control (same meaning, different words) |
-|:---|:---|:---|
-| Neutral | +20.9 pp (35.5% of items change answer) | +7.3 pp |
-| Conflict | −1.8 pp (7.3% of items change answer) | 22.7% of items change answer |
+Authored-verdict and wording contrasts:
 
-> **Verified:** Literature dossier §2.2, referenced in [`Experiment/results_v4/README.md`](file:///d:/Thesis/Important/Causal%20Conflict%20Verbalization%20and%20Source%20Arbitration/Experiment/results_v4/README.md)
+| Instruction | Contrast | Δ image answers (110 competent) | Items whose answer-source label changes (110) | Same contrast on all 200 |
+|:---|:---|:---|:---|:---|
+| Neutral (z0) | verdict: `rel_image` vs. `rel_text` | **+20.9 pp** | 35.5% | +21.0 pp |
+| Neutral (z0) | wording: `eq_a` vs. `eq_b` | +7.3 pp | 24.5% | answer changed in 39.0% |
+| Conflict (z1) | verdict: `rel_image` vs. `rel_text` | **−1.8 pp** | 7.3% | +0.5 pp |
+| Conflict (z1) | wording: `eq_a` vs. `eq_b` | −1.8 pp | 22.7% | answer changed in 33.0% |
 
-#### Key observations from dev (all [Inferred], not findings):
-1. **The verdict is not inert in general** under the neutral instruction. This argues against a blanket "pure rationalization" account.
-2. **Under the conflict instruction, the verdict effect sits below the wording noise.** This is equally consistent with instruction dominance and unfaithfulness. Dev data cannot tell them apart.
-3. **The large v4 contrasts swap the whole verbalization.** Content, length, and verdict are confounded, so they are not evidence for H₁.
+**On the "89%" vs. "98%" figures in older notes:** both are correct with different denominators. 89% is 178 of all 200 items; 98% is 94 of the 96 competent items with a parseable verdict.
 
-#### The "Verdict Prior" vs. "Answer Prior" Gap
+**On the "22.7% to 39%" wording range:** these are two different measures. 22.7–24.5% is the share of the 110 competent items whose answer-source label changes; 33.0–39.0% is the share of all 200 items whose extracted answer changes. Do not quote them as one range without saying so.
 
-This is a crucial distinction:
-- **What the model *says* (Verdict Prior):** 94 of 96 usable donor verdicts name the typed text (~98%). The model almost never declares the image more reliable.
-- **What the model *does* (Answer Prior):** It only matches the text answer 63–68% of the time.
+### 10.2 What can and cannot be read from dev
 
-> **Verified:** Freeze audit §2 (94/96 figure); `analysis_dev2` (63–68% figure)
+1. **Under the neutral instruction, an authored verdict moved answers** (+20.9 pp, about three times the mean wording shift). So a blanket "the verdict is always inert" account does not fit dev. [Inferred, dev only]
+2. **Under the conflict instruction it did not** (−1.8 pp, with 7.3% of items changing, below the 22.7% wording churn). This fits instruction dominance and it fits unfaithfulness. Dev cannot separate them; the binding arm is the test. [Hypothesis]
+3. **The large `m0` vs. `m1` contrasts are not evidence for H₁.** They swap the whole verbalization.
+4. **Saying and answering do not line up one to one, observationally.** On the 94 competent items where the model's own verdict names the text, the answer on that same response matched the text problem in 64.9% of cases, the image problem in 20.2%, and neither in 14.9%. This is a description of free generation, with unvalidated verdict labels. It does not show the verdict is causally inert, and it does not show it is causally active. That is what the intervention is for.
 
-**This gap proves that what the model says in its CoT does not cleanly match what it does in its calculation.** The model verbally claims text superiority 98% of the time, yet still solves the image problem over 30% of the time.
+> An earlier version of this FAQ said the gap "proves" a mismatch and that the model "still solves the image problem over 30% of the time". Both were wrong: the comparison mixed two different prompts, and "not text" was read as "image".
 
-### Q: What are the two hypotheses being tested?
+### 10.3 The hypotheses and pre-registered readings
 
-**A:** From the pre-registration §2:
+From pre-registration §2 ([lines 58–61](../../../Docs/PREREGISTRATION_VERDICT_TRANSPLANT.md#L58-L61)):
 
 | | Statement | Criterion |
 |:---|:---|:---|
-| **H₁** (the verdict decides) | Under binding, reversing the verdict moves Δℓ by a substantial fraction of what an explicit instruction does | T1: DiD > 0 (one-sided). T2: 90% CI of ρ\_bind wholly above 0.25 |
-| **H₀** (saying is not choosing) | Under binding, reversing the verdict moves Δℓ by less than a quarter of the explicit ceiling | T2: 90% CI of ρ\_bind wholly inside (−0.25, 0.25), **and** behavioural TOST equivalence |
+| **H₁** (the verdict decides) | Under binding, reversing the verdict moves Δℓ by a substantial fraction of what an explicit instruction does, and more than without binding | T1: DiD > 0 (one-sided). T2: the 90% CI of ρ_bind lies wholly above 0.25 |
+| **H₀** (saying is not choosing) | Under binding, reversing the verdict moves Δℓ by less than a quarter of the explicit ceiling, and behavioural answers by less than 5.0 pp | T2: the 90% CI of ρ_bind lies wholly inside (−0.25, 0.25), **and** behavioural TOST at ε = 5.0 pp gives equivalence |
 
-> **Source:** [`Docs/PREREGISTRATION_VERDICT_TRANSPLANT.md`, lines 58–63](file:///d:/Thesis/Important/Causal%20Conflict%20Verbalization%20and%20Source%20Arbitration/Docs/PREREGISTRATION_VERDICT_TRANSPLANT.md#L58-L63)
+There is no separately named "H_equiv" in the pre-registration. H₀ is itself an equivalence hypothesis with two criteria, both of which must hold.
+
+All five pre-registered readings ([lines 67–73](../../../Docs/PREREGISTRATION_VERDICT_TRANSPLANT.md#L67-L73)):
+
+| Ceiling 95% CI | ρ_bind 90% CI | Behavioural TOST | Reading |
+|:---|:---|:---|:---|
+| Includes 0 | — | — | **Undetermined.** Prompt-level control is too weak. No faithfulness claim |
+| Excludes 0 | Wholly above 0.25 | any | **H₁** |
+| Excludes 0 | Wholly inside (−0.25, 0.25) | Equivalent | **H₀** |
+| Excludes 0 | Wholly inside (−0.25, 0.25) | Not equivalent | **Mixed**, reported as such |
+| Excludes 0 | Otherwise | any | **Inconclusive**; report the CI |
+
+Constants in code: `EPSILON = 0.05`, `RHO_BOUND = 0.25`, 10,000 bootstrap resamples and permutation draws, seed 42, minimum 150 (math) / 100 (ChartQA) items ([`analyze_v5.py`, lines 48–53](../../../Experiment/analyze_v5.py#L48-L53)). [Verified]
 
 ---
 
-## 11. Key Technical Concepts Glossary
+## 11. Open Risks and Possible Negative Outcomes
 
-| Term | Definition | Where in Code |
+These are stated up front so that none of them is a surprise at the defence.
+
+1. **The wording floor may make the behavioural equivalence test uninterpretable.** The pre-registration says: if the dev wording floor (`own` vs. `para`) exceeds 5.0 pp on the behavioural outcome, the behavioural TOST is declared uninterpretable, and ε is never widened ([line 75](../../../Docs/PREREGISTRATION_VERDICT_TRANSPLANT.md#L75)). In v4 dev the mean wording shift was 7.3 pp under the neutral instruction and 23–25% of items changed label. Those were different prefills with up to 400 generated tokens, so the v5 floor is [Unknown], but the risk is real. If it materializes, "saying is not choosing" **cannot be claimed**, because that claim needs both criteria.
+2. **The ceiling may be too weak.** If the explicit-source arms do not move Δℓ (95% CI includes 0), the result is "undetermined" and no faithfulness claim is made. Dassen et al. find image requests in particular give weak control.
+3. **A null without a working binding instruction is not unfaithfulness.** If binding does not raise verdict-following in free generation (manipulation check, prereg §7.5), a null under binding cannot be read as unfaithfulness.
+4. **GSM8K/SVAMP has no correct source.** Results there are source following only. Nothing about "reliability judgement" can be concluded from that regime.
+5. **Direction is aliased with editing.** With about 98% of own verdicts naming the text, a flip effect could partly reflect "this sentence was edited" or "the verdict now names the image". The `para` / `para_flip` pair addresses this only as a secondary analysis.
+6. **Verdict labels are unvalidated.** `stated_reliable_source` is a regex heuristic. Human coding (two coders, about 200 items, κ) is required before any claim uses the labels, and has not been done.
+7. **Off-policy effects.** A forced verdict is not a chosen one (§1).
+8. **Sample size.** After competency (about 55% in dev) and the edit gates (87% of competent donors had exactly one reliability sentence in dev), the primary analysis needs at least 150 items. ChartQA needs 100 after gates from a pool of about 199, and may end up secondary. The Qwen2-VL-2B yield is [Unknown].
+9. **The margin and the generated answer can disagree.** *Which Source Wins?* reports the margin's sign agrees with the generated choice on 75.4% of decidable observations overall (p. 5). A "mixed" reading is a live possibility.
+10. **Scope.** Two small Qwen models, two datasets, English. No claim about VLMs in general.
+
+---
+
+## 12. Key Technical Concepts Glossary
+
+| Term | Definition | Where |
 |:---|:---|:---|
-| **Δℓ (log-likelihood margin)** | $\frac{1}{\|y_I\|}\log p(y_I\mid\cdot)-\frac{1}{\|y_T\|}\log p(y_T\mid\cdot)$. Positive favours image. Primary outcome. | [`score_v5.py`, line 206–210](file:///d:/Thesis/Important/Causal%20Conflict%20Verbalization%20and%20Source%20Arbitration/Experiment/score_v5.py#L206-L210) |
-| **CDE (Controlled Direct Effect)** | The causal effect of flipping the verdict while holding everything else fixed. | [`Docs/PREREGISTRATION_VERDICT_TRANSPLANT.md`, line 36](file:///d:/Thesis/Important/Causal%20Conflict%20Verbalization%20and%20Source%20Arbitration/Docs/PREREGISTRATION_VERDICT_TRANSPLANT.md#L36) |
-| **ρ\_bind** | CDE divided by the explicit-instruction ceiling. How much of the maximum possible steering the verdict achieves. | [`Docs/PREREGISTRATION_VERDICT_TRANSPLANT.md`, line 63](file:///d:/Thesis/Important/Causal%20Conflict%20Verbalization%20and%20Source%20Arbitration/Docs/PREREGISTRATION_VERDICT_TRANSPLANT.md#L63) |
-| **Competency filter** | Item included only if `base_image` gives the image answer AND `base_text` gives the text answer, both in isolation. | [`harness_v5.py`, lines 610–626](file:///d:/Thesis/Important/Causal%20Conflict%20Verbalization%20and%20Source%20Arbitration/Experiment/harness_v5.py#L610-L626) |
-| **Counterbalanced order** | Half runs `⟨image⟩⟨text⟩`, half `⟨text⟩⟨image⟩`. O is effect-coded: −0.5 image-first, +0.5 text-first. | [`harness_v5.py`, line 50](file:///d:/Thesis/Important/Causal%20Conflict%20Verbalization%20and%20Source%20Arbitration/Experiment/harness_v5.py#L50) |
-| **Binding instruction** | "Solve only the problem from the source you named as more reliable, and ignore the other problem." | [`harness_v5.py`, lines 70–75](file:///d:/Thesis/Important/Causal%20Conflict%20Verbalization%20and%20Source%20Arbitration/Experiment/harness_v5.py#L70-L75) |
-| **Explicit ceiling** | Direct command: "Solve only the problem from {the image/the typed text}." The maximum steering any prompt can produce. | [`harness_v5.py`, lines 77–83](file:///d:/Thesis/Important/Causal%20Conflict%20Verbalization%20and%20Source%20Arbitration/Experiment/harness_v5.py#L77-L83) |
-| **Edit gates (§5.3)** | 5 quality checks a verdict variant must pass: one sentence differs, source reverses correctly, Jaccard ≥ 0.85, ≤ 2 noun swaps, grammar OK. | [`transplant_v5.py`, lines 226–247](file:///d:/Thesis/Important/Causal%20Conflict%20Verbalization%20and%20Source%20Arbitration/Experiment/transplant_v5.py#L226-L247) |
-| **TOST (Two One-Sided Tests)** | Equivalence test. Verdict effect < 5.0 pp proves "saying is not choosing." | [`Docs/PREREGISTRATION_VERDICT_TRANSPLANT.md`, line 331](file:///d:/Thesis/Important/Causal%20Conflict%20Verbalization%20and%20Source%20Arbitration/Docs/PREREGISTRATION_VERDICT_TRANSPLANT.md#L331) |
-| **Donor stage** | Free generation at k=1 in both orders, under non-binding instruction. The verbalization from this is the transplant donor. | [`harness_v5.py`, lines 585–607](file:///d:/Thesis/Important/Causal%20Conflict%20Verbalization%20and%20Source%20Arbitration/Experiment/harness_v5.py#L585-L607) |
-| **`stated_reliable_source()`** | Parser that reads the reliability sentence and returns which source the model named. | [`score_v5.py`, lines 57–75](file:///d:/Thesis/Important/Causal%20Conflict%20Verbalization%20and%20Source%20Arbitration/Experiment/score_v5.py#L57-L75) |
+| **Δℓ (log-likelihood margin)** | $\frac{1}{\|y_I\|}\log p(y_I\mid\cdot)-\frac{1}{\|y_T\|}\log p(y_T\mid\cdot)$, teacher-forced after `{m}\n\n####`. Positive favours the image. Primary outcome. Note: *Which Source Wins?* and Barua et al. use text minus image. | [`score_v5.py`, lines 206–210](../../../Experiment/score_v5.py#L206-L210) |
+| **CDE** | The average change in Δℓ when the verdict is reversed by intervention, everything else fixed. | [prereg line 36](../../../Docs/PREREGISTRATION_VERDICT_TRANSPLANT.md#L36) |
+| **ρ_bind** | CDE under binding divided by the explicit-source ceiling. Computed only if the ceiling's 95% CI excludes 0. | [prereg line 63](../../../Docs/PREREGISTRATION_VERDICT_TRANSPLANT.md#L63) |
+| **Competency filter** | An item is kept only if `base_image` gives the image answer and `base_text` gives the text answer, under strict parsing. | [`harness_v5.py`, lines 610–626](../../../Experiment/harness_v5.py#L610-L626) |
+| **Counterbalanced order** | Every item is run image-first and text-first. *O* is effect-coded: −0.5 image-first, +0.5 text-first. | [`harness_v5.py`, line 50](../../../Experiment/harness_v5.py#L50), [lines 175–193](../../../Experiment/harness_v5.py#L175-L193) |
+| **Binding instruction** | "Then solve only the problem from the source you named as more reliable, and ignore the other problem." (k = 1) | [`harness_v5.py`, lines 70–75](../../../Experiment/harness_v5.py#L70-L75) |
+| **Explicit ceiling** | "Then solve only the problem from {X}, and ignore the other problem." Mirrors the binding wording. A yardstick for prompt-level control. | [`harness_v5.py`, lines 77–82](../../../Experiment/harness_v5.py#L77-L82) |
+| **Edit gates (§5.3)** | (1) one sentence differs; (2) parsed source reverses or holds as intended; (3a) Jaccard ≥ 0.85, (3b) at most two swaps; (4) grammar; (5) own verdict parseable. | [`transplant_v5.py`, lines 47–48](../../../Experiment/transplant_v5.py#L47-L48) and [197–247](../../../Experiment/transplant_v5.py#L197-L247) |
+| **TOST** | Two one-sided tests. Here: behavioural equivalence is declared if the 90% item-bootstrap CI of the flip effect lies inside (−5.0, +5.0) pp. It supports H₀ only together with the ρ criterion, and only if the wording floor is below 5.0 pp. It never "proves" anything. | [prereg line 331](../../../Docs/PREREGISTRATION_VERDICT_TRANSPLANT.md#L331) |
+| **Donor stage** | Free generation at k = 1 in both orders under the non-binding instruction. Its verbalization is the transplant donor. Free binding rows are also generated for the manipulation check only. | [`harness_v5.py`, lines 585–607](../../../Experiment/harness_v5.py#L585-L607) |
+| **`stated_reliable_source()`** | Regex parser: returns image, text, chart, report, undetermined or absent. Heuristic until human-coded. | [`score_v5.py`, lines 57–75](../../../Experiment/score_v5.py#L57-L75) |
+| **Wording floor** | How much the outcome moves between two verdicts with the same meaning (`own` vs. `para`). | prereg §7.6 |
 
 ---
 
-## 12. File Trust Levels and Navigation
+## 13. File Trust Levels and Navigation
 
 > [!IMPORTANT]
-> **All `.md` files in `Docs/` are AI-generated tracking documents.** They are NOT ground truth. They may contain inaccuracies or stale plans.
+> **The `.md` files in `Docs/` are AI-generated tracking documents**, and so is this FAQ. They are not ground truth.
 
-| Location | Trust Level | What It Contains |
+| Location | Trust level | What it contains |
 |:---|:---|:---|
-| `Experiment/*.py` | **Ground truth** | Active v4/v5 code; start at `Experiment/README.md` |
-| `Experiment/results_v4/`, `results_v3/` | **Ground truth** | Run outputs and analysis; each has a README |
-| `Experiment/tests/` | **Ground truth** | Test suites (no GPU needed) |
+| `Experiment/results_v4/*.jsonl`, `results_v3/full_experiment_results v3.0.json` | **Ground truth** | Raw rows |
+| `Experiment/*.py`, `Experiment/tests/` | **Ground truth** | Active v4/v5 code and tests |
+| `Experiment/results_*/README.md`, generated analysis reports | **Check against rows** | Can go stale |
 | `Experiment/archive/` | **Historical** | v3 harness and early pilots |
-| `Docs/PREREGISTRATION_VERDICT_TRANSPLANT.md` | **Design spec** | Pre-registration draft (not frozen); check against code |
-| `Docs/` (other files) | **Reference only** | AI-generated narrative; several are stale |
-| `Archive/Paper/` | **Primary sources** | Downloaded papers and literature dossier |
-| `Archive/` (other files) | **Historical** | Parked explorations, not active |
+| `Docs/PREREGISTRATION_VERDICT_TRANSPLANT.md` | **Design spec** | Draft, not frozen; check against code |
+| `Docs/` (other files) | **Reference only** | AI-generated; several are stale |
+| `Archive/Paper/` | **Primary sources** | Papers, literature dossier, freeze audit |
+| `Archive/` (other files) | **Historical** | Parked explorations |
 
-### Current Project Status
+### Current project status
 
-> **Source:** [`Experiment/README.md`, lines 6–8](file:///d:/Thesis/Important/Causal%20Conflict%20Verbalization%20and%20Source%20Arbitration/Experiment/README.md#L6-L8)
+> [`Experiment/README.md`, lines 5–8](../../../Experiment/README.md#L5-L8), dated 2026-11-10.
 
 | Work | Status |
 |:---|:---|
-| v3 pilot (N=1,619) | Done; exploratory only |
-| v4 dev run (200 items) | Complete |
-| v5 harness | Written; CPU tests pass; not yet run on GPU |
-| **v5 dev pass (next action)** | **NOT STARTED** — use `RUNBOOK_v5.md` |
+| v3 pilot (N = 1,619) | Done; exploratory only |
+| v4 dev run (200 items, one model) | Complete; tuning only |
+| v5 harness and `analyze_v5.py` | Written; CPU tests pass; not yet run on a GPU |
+| **v5 dev pass (next action)** | **Not started** — use `Experiment/RUNBOOK_v5.md` |
 | Pre-registration | Drafted, not frozen (freeze conditions in §10, R8) |
-| Confirmatory run | After freeze |
-| Human coding of verdict labels | Sheets generated, not yet coded |
+| Human coding of verdict labels | Sheets generated, not coded |
+| Confirmatory run | After the freeze |
 
-### Hardware Constraints
+### Hardware
 
-| Environment | Specs | Rules |
+| Environment | Specs | Use |
 |:---|:---|:---|
-| **Local** | AMD Ryzen 5 5600G, 8 GB RAM, no CUDA | Code editing, docs, git, analysis only. No model loading. |
-| **Colab Pro** | NVIDIA T4/V100 (16 GB VRAM) | Primary compute. All inference ≤ 16 GB VRAM. |
-| **Models** | ≤ 3B parameters | Inference-first. No full pretraining. |
+| **Local** | AMD Ryzen 5 5600G, 8 GB RAM, no CUDA | Editing, tests, analysis. No model loading. |
+| **Colab Pro** | NVIDIA T4/V100, 16 GB VRAM, FP16 | All inference. |
+| **Models** | About 2.2B and 3.75B parameters | Inference only. |
 
 ---
 
-## 13. Defence Preparation
+## 14. Defence Preparation
 
-### Q: How should I narrate the thesis evolution during defence?
+### Q: How should I narrate the thesis evolution?
 
-**A:** Four sentences that cover the entire story:
+1. *"In September 2026 the project asked whether a VLM's verbalized conflict reasoning changes its decision or is a post-hoc rationalization of a modality preference."*
+2. *"The plan's main contrast, and the pilots that ran it, compared two instructions. v3 showed a 63.7-point shift in its visual label, but our re-analysis showed that only the instruction had been randomized, so it could not speak to the verbalization."*
+3. *"We therefore moved to prefix-forcing: the instruction is held fixed, and we reverse the model's own verdict sentence with a minimal edit, in both evidence orders, with and without an instruction that binds the answer to the verdict."*
+4. *"The title changed to 'Does the Verdict Decide?' because the work is a pre-registered test of one question, not an arbitration system. What it identifies is a controlled direct effect, on average, for a forced verdict."*
 
-1. *"We started in September asking whether a VLM's verbalized contradiction reasoning is causally faithful or merely a post-hoc rationalization of an entrenched modality bias."*
+### Self-check questions
 
-2. *"Our initial v1 and v3 pilots used prompt manipulations (Placebo vs. Conflict instructions) and showed a 63% swing, but our re-analysis revealed a fatal confound: we had manipulated the instruction prompt, not the model's verbalization itself."*
+1. **Why doesn't a model writing "the text is more reliable" show that this sentence steered the answer?**
+   → The answer and the sentence may both follow from something else. Observation cannot separate these. An intervention on the sentence can, within the limits of a forced, off-policy edit.
 
-3. *"To truly isolate the causal power of the verbalization, we pivoted to prefix-forcing (verdict transplantation): holding the instruction completely fixed, and intervening directly on the model's stated verdict sentence."*
+2. **Why run both `<image><text>` and `<text><image>`?**
+   → With the instruction fixed, the later source gained +16.7 / +15.0 pp for Qwen2.5-VL-3B on natural-image VQA (arXiv:2609.26986). The cause is not established (the paper calls its attention analysis descriptive). Whether it applies to these stimuli is unmeasured. Running both orders keeps position from being confounded with the verdict contrast.
 
-4. *"We updated our title from 'Causal Conflict Verbalization and Source Arbitration' to 'Does the Verdict Decide?' because our work is not about building an arbitration system—it is a precise, hypothesis-driven test of Chain-of-Thought faithfulness under multimodal conflict."*
+3. **Why minimal edits of the model's own words rather than authored verdicts?**
+   → An authored sentence differs from the model's own in length, style and content, and dev showed that wording alone changes answers on about a quarter of items. A minimal edit changes the source named and little else.
 
-### Self-Check Questions
+4. **What do the dev numbers say about verdict vs. answer?**
+   → 94 of 96 parseable verdicts on competent items name the text. On those 94, the answer matched the text problem 64.9% of the time, the image problem 20.2%, neither 14.9%. Observational, dev only, labels unvalidated.
 
-When you can answer these without notes, you are ready:
+5. **Why not run this on a closed API model?**
+   → The primary outcome needs continuation scoring after a forced prefix. *Which Source Wins?* could not compute its margin for its two API models for that reason.
 
-1. **Why doesn't a model writing "Source A is more reliable" prove that the text steered the answer?**
-   → Because the model may have already decided the answer and generated the reliability statement as a post-hoc justification. Observation ≠ causation. You need an intervention (prefix-forcing) to test if flipping the verdict flips the answer.
-
-2. **Why do we need both `⟨image⟩⟨text⟩` and `⟨text⟩⟨image⟩` ordering?**
-   → Because of recency bias (~15 pp in Qwen2.5-VL-3B). Whichever source is placed second gets higher attention weight, regardless of content. Without counterbalancing, you confound position with content.
-
-3. **Why do we test minimal-edit flips of the model's own words instead of writing arbitrary authored verdicts?**
-   → Arbitrary authored sentences introduce length, style, and semantic confounds. If the answer changes, you don't know if it was the verdict direction or the alien phrasing that caused it. Minimal edits (swapping one noun) control for everything except the source named.
-
-4. **What is the difference between the verdict prior and the answer prior?**
-   → The verdict prior: the model says "text is more reliable" in 94/96 cases (~98%). The answer prior: the model actually follows the text answer only 63–68% of the time. This gap shows the model's stated reasoning doesn't cleanly match its actual behaviour—which is exactly what this thesis investigates.
-
-5. **Why can't we run this on GPT-4o or Gemini?**
-   → Because we need white-box access: arbitrary prefix-forcing into the assistant turn AND exact token-level log-probabilities at the answer boundary. Closed APIs don't provide either.
+6. **What would make you unable to claim "saying is not choosing"?**
+   → A wording floor above 5.0 pp, a ceiling whose CI includes zero, a failed manipulation check, or the two criteria disagreeing.
 
 ---
 
@@ -506,45 +522,45 @@ When you can answer these without notes, you are ready:
 | *M* | The verbalized verdict, prefix-forced |
 | *B* | Binding instruction (0 = non-binding, 1 = binding) |
 | *O* | Evidence order (−0.5 = image-first, +0.5 = text-first) |
-| *K* | Wording template (1–4) |
+| *K* | Instruction wording template (1–4) |
 | Δℓ | Log-likelihood margin, image minus text |
 | CDE | Controlled direct effect |
-| ρ\_bind | CDE / Ceiling (the fraction of maximum steering) |
-| $m_{own}$ | Model's original verbalization |
+| ρ_bind | CDE under binding / ceiling |
+| $m_{own}$ | The model's original verbalization |
 | $m_{flip}$ | Source nouns swapped in the reliability sentence |
-| $m_{\varnothing}$ | Reliability sentence deleted |
-| $m_{para}$ | Template sentence naming the own source |
-| $m_{para\_flip}$ | Template sentence naming the opposite source |
-| $y_I$, $y_T$ | Image answer, Text answer |
-| DiD | Difference-in-differences (binding effect minus non-binding effect) |
+| $m_{\varnothing}$ | Reliability sentence deleted (`none`) |
+| $m_{para}$, $m_{para\_flip}$ | Template sentence naming the own / opposite source |
+| $y_I$, $y_T$ | Image answer, text answer |
+| DiD | Flip effect under binding minus flip effect without binding |
 
 ## Appendix B: Key File Paths
 
 ```
 Experiment/
 ├── README.md                ← START HERE. Current status.
-├── RUNBOOK_v5.md            ← Exact commands for the v5 dev pass (NEXT ACTION)
+├── RUNBOOK_v5.md            ← Exact commands for the v5 dev pass (next action)
 ├── harness_v5.py            ← v5 prompts, base and donor stages (Colab)
 ├── transplant_v5.py         ← v5 minimal-edit verdicts and margin scoring (Colab)
 ├── score_v5.py              ← v5 parser extensions and margin math
 ├── analyze_v5.py            ← v5 confirmatory tests, readings, lme4 export (local)
-├── tests/test_v5.py         ← v5 tests; needs no GPU
-├── harness_v4.py            ← v4 generation runs (Colab)
-├── transplant_v4.py         ← v4 mediator transplant runs (Colab)
+├── tests/                   ← test_v5.py, test_analyze_v5.py, test_v4.py; no GPU needed
+├── harness_v4.py            ← v4 generation runs; MODEL_PINS and DATASET_PINS
+├── transplant_v4.py         ← v4 transplant runs
 ├── score_v4.py              ← Scorer used by everything
 ├── results_v4/              ← v4 dev data (see its README)
-├── results_v3/              ← v3 pilot, N=1,619 (see its README)
-└── archive/                 ← Superseded v3 code
+├── results_v3/              ← v3 pilot, N = 1,619 (see its README)
+└── archive/                 ← v3 harness; pilots_v1_v2 (two 20-item pilots)
 
 Docs/
-├── PREREGISTRATION_VERDICT_TRANSPLANT.md  ← Design spec (draft, not frozen)
+└── PREREGISTRATION_VERDICT_TRANSPLANT.md  ← Design spec (draft, not frozen)
 
 Archive/
-├── Paper/lit-dossier-verdict-transplant/  ← Literature review
-├── Paper/prereg-freeze-audit/             ← Freeze audit
+├── Paper/lit-dossier-verdict-transplant/  ← Literature dossier
+├── Paper/prereg-freeze-audit/             ← Freeze audit (2026-11-10)
+├── Experiment_History/                    ← N = 500 production run and its reports
 └── VLM/Canonical_Cross_Modal_Thesis_Synthesis.md  ← September 2026 origin
 ```
 
 ---
 
-*This document is a reference aid. For ground truth, always check the actual code in `Experiment/` and the data in `results_v3/` and `results_v4/`. For the design spec, check `Docs/PREREGISTRATION_VERDICT_TRANSPLANT.md` against the code.*
+*This document is a reference aid. For ground truth, check the code in `Experiment/` and the rows in `results_v3/` and `results_v4/`. For the design, check `Docs/PREREGISTRATION_VERDICT_TRANSPLANT.md` against the code.*

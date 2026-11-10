@@ -55,24 +55,37 @@ CMC-Bench (Catapang 2026, MAGMaR) is unread and must be read before the related-
 
 The **primary outcome is Δℓ** (§6.1), in both regimes. The behavioural outcome (§6.2) is secondary.
 
-| | Statement | Criterion (§7.3) |
-|---|---|---|
-| **H₁** (the verdict decides) | Under binding, reversing the verdict moves Δℓ by a substantial fraction of what an explicit instruction does, and more than without binding | T1: DiD > 0 (one-sided). T2: the 90% CI of ρ_bind lies wholly above 0.25 |
-| **H₀** (saying is not choosing) | Under binding, reversing the verdict moves Δℓ by less than a quarter of the explicit ceiling, and behavioural answers by less than 5.0 pp | T2: the 90% CI of ρ_bind lies wholly inside (−0.25, 0.25), **and** behavioural TOST at ε = 5.0 pp gives equivalence |
-
 Here $\rho_b=\mathrm{CDE}_{\ell,b}/\mathrm{Ceil}_\ell$, where $\mathrm{CDE}_{\ell,b}$ is averaged over *K* and *O* (§7.1) and $\mathrm{Ceil}_\ell$ is defined in §4.3.
 
-Pre-registered readings (from R4):
+### 2.1 The two hypotheses and the binding question
 
-| Ceil_ℓ 95% CI | ρ_bind 90% CI | Behavioural TOST | Reading |
-|---|---|---|---|
-| Includes 0 | — | — | **Undetermined:** prompt-level control is too weak. No faithfulness claim |
-| Excludes 0 | Wholly above 0.25 | any | **H₁:** the verdict is decision-relevant once the prompt binds it |
-| Excludes 0 | Wholly inside (−0.25, 0.25) | Equivalent | **H₀:** saying is not choosing. The model follows an explicit source instruction but not its own reversed verdict |
-| Excludes 0 | Wholly inside (−0.25, 0.25) | Not equivalent | **Mixed**, reported as such |
-| Excludes 0 | Otherwise | any | **Inconclusive**; report the CI |
+| | Statement | Criterion |
+|---|---|---|
+| **H₁** (the verdict decides) | Under binding, reversing the verdict moves Δℓ by more than a quarter of what an explicit instruction does | **T2 alone:** the 90% CI of ρ_bind lies wholly above 0.25 |
+| **H₀** (saying is not choosing) | Under binding, reversing the verdict moves Δℓ by less than a quarter of the explicit ceiling, and behavioural answers by less than 5.0 pp | **T2 and the behavioural test:** the 90% CI of ρ_bind lies wholly inside (−0.25, 0.25), the behavioural TOST at ε = 5.0 pp gives equivalence, and the wording-floor gate passes (§7.6) |
+| **Binding question** (not a hypothesis about the verdict) | The verdict's effect is larger with the binding instruction than without it | **T1:** DiD > 0, one-sided sign-flip permutation p ≤ 0.05 |
 
-The same readings are reported under the non-binding instruction (T3). If the dev wording floor ($m_{own}$ vs. $m_{para}$) exceeds 5.0 pp on the behavioural outcome, the behavioural equivalence test is declared uninterpretable. ε is never widened.
+**T1 is not a condition for H₁.** H₁ says the verdict decides under binding, and T2 tests exactly that. T1 asks a different question: whether the binding instruction is what makes it decide. If ρ_bind is above 0.25 and T1 is not significant, the verdict decides with or without binding. That is still H₁, and requiring T1 would wrongly reject it. T1 therefore only qualifies the wording of an H₁ reading. T1 does not enter H₀, the mixed reading or the inconclusive reading.
+
+### 2.2 Decision table
+
+Rows are checked from top to bottom, and the first row that matches gives the reading. `analyze_v5.combined_reading` implements this table and nothing else.
+
+| # | Ceil_ℓ 95% CI | ρ_bind 90% CI | T1 | Behavioural TOST | Wording-floor gate | Reading |
+|---|---|---|---|---|---|---|
+| 1 | Includes 0 | — | — | — | — | **Undetermined:** prompt-level control is too weak. No faithfulness claim |
+| 2 | Excludes 0 | Wholly above 0.25 | p ≤ 0.05 | — | — | **H₁, and binding strengthens it:** the verdict is decision-relevant, and more so once the prompt binds it |
+| 3 | Excludes 0 | Wholly above 0.25 | p > 0.05 | — | — | **H₁, with no evidence that binding strengthens it:** the verdict is decision-relevant; read with T3 |
+| 4 | Excludes 0 | Wholly inside (−0.25, 0.25) | — | — | Fails | **Graded equivalence only:** the behavioural test is uninterpretable, so H₀ is not claimed |
+| 5 | Excludes 0 | Wholly inside (−0.25, 0.25) | — | Equivalent | Passes | **H₀:** saying is not choosing. The model follows an explicit source instruction but not its own reversed verdict |
+| 6 | Excludes 0 | Wholly inside (−0.25, 0.25) | — | Not equivalent | Passes | **Mixed**, reported as such |
+| 7 | Excludes 0 | Anything else | — | — | — | **Inconclusive**; report the CI |
+
+"—" means the column is not consulted for that row.
+
+- **Which p-values decide.** Readings use the unadjusted criteria: the CIs above, and the unadjusted T1 p-value. Holm-adjusted p-values are reported beside every reading (§7.2), and the report says so whenever a reading would change after the correction.
+- **Non-binding.** The same table is read with ρ_nonbind (T3) and the non-binding behavioural cells. Rows 2 and 3 collapse into one H₁ row there, because T1 compares the two instructions and has no non-binding version.
+- **ε is never widened.**
 
 ---
 
@@ -92,7 +105,8 @@ The same readings are reported under the non-binding instruction (T3). If the de
 
 ### 3.2 Evidence conflict (ChartQA-Conflict)
 
-- **Dataset:** `vlm-modality-research/chartqa-evidence-conflict-v2`, revision `7d15a9704bc5e028e7038ef98aa7917059535bf8`, split `test`, 229 items.
+- **Dataset:** `vlm-modality-research/chartqa-evidence-conflict-v2`, revision `7d15a9704bc5e028e7038ef98aa7917059535bf8`, split `test`. The release has **230 rows; 229 are analysed**.
+- **Excluded item:** `conflict_id` 45. *Which Source Wins?* removed one item in a post-run audit because its report did not support its answer (§3.2.2, p. 4). The paper's artifact names it in `data/chartqa_conflict/excluded_items.json` and in `MANIFEST.json` (`chartqa_excluded_compiled_item_ids: [45]`). Row 45 asks for a March 2021 value; its report gives 1.81 for March 2021 and puts the report answer, 2.81, under September 2019. `harness_v5.chartqa_analysis_set` drops it and refuses to run unless the pinned release yields exactly 230 rows and 229 items. No other pair has equal answers.
 - **Construction:** the original chart supports the ChartQA answer *a_I*. A reviewed counterfactual report supports *a_T*. The chart is the correct source.
 - **Known limitation** (arXiv:2608.17205, Limitations): the report states the value directly, while the chart has to be read. Barua et al. (arXiv:2610.19407, pp. 7–8) find text evidence 1.4–3.8 times stronger in that structure.
 - **Dev/confirm split:** `--dev_size 30`, leaving 199 confirm items. The harness default of 200 would leave 29.
@@ -360,13 +374,26 @@ All are reported with uncorrected 95% CIs and labelled secondary.
 - **Relative-uncertainty stratification:** $\Delta H_{rel}=\frac{2(H^{(t)}-H^{(v)})}{H^{(t)}+H^{(v)}}$, adapted from Zhang et al. (arXiv:2511.02243, p. 6). Here $H$ is the length-normalized NLL of the gold answer, teacher-forced after the prefill `####` in the base arm's prompt; it is not single-token entropy. $H^{(v)}$ uses the image answer under `base_image`, and $H^{(t)}$ the text answer under `base_text`. The balance point is where a one-predictor logistic regression of the baseline preference (the sign of Δℓ under non-binding with $m_\varnothing$) on $\Delta H_{rel}$ crosses 0.5. The CDE is reported inside vs. outside ±0.5 of it.
 - **Manipulation check** (donor stage, no forcing): how often the answer follows the source the model's own verdict names, under the binding rows (`free_binding`) and under the non-binding donor rows. If binding does not raise this share, the binding wording failed, and a null under binding cannot be read as unfaithfulness.
 
-### 7.6 Descriptive noise floor
+### 7.6 Noise floor and the wording-floor gate
 
-Report the per-item change rate of the behavioural answer, and the mean |ΔΔℓ|, for:
-- $m_{own}$ vs. $m_{para}$ (wording);
-- $m_{own}$ vs. $m_{flip}$ (verdict).
+Reported for $m_{own}$ vs. $m_{para}$ (wording) and $m_{own}$ vs. $m_{flip}$ (verdict), per binding level:
+- the **churn rate**: the share of (item, order) cells whose behavioural answer source changes at all;
+- the mean |ΔΔℓ|.
 
-CoT-Mediate's null-paraphrase flip rates are 0.5–3.3% (p. 6).
+**Wording-floor gate [Design decision].** It uses $m_{own}$ vs. $m_{para}$ on the behavioural outcome, under binding. The gate **fails if either** of these holds:
+1. the signed mean difference exceeds ε in size: |mean| > 5.0 pp;
+2. the churn rate exceeds 5.0% of cells.
+
+Why both:
+- The signed mean cancels when answers move in both directions. If 20% of answers move toward the image and 20% toward the text, the mean is 0 while 40% of answers changed. Part 2 catches that.
+- The churn rate is an upper bound on the size of the signed mean, so part 2 is the stricter half. Part 1 is kept and reported because it is R4's original wording.
+- The limit matches ε for two reasons. CoT-Mediate's floors are flip rates of 0.5–3.3% (arXiv:2607.27304, p. 6), so 5.0% sits above them. And at 5% churn the planned sample of about 215 analysed items gives the TOST about 0.90 power; at 7.3% it gives about 0.71 (freeze audit §3, power table).
+
+The analysis also reports the TOST's power at the observed wording noise, $2\Phi(\varepsilon/\mathrm{SE}-1.645)-1$ with SE from the per-item differences, and flags it when it is below 0.80. That flag is information, not a gate.
+
+The gate is evaluated on the dev pass and again on the confirmatory data. Failing either makes the behavioural equivalence test uninterpretable (§2.2, row 4).
+
+**Expected consequence.** In the v4 dev data, rewording changed 22.7% of answers under 400-token solving (dossier §2.2). If v5's 512-token solving on GSM8K/SVAMP behaves alike, this gate fails there, and H₀ cannot be claimed in that regime: the strongest available reading is "graded equivalence only". The ChartQA answer-only decode is expected to be far more stable. The dev pass measures both.
 
 ---
 
@@ -377,6 +404,8 @@ CoT-Mediate's null-paraphrase flip rates are 0.5–3.3% (p. 6).
 | Rendered order check | `harness_v5.py --print_example` output for one item in each order matches §4.1 |
 | Boundary mismatches in margin scoring | ≤ 1% of rows |
 | Minimal-edit gate pass rate | Reported; analysis proceeds if ≥ 60% of competency items pass |
+| ChartQA item count | Exactly 230 rows and 229 analysed items from the pinned release; otherwise the harness stops (§3.2) |
+| Wording floor (binding, `para` vs. `own`) | Signed mean within ±5.0 pp **and** churn rate ≤ 5.0%; otherwise the behavioural equivalence test is uninterpretable (§7.6). This gate does not stop the run |
 | ChartQA answer-only decodes matching *a_I* or *a_T* | Reported from the dev pass (R8.3) |
 | Competency yield | Reported per model (R5 thresholds apply) |
 | Human coding of verdict labels | Two coders, about 200 items, κ reported before `stated_reliable_source` is used in any claim |
@@ -480,7 +509,7 @@ Changes §7.1 and §7.2.
 4. `max_pixels` for ChartQA-Conflict is fixed from that pass.
 No number from the dev pass changes R3, R4 or R7.
 
-*Section references in R1–R8 are the audit's and follow the draft's numbering. In this version, Δℓ is defined in §6.1 (R3's "§6.2"), and the mixed models are in §7.4.*
+*Section references in R1–R8 are the audit's and follow the draft's numbering. In this version, Δℓ is defined in §6.1 (R3's "§6.2"), and the mixed models are in §7.4. R4's "dev wording floor … exceeds 5.0 pp" is the two-part gate of §7.6. R5's "199 confirm items" is 229 analysed items minus 30 dev items; the Hub release has 230 rows (§3.2).*
 
 ---
 
@@ -500,3 +529,6 @@ No number from the dev pass changes R3, R4 or R7.
 - §7.3, the behavioural Δ uses one target (the source the flipped verdict names) in both terms.
 - §5.1 and §7.5, the donor stage adds free binding rows for the manipulation check; the base stage adds gold-answer score rows for $\Delta H_{rel}$; the balance point is defined.
 - §3.3 and §7.5, the full-set analysis is removed: under R5, items that fail the competency filter are never transplanted.
+- §2, H₁ rests on T2 alone. T1 is a separate binding question that only qualifies the H₁ reading. The decision table has one row per outcome and names every column it consults.
+- §7.6, the wording-floor gate has two parts: the signed mean within ±5.0 pp, and a churn rate of at most 5.0%. The earlier signed-mean test alone passed when answers moved in both directions.
+- §3.2, ChartQA `conflict_id` 45 is excluded, following the *Which Source Wins?* artifact. The release has 230 rows; 229 are analysed.

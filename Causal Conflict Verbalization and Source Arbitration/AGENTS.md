@@ -18,10 +18,10 @@
 - **Models:** `Qwen/Qwen2.5-VL-3B-Instruct` and `Qwen/Qwen2-VL-2B-Instruct`. Both run on Colab Pro 16 GB GPUs; revisions are pinned in `Experiment/harness_v4.py` (`MODEL_PINS`).
 - **Stimuli:**
   - Task-selection conflict: `vlm-modality-research/modality-conflict-arbitration-v2` (GSM8K/SVAMP).
-  - Evidence conflict: `vlm-modality-research/chartqa-evidence-conflict-v2` (229 items).
+  - Evidence conflict: `vlm-modality-research/chartqa-evidence-conflict-v2` (229 analysed items; the 230-row release minus `conflict_id` 45).
   - Both come from *Which Source Wins?* (arXiv:2608.17205).
 - **Design Spec:** `Docs/PREREGISTRATION_VERDICT_TRANSPLANT.md` (draft, not yet frozen). Evidence base: `Archive/Paper/lit-dossier-verdict-transplant/lit-dossier-verdict-transplant.md`.
-- **Current Phase:** v3 pilot and v4 dev runs are done (exploratory only), and the literature audit is done. Next: upgrade the harness to v5, then freeze the pre-registration. **No confirmatory data exists.**
+- **Current Phase:** v3 pilot and v4 dev runs are done (exploratory only), and the literature audit is done. The v5 harness is written and passes its CPU tests but has not run on a GPU. Next: run the v5 dev pass (`Experiment/RUNBOOK_v5.md`), then freeze the pre-registration. **No confirmatory data exists.**
 
 ### What the Pilot Does and Does Not Show
 - The pipeline works on `Qwen/Qwen2.5-VL-3B-Instruct` on a T4 [Verified].

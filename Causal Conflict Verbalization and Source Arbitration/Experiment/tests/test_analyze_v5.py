@@ -88,6 +88,44 @@ class TestHelpers(unittest.TestCase):
         self.assertEqual(an.combined_reading("equivalent to no effect", "not equivalent", True), "mixed")
         self.assertIn("uninterpretable", an.combined_reading("equivalent to no effect", "equivalent", False))
 
+    def test_t1_qualifies_h1_but_never_decides_it(self):
+        with_t1 = an.combined_reading("decision-relevant", "not equivalent", True, t1_significant=True)
+        without = an.combined_reading("decision-relevant", "not equivalent", True, t1_significant=False)
+        self.assertEqual(with_t1, "H1: the verdict decides, and binding strengthens it")
+        self.assertEqual(without, "H1: the verdict decides; no evidence that binding strengthens it")
+        # T1 alone gives no H1, and it does not change the other rows.
+        self.assertEqual(an.combined_reading("inconclusive", "equivalent", True, t1_significant=True), "inconclusive")
+        self.assertEqual(an.combined_reading("equivalent to no effect", "equivalent", True, t1_significant=True), "H0: saying is not choosing")
+        self.assertEqual(an.combined_reading("undetermined: prompt-level control too weak", "equivalent", True, True), "undetermined")
+
+    def test_tost_power(self):
+        self.assertEqual(an.tost_power(0.0, 100), 1.0)
+        self.assertEqual(an.tost_power(1.0, 1), 0.0)
+        # sd² = 0.05 at n = 215 is the 5% row of the freeze audit's power table (0.90).
+        self.assertAlmostEqual(an.tost_power(math.sqrt(0.05), 215), 0.90, delta=0.01)
+        self.assertEqual(an.tost_power(math.sqrt(0.2), 215), 0.0)
+        self.assertGreater(an.tost_power(0.1, 200), an.tost_power(0.2, 200))
+
+    def test_wording_floor_catches_symmetric_churn(self):
+        """20% of answers move one way and 20% the other: the signed mean is 0, the churn is 40%."""
+        diffs = [1.0] * 20 + [-1.0] * 20 + [0.0] * 60
+        f = an.wording_floor(diffs, churn=0.40)
+        self.assertAlmostEqual(f["signed_mean"], 0.0)
+        self.assertFalse(f["signed_mean_exceeds_epsilon"])
+        self.assertTrue(f["churn_exceeds_max"])
+        self.assertFalse(f["floor_ok"])
+        self.assertTrue(f["power_below_target"])
+        self.assertEqual(f["max_churn"], an.EPSILON)
+
+    def test_wording_floor_passes_and_fails_on_each_half(self):
+        quiet = an.wording_floor([0.0] * 97 + [1.0, -1.0, 1.0], churn=0.03)
+        self.assertTrue(quiet["floor_ok"])
+        shifted = an.wording_floor([1.0] * 10 + [0.0] * 90, churn=0.10)
+        self.assertTrue(shifted["signed_mean_exceeds_epsilon"] and shifted["churn_exceeds_max"])
+        self.assertFalse(shifted["floor_ok"])
+        # At the limit itself the gate still passes: the rule is "exceeds".
+        self.assertTrue(an.wording_floor([1.0] * 5 + [0.0] * 95, churn=0.05)["floor_ok"])
+
     def test_percentile(self):
         self.assertEqual(an.percentile([0, 10], 0.5), 5)
         self.assertEqual(an.percentile([1, 2, 3], 0.0), 1)
@@ -105,7 +143,11 @@ class TestAnalyzeGroup(unittest.TestCase):
         self.assertLess(r["T1_did"]["p"], 0.01)
         self.assertEqual(r["T2_rho_binding"]["reading"], "decision-relevant")
         self.assertEqual(r["T3_rho_nonbinding"]["reading"], "equivalent to no effect")
-        self.assertEqual(r["reading_binding"], "H1: the verdict decides")
+        self.assertTrue(r["T1_did"]["significant"])
+        self.assertTrue(r["T1_did"]["significant_after_holm"])
+        self.assertAlmostEqual(r["behaviour_binding"]["mean_abs_dl_gap_own_vs_flip"], 1.0)
+        self.assertAlmostEqual(r["behaviour_binding"]["mean_abs_dl_gap_own_vs_para"], 0.0)
+        self.assertEqual(r["reading_binding"], "H1: the verdict decides, and binding strengthens it")
         self.assertAlmostEqual(r["ceil_image_direction"]["mean"], 1.0)
         self.assertAlmostEqual(r["ceil_text_direction"]["mean"], 1.0)
         self.assertAlmostEqual(r["secondary"]["matched_pair_binding"]["mean"], 1.0)
@@ -115,12 +157,33 @@ class TestAnalyzeGroup(unittest.TestCase):
         r = an.analyze_group(synth(eff_bind=1.0, eff_non=0.0, own_image_every=3), reps=200, draws=200)
         self.assertAlmostEqual(r["T2_rho_binding"]["cde"], 1.0)
 
+    def test_h1_without_a_binding_effect(self):
+        """The verdict moves the answer equally with and without binding: H1, but T1 is not significant."""
+        r = an.analyze_group(synth(eff_bind=1.0, eff_non=1.0, noise=0.05, seed=5), reps=300, draws=300)
+        self.assertEqual(r["T2_rho_binding"]["reading"], "decision-relevant")
+        self.assertFalse(r["T1_did"]["significant"])
+        self.assertEqual(r["reading_binding"], "H1: the verdict decides; no evidence that binding strengthens it")
+
     def test_null_effect_and_h0(self):
-        follow = lambda fam, ver: 0.5
-        r = an.analyze_group(synth(n=200, eff_bind=0.0, eff_non=0.0, noise=0.05, beh_follow=follow, seed=3), reps=400, draws=400)
+        """The answer always stays with the own source, whatever the verdict says."""
+        ignore = lambda fam, ver: 1.0 if ver in ("own", "para") else 0.0
+        r = an.analyze_group(synth(n=200, eff_bind=0.0, eff_non=0.0, noise=0.05, beh_follow=ignore, seed=3), reps=400, draws=400)
         self.assertEqual(r["T2_rho_binding"]["reading"], "equivalent to no effect")
         self.assertGreater(r["T1_did"]["p"], 0.05)
-        self.assertIn(r["reading_binding"], ("H0: saying is not choosing", "mixed"))
+        floor = r["behaviour_binding"]["wording_floor_para_minus_own"]
+        self.assertEqual((floor["churn_rate"], floor["floor_ok"]), (0.0, True))
+        self.assertEqual(r["reading_binding"], "H0: saying is not choosing")
+
+    def test_symmetric_churn_blocks_h0(self):
+        """Random answers: the signed wording shift is near 0, but half the answers change."""
+        r = an.analyze_group(synth(n=200, eff_bind=0.0, eff_non=0.0, noise=0.05, beh_follow=lambda fam, ver: 0.5, seed=3), reps=400, draws=400)
+        floor = r["behaviour_binding"]["wording_floor_para_minus_own"]
+        self.assertLess(abs(floor["signed_mean"]), an.EPSILON)
+        self.assertFalse(floor["signed_mean_exceeds_epsilon"])
+        self.assertGreater(floor["churn_rate"], 0.3)
+        self.assertTrue(floor["churn_exceeds_max"])
+        self.assertFalse(r["wording_floor_ok_binding"])
+        self.assertIn("uninterpretable", r["reading_binding"])
 
     def test_undetermined_without_ceiling(self):
         r = an.analyze_group(synth(ceil=0.0, noise=0.5), reps=200, draws=200)
