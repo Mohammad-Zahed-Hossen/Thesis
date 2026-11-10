@@ -49,16 +49,16 @@ When in doubt, read the code, data and papers, not the narrative documents.
 
 Every v5 run and analysis must satisfy all of these. Details are in the pre-registration.
 
-1. **Counterbalanced evidence order.** Run both `<image><text>` and `<text><image>`. The instruction stays fixed before both sources, and the format line stays after them. Source A/B labels are counterbalanced too.
+1. **Counterbalanced evidence order.** Run both `<image><text>` and `<text><image>`. The instruction stays fixed before both sources, and the format line stays after them. There are no "Source A/B" labels: sources get modality headers, and only their positions swap (prereg R2).
    - Why: with the instruction fixed, putting a source last moves Qwen2.5-VL-3B toward it by +16.7 / +15.0 pp (arXiv:2609.26986, natural images). If the instruction moves with the text, the sign reverses.
    - `render_chat` currently always puts the image first. That must change.
 2. **Binding arm plus explicit single-source ceilings.**
    - Binding: "…Then solve only the problem from the source you named as more reliable, and ignore the other problem."
    - Ceilings: `explicit_image` / `explicit_text`. Report any binding effect as a fraction of this ceiling.
    - Why: without binding, a null verdict effect can't be told apart from the instruction dominating.
-3. **Minimal-edit verdicts.** Flipped verdicts swap only the source noun phrase in the reliability clause of the model's own `conflict_full` verbalization. Gates: exactly one clause changed; the flip actually reverses `stated_reliable_source`; token Jaccard ≥ 0.85. Authored sentences (`rel_image` / `rel_text`) are a secondary arm only.
-4. **Competency conditioning.** Primary results use only items where `base_image` solves the item's image problem and `base_text` solves its text problem, under the same decoding. Full-set results are secondary. Cross-model comparisons use the intersection of these sets.
-5. **Short-horizon primary outcome.** Force `####` right after the verdict. Score a short greedy decode and the length-normalized log-likelihood margin between the image answer and the text answer. Free-form solving is a secondary outcome only.
+3. **Minimal-edit verdicts.** Flipped verdicts swap only the source noun phrase in the reliability clause of the model's own `conflict_full` verbalization. Gates: exactly one clause changed; the flip actually reverses `stated_reliable_source`; token Jaccard ≥ 0.85 and at most two swapped noun phrases. Authored sentences (`rel_image` / `rel_text`) are not run in v5; the matched `para` / `para_flip` pair is the robustness check.
+4. **Competency conditioning.** Primary results use only items where `base_image` solves the item's image problem and `base_text` solves its text problem, under the same decoding. Items that fail the filter are never transplanted. Cross-model comparisons use the intersection of these sets.
+5. **One primary outcome: Δℓ.** This is the length-normalized log-likelihood margin at `####`, image minus text, teacher-forced right after the verdict. Behavioural decodes are secondary: 512-token solving for GSM8K/SVAMP and a 16-token answer-only decode for ChartQA. Ceilings use the no-verdict prefill. No source letters.
 6. **Repetition penalty 1.0, greedy decoding, pinned revisions.** Use a new `--run_tag` for any prompt or setting change.
 
 ## Claim Boundaries

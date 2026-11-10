@@ -2,20 +2,21 @@
 
 **Working title:** *Does the Verdict Decide? Testing Whether Stated Source Reliability Steers Vision-Language Models under Image–Text Conflict*
 
-**Status:** DRAFT, not frozen. To freeze it:
-1. Resolve every item in §10.
-2. Commit the file.
-3. Tag the commit `prereg-v5`.
-4. Record the tag hash in the run manifests.
+**Status:** DRAFT, not frozen. It is frozen only when the conditions in §10, R8 are met:
+- literal templates;
+- the v5 harness with tests;
+- one v5 dev pass on both models;
+- `max_pixels` fixed for ChartQA.
 
-Confirmatory data collected before the freeze does not count as confirmatory.
+To freeze it, commit this file, tag the commit `prereg-v5`, and record the tag hash in every confirmatory manifest. Confirmatory data collected before the freeze does not count as confirmatory.
 
 **Sources:**
-- `Archive/Paper/lit-dossier-verdict-transplant/lit-dossier-verdict-transplant.md` (the dossier, §§2.3, 3 and 4)
+- `Archive/Paper/lit-dossier-verdict-transplant/lit-dossier-verdict-transplant.md` (the dossier)
+- `Archive/Paper/prereg-freeze-audit/prereg-freeze-audit.md` (the freeze audit, 2026-11-10)
 - the PDFs in `Archive/Paper/`
-- `Experiment/*.py` at commit `5266e17`
+- `Experiment/*_v5.py`
 
-Anything not stated in those sources is marked **[Design decision]**: it is a choice made here, not taken from the literature.
+Anything not stated in those sources is marked **[Design decision]**: it is a choice made here, not a value taken from the literature.
 
 ---
 
@@ -24,38 +25,54 @@ Anything not stated in those sources is marked **[Design decision]**: it is a ch
 **RQ.** When an image and a typed text support different answers, does a vision-language model's verbalized verdict about which source is more reliable causally determine which source its answer follows?
 
 **Notation:**
-- *Z*: the instruction.
-- *M*: the verbalized verdict.
-- *Y*: which source's answer the output matches, in {image, text, neither}.
+- *M*: the verbalized verdict, prefix-forced into the assistant turn.
+- *B*: binding instruction.
 - *O*: evidence order.
-- *B*: binding wording.
 - *K*: wording template.
+- Δℓ: the log-likelihood margin of §6.1.
 
-**Estimand.** Prefix forcing sets *M* by intervention. That cuts the item-level confounding of *M*, so we can identify the **controlled direct effect** of the verdict at a fixed (z, o, b):
+**Estimand: the effect of reversing the model's own stated verdict.** Prefix forcing sets *M* by intervention, which identifies a **controlled direct effect** of the verdict at a fixed (b, o, k):
 
-$$\mathrm{CDE}_{z,o,b}=P(Y{=}\text{img}\mid do(M{=}m_{\text{img}}),z,o,b)-P(Y{=}\text{img}\mid do(M{=}m_{\text{txt}}),z,o,b)$$
+$$\mathrm{CDE}_{\ell,b,o,k}=E\big[\Delta\ell\mid do(M{=}m_{flip}),b,o,k\big]-E\big[\Delta\ell\mid do(M{=}m_{own}),b,o,k\big]$$
 
-This is **not** a natural indirect effect, and the words "mediation" and "mediates" are not used for it. Forced verdicts are off-policy, so effects may not transfer to free generation (dossier §2.3).
+The sign is oriented so that a positive CDE means the answer moves toward the source the flipped verdict names.
+
+Why the estimand is phrased this way (freeze audit, §2 and R6): on v4 dev, 94 of 96 usable donor verdicts name the typed text. "The verdict names the image" is therefore nearly the same variable as "the verdict was flipped", so the contrast is described everywhere as *reversing the model's own verdict*, not as *image vs. text verdict*. A matched pair of template verdicts, $m_{para}$ vs. $m_{para\_flip}$ (§5), is a pre-registered robustness check in which both verdicts are edited.
+
+This is **not** a natural indirect effect. The words "mediation" and "mediates" are not used for it. Forced verdicts are off-policy, so effects may not transfer to free generation (dossier §2.3).
+
+### 1.1 Novelty boundary
+
+This replaces dossier §4.1 and is taken verbatim from freeze audit §5:
+
+> Within the fourteen sources read, no study intervenes on a vision-language model's own stated source-reliability verdict, by prefix-forcing a minimally edited version of it, and measures whether the answer follows under image–text conflict with evidence order counterbalanced. Nor does any test whether an instruction that binds the answer to that verdict changes its effect. Prior work steers modality reliance with an external request and evaluates it by editing the evidence (Dassen et al., arXiv:2610.33841); predicts preference from evidence strength with no verbalization (Barua et al., arXiv:2610.19407); tests whether explanations mention edited visual evidence (Menzat et al., arXiv:2609.06704); or edits clinical content in a model's reasoning with no modality conflict (Bhowal et al., arXiv:2607.27304). We do not claim that prompt-based modality steering is new: our explicit-source arms replicate the natural-language instruction baseline of Dassen et al. and serve only as a ceiling.
+
+CMC-Bench (Catapang 2026, MAGMaR) is unread and must be read before the related-work chapter is written.
 
 ---
 
 ## 2. Hypotheses
 
-| | Statement | Test |
+The **primary outcome is Δℓ** (§6.1), in both regimes. The behavioural outcome (§6.2) is secondary.
+
+| | Statement | Criterion (§7.3) |
 |---|---|---|
-| **H₁** (the verdict decides) | Under the binding instruction, CDE > ε, and the verdict effect is larger with binding than without (β₄ > 0) | One-sided test of β₄; CDE under binding with a 95% CI excluding [−ε, ε] |
-| **H₀** (saying is not choosing) | Under the binding instruction, \|CDE\| < ε | TOST at α = 0.05 with ε = 7.3 pp (§7.3) |
+| **H₁** (the verdict decides) | Under binding, reversing the verdict moves Δℓ by a substantial fraction of what an explicit instruction does, and more than without binding | T1: DiD > 0 (one-sided). T2: the 90% CI of ρ_bind lies wholly above 0.25 |
+| **H₀** (saying is not choosing) | Under binding, reversing the verdict moves Δℓ by less than a quarter of the explicit ceiling, and behavioural answers by less than 5.0 pp | T2: the 90% CI of ρ_bind lies wholly inside (−0.25, 0.25), **and** behavioural TOST at ε = 5.0 pp gives equivalence |
 
-The same pair is tested separately under the non-binding instruction. The **explicit-source ceiling** (§4.3) must be read before any H₀ result counts as unfaithfulness.
+Here $\rho_b=\mathrm{CDE}_{\ell,b}/\mathrm{Ceil}_\ell$, where $\mathrm{CDE}_{\ell,b}$ is averaged over *K* and *O* (§7.1) and $\mathrm{Ceil}_\ell$ is defined in §4.3.
 
-| Binding CDE | Explicit ceiling | Pre-registered reading |
-|---|---|---|
-| > ε | any | H₁: the verdict is decision-relevant once the prompt binds it |
-| Equivalent to 0 | Moves answers by > ε | Faithfulness failure: the model follows an explicit source instruction but not its own stated verdict |
-| Equivalent to 0 | Moves answers by ≤ ε | Undetermined: prompt-level control is too weak. No faithfulness claim |
-| Neither > ε nor equivalent | any | Inconclusive; report the CI |
+Pre-registered readings (from R4):
 
-**Directional asymmetry** is expected (Tang et al., arXiv:2602.14518, p. 8; dossier §2.3). The model's own verdicts mostly name the typed text. Two direction-specific contrasts are therefore pre-registered as secondary (§7.4).
+| Ceil_ℓ 95% CI | ρ_bind 90% CI | Behavioural TOST | Reading |
+|---|---|---|---|
+| Includes 0 | — | — | **Undetermined:** prompt-level control is too weak. No faithfulness claim |
+| Excludes 0 | Wholly above 0.25 | any | **H₁:** the verdict is decision-relevant once the prompt binds it |
+| Excludes 0 | Wholly inside (−0.25, 0.25) | Equivalent | **H₀:** saying is not choosing. The model follows an explicit source instruction but not its own reversed verdict |
+| Excludes 0 | Wholly inside (−0.25, 0.25) | Not equivalent | **Mixed**, reported as such |
+| Excludes 0 | Otherwise | any | **Inconclusive**; report the CI |
+
+The same readings are reported under the non-binding instruction (T3). If the dev wording floor ($m_{own}$ vs. $m_{para}$) exceeds 5.0 pp on the behavioural outcome, the behavioural equivalence test is declared uninterpretable. ε is never widened.
 
 ---
 
@@ -63,19 +80,24 @@ The same pair is tested separately under the non-binding instruction. The **expl
 
 ### 3.1 Task-selection conflict (GSM8K/SVAMP)
 
-- **Dataset:** `vlm-modality-research/modality-conflict-arbitration-v2`, revision `2c55b099f286554685798d54cea4bde761d486b7`. Use split `train`, filtered to `degradation_level == 0` and `channel == "image"` (as in `harness_v4.load_items`).
-- **Construction** (from *Which Source Wins?*, arXiv:2608.17205): the rendered image of problem *i* paired with the typed text of problem *(i+1) mod N*. Pairs with equal answers are excluded (`filter_distinct`).
-- **Interpretation:** neither source is wrong. "Reliability" is ill-posed here (dossier §5.1), so results from this regime are described as *source following*, not *reliability judgement*.
-- **Dev/confirm split:** `split_phase(..., dev_size=200)`. Confirm items share no problem with dev items. The existing 200 dev items are already spent.
-- **Confirm sample [Design decision]:** 400 confirm items per model, drawn from the confirm pool with seed 42, stratified by source (GSM8K/SVAMP) in proportion to its size.
+- **Dataset:** `vlm-modality-research/modality-conflict-arbitration-v2`, revision `2c55b099f286554685798d54cea4bde761d486b7`. Use split `train`, filtered to `degradation_level == 0` and `channel == "image"`.
+- **Construction** (*Which Source Wins?*, arXiv:2608.17205): the rendered image of problem *i* paired with the typed text of problem *(i+1) mod N*. Pairs with equal answers are excluded.
+- **Interpretation:** neither source is wrong. Results are described as *source following*, not *reliability judgement*.
+- **Dev/confirm split:** `split_phase(..., dev_size=200)`. The 200 dev items are spent; confirm items share no problem with them.
+- **Confirm sample (R5) [Design decision]:**
+  1. Run the base arms on the whole confirm pool.
+  2. Take items in a seeded order (seed 42) until 250 pass the competency filter.
+  3. All 250 enter the transplant.
+  - The primary analysis needs at least 150 items after the edit gates (§5.3).
 
 ### 3.2 Evidence conflict (ChartQA-Conflict)
 
 - **Dataset:** `vlm-modality-research/chartqa-evidence-conflict-v2`, revision `7d15a9704bc5e028e7038ef98aa7917059535bf8`, split `test`, 229 items.
 - **Construction:** the original chart supports the ChartQA answer *a_I*. A reviewed counterfactual report supports *a_T*. The chart is the correct source.
-- **Known limitation** (arXiv:2608.17205, Limitations): the report states its value directly, while the chart has to be read, so the two sources are not equally direct.
-- **Dev/confirm split [Design decision]:** `--dev_size 30`. The harness default of 200 would leave only 29 items for confirmation [Verified, `split_phase`]. All remaining items are confirm items.
-- **Power caveat:** for Qwen2-VL-2B, *Which Source Wins?* had only 113 attributable generated answers (Table 11). ChartQA results for 2B are therefore **secondary**.
+- **Known limitation** (arXiv:2608.17205, Limitations): the report states the value directly, while the chart has to be read. Barua et al. (arXiv:2610.19407, pp. 7–8) find text evidence 1.4–3.8 times stronger in that structure.
+- **Dev/confirm split:** `--dev_size 30`, leaving 199 confirm items. The harness default of 200 would leave 29.
+- **Entry rule (R5):** a model's ChartQA results enter the confirmatory family only if at least 100 items survive the competency and edit gates, counted before any transplant row is decoded. Otherwise they are secondary. Qwen2-VL-2B on ChartQA-Conflict is secondary regardless.
+- **About the 113 in *Which Source Wins?*:** Table 11 counts Qwen2-VL-2B items that are "decidable at all four required endpoints" across degradation levels (p. 18). It is not a competency yield. The 2B ChartQA yield is measured in the dev pass.
 
 ### 3.3 Competency conditioning
 
@@ -83,78 +105,101 @@ For each model, an item enters the **primary** analysis only if:
 - `base_image` gives the item's image answer; **and**
 - `base_text` gives the item's text answer.
 
-Both are run under the same decoding settings. This follows Zhang et al. (arXiv:2511.02243, p. 5) and the Noncommutativity paper (arXiv:2609.26986, p. 4). Full-set results are reported as secondary. Cross-model comparisons use the intersection of the two models' competency sets. On v4 dev, 110 of 200 items passed for Qwen2.5-VL-3B [Verified, dossier §2.2].
+Both are run under the regime's decoding settings (§3.4). This follows Zhang et al. (arXiv:2511.02243, p. 5) and Noncommutativity (arXiv:2609.26986, p. 4). Cross-model comparisons use the intersection of the competency sets. Items that fail the filter never enter the transplant (R5), so there is no full-set analysis.
 
 ### 3.4 Models and decoding
 
 | Setting | Value |
 |---|---|
 | Models | `Qwen/Qwen2.5-VL-3B-Instruct` @ `66285546d2b821cf421d4f5eb2576359d3770cd3`; `Qwen/Qwen2-VL-2B-Instruct` @ `895c3a49bc3fa70a340399125c650a463535e71c` |
-| Decoding | Greedy (`do_sample=False`), `repetition_penalty=1.0`, FP16, SDPA, `max_pixels = 256·28·28` |
-| Hardware | Colab Pro, 16 GB GPU |
+| Decoding | Greedy, `repetition_penalty = 1.0`, FP16 on T4/V100, SDPA |
+| Pixels | GSM8K/SVAMP: `max_pixels = 256·28·28`. ChartQA: fixed from the dev pass (R8.4) |
+| Base arms | GSM8K/SVAMP: step-by-step, 512 new tokens. ChartQA: answer-only, 64 new tokens |
 
 ---
 
 ## 4. Prompts
 
-### 4.1 Layout (both orders)
+### 4.1 Layout (R2: no source letters)
 
-The instruction comes **before** both sources and the format line **after** them. Only the two sources swap places (arXiv:2609.26986, Eq. 1).
+Sources are introduced by modality headers, and only their positions swap. The instruction **I** comes before both sources and the format line **F** after them (arXiv:2609.26986, Eq. 1).
+
+The literal user-turn content lists, as built by `harness_v5.build_content`, are below. `<image>` is one `{"type": "image"}` entry; for Qwen2(.5)-VL it renders as `<|vision_start|><|image_pad|><|vision_end|>`.
 
 ```
-image-first:  [I] Source A: <image>        Source B: <typed problem>  [F]
-text-first:   [I] Source A: <typed problem> Source B: <image>        [F]
+GSM8K/SVAMP image-first:  "{I}\n\nImage: " <image> "\n\nTyped text:\n{text_question}\n\n{F}"
+GSM8K/SVAMP text-first:   "{I}\n\nTyped text:\n{text_question}\n\nImage: " <image> "\n\n{F}"
+ChartQA chart-first:      "{I}\n\nChart: " <image> "\n\nReport:\n{report}\n\n{F}"
+ChartQA report-first:     "{I}\n\nReport:\n{report}\n\nChart: " <image> "\n\n{F}"
 ```
 
-**Literal text [Design decision; the labels follow *Which Source Wins?*]:**
-- Image source line: `Source {X} is the attached image.`
-- Text source line: `Source {X} is the typed text below:\n{text_question}`
-- `{X}` ∈ {A, B}. Letters follow presentation order, so A is always shown first.
-- Verdicts name sources by modality ("the image", "the typed text"), never by letter.
-- **[Design decision]** Because letters follow order, letter is perfectly confounded with order. No separate letter counterbalancing is run. Resolve this in §10 if letter effects need to be separated.
+- *O* is effect-coded: −0.5 for image-first, +0.5 for text-first. There is no letter factor, so β₂ and β₅ are read as effects of position only.
+- Verdicts name sources by modality ("the image", "the typed text", "the chart", "the report").
 
-**Format line F:** the existing `FORMAT` string in `harness_v4.py`: `Show your step-by-step working. On the last line, write #### followed by only the final number.`
+**Format lines:**
+- GSM8K/SVAMP: `Show your step-by-step working. On the last line, write #### followed by only the final number.`
+- ChartQA: `On the last line, write #### followed by only the answer.`
 
-**Implementation:** `render_chat(..., order)` builds the user content list as `[text(I), text(source-1 line), image|text, text(source-2 line), text|image, text(F)]`. Each `{"type": "image"}` entry becomes `<|vision_start|><|image_pad|><|vision_end|>` at its list position. Verify this on Colab by printing `apply_chat_template(..., tokenize=False)` (dossier §3.1).
+### 4.2 GSM8K/SVAMP instruction templates (K = 4)
 
-### 4.2 Instruction templates (GSM8K/SVAMP), K = 4
+I = stem_k + " " + ending_k.
 
-Template 1 for each arm is canonical and comes from the dossier, §3.2. **Templates 2–4 are drafts [Design decision]** and must be frozen with this document.
-
-Every instruction begins with the same stem, S_k (k = 1…4):
+**Stems:**
 1. "In two sentences, state whether the image and the typed text present the same problem, and say which source you consider more reliable."
 2. "In two sentences, say whether the image and the typed text show the same problem, and state which source you find more reliable."
 3. "In two sentences, judge whether the image and the typed text contain the same problem, and say which of the two sources is more reliable."
 4. "In two sentences, note whether the image and the typed text give the same problem, and say which source you trust as more reliable."
 
-The arm-specific ending follows S_k:
+**Endings:**
 
-| Arm | Ending (k = 1 canonical; others draft) |
-|---|---|
-| **Non-binding** | 1: "Then solve a problem." · 2: "Then solve one problem." · 3: "Then work out a problem." · 4: "Then solve a problem from the sources." |
-| **Binding** | 1: "Then solve only the problem from the source you named as more reliable, and ignore the other problem." · 2: "Then solve only the problem given by the source you said is more reliable, and ignore the other one." · 3: "Then work out only the problem from the more reliable source you named, and disregard the other problem." · 4: "Then solve only the problem in the source you judged more reliable, and leave the other problem aside." |
-| **Explicit-image** (ceiling) | 1: "Then solve only the problem shown in the image." · 2–4: same meaning, reworded in parallel with the binding endings |
-| **Explicit-text** (ceiling) | 1: "Then solve only the typed problem." · 2–4: same meaning, reworded in parallel |
+| k | Non-binding | Binding | Explicit (X = "the image" / "the typed text") |
+|---|---|---|---|
+| 1 | "Then solve a problem." | "Then solve only the problem from the source you named as more reliable, and ignore the other problem." | "Then solve only the problem from X, and ignore the other problem." |
+| 2 | "Then solve one problem." | "Then solve only the problem given by the source you said is more reliable, and ignore the other one." | "Then solve only the problem given by X, and ignore the other one." |
+| 3 | "Then work out a problem." | "Then work out only the problem from the more reliable source you named, and disregard the other problem." | "Then work out only the problem from X, and disregard the other problem." |
+| 4 | "Then solve a problem from the sources." | "Then solve only the problem in the source you judged more reliable, and leave the other problem aside." | "Then solve only the problem in X, and leave the other problem aside." |
 
-### 4.3 Explicit-source ceiling
+The explicit endings mirror the binding endings word for word, so the two arms differ by one noun phrase (freeze audit §4).
 
-$$\mathrm{Ceil}_{o}=P(Y{=}\text{img}\mid \text{explicit\_image},o)-P(Y{=}\text{img}\mid\text{explicit\_text},o)$$
+### 4.3 Explicit-source ceiling (R6)
 
-- Measured with the model's own verdict prefilled (§5, $m_{own}$).
-- The binding effect is reported as CDE/Ceil.
-- The dossier (§3.2) notes that unconditional source instructions were weak in prior work: Deng et al. found a 2.6 pp shift (arXiv:2503.02199, p. 6), and the Noncommutativity paper found 89–145% of the order effect remaining (arXiv:2609.26986, p. 3).
+The ceiling is measured with $m_\varnothing$ (the donor verbalization with its reliability sentence deleted) prefilled, **not** with $m_{own}$. With $m_{own}$, the explicit-image arm would contradict a verdict naming the text in about 98% of items.
 
-### 4.4 ChartQA-Conflict adaptation [Design decision]
+$$\mathrm{Ceil}_\ell = E[\Delta\ell\mid \text{explicit\_image}, m_\varnothing] - E[\Delta\ell\mid \text{explicit\_text}, m_\varnothing]$$
 
-- Stem S_1: "Question: {question}\nIn two sentences, state whether the chart and the report give the same answer, and say which source you consider more reliable."
-- Endings:
-  - non-binding: "Then answer the question."
-  - binding: "Then answer the question using only the source you named as more reliable, and ignore the other source."
-  - explicit: "…using only the chart." / "…using only the report."
-- Source lines: "Source {X} is the attached chart." and "Source {X} is the report below:\n{report}".
-- F: "On the last line, write #### followed by only the answer."
-- Parsing is strict, `####` only, as in *Which Source Wins?*, Appendix A.
-- K = 4 drafts are to be written in parallel to §4.2 before the freeze.
+- It is reported in total and **per direction** against the non-binding arm, also with $m_\varnothing$:
+  - $\mathrm{Ceil}^{img}_\ell = E[\Delta\ell\mid\text{explicit\_image},m_\varnothing]-E[\Delta\ell\mid\text{non-binding},m_\varnothing]$
+  - $\mathrm{Ceil}^{txt}_\ell = E[\Delta\ell\mid\text{non-binding},m_\varnothing]-E[\Delta\ell\mid\text{explicit\_text},m_\varnothing]$
+- **Expect an asymmetric ceiling** (Dassen et al., arXiv:2610.33841, Table 2): image requests are weaker than text requests.
+- These arms replicate the natural-language baseline of Dassen et al. (Table 7, p. 15) and are not claimed as new.
+
+### 4.4 ChartQA-Conflict templates (K = 4)
+
+I = "Question: {question}\n" + stem_k + " " + ending_k.
+
+**Stems:**
+1. "In two sentences, state whether the chart and the report give the same answer, and say which source you consider more reliable."
+2. "In two sentences, say whether the chart and the report give the same answer, and state which source you find more reliable."
+3. "In two sentences, judge whether the chart and the report support the same answer, and say which of the two sources is more reliable."
+4. "In two sentences, note whether the chart and the report agree on the answer, and say which source you trust as more reliable."
+
+**Endings:**
+
+| k | Non-binding | Binding | Explicit (X = "the chart" / "the report") |
+|---|---|---|---|
+| 1 | "Then answer the question." | "Then answer the question using only the source you named as more reliable, and ignore the other source." | "Then answer the question using only X, and ignore the other source." |
+| 2 | "Then give an answer to the question." | "Then answer the question using only the source you said is more reliable, and ignore the other one." | "Then answer the question using only X, and ignore the other one." |
+| 3 | "Then work out the answer to the question." | "Then work out the answer using only the more reliable source you named, and disregard the other source." | "Then work out the answer using only X, and disregard the other source." |
+| 4 | "Then answer the question from the sources." | "Then answer the question using only the source you judged more reliable, and leave the other source aside." | "Then answer the question using only X, and leave the other source aside." |
+
+Answers are parsed strictly, following *Which Source Wins?* §3.3: "We do not search explanations or reasoning traces for embedded numbers" (p. 5). The parser takes the value after `####`. If there is no `####`, it takes the first non-empty line, but only when that whole line is a single answer.
+
+### 4.5 Single-source base arms [Design decision]
+
+| Arm | GSM8K/SVAMP | ChartQA |
+|---|---|---|
+| `base_image` | "Image: " <image> "\n\nSolve the problem shown in the image. {F}" | "Question: {question}\nAnswer the question using the chart.\n\nChart: " <image> "\n\n{F}" |
+| `base_text` (no image) | "Typed text:\n{text_question}\n\nSolve the typed problem. {F}" | "Question: {question}\nAnswer the question using the report.\n\nReport:\n{report}\n\n{F}" |
 
 ---
 
@@ -162,172 +207,296 @@ $$\mathrm{Ceil}_{o}=P(Y{=}\text{img}\mid \text{explicit\_image},o)-P(Y{=}\text{i
 
 ### 5.1 Donor stage
 
-For each item and each order *o*, generate freely under the **non-binding, k = 1** instruction (`max_new_tokens = 512`). Take the verbalization *v* with `score_v4.split_verbalization`.
+For each item and each order *o*:
+- generate freely under the **non-binding, k = 1** instruction (GSM8K/SVAMP: 512 new tokens; ChartQA: 128);
+- take the verbalization *v* with `score_v4.split_verbalization`.
 
-The same *v* is used across all *K* and *B* for that item and order, so the forced content does not change across those factors **[Design decision]**.
+The donor stage also generates freely under the **binding, k = 1** instruction in both orders (rows with family `free_binding`). Nothing is forced in these rows. They are used only for the manipulation check (§7.5) and never as donors.
 
-### 5.2 Verdict variants
+The same *v* is used across all *K* and *B* for that item and order. This keeps the forced content constant across those factors [Design decision].
 
-Lexicon of source noun phrases (each pair swaps both ways):
+### 5.2 Variants
 
-| Image side | Text side |
-|---|---|
-| "the image" | "the typed text" |
-| "image" | "text" |
-| "the picture" | "the text" |
-| "visual information" | "textual information" |
+**Lexicon of source noun phrases** (matched on word boundaries, longest phrase first; case is preserved):
 
-Steps:
-1. Find the **reliability clause**: the sentence in *v* where `stated_reliable_source` matches.
+| Regime | Image side → replacement | Text side → replacement |
+|---|---|---|
+| GSM8K/SVAMP | "image", "picture" → "typed text"; "visual information" → "textual information" | "typed text", "text" → "image"; "textual information" → "visual information" |
+| ChartQA | "the chart", "chart" → "report" | "the report", "report" → "chart" |
+
+Article agreement is repaired after a swap ("a image" → "an image", "an typed text" → "a typed text"). Each repair is counted.
+
+**Steps:**
+1. Find the **reliability sentence**: the one sentence of *v* matching `\breliable\b`. If *v* has two or more such sentences, the item is excluded at gate 1.
 2. Build the variants:
    - $m_{own}$: *v* unchanged.
-   - $m_{flip}$: swap only the source noun phrases inside the reliability clause. Every other token stays the same.
-   - $m_{\varnothing}$ (no verdict): delete the reliability clause.
-   - $m_{para}$ (wording floor): reword the reliability clause with one fixed template, keeping its direction. The four templates are "I consider X more reliable." / "X seems more reliable to me." / "I would trust X more." / "X is the more reliable source." The first that differs from the original is used.
+   - $m_{flip}$: swap the source noun phrases inside the reliability sentence only. Every other token stays the same.
+   - $m_\varnothing$: delete the reliability sentence.
+   - $m_{para}$ and $m_{para\_flip}$: replace the reliability sentence with the same template sentence, naming the own source and the opposite source respectively. Both are edited, so they differ only in direction. Templates, with X = "the image", "the typed text", "the chart" or "the report", capitalised when the sentence starts with it:
+     1. "I consider X more reliable."
+     2. "X seems more reliable to me."
+     3. "I would treat X as more reliable." **[Design decision; this replaces the draft's "I would trust X more."]** The draft wording contains no "reliable", so the parser in gate 2 cannot read it.
+     4. "X is the more reliable source."
+   - The first template whose own-source sentence differs from the original reliability sentence is used, after whitespace and case normalization. The same template index is then used for $m_{para\_flip}$.
+3. Authored sentences (`transplant_v4.AUTHORED`, `rel_image`/`rel_text`) are not run in v5.
 
 ### 5.3 Gates
 
-A variant is used only if all of these hold:
-1. Exactly one sentence differs from *v*. For $m_{\varnothing}$, exactly one sentence is removed.
-2. For $m_{flip}$, `stated_reliable_source(m_flip)` is the opposite of `stated_reliable_source(v)`. For $m_{para}$, it is the same.
-3. Token-level Jaccard similarity on lowercased word tokens satisfies $J(v, m_{flip}) \ge 0.85$.
-4. A regex check for subject–verb agreement ("is/are") passes. A random 50 variants per model are also checked by a person.
-5. The item is excluded if `stated_reliable_source(v)` is "both", "unclear" or absent. Exclusions are counted per model and order.
+A variant is used only if all of these hold. The item is dropped if any of its variants fails.
 
-Item counts are reported at each gate.
+1. **Exactly one sentence differs from *v*.** For $m_\varnothing$, exactly one sentence is removed.
+2. **The stated source reverses or holds as intended.** `stated_reliable_source` (score_v5) gives the opposite source for $m_{flip}$ and $m_{para\_flip}$, the own source for $m_{para}$, and "absent" for $m_\varnothing$.
+3. **The edit is small.**
+   - (a) Token Jaccard ≥ 0.85, computed on the sets of lowercased word tokens: $J(v, m_{flip}) \ge 0.85$.
+   - (b) **[Design decision]** The flip swaps at most two source noun phrases.
+   - Part (a) alone has almost no force. When both source nouns also occur in another sentence, the two token sets are identical; this was the case for all 182 passing v4 dev donors. Part (b) bounds the edit directly. A multiset Jaccard (repeats counted) and the number of changed tokens are reported in `gates.json` but are not gates: as ratios they would reject short, clean verdicts for their length alone.
+4. **Grammar.** A regex finds no "image/text/chart/report are" and no article mismatch. A random 50 variants per model are also checked by a person.
+5. **Own verdict is usable.** `stated_reliable_source(v)` must name a source of the item's regime. Items labelled "undetermined" or "absent" are excluded.
 
-### 5.4 Verdict direction coding
-
-- *D* = 1 if the forced verdict names the image, *D* = 0 if it names the typed text.
-- For a donor whose own verdict names the text: $m_{own}$ has D = 0 and $m_{flip}$ has D = 1. The reverse holds for donors whose own verdict names the image.
-- Own versus flipped is recorded separately as *F* ∈ {own, flip}, for the asymmetry contrasts.
-
-### 5.5 Secondary arm
-
-The authored sentences `rel_image` and `rel_text` from `transplant_v4.AUTHORED` are kept as a secondary arm.
+Counts at every gate are written to `{run_tag}.gates.json` and reported.
 
 ---
 
-## 6. Outcomes
+## 6. Outcomes (R3)
 
-### 6.1 Primary, binary: short-horizon decode
-
-- Prefill `{m}\n\n#### ` in the assistant turn.
-- Greedy-decode at most 16 new tokens.
-- Parse the first number and classify it with `numeric_equal` as image, text or neither.
-- This follows CoT-Mediate, which decodes at most 24 answer tokens after the forced chain of thought (arXiv:2607.27304, p. 5). It is meant to fix the roughly tenfold wording-noise inflation seen with 400-token solving (dossier §2.2, item 4).
-
-### 6.2 Primary, graded: log-likelihood margin at `####`
+### 6.1 Primary: log-likelihood margin at `####`
 
 $$\Delta\ell=\tfrac{1}{|y_I|}\log p(y_I\mid\cdot)-\tfrac{1}{|y_T|}\log p(y_T\mid\cdot)$$
 
-- Teacher-forced on the continuation `" {y}"` after the same prefill.
-- Length-normalized as in *Which Source Wins?* (abstract; §3.3).
-- Related to the log-odds swap score $C_\theta$ in arXiv:2609.26986 (Eqs. 3–4).
+- **Teacher-forced** after the prefill `{m}\n\n#### `.
+- **Sign convention:** Δℓ is **image minus text**, so a positive value favours the image (or chart) answer. *Which Source Wins?* (Eq. 1) and Barua et al. (Eq. 1) use text minus image; convert before comparing.
+- **Length normalization:** $|y|$ is the number of continuation tokens.
+- **Tokenization [Design decision]:** the prefill string ends at `####`. Each candidate is scored as the continuation `" " + y`, which yields the same string as `{m}\n\n#### {y}`. The prefix token ids must be an exact prefix of the full-sequence ids. If they are not, the row is flagged `boundary_mismatch` and dropped. If the first continuation token is whitespace only, it is not scored and not counted in $|y|$: both candidates share it, and counting it would change the length normalization. Each row records how many such tokens were skipped (`ws_skipped`).
+- *Which Source Wins?* scores its margin "after the fixed #### delimiter … with no chain-of-thought" (p. 5). Barua et al. report 75.3–82.0% agreement between the margin's sign and freely generated choices (Appendix B.5).
 
-### 6.3 Secondary
+### 6.2 Secondary: behavioural answer
 
-- Free-form solving after the forced verdict (`max_new_tokens = 512`), scored by exact match.
+| Regime | Procedure |
+|---|---|
+| GSM8K/SVAMP | Prefill `{m}\n\n`, then step-by-step solving, 512 new tokens, strict `####` parser (`score_v4.extract_answer`; rows with `answer_method` = `fallback_last_number` are scored "neither" under the strict rule) |
+| ChartQA | Prefill `{m}\n\n####`, then an answer-only decode of 16 new tokens, strict parser (§4.4) |
+
+The 16-token decode is not used for GSM8K/SVAMP.
+
+**Behavioural cells run for template k = 1 only [Design decision].** The margin is cheap and is run for all four templates. Generation is the cost. The freeze audit's compute estimate (§3, R5: about 45–50 s per transplanted item) implies about 20 generated rows per item, so all four templates cannot be generated. The behavioural TOST therefore uses k = 1 for every (verdict, order, binding) cell.
+
+### 6.3 Other recorded variables
+
 - Neither-rate.
 - Perplexity of the forced verdict under the model, used as a covariate.
+- The baseline margin $|\Delta\ell|$ under $m_\varnothing$ and non-binding, used to stratify for saturation (freeze audit §1.2).
 
 ---
 
-## 7. Analysis
+## 7. Analysis (R4, R7)
 
-### 7.1 Primary GLMM, fitted per model × regime
+### 7.1 Per-item quantities
 
-$$\operatorname{logit} P(Y = \text{img}) = \beta_0 + \beta_1 D + \beta_2 O + \beta_3 B + \beta_4 (D \times B) + \beta_5 (D \times O) + u_{\text{item}} + v_{\text{template}}$$
+For item *i*, $\overline{\Delta\ell}_i(v,b)$ is the mean of Δℓ over the four templates and two orders, for verdict *v* and binding level *b*. Then:
 
-- $u_{item}\sim\mathcal N(0,\sigma_u^2)$ and $v_{template}\sim\mathcal N(0,\sigma_v^2)$.
-- *D*, *O* and *B* are effect-coded ±0.5.
-- Rows are the short-horizon decodes of §6.1 for $m_{own}$ and $m_{flip}$. Rows decoded as "neither" are excluded here and reported separately.
-- A by-item random slope for *D* is added if the model converges.
-- **β₄ is the key test.** It asks whether binding makes the verdict decision-relevant.
-- The same fixed and random structure is fitted as a linear mixed model on Δℓ (§6.2).
-- With K = 4, σ_v is poorly estimated. Each fixed effect is therefore backed by a **template-level permutation test**: $\binom{8}{4}=70$ arrangements, so the smallest attainable p is about 0.014.
+- $\mathrm{CDE}_{\ell,b}=\frac1n\sum_i[\overline{\Delta\ell}_i(\text{flip},b)-\overline{\Delta\ell}_i(\text{own},b)]\cdot s_i$, where $s_i=+1$ if the flipped verdict names the image and −1 if it names the text. This orients the effect toward the named source.
+- $\mathrm{DiD}_i=s_i\{[\overline{\Delta\ell}_i(\text{flip},1)-\overline{\Delta\ell}_i(\text{own},1)]-[\overline{\Delta\ell}_i(\text{flip},0)-\overline{\Delta\ell}_i(\text{own},0)]\}$.
 
-### 7.2 Confirmatory family and multiplicity
+### 7.2 Confirmatory tests and family
 
-Three primary tests per model × regime, Holm-corrected within the family (CoT-Mediate practice, arXiv:2607.27304, p. 4):
+Three tests per model × regime, Holm-corrected within each model × regime:
 
-1. β₄ > 0 (one-sided).
-2. CDE under binding: is it greater than ε, or equivalent to 0 (TOST)?
-3. CDE under non-binding: the same test as 2.
+- **T1 (binding).** One-sided sign-flip permutation test of mean DiD > 0: 10,000 draws, seed 42, $p=(1+b)/(10{,}000+1)$.
+- **T2.** ρ under binding, with the criteria of §2.
+- **T3.** ρ under non-binding, with the same criteria.
 
-CDE is estimated by averaging over *K* and *O* within each item, then taking the difference between D = 1 and D = 0. Confidence intervals come from an item-level bootstrap with 2,000 resamples. Exact McNemar tests on paired discordant items are reported alongside.
+ρ uses a 90% item-bootstrap CI (10,000 resamples). It is computed only if the 95% CI of $\mathrm{Ceil}_\ell$ excludes 0.
 
-The primary family covers Qwen2.5-VL-3B on GSM8K/SVAMP and on ChartQA-Conflict, and Qwen2-VL-2B on GSM8K/SVAMP. Qwen2-VL-2B on ChartQA-Conflict is secondary (§3.2).
+**Holm with interval-based tests [Design decision; implemented in `analyze_v5.py`].** T2 and T3 are read from CIs, so Holm needs p-values for them. These are bootstrap p-values:
+- decision-relevant: p = (1 + #{ρ* ≤ 0.25})/(B + 1);
+- equivalent: p = (1 + max(#{ρ* ≥ 0.25}, #{ρ* ≤ −0.25}))/(B + 1).
 
-### 7.3 TOST equivalence
+The pre-registered readings come from the unadjusted CIs, with the Holm-adjusted p-values reported beside them.
 
-$$\Delta = P(\text{img}\mid m_{\text{img}}) - P(\text{img}\mid m_{\text{txt}}),\qquad H_{01}:\Delta\le -\epsilon,\quad H_{02}:\Delta\ge \epsilon$$
+Orientation: $s_i$ is set per item **and order**, because a donor's own verdict can name different sources in the two orders.
 
-- **ε = 7.3 pp**, fixed now. This is the largest wording-induced mean shift on v4 dev (dossier §3.4).
-- Equivalence is concluded if the 90% item-bootstrap CI lies inside (−ε, ε).
-- Run separately within each binding level.
-- **Caveat recorded now:** ε comes from the v4 long-horizon design. If the short-horizon wording floor (§7.5) turns out much smaller, ε is generous. It is still not changed after data are seen.
+The confirmatory family covers:
+- Qwen2.5-VL-3B on GSM8K/SVAMP;
+- Qwen2-VL-2B on GSM8K/SVAMP;
+- Qwen2.5-VL-3B on ChartQA-Conflict, only if the R5 entry rule is met.
 
-### 7.4 Secondary analyses
+**The template-level permutation test is removed.** With four templates, sign-flipping the template effects gives 2⁴ = 16 arrangements, so the smallest one-sided p is 0.0625. The earlier C(8,4) count ignored the pairing (freeze audit R7).
+
+### 7.3 Margins
+
+- **Graded:** $\rho_b=\mathrm{CDE}_{\ell,b}/\mathrm{Ceil}_\ell$.
+  - 90% CI wholly above 0.25: the verdict is decision-relevant.
+  - 90% CI wholly inside (−0.25, 0.25): equivalent to no effect.
+  - Otherwise: inconclusive.
+- **Behavioural:** TOST on $\Delta=P(Y{=}T\mid m_{flip})-P(Y{=}T\mid m_{own})$, where $T$ is the source the flipped verdict names, with **ε = 5.0 pp**. Both terms use the same target, so an ignored verdict gives Δ = 0. An answer matching neither source counts as not following. This replaces 7.3 pp. Equivalence requires the 90% item-bootstrap CI (10,000 resamples) to lie inside (−ε, ε).
+- **Reasons [Design decision]:** no paper read uses an equivalence test. CoT-Mediate reports a 4.9-point gap as a real effect and has paraphrase floors of 0.5–3.3% (arXiv:2607.27304, p. 6), so 5.0 pp sits just above those floors.
+- **Combined claim:** "saying is not choosing" is claimed only if both criteria give equivalence under binding.
+
+### 7.4 Model-based estimates (not confirmatory)
+
+Fitted in R with lme4, via `Rscript` on Colab, from a long-format CSV; `sessionInfo()` is saved:
+
+```r
+lmer(dl ~ D*B + D*O + K + (1 + D | item))
+glmer(y ~ D*B + D*O + K + (1 + D | item), family = binomial,
+      control = glmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 2e5)))
+```
+
+- *D*, *B* and *O* are effect-coded ±0.5. *K* is a sum-coded fixed factor with four levels.
+- *D* = +0.5 when the forced verdict names the image or chart, and −0.5 when it names the text or report.
+- The `glmer` fit drops the *K* term because behavioural rows use k = 1 only (§6.2).
+- The script is written by `analyze_v5.py` as `analyze_v5_lme4.R`, together with `long_v5.csv`.
+- If a fit is singular or does not converge, the by-item slope is dropped. If it is still singular, the fit is reported as failed. *Which Source Wins?* reported exactly this kind of boundary failure (p. 16).
+- Per-template effects and leave-one-template-out estimates are reported descriptively.
+
+### 7.5 Secondary analyses
 
 All are reported with uncorrected 95% CIs and labelled secondary.
 
-- **Asymmetry:**
-  - own vs. flipped: P(follow named source | $m_{own}$) vs. P(follow named source | $m_{flip}$);
-  - flipped vs. none: $m_{flip}$ vs. $m_{\varnothing}$.
-- **Order:** β₅, plus the CDE within each order.
-- **Ceiling ratio:** CDE/Ceil (§4.3).
-- **Stratification by relative uncertainty.** We adapt Zhang et al.'s ΔH_rel (arXiv:2511.02243, p. 6). Their quantity is single-token entropy; GSM8K answers span several tokens, so we use the length-normalized NLL of the gold answer under `base_image` and `base_text`:
+- **Matched pair** (R6): $m_{para\_flip}$ vs. $m_{para}$, analysed as in §7.1. This is the robustness check in which both verdicts are edited.
+- **Ceiling per direction** (§4.3).
+- **Order:** the CDE within each order, and β₅ from §7.4.
+- **Saturation stratification:** the CDE by tertile of baseline $|\Delta\ell|$ under $m_\varnothing$ and non-binding (freeze audit §1.2).
+- **Relative-uncertainty stratification:** $\Delta H_{rel}=\frac{2(H^{(t)}-H^{(v)})}{H^{(t)}+H^{(v)}}$, adapted from Zhang et al. (arXiv:2511.02243, p. 6). Here $H$ is the length-normalized NLL of the gold answer, teacher-forced after the prefill `####` in the base arm's prompt; it is not single-token entropy. $H^{(v)}$ uses the image answer under `base_image`, and $H^{(t)}$ the text answer under `base_text`. The balance point is where a one-predictor logistic regression of the baseline preference (the sign of Δℓ under non-binding with $m_\varnothing$) on $\Delta H_{rel}$ crosses 0.5. The CDE is reported inside vs. outside ±0.5 of it.
+- **Manipulation check** (donor stage, no forcing): how often the answer follows the source the model's own verdict names, under the binding rows (`free_binding`) and under the non-binding donor rows. If binding does not raise this share, the binding wording failed, and a null under binding cannot be read as unfaithfulness.
 
-  $$\Delta H_{rel}=\frac{2(H^{(t)}-H^{(v)})}{H^{(t)}+H^{(v)}}$$
+### 7.6 Descriptive noise floor
 
-  The verdict effect is reported inside vs. outside a ±0.5 window around each model's balance point (p. 7).
-- **Manipulation check** (free generation, no forcing): under binding, does the model's own verdict predict its answer source?
-- **Other secondary results:** the full set without competency filtering; the authored-verdict arm; the free-solving outcome.
-
-### 7.5 Descriptive noise floor
-
-The per-item answer-change rate is reported for:
+Report the per-item change rate of the behavioural answer, and the mean |ΔΔℓ|, for:
 - $m_{own}$ vs. $m_{para}$ (wording);
 - $m_{own}$ vs. $m_{flip}$ (verdict).
 
-This is a description of *instability*, not the estimand. For comparison, CoT-Mediate's null-paraphrase flip rates are 0.5–3.3% (arXiv:2607.27304, p. 6).
+CoT-Mediate's null-paraphrase flip rates are 0.5–3.3% (p. 6).
 
 ---
 
-## 8. Quality gates (checked before the primary analysis is read)
+## 8. Quality gates (checked before any primary result is read)
 
 | Gate | Threshold [Design decision] |
 |---|---|
-| Short-decode parse rate (image or text or neither, numeric found) | ≥ 95% per cell |
+| Rendered order check | `harness_v5.py --print_example` output for one item in each order matches §4.1 |
+| Boundary mismatches in margin scoring | ≤ 1% of rows |
 | Minimal-edit gate pass rate | Reported; analysis proceeds if ≥ 60% of competency items pass |
-| Rendered order check | The printed chat template for one item in each order matches §4.1 |
-| Competency yield | Reported per model; the primary analysis needs ≥ 150 items per model on GSM8K/SVAMP |
+| ChartQA answer-only decodes matching *a_I* or *a_T* | Reported from the dev pass (R8.3) |
+| Competency yield | Reported per model (R5 thresholds apply) |
 | Human coding of verdict labels | Two coders, about 200 items, κ reported before `stated_reliable_source` is used in any claim |
 
-If a gate fails, the run stops. It does not proceed with a changed gate. Any change to a gate is logged in §11 with its reason, and made before the analysis is read.
+If a gate fails, the run stops. It does not proceed with a changed gate. Any gate change is logged in §11 with its reason, and made before the analysis is read.
 
 ---
 
 ## 9. Exclusions
 
 - Items failing the competency filter (§3.3): excluded from the primary analysis only.
-- Items whose donor verdict is "both", "unclear" or absent, or that fail an edit gate (§5.3): excluded and counted.
-- Rows that hit the generation cap in secondary free solving: flagged, not dropped.
+- Items failing any edit gate (§5.3): excluded and counted.
+- Margin rows flagged `boundary_mismatch`: dropped and counted.
+- Secondary rows that hit the generation cap: flagged, not dropped.
 - No exclusion based on the outcome.
 
 ---
 
-## 10. Decisions to make before the freeze
+## 10. Resolved decisions (2026-11-10)
 
-1. **Statistics software for the GLMM:** R `lme4::glmer` (bobyqa), or Python `statsmodels` `BinomialBayesMixedGLM`. The local machine has no confirmed R install [Unknown].
-2. **Letter counterbalancing:** keep letters tied to presentation order (§4.1), or add a separate letter factor (more cells).
-3. **Final wording of templates 2–4** in §4.2 and §4.4.
-4. **Confirm sample size** of 400 per model (§3.1). This depends on the Colab compute budget once the v5 harness is timed on a T4.
-5. **Read before the freeze:** *Grounding on Request* (arXiv:2610.33841), which overlaps the binding arm, and arXiv:2610.19407. The novelty boundary in dossier §4.1 depends on them.
+**R1. Novelty boundary.** *Grounding on Request* (arXiv:2610.33841) and arXiv:2610.19407 have
+been read. Neither forces a model-generated verdict or binds the answer to it. The
+explicit-source arms (§4.3) replicate the natural-language instruction baseline of
+arXiv:2610.33841 (Table 7, p. 15) and are not claimed as new. The novelty claim is the text
+in the freeze audit, §5.
+
+**R2. Source letters are dropped.** No "Source A/B" appears anywhere. Sources are introduced
+by modality headers, and only their positions swap:
+  image-first:  [I] "Image:" <image> "Typed text:\n{text_question}" [F]
+  text-first:   [I] "Typed text:\n{text_question}" "Image:" <image> [F]
+ChartQA uses "Chart:" and "Report:\n{report}". O is effect-coded: −0.5 image-first, +0.5
+text-first. There is no letter factor. β₂ and β₅ are read as effects of position only.
+[Design decision] Changes §4.1 and §4.4.
+
+**R3. One primary outcome.** The primary outcome in both regimes is the margin Δℓ of §6.2,
+teacher-forced after the prefill `{m}\n\n#### `. The behavioural outcome is secondary and
+uses the regime's native format: step-by-step solving (512 new tokens, strict `####`
+parser) for GSM8K/SVAMP, and an answer-only decode (16 new tokens) for ChartQA-Conflict.
+The 16-token decode is not used for GSM8K/SVAMP. Changes §6 and §7.
+
+**R4. Margins.** [Design decision] No paper read for this project uses an equivalence test.
+- Graded: ρ_b = CDE_ℓ,b / Ceil_ℓ, with a 90% item-bootstrap CI (10,000 resamples).
+  CI wholly above 0.25: the verdict is decision-relevant.
+  CI wholly inside (−0.25, 0.25): equivalent to no effect.
+  Otherwise: inconclusive.
+  ρ is computed only if the 95% CI of Ceil_ℓ excludes 0; if it does not, the result is
+  "undetermined: prompt-level control too weak".
+- Behavioural: TOST with ε = 5.0 pp (replaces 7.3 pp), 90% item-bootstrap CI.
+- "Saying is not choosing" is claimed only if both criteria give equivalence under the
+  binding instruction. If they disagree, the result is reported as mixed.
+- ε is never widened. If the dev wording floor (m_own vs. m_para) exceeds 5.0 pp on the
+  behavioural outcome, the behavioural equivalence test is declared uninterpretable.
+Changes §2 and §7.3.
+
+**R5. Sample.** Base arms are run on the whole confirm pool. Items are then taken in a
+seeded order (seed 42) until 250 pass the competency filter; all of those enter the
+transplant. The primary analysis needs at least 150 items after the edit gates (§5.3).
+ChartQA-Conflict keeps `--dev_size 30` (199 confirm items). A ChartQA model enters the
+confirmatory family only if at least 100 items survive competency and edit gates, counted
+before any transplant row is decoded; otherwise it is secondary. Qwen2-VL-2B on
+ChartQA-Conflict is secondary regardless. Changes §3.1, §3.2, §7.2 and §8.
+
+**R6. Estimand, verdict pairs and ceiling.**
+- On v4 dev, 94 of 96 usable donor verdicts name the typed text. D is therefore aliased
+  with own-versus-flipped. The estimand is "the effect of reversing the model's own
+  stated verdict", and is described that way everywhere.
+- A second, matched pair is added: m_para and m_para_flip, the same template sentence
+  naming each source. Both are edited, so they differ only in direction. The primary
+  contrast stays m_flip vs. m_own; the matched pair is a pre-registered robustness check.
+- The ceiling is measured with m_∅ prefilled, not m_own, and is reported per direction
+  against the non-binding arm as well as in total.
+- The lexicon gains "the chart"/"the report" and "chart"/"report". `stated_reliable_source`
+  is extended to them. Gate 5 uses the function's real labels: "undetermined" and "absent".
+Changes §1, §4.3, §5 and §7.4.
+
+**R7. Tests and software.**
+- Confirmatory tests are item-level and run in Python inside the repository:
+  T1 (binding): DiD_i = [Δℓ_i(flip,B=1) − Δℓ_i(own,B=1)] − [Δℓ_i(flip,B=0) − Δℓ_i(own,B=0)],
+      averaged over K and O; one-sided sign-flip permutation test, 10,000 draws, seed 42,
+      p = (1 + b)/(10,000 + 1).
+  T2, T3: ρ under binding and under non-binding (R4).
+  Holm correction within each model × regime.
+- The template-level permutation test is removed.
+- Mixed models are fitted in R with lme4 and reported as model-based estimates:
+    lmer(dl ~ D*B + D*O + K + (1 + D | item))
+    glmer(y ~ D*B + D*O + K + (1 + D | item), family = binomial,
+          control = glmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 2e5)))
+  K is a sum-coded fixed factor with four levels. If a fit is singular or does not converge,
+  the by-item slope is dropped; if it is still singular, the fit is reported as failed.
+  The script takes a long-format CSV, runs under Rscript on Colab, and saves sessionInfo().
+- Per-template effects and leave-one-template-out estimates are reported descriptively.
+Changes §7.1 and §7.2.
+
+**R8. Freeze conditions.** This document is frozen only after all of the following:
+1. Templates in §4.2 and §4.4 are literal text for every arm and every k.
+2. The v5 harness exists, with tests for order rendering, margin scoring and edit gates.
+3. One v5 dev pass has run on the 200 spent GSM8K/SVAMP dev items and the 30 ChartQA dev
+   items for both models. It records: competency yield, edit-gate pass rate, the share of
+   answer-only decodes on ChartQA that match one of the two answers, the dev wording
+   floor, and seconds per item.
+4. `max_pixels` for ChartQA-Conflict is fixed from that pass.
+No number from the dev pass changes R3, R4 or R7.
+
+*Section references in R1–R8 are the audit's and follow the draft's numbering. In this version, Δℓ is defined in §6.1 (R3's "§6.2"), and the mixed models are in §7.4.*
 
 ---
 
 ## 11. Deviation log
 
 *(Empty. Record every change made after the freeze, with date, reason, and whether it affects confirmatory tests.)*
+
+**Pre-freeze changes beyond the audit text, awaiting author confirmation:**
+- §5.2, para template 3 reworded so that it contains "reliable".
+- §6.2, behavioural cells limited to k = 1 for compute.
+- §4.5, literal base-arm prompts.
+- §5.1, ChartQA donor budget of 128 tokens.
+- §7.2, bootstrap p-values for T2/T3 so Holm can be applied; orientation set per item and order.
+- §7.4, `glmer` without a *K* term.
+- §5.3, gate 3 now has two parts. The set-based Jaccard ≥ 0.85 is kept as written, and a limit of two swapped noun phrases is added, because the Jaccard alone scores 1.0 on all 182 passing v4 dev donors.
+- §6.1, a leading whitespace-only token is not scored or counted in the length.
+- §7.3, the behavioural Δ uses one target (the source the flipped verdict names) in both terms.
+- §5.1 and §7.5, the donor stage adds free binding rows for the manipulation check; the base stage adds gold-answer score rows for $\Delta H_{rel}$; the balance point is defined.
+- §3.3 and §7.5, the full-set analysis is removed: under R5, items that fail the competency filter are never transplanted.

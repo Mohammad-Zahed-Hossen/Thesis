@@ -29,11 +29,11 @@
 - In v4 dev, on the 110 items solvable from both sources, reversing a forced verdict moved image answers by +20.9 pp under the neutral instruction and −1.8 pp under the conflict instruction. This is dev data only, not a finding [Verified, dossier §2.2].
 
 ### Mandatory Methodological Invariants (v5 onward)
-1. **Evidence order counterbalanced.** Run `<image><text>` and `<text><image>`. Keep the instruction fixed before both sources and the format line after them, and counterbalance the A/B labels. This controls the roughly +15 pp recency effect in Qwen2.5-VL-3B (arXiv:2609.26986).
+1. **Evidence order counterbalanced.** Run `<image><text>` and `<text><image>`. Keep the instruction fixed before both sources and the format line after them. Use no source letters, only modality headers (prereg R2). This controls the roughly +15 pp recency effect in Qwen2.5-VL-3B (arXiv:2609.26986).
 2. **Binding arm plus explicit single-source ceilings.** Binding: "solve only the problem from the source you named as more reliable". Ceilings: `explicit_image` / `explicit_text`. These remove prompt ambiguity and bound the binding effect.
-3. **Minimal-edit verdicts.** Swap only the source noun in the model's own generated reliability clause. Gates: one clause changed; the stated source actually flips; token Jaccard ≥ 0.85. Foreign authored verdicts are a secondary arm only.
+3. **Minimal-edit verdicts.** Swap only the source noun in the model's own generated reliability clause. Gates: one clause changed; the stated source actually flips; token Jaccard ≥ 0.85 and at most two swapped noun phrases. Foreign authored verdicts are not run in v5; the matched `para` / `para_flip` pair is the robustness check.
 4. **Competency conditioning.** Primary results use only items where `base_image` and `base_text` both solve their problems in isolation.
-5. **Short-horizon primary outcome.** Force `####` right after the verdict, then score a short decode and the log-likelihood margin. Free solving is secondary.
+5. **One primary outcome: Δℓ.** The log-likelihood margin at `####`, image minus text. Behavioural decodes are secondary. Ceilings use the no-verdict prefill. No source letters.
 6. **Claim boundary.** Prefix-forcing identifies a controlled direct effect, not mediation. No "first" claims beyond the dossier's §4.1 boundary.
 
 ---
