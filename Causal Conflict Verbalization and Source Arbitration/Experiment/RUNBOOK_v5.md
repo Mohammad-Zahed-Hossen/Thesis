@@ -41,6 +41,7 @@ python harness_v5.py --print_example --split chartqa  --phase dev --run_tag rend
 Each command prints both orders (`image_first`, then `text_first`). `--print_example` loads only the processor, so it needs no GPU memory. The three pinned revisions ship the same chat template (checked on the Hub on 2026-11-11), so the six printouts should differ only in the item text.
 
 Check every printout:
+
 - `<|vision_start|><|image_pad|><|vision_end|>` sits right after `Image: ` (or `Chart: `).
 - The typed text or report block is on the other side of the image in each order.
 - The instruction comes before both sources and the format line after them.
@@ -52,14 +53,15 @@ If anything differs from §4.1, **stop**: the real template doesn't match the te
 
 Run all six blocks:
 
-| Block | MODEL | TAG | SPLIT |
-|---|---|---|---|
-| 1 | `Qwen/Qwen2.5-VL-3B-Instruct` | `qwen25` | `conflict` |
-| 2 | `Qwen/Qwen2-VL-2B-Instruct` | `qwen2` | `conflict` |
-| 3 | `Qwen/Qwen2.5-VL-3B-Instruct` | `qwen25` | `chartqa` |
-| 4 | `Qwen/Qwen2-VL-2B-Instruct` | `qwen2` | `chartqa` |
-| 5 | `Qwen/Qwen2.5-VL-7B-Instruct` | `qwen25_7b` | `conflict` |
-| 6 | `Qwen/Qwen2.5-VL-7B-Instruct` | `qwen25_7b` | `chartqa` |
+
+| Block | MODEL                         | TAG         | SPLIT      |
+| ------- | ------------------------------- | ------------- | ------------ |
+| 1     | `Qwen/Qwen2.5-VL-3B-Instruct` | `qwen25`    | `conflict` |
+| 2     | `Qwen/Qwen2-VL-2B-Instruct`   | `qwen2`     | `conflict` |
+| 3     | `Qwen/Qwen2.5-VL-3B-Instruct` | `qwen25`    | `chartqa`  |
+| 4     | `Qwen/Qwen2-VL-2B-Instruct`   | `qwen2`     | `chartqa`  |
+| 5     | `Qwen/Qwen2.5-VL-7B-Instruct` | `qwen25_7b` | `conflict` |
+| 6     | `Qwen/Qwen2.5-VL-7B-Instruct` | `qwen25_7b` | `chartqa`  |
 
 Set the variables for one block, then run its three stages:
 
@@ -69,10 +71,11 @@ MODEL=Qwen/Qwen2.5-VL-3B-Instruct; TAG=qwen25; SPLIT=conflict; BS=8
 
 **Batch size for the 7B model (mandatory on 24 GB).** The 7B weights take about 16.6 GB in `bfloat16`, which leaves roughly 6 GB on a 24 GB card.
 
-| GPU | 2B and 3B | 7B |
-|---|---|---|
-| 24 GB (L4, RTX 3090/4090) | `BS=8` | `BS=2` |
-| 40 or 80 GB (A100) | `BS=8` | `BS=8` |
+
+| GPU                       | 2B and 3B | 7B     |
+| --------------------------- | ----------- | -------- |
+| 24 GB (L4, RTX 3090/4090) | `BS=8`    | `BS=2` |
+| 40 or 80 GB (A100)        | `BS=8`    | `BS=8` |
 
 - `--batch_size` matters in **all three stages**, because each one generates: the base stage (512-token solving), the donor stage, and the behavioural rows of the transplant.
 - Margin scoring ignores it: it always runs one request at a time.
@@ -102,6 +105,7 @@ python transplant_v5.py --split $SPLIT --phase dev --model_id $MODEL --batch_siz
 ```
 
 Notes:
+
 - ChartQA uses `--dev_size 30` automatically. The harness refuses values of 100 or more.
 - ChartQA loads 230 rows and drops `conflict_id` 45, leaving 229 (30 dev, 199 confirm). If the counts differ, the harness stops: the dataset is not the pinned release.
 - Every stage resumes if it is interrupted: rerun the same command with the same `--run_tag`. A new tag is needed only after changing code, prompts or settings.
@@ -116,18 +120,19 @@ The default is `--max_pixels 200704` (256·28·28), the same as GSM8K/SVAMP. Cha
 
 Copy `results_v5/` to the local machine. For each block, record these into the pre-registration's deviation log, or into a dev-pass note beside it (R8.3):
 
-| Quantity | Where it comes from |
-|---|---|
-| Competency yield | `gates.json`: `competent` out of `items` |
-| Edit-gate pass rate | `gates.json`: `passed` out of `competent`, plus `fail_reasons_by_order` |
-| ChartQA answer-only decodes matching *a_I* or *a_T* | `beh` rows, scored with `score_v5.behavioural_source` |
-| Dev wording floor | `beh` rows, `para` vs `own`, per binding level: the signed mean (limit ±5.0 pp) and the churn rate (limit 5.0%). The gate fails if either is exceeded |
-| Boundary mismatches | Share of `dl` rows with `boundary_mismatch: true` (gate: ≤ 1%) |
-| Whitespace token | `ws_skipped` in `dl` rows: 2 means a separate space token was skipped for both candidates, 0 means the tokenizer has none |
-| Manipulation check | `free_binding` vs `donor` rows of the donor file: share of answers that follow the stated verdict |
-| Seconds per item | Sum of `wall_s` over an item's rows, from the transplant file |
-| GPU, dtype, peak VRAM | Each manifest: `gpu`, `dtype` (must be `torch.bfloat16`), `peak_vram_gb`, `batch_size` |
-| Competency intersection | Item ids that pass competency for all three models, per regime (from the three `gates.json` files or base files) |
+
+| Quantity                                            | Where it comes from                                                                                                                                    |
+| ----------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Competency yield                                    | `gates.json`: `competent` out of `items`                                                                                                               |
+| Edit-gate pass rate                                 | `gates.json`: `passed` out of `competent`, plus `fail_reasons_by_order`                                                                                |
+| ChartQA answer-only decodes matching *a_I* or *a_T* | `beh` rows, scored with `score_v5.behavioural_source`                                                                                                  |
+| Dev wording floor                                   | `beh` rows, `para` vs `own`, per binding level: the signed mean (limit ±5.0 pp) and the churn rate (limit 5.0%). The gate fails if either is exceeded |
+| Boundary mismatches                                 | Share of `dl` rows with `boundary_mismatch: true` (gate: ≤ 1%)                                                                                        |
+| Whitespace token                                    | `ws_skipped` in `dl` rows: 2 means a separate space token was skipped for both candidates, 0 means the tokenizer has none                              |
+| Manipulation check                                  | `free_binding` vs `donor` rows of the donor file: share of answers that follow the stated verdict                                                      |
+| Seconds per item                                    | Sum of `wall_s` over an item's rows, from the transplant file                                                                                          |
+| GPU, dtype, peak VRAM                               | Each manifest: `gpu`, `dtype` (must be `torch.bfloat16`), `peak_vram_gb`, `batch_size`                                                                 |
+| Competency intersection                             | Item ids that pass competency for all three models, per regime (from the three `gates.json` files or base files)                                       |
 
 Then run the analysis locally. It reports most of the quantities above, plus T1, ρ, TOST and every secondary analysis:
 
@@ -137,6 +142,7 @@ python analyze_v5.py --runs results_v5/v5dev_*_tp_*.jsonl --gates results_v5/v5d
 ```
 
 It writes:
+
 - `analysis_v5.md` and `analysis_v5.json`;
 - `long_v5.csv`;
 - `analyze_v5_lme4.R`, for the model-based fits.
