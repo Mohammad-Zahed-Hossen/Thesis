@@ -17,7 +17,7 @@ The full design is in `Docs/PREREGISTRATION_VERDICT_TRANSPLANT.md`. The evidence
 - **Done:** v3 pilot (N = 1,619) and v4 dev runs, both exploratory.
 - **Done:** literature audit. The original novelty claim does not hold; the current claim is in the dossier, §4.1.
 - **Done:** v5 harness and `analyze_v5.py` are written and pass their CPU tests (`harness_v5.py`, `transplant_v5.py`, `score_v5.py`, `analyze_v5.py`). Nothing in v5 has run on a GPU.
-- **Now:** run the v5 dev pass on Colab with `Experiment/RUNBOOK_v5.md` (both models, 200 GSM8K/SVAMP and 30 ChartQA dev items). Record the dev-pass numbers, do the human coding of verdict labels, then freeze the pre-registration.
+- **Now:** run the v5 dev pass with `Experiment/RUNBOOK_v5.md` (all three models, on the 24 GB+ GPU class, 200 GSM8K/SVAMP and 30 ChartQA dev items). Record the dev-pass numbers, do the human coding of verdict labels, then freeze the pre-registration.
 - **No confirmatory data exists yet, and no v5 data of any kind.**
 
 For current status and next steps, read `Experiment/README.md` first.
@@ -36,14 +36,15 @@ When in doubt, read the code, data and papers, not the narrative documents.
 
 ## Research Setup
 
-- **Models:**
-  - `Qwen/Qwen2.5-VL-3B-Instruct`, pinned to `66285546d2b821cf421d4f5eb2576359d3770cd3`
+- **Models (three, all confirmatory; decided 2026-11-11):**
   - `Qwen/Qwen2-VL-2B-Instruct`, pinned to `895c3a49bc3fa70a340399125c650a463535e71c`
-  - Both run on Colab Pro 16 GB GPUs. Pins are in `harness_v4.py` (`MODEL_PINS`).
+  - `Qwen/Qwen2.5-VL-3B-Instruct`, pinned to `66285546d2b821cf421d4f5eb2576359d3770cd3`
+  - `Qwen/Qwen2.5-VL-7B-Instruct`, pinned to `cc594898137f460bfe9f0759e9844b3ce807cfb5`
+  - Pins are in `harness_v4.py` (`MODEL_PINS`). Claims are made per model; a cross-model statement needs all confirmatory models to agree. 3B vs. 7B is a descriptive within-generation size comparison, not a scaling law.
 - **Task-selection conflict:** `vlm-modality-research/modality-conflict-arbitration-v2`. GSM8K/SVAMP rendered image of problem *i* paired with typed problem *i+1*; equal-answer pairs excluded. Neither source is wrong here.
 - **Evidence conflict:** `vlm-modality-research/chartqa-evidence-conflict-v2`. 229 analysed items (230 rows; `conflict_id` 45 is excluded, as in the paper's artifact): a real chart and a counterfactual report on the same question.
 - **Stimuli source:** Ghosh et al., *Which Source Wins?* (arXiv:2608.17205). Cite it.
-- **Execution:** Google Colab Pro (NVIDIA T4/V100, 16 GB VRAM, FP16, SDPA).
+- **Execution (v5):** `bfloat16`, SDPA, no quantization, on one GPU class with compute capability ≥ 8 and at least 24 GB (L4, A100, RTX 3090/4090). `harness_v5.HFBackend` refuses any other dtype. T4/V100 are not used for v5: they fall back to `float16`, and the 7B does not fit. v4 dev ran `float16` on a T4.
 - **Local machine:** AMD Ryzen 5 5600G, 8 GB RAM, no CUDA. Code editing, tests and analysis only.
 
 ## Mandatory Methodological Invariants
@@ -79,7 +80,7 @@ Recomputed from `Experiment/results_v4/dev2_*.jsonl` with `score_v4.py`, or read
 - **Authored verdict reversal (110 items):** neutral instruction +20.9 pp image answers, 35.5% of items change source label; conflict instruction −1.8 pp, 7.3%.
 - **Wording control (110 items):** +7.3 pp / 24.5% (neutral), −1.8 pp / 22.7% (conflict). On all 200, the extracted answer changes in 39.0% / 33.0%. These are different measures; don't quote "22.7–39%" as one range.
 - **v3:** abstention is 38 items (2.3%), not 13.65%. Token-cap hits 98.1% / 37.6% / 44.2% in Arms 1–3.
-- **Models (Hub):** Qwen2.5-VL-3B-Instruct has 3,754.6M parameters; Qwen2-VL-2B-Instruct has 2,209.0M.
+- **Models (Hub):** Qwen2-VL-2B-Instruct has 2,209.0M parameters; Qwen2.5-VL-3B-Instruct has 3,754.6M; Qwen2.5-VL-7B-Instruct has 8,292.2M (about 16.6 GB of weights). The three pinned revisions ship an identical chat template.
 - **Datasets (Hub):** `modality-conflict-arbitration-v2` has 13.0K rows in `train` (1,304 GSM8K + 296 SVAMP distinct-answer pairs at L0, image channel). `chartqa-evidence-conflict-v2` has **230** rows in `test` at the pinned revision. 229 are analysed: `conflict_id` 45 is excluded, as recorded in the *Which Source Wins?* artifact (`excluded_items.json`). `harness_v5.chartqa_analysis_set` enforces both counts.
 - **Literature checks:**
   - *Which Source Wins?* (Ghosh, Gupta & Wang) tested Qwen2-VL-2B and Qwen2.5-VL-**7B**, not the 3B. It used Source A/B labels and a text-minus-image margin, and has no faithfulness analysis.
@@ -116,5 +117,5 @@ Recomputed from `Experiment/results_v4/dev2_*.jsonl` with `score_v4.py`, or read
 1. **Be a research partner, not a cheerleader.** Challenge weak claims and ask for evidence.
 2. **Epistemic honesty.** Tag claims as [Verified], [Inferred], [Hypothesis] or [Unknown]. Never invent papers, citations or datasets.
 3. **Level 3 rigor.** Competing hypotheses (H₁ vs H₀), noise floors and ceilings, deterministic metrics, pre-registered contrasts. No leaderboard chasing.
-4. **Code for Colab, not local.** Any model-touching code targets Colab Pro. The local machine is strictly for editing, tests and analysis.
+4. **Code for the GPU session, not local.** Any model-touching code targets the pre-registered GPU class (Colab Pro L4/A100 or an RTX 3090/4090). The local machine is strictly for editing, tests and analysis.
 5. **Don't treat Docs/ as truth.** Cross-check against code, data and the papers in `Archive/Paper/`.

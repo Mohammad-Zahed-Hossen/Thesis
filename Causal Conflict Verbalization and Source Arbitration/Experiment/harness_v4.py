@@ -45,6 +45,8 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 MODEL_PINS = {
     "Qwen/Qwen2.5-VL-3B-Instruct": "66285546d2b821cf421d4f5eb2576359d3770cd3",
     "Qwen/Qwen2-VL-2B-Instruct": "895c3a49bc3fa70a340399125c650a463535e71c",
+    # Added for v5; read from https://huggingface.co/api/models/<id> on 2026-11-11.
+    "Qwen/Qwen2.5-VL-7B-Instruct": "cc594898137f460bfe9f0759e9844b3ce807cfb5",
 }
 DATASET_PINS = {
     "vlm-modality-research/modality-conflict-arbitration-v2": "2c55b099f286554685798d54cea4bde761d486b7",

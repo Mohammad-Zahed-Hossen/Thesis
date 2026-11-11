@@ -5,7 +5,7 @@ Start here. This folder holds all experiment code and data for the thesis.
 **Last updated:** 2026-11-10
 **Stage:** The v5 harness is written and passes its CPU tests. The v5 dev pass on Colab has not run. No confirmatory data exists yet.
 **Design spec:** [../Docs/PREREGISTRATION_VERDICT_TRANSPLANT.md](../Docs/PREREGISTRATION_VERDICT_TRANSPLANT.md) (draft, not frozen; freeze conditions in §10, R8).
-**Next action:** run the v5 dev pass with [RUNBOOK_v5.md](RUNBOOK_v5.md) (two models, 200 GSM8K/SVAMP and 30 ChartQA dev items). Then run `analyze_v5.py` on it, record the dev-pass numbers, and freeze.
+**Next action:** run the v5 dev pass with [RUNBOOK_v5.md](RUNBOOK_v5.md) (three models, 200 GSM8K/SVAMP and 30 ChartQA dev items, `bfloat16` on a 24 GB+ GPU). Then run `analyze_v5.py` on it, record the dev-pass numbers, and freeze.
 
 What v5 adds (`harness_v5.py`, `transplant_v5.py`, `score_v5.py`; the v4 files are unchanged):
 1. **Order counterbalancing without letters.** `build_content(..., order)` makes `[instruction, source 1, <image> or text, source 2, format]` with modality headers ("Image:", "Typed text:", "Chart:", "Report:"). Only the sources swap.
@@ -13,7 +13,7 @@ What v5 adds (`harness_v5.py`, `transplant_v5.py`, `score_v5.py`; the v4 files a
 3. **Minimal-edit verdicts:** `own`, `flip`, `none`, `para`, `para_flip`, with the gates of pre-registration §5.3 and a per-run `gates.json`.
 4. **Primary outcome Δℓ.** The length-normalized log-likelihood margin at `####`, image minus text, with an exact token-boundary check. Behavioural decodes are secondary (512-token solving for GSM8K/SVAMP, 16-token answer-only for ChartQA).
 5. **Ceilings** use the `none` prefill. Explicit arms run only with `none`.
-6. **Two models**, pinned in `MODEL_PINS`. ChartQA defaults to `--dev_size 30`.
+6. **Three models** (2B, 3B, 7B), pinned in `MODEL_PINS`, all run in `bfloat16`; the harness refuses any other dtype. ChartQA defaults to `--dev_size 30`.
 
 ## Layout
 
@@ -59,7 +59,7 @@ Experiment/
 | Pre-registration | Drafted, not frozen | `../Docs/PREREGISTRATION_VERDICT_TRANSPLANT.md` |
 | Freeze audit | Received; its fixes are applied to the pre-registration | `../Archive/Paper/prereg-freeze-audit/` |
 | v5 harness (order, templates, minimal edits, margin) | **Written; CPU tests pass**; not yet run on a GPU | `harness_v5.py`, `transplant_v5.py`, `score_v5.py`, `tests/test_v5.py` |
-| v5 dev pass (both models, 200 + 30 items) | **Next** | [RUNBOOK_v5.md](RUNBOOK_v5.md) |
+| v5 dev pass (2B, 3B and 7B; 200 + 30 items) | **Next** | [RUNBOOK_v5.md](RUNBOOK_v5.md) |
 | `analyze_v5.py` (T1, ρ, TOST, floors, lme4 export) | **Written; tested on synthetic rows** | `analyze_v5.py`, `tests/test_analyze_v5.py` |
 | Human coding of verdict labels | Sheets generated; not yet coded. Needed before any claim based on verdict labels | `coding_v3/` |
 | Confirmatory run | After the pre-registration freeze | Colab GPU |

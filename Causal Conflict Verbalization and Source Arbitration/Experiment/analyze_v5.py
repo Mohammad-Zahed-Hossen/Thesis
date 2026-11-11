@@ -55,6 +55,9 @@ N_PERM = 10_000
 SEED = 42
 MIN_ITEMS = {"math": 150, "chartqa": 100}  # R5
 
+MODEL_3B = "Qwen/Qwen2.5-VL-3B-Instruct"
+MODEL_7B = "Qwen/Qwen2.5-VL-7B-Instruct"
+
 IMAGE_SIDE = {"image", "chart"}
 
 # ─── Loading ─────────────────────────────────────────────────────────────────
@@ -626,6 +629,75 @@ def analyze_group(
     return res
 
 
+def analyze_size_comparison(
+    rows_3b: Sequence[Dict[str, Any]],
+    rows_7b: Sequence[Dict[str, Any]],
+    reps: int = N_BOOT,
+    seed: int = SEED,
+) -> Dict[str, Any]:
+    """Secondary within-generation size contrast: Qwen2.5-VL-3B vs Qwen2.5-VL-7B (prereg §7.2).
+
+    Reports difference in rho_bind on the intersection of the two models' competent & gated items,
+    with a 95% item-bootstrap CI.
+    """
+    regime = rows_3b[0]["regime"]
+    phase = rows_3b[0].get("phase")
+    dl_3b, _ = index_dl(rows_3b)
+    ids_3b = item_ids(rows_3b)
+    d_bind_3b = per_item(dl_3b, ids_3b, cde_fn(dl_3b, "binding"))
+    ceil_3b = per_item(dl_3b, ids_3b, ceil_fn(dl_3b))
+
+    dl_7b, _ = index_dl(rows_7b)
+    ids_7b = item_ids(rows_7b)
+    d_bind_7b = per_item(dl_7b, ids_7b, cde_fn(dl_7b, "binding"))
+    ceil_7b = per_item(dl_7b, ids_7b, ceil_fn(dl_7b))
+
+    common = sorted(set(d_bind_3b) & set(ceil_3b) & set(d_bind_7b) & set(ceil_7b))
+    res: Dict[str, Any] = {
+        "regime": regime,
+        "phase": phase,
+        "model_3b": MODEL_3B,
+        "model_7b": MODEL_7B,
+        "n_intersection": len(common),
+    }
+    if len(common) < 2:
+        res["error"] = "fewer than two items in intersection"
+        return res
+
+    vb_3b = [d_bind_3b[i] for i in common]
+    vc_3b = [ceil_3b[i] for i in common]
+    vb_7b = [d_bind_7b[i] for i in common]
+    vc_7b = [ceil_7b[i] for i in common]
+
+    mean_c3 = mean(vc_3b)
+    mean_c7 = mean(vc_7b)
+    rho_3b = mean(vb_3b) / mean_c3 if mean_c3 != 0 else None
+    rho_7b = mean(vb_7b) / mean_c7 if mean_c7 != 0 else None
+    delta_rho = (rho_7b - rho_3b) if (rho_3b is not None and rho_7b is not None) else None
+
+    res["rho_3b_on_intersection"] = rho_3b
+    res["rho_7b_on_intersection"] = rho_7b
+    res["delta_rho_7b_minus_3b"] = delta_rho
+
+    idx = resample_indices(len(common), reps, seed)
+    boots = []
+    for s in idx:
+        d3 = mean([vc_3b[i] for i in s])
+        d7 = mean([vc_7b[i] for i in s])
+        if d3 != 0 and d7 != 0:
+            r3 = mean([vb_3b[i] for i in s]) / d3
+            r7 = mean([vb_7b[i] for i in s]) / d7
+            boots.append(r7 - r3)
+
+    if boots:
+        boots.sort()
+        res["delta_rho_ci95"] = [percentile(boots, 0.025), percentile(boots, 0.975)]
+    else:
+        res["delta_rho_ci95"] = None
+
+    return res
+
+
 # ─── Output ──────────────────────────────────────────────────────────────────
 
 CSV_FIELDS = ["model_id", "regime", "item", "outcome", "family", "verdict", "k", "order", "D", "B", "O", "dl", "y_image", "named_source", "own_source"]
@@ -701,7 +773,11 @@ def fmt(x, digits=3):
     return f"{x:.{digits}f}" if isinstance(x, float) else str(x)
 
 
-def render(results: Sequence[Dict[str, Any]], gates: Dict[str, Any]) -> str:
+def render(
+    results: Sequence[Dict[str, Any]],
+    gates: Dict[str, Any],
+    size_comparisons: Sequence[Dict[str, Any]] = (),
+) -> str:
     lines = ["# v5 analysis", "", "Δℓ is image minus text. CDE is oriented toward the source the reversed verdict names.", ""]
     if any(r.get("phase") == "dev" for r in results):
         lines += ["**Dev data: for tuning and the freeze record only, not findings.**", ""]
@@ -746,6 +822,20 @@ def render(results: Sequence[Dict[str, Any]], gates: Dict[str, Any]) -> str:
         for k, v in r["secondary"].items():
             lines += [f"- {k}: {fmt(v) if not isinstance(v, dict) else json.dumps({a: (round(b, 4) if isinstance(b, float) else b) for a, b in v.items()})}"]
         lines += [""]
+    if size_comparisons:
+        lines += ["## Size comparison: Qwen2.5-VL-3B vs. Qwen2.5-VL-7B (secondary, descriptive)", ""]
+        for sc in size_comparisons:
+            lines += [f"### Regime: {sc['regime']}", ""]
+            lines += [f"- Common competent & gated items: N = {sc['n_intersection']}"]
+            if "error" in sc:
+                lines += [f"- **{sc['error']}**", ""]
+                continue
+            lines += [
+                f"- ρ_bind (3B) on intersection: {fmt(sc['rho_3b_on_intersection'])}",
+                f"- ρ_bind (7B) on intersection: {fmt(sc['rho_7b_on_intersection'])}",
+                f"- Δρ (7B minus 3B): {fmt(sc['delta_rho_7b_minus_3b'])} (95% CI {fmt(sc['delta_rho_ci95'])})",
+                "",
+            ]
     if gates:
         lines += ["## Gate reports", ""]
         for name, g in gates.items():
@@ -774,6 +864,16 @@ def main() -> int:
         groups[(r["model_id"], r["regime"])].append(r)
     base_rows, donor_rows = load_jsonl(args.base), load_jsonl(args.donor)
     results = [analyze_group(g, args.reps, args.draws, args.seed, base_rows, donor_rows) for _, g in sorted(groups.items())]
+
+    # Within-generation size comparison: 3B vs 7B per regime (prereg §7.2)
+    size_comparisons = []
+    regimes = sorted(set(r["regime"] for r in rows))
+    for reg in regimes:
+        g3 = groups.get((MODEL_3B, reg))
+        g7 = groups.get((MODEL_7B, reg))
+        if g3 and g7:
+            size_comparisons.append(analyze_size_comparison(g3, g7, args.reps, args.seed))
+
     gates = {}
     for p in args.gates:
         with open(p, encoding="utf-8") as f:
@@ -781,9 +881,9 @@ def main() -> int:
 
     os.makedirs(args.output_dir, exist_ok=True)
     with open(os.path.join(args.output_dir, "analysis_v5.json"), "w", encoding="utf-8") as f:
-        json.dump({"results": results, "gates": gates}, f, indent=2)
+        json.dump({"results": results, "size_comparisons": size_comparisons, "gates": gates}, f, indent=2)
     with open(os.path.join(args.output_dir, "analysis_v5.md"), "w", encoding="utf-8") as f:
-        f.write(render(results, gates))
+        f.write(render(results, gates, size_comparisons))
     n = export_long(rows, os.path.join(args.output_dir, "long_v5.csv"))
     with open(os.path.join(args.output_dir, "analyze_v5_lme4.R"), "w", encoding="utf-8") as f:
         f.write(R_SCRIPT)

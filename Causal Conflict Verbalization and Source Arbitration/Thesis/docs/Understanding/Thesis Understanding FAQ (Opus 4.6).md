@@ -327,14 +327,15 @@ On v4 dev, Qwen2.5-VL-3B solved 72.8% of problems from the image alone and 75.4%
 Qwen2.5-VL-3B is also used by neighbouring work (arXiv:2609.26986, arXiv:2610.19407), which gives comparison points.
 
 #### Reason C: size and faithfulness
-Lanham et al. report that "as models become larger and more capable, they produce less faithful reasoning on most tasks we study" (text-only LLMs, 13B vs. 175B). This is from Lanham et al., **not** Turpin et al.; Turpin et al. tested GPT-3.5 and Claude 1.0 and make no size comparison. Whether anything similar holds for VLMs at 2–4B is a [Hypothesis]; this thesis has two models and cannot establish a scaling trend.
+Lanham et al. report that "as models become larger and more capable, they produce less faithful reasoning on most tasks we study" (text-only LLMs, 13B vs. 175B). This is from Lanham et al., **not** Turpin et al.; Turpin et al. tested GPT-3.5 and Claude 1.0 and make no size comparison. To investigate whether this extends to modern VLMs without confounding architecture generations, this thesis evaluates the **Qwen Triad**: two compact models (2B and 3B) plus a flagship 7B model. While three models across two generations cannot establish a general scaling law, comparing `Qwen2.5-VL-3B` against `Qwen2.5-VL-7B` provides a clean, within-generation size comparison on the intersection of competent items.
 
-#### Models
+#### Models (The Qwen Triad)
 
 | Model | Pinned revision | Parameters (Hub) | Role |
 |:---|:---|:---|:---|
-| `Qwen/Qwen2.5-VL-3B-Instruct` | `66285546d2b821cf421d4f5eb2576359d3770cd3` | 3,754.6M | Primary |
-| `Qwen/Qwen2-VL-2B-Instruct` | `895c3a49bc3fa70a340399125c650a463535e71c` | 2,209.0M | Second model |
+| `Qwen/Qwen2.5-VL-3B-Instruct` | `66285546d2b821cf421d4f5eb2576359d3770cd3` | 3,754.6M | Confirmatory (workhorse) |
+| `Qwen/Qwen2.5-VL-7B-Instruct` | `cc594898137f460bfe9f0759e9844b3ce807cfb5` | 8,292.2M | Confirmatory (flagship, matches *Which Source Wins?*) |
+| `Qwen/Qwen2-VL-2B-Instruct` | `895c3a49bc3fa70a340399125c650a463535e71c` | 2,209.0M | Confirmatory (previous generation) |
 
 > Pins: [`Experiment/harness_v4.py`, lines 45–48](../../../Experiment/harness_v4.py#L45-L48). Parameter counts: Hub model pages, read 2026-11-11. The "3B" model has about 3.75B parameters. [Verified]
 

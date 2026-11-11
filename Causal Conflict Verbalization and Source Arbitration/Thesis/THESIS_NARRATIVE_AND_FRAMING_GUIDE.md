@@ -67,10 +67,30 @@ Explain how every defect in the pilots was systematically eliminated in the v5 d
 ### What to Say:
 > *"Our early pilot experiments revealed a critical methodological confound that is widespread in multimodal prompting literature: comparing conflict-prompted generation to direct generation measures the total effect of the instruction, leaving the causal role of the intermediate reasoning trace completely unidentifiable. To overcome this, we formulated 'Does the Verdict Decide?' as a controlled direct effect under prefix-forcing, holding the instruction, ordering, and length strictly invariant."*
 
+> *"We evaluate across three open models (2B, 3B, and 7B), including a direct within-generation size comparison between Qwen2.5-VL-3B and Qwen2.5-VL-7B."*
+
 ### What NOT to Say:
 - ❌ *"Our first experiments failed, so we had to abandon them."*
 - ❌ *"We downgraded our idea from arbitration to prefix-forcing because arbitration was too hard."*
 - ❌ *"Prompting can never test faithfulness in any form."* (Too absolute; state instead that instruction-level contrasts cannot isolate the verbalization pathway).
+- ❌ *"We conducted a comprehensive cross-scale scaling audit proving inverse scaling laws."* (Too broad: 2B is an earlier generation architecture, so only 3B vs 7B cleanly isolates parameter scale within the same generation. Frame it as a three-model evaluation and a two-point within-generation comparison).
+
+---
+
+## 4. Multi-Model Scope & Framing: The Qwen Triad (2B, 3B, 7B)
+
+When presenting the models evaluated in the thesis:
+
+1. **The Three Models:**
+   - `Qwen/Qwen2-VL-2B-Instruct` (2.2B — compact / previous generation baseline)
+   - `Qwen/Qwen2.5-VL-3B-Instruct` (3.7B — compact / current generation workhorse)
+   - `Qwen/Qwen2.5-VL-7B-Instruct` (7.6B — flagship open standard, directly matching *Which Source Wins?*)
+
+2. **The Strategic Defense Value:**
+   - **Eliminates the "Tiny Model" Objection:** Demonstrates that findings are not quirks of compact models under 4B parameters.
+   - **Direct Literature Parity:** Anchors baseline modality preferences against published numbers from *Which Source Wins?* on identical conflict stimuli.
+   - **Clean Within-Generation Size Comparison:** Directly isolates the effect of parameter scale between `Qwen2.5-VL-3B` and `Qwen2.5-VL-7B` on the intersection of competent items, testing whether increased capacity alters verdict faithfulness.
+   - **Disciplined Claim Boundaries:** Claims are reported per-model, avoiding overgeneralized "universal scaling laws" while providing a robust, multi-scale empirical foundation.
 
 ---
 

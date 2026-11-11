@@ -23,7 +23,7 @@ import transplant_v5 as tp
 FAMS = [("nonbinding", v) for v in tp.VERDICTS] + [("binding", v) for v in tp.VERDICTS] + [("explicit_image", "none"), ("explicit_text", "none")]
 
 
-def synth(n=40, eff_bind=1.0, eff_non=0.2, ceil=2.0, own_image_every=0, noise=0.0, beh_follow=None, seed=0, regime="math"):
+def synth(n=40, eff_bind=1.0, eff_non=0.2, ceil=2.0, own_image_every=0, noise=0.0, beh_follow=None, seed=0, regime="math", model_id="M"):
     """Rows where reversing the verdict moves Δℓ by eff toward the named source.
 
     own_image_every=m makes every m-th item's own verdict name the image, to test orientation.
@@ -49,7 +49,7 @@ def synth(n=40, eff_bind=1.0, eff_non=0.2, ceil=2.0, own_image_every=0, noise=0.
                         eff = eff_bind if fam == "binding" else eff_non
                         dl = a + (s * eff if ver in ("flip", "para_flip") else 0.0)
                     dl += rng.gauss(0, noise) if noise else 0.0
-                    base = dict(id=f"it{i}", model_id="M", regime=regime, phase="dev", family=fam, verdict=ver, k=k, order=order,
+                    base = dict(id=f"it{i}", model_id=model_id, regime=regime, phase="dev", family=fam, verdict=ver, k=k, order=order,
                                 O=h5.ORDER_CODE[order], B=0.5 if fam == "binding" else -0.5 if fam == "nonbinding" else None,
                                 own_source=own, named_source=named, y_image="11", y_text="22", wall_s=0.1)
                     rows.append({**base, "outcome": "dl", "dl": dl, "boundary_mismatch": False})
@@ -274,6 +274,19 @@ class TestBaseAndDonorAnalyses(unittest.TestCase):
         self.assertEqual(r["secondary"]["manipulation_check"]["free_binding"]["answer_follows_stated_verdict"], 1.0)
         self.assertEqual(r["secondary"]["relative_uncertainty_binding"]["n"], 12)
 
+    def test_size_comparison_3b_vs_7b(self):
+        r3 = synth(n=20, eff_bind=0.8, ceil=2.0, noise=0.1, model_id=an.MODEL_3B, seed=1)
+        r7 = synth(n=20, eff_bind=1.6, ceil=2.0, noise=0.1, model_id=an.MODEL_7B, seed=2)
+        sc = an.analyze_size_comparison(r3, r7, reps=100, seed=42)
+        self.assertEqual(sc["n_intersection"], 20)
+        self.assertAlmostEqual(sc["rho_3b_on_intersection"], 0.4, places=1)
+        self.assertAlmostEqual(sc["rho_7b_on_intersection"], 0.8, places=1)
+        self.assertAlmostEqual(sc["delta_rho_7b_minus_3b"], 0.4, places=1)
+        self.assertEqual(len(sc["delta_rho_ci95"]), 2)
+        self.assertLess(sc["delta_rho_ci95"][0], sc["delta_rho_ci95"][1])
+        self.assertLessEqual(sc["delta_rho_ci95"][0], sc["delta_rho_7b_minus_3b"])
+        self.assertGreaterEqual(sc["delta_rho_ci95"][1], sc["delta_rho_7b_minus_3b"])
+
 
 class TestOutputs(unittest.TestCase):
     def test_csv_and_main(self):
@@ -293,6 +306,30 @@ class TestOutputs(unittest.TestCase):
             self.assertTrue(os.path.exists(os.path.join(out, "analyze_v5_lme4.R")))
             with open(os.path.join(out, "analysis_v5.md"), encoding="utf-8") as f:
                 self.assertIn("Dev data", f.read())
+
+    def test_main_size_comparison(self):
+        r3 = synth(n=10, eff_bind=0.8, ceil=2.0, model_id=an.MODEL_3B, seed=1)
+        r7 = synth(n=10, eff_bind=1.6, ceil=2.0, model_id=an.MODEL_7B, seed=2)
+        with tempfile.TemporaryDirectory() as d:
+            run3 = os.path.join(d, "tp3.jsonl")
+            run7 = os.path.join(d, "tp7.jsonl")
+            with open(run3, "w", encoding="utf-8") as f:
+                for r in r3:
+                    f.write(json.dumps(r) + "\n")
+            with open(run7, "w", encoding="utf-8") as f:
+                for r in r7:
+                    f.write(json.dumps(r) + "\n")
+            out = os.path.join(d, "out")
+            sys.argv = ["analyze_v5.py", "--runs", run3, run7, "--output_dir", out, "--reps", "50", "--draws", "50"]
+            self.assertEqual(an.main(), 0)
+            with open(os.path.join(out, "analysis_v5.json"), encoding="utf-8") as f:
+                res = json.load(f)
+            self.assertEqual(len(res["size_comparisons"]), 1)
+            self.assertEqual(res["size_comparisons"][0]["n_intersection"], 10)
+            with open(os.path.join(out, "analysis_v5.md"), encoding="utf-8") as f:
+                text = f.read()
+            self.assertIn("## Size comparison: Qwen2.5-VL-3B vs. Qwen2.5-VL-7B", text)
+            self.assertIn("Δρ (7B minus 3B)", text)
 
 
 if __name__ == "__main__":

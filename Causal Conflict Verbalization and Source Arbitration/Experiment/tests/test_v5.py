@@ -7,6 +7,9 @@ Run from Experiment/:
 HFBackend is not covered: it needs a GPU session. Its first real check is the dev pass
 in RUNBOOK_v5.md, including `harness_v5.py --print_example` against the real chat template.
 """
+import argparse
+import contextlib
+import io
 import json
 import math
 import os
@@ -507,6 +510,60 @@ class TestConfig(unittest.TestCase):
         with self.assertRaises(SystemExit):
             h5.config_from_args(self.args(dev_size=200), "base")
         self.assertEqual(h5.config_from_args(self.args(split="conflict"), "base").dev_size, 200)
+
+
+class TestModelFamily(unittest.TestCase):
+    """The three pre-registered models (prereg §3.4) and the fixed dtype."""
+
+    TRIAD = {
+        "Qwen/Qwen2-VL-2B-Instruct": "895c3a49bc3fa70a340399125c650a463535e71c",
+        "Qwen/Qwen2.5-VL-3B-Instruct": "66285546d2b821cf421d4f5eb2576359d3770cd3",
+        "Qwen/Qwen2.5-VL-7B-Instruct": "cc594898137f460bfe9f0759e9844b3ce807cfb5",
+    }
+
+    def test_pins_are_the_preregistered_commits(self):
+        self.assertEqual(dict(h5.MODEL_PINS), self.TRIAD)
+        for sha in h5.MODEL_PINS.values():
+            self.assertRegex(sha, r"^[0-9a-f]{40}$")
+
+    def test_prereg_lists_every_pin(self):
+        with open(os.path.join(os.path.dirname(h5.HERE), "Docs", "PREREGISTRATION_VERDICT_TRANSPLANT.md"), encoding="utf-8") as f:
+            text = f.read()
+        for model, sha in self.TRIAD.items():
+            self.assertIn(f"`{model}` @ `{sha}`", text)
+
+    def test_cli_accepts_each_model_and_resolves_its_pin(self):
+        for model, sha in self.TRIAD.items():
+            parser = argparse.ArgumentParser()
+            h5.add_common_args(parser)
+            args = parser.parse_args(["--run_tag", "t", "--dry_run", "--model_id", model])
+            self.assertEqual(h5.config_from_args(args, "base").model_revision, sha)
+        with self.assertRaises(SystemExit), contextlib.redirect_stderr(io.StringIO()):
+            parser.parse_args(["--run_tag", "t", "--model_id", "Qwen/Qwen2.5-VL-72B-Instruct"])
+
+    def test_dtype_gate(self):
+        h5.check_dtype("torch.bfloat16")
+        for bad in ("torch.float16", "torch.float32"):
+            with self.assertRaises(SystemExit):
+                h5.check_dtype(bad)
+
+    def test_render_for_7b_config_both_orders(self):
+        # The dry run uses the test double for every model. This checks the layout logic for a
+        # 7B config; the real 7B template is checked on the GPU by the render gate (prereg §8).
+        it = math_item()
+        instr = h5.instruction("math", "binding", 1)
+        prefill = "The verdict.\n\n####"
+        seen = {}
+        for order in h5.ORDERS:
+            text = h5.render_chat(h5.fake_qwen_chat_template, h5.build_content("math", it, instr, order), prefill)
+            self.assertTrue(text.endswith(prefill))
+            self.assertFalse(text.rstrip().endswith("<|im_end|>"))
+            user = text.split("<|im_start|>user\n")[1].split("<|im_end|>")[0]
+            self.assertTrue(user.startswith(instr))
+            self.assertTrue(user.endswith(h5.FORMAT_MATH))
+            self.assertNotIn("Source A", user)
+            seen[order] = user.index("Image: ") < user.index("Typed text:")
+        self.assertEqual(seen, {"image_first": True, "text_first": False})
 
 
 if __name__ == "__main__":

@@ -430,8 +430,29 @@ class EchoBackend:
         return out
 
 
+REQUIRED_DTYPE = "torch.bfloat16"  # prereg §3.4
+
+
+def check_dtype(dtype: str) -> None:
+    """Stop unless the model was loaded in the pre-registered dtype.
+
+    h4.HFBackend picks bfloat16 on GPUs with compute capability >= 8 (L4, A100, RTX 30/40)
+    and float16 below that (T4, V100). v5 fixes bfloat16 for every model, so a float16 or
+    float32 load means the session is on the wrong GPU class.
+    """
+    if dtype != REQUIRED_DTYPE:
+        raise SystemExit(
+            f"v5 runs require {REQUIRED_DTYPE} (prereg §3.4) but this session loaded {dtype}. "
+            "Use a GPU with compute capability >= 8 (L4, A100, RTX 3090/4090); T4 and V100 fall back to float16."
+        )
+
+
 class HFBackend(h4.HFBackend):
     """Transformers backend for v5 requests. Needs a GPU session; not run by local tests."""
+
+    def __init__(self, cfg):
+        super().__init__(cfg)
+        check_dtype(self.dtype)
 
     @property
     def apply_chat_template(self):

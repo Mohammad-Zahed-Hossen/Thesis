@@ -5,7 +5,7 @@
 **Status:** DRAFT, not frozen. It is frozen only when the conditions in §10, R8 are met:
 - literal templates;
 - the v5 harness with tests;
-- one v5 dev pass on both models;
+- one v5 dev pass on all three models, on the GPU class and dtype of §3.4;
 - `max_pixels` fixed for ChartQA.
 
 To freeze it, commit this file, tag the commit `prereg-v5`, and record the tag hash in every confirmatory manifest. Confirmatory data collected before the freeze does not count as confirmatory.
@@ -110,7 +110,7 @@ Rows are checked from top to bottom, and the first row that matches gives the re
 - **Construction:** the original chart supports the ChartQA answer *a_I*. A reviewed counterfactual report supports *a_T*. The chart is the correct source.
 - **Known limitation** (arXiv:2608.17205, Limitations): the report states the value directly, while the chart has to be read. Barua et al. (arXiv:2610.19407, pp. 7–8) find text evidence 1.4–3.8 times stronger in that structure.
 - **Dev/confirm split:** `--dev_size 30`, leaving 199 confirm items. The harness default of 200 would leave 29.
-- **Entry rule (R5):** a model's ChartQA results enter the confirmatory family only if at least 100 items survive the competency and edit gates, counted before any transplant row is decoded. Otherwise they are secondary. Qwen2-VL-2B on ChartQA-Conflict is secondary regardless.
+- **Entry rule (R5):** a model's ChartQA results enter the confirmatory family only if at least 100 items survive the competency and edit gates, counted before any transplant row is decoded. Otherwise they are secondary. The rule is the same for all three models. (An earlier draft made Qwen2-VL-2B on ChartQA-Conflict secondary regardless; that exception is removed, see §11.)
 - **About the 113 in *Which Source Wins?*:** Table 11 counts Qwen2-VL-2B items that are "decidable at all four required endpoints" across degradation levels (p. 18). It is not a competency yield. The 2B ChartQA yield is measured in the dev pass.
 
 ### 3.3 Competency conditioning
@@ -125,8 +125,12 @@ Both are run under the regime's decoding settings (§3.4). This follows Zhang et
 
 | Setting | Value |
 |---|---|
-| Models | `Qwen/Qwen2.5-VL-3B-Instruct` @ `66285546d2b821cf421d4f5eb2576359d3770cd3`; `Qwen/Qwen2-VL-2B-Instruct` @ `895c3a49bc3fa70a340399125c650a463535e71c` |
-| Decoding | Greedy, `repetition_penalty = 1.0`, FP16 on T4/V100, SDPA |
+| Models | Three, all confirmatory (§7.2). Parameter counts are from the Hub model pages, read 2026-11-11: |
+| | `Qwen/Qwen2-VL-2B-Instruct` @ `895c3a49bc3fa70a340399125c650a463535e71c` — 2,209.0M parameters, Qwen2-VL generation |
+| | `Qwen/Qwen2.5-VL-3B-Instruct` @ `66285546d2b821cf421d4f5eb2576359d3770cd3` — 3,754.6M parameters, Qwen2.5-VL generation |
+| | `Qwen/Qwen2.5-VL-7B-Instruct` @ `cc594898137f460bfe9f0759e9844b3ce807cfb5` — 8,292.2M parameters, Qwen2.5-VL generation; the one model shared with *Which Source Wins?* |
+| Decoding | Greedy, `repetition_penalty = 1.0`, SDPA attention |
+| Precision and hardware **[Design decision]** | `bfloat16` for every model, no quantization, on one GPU class with CUDA compute capability ≥ 8 and at least 24 GB (NVIDIA L4, A100, RTX 3090/4090). `harness_v5.HFBackend` stops if the model loads in any other dtype. T4 and V100 are not used: there the loader falls back to `float16`, and the 7B model (about 16.6 GB of weights) does not fit in 16 GB. All rows of one model × regime run on the same GPU model, which each manifest records. The v4 dev runs used `float16` on a T4; they are not compared numerically with v5 |
 | Pixels | GSM8K/SVAMP: `max_pixels = 256·28·28`. ChartQA: fixed from the dev pass (R8.4) |
 | Base arms | GSM8K/SVAMP: step-by-step, 512 new tokens. ChartQA: answer-only, 64 new tokens |
 
@@ -329,10 +333,16 @@ The pre-registered readings come from the unadjusted CIs, with the Holm-adjusted
 
 Orientation: $s_i$ is set per item **and order**, because a donor's own verdict can name different sources in the two orders.
 
-The confirmatory family covers:
-- Qwen2.5-VL-3B on GSM8K/SVAMP;
-- Qwen2-VL-2B on GSM8K/SVAMP;
-- Qwen2.5-VL-3B on ChartQA-Conflict, only if the R5 entry rule is met.
+**Confirmatory families.** Each model × regime is its own family of three tests:
+- GSM8K/SVAMP: Qwen2-VL-2B, Qwen2.5-VL-3B and Qwen2.5-VL-7B. Three families.
+- ChartQA-Conflict: each of the same three models, but only if that model meets the R5 entry rule (at least 100 items after the competency and edit gates). Up to three more families. A model that misses the rule is reported as secondary for ChartQA.
+
+**Claims are made per model [Design decision].**
+- Every primary conclusion is the reading of one model × regime (§2). It is reported for that model by name.
+- A statement about "the models" in a regime is made only if all confirmatory models in that regime have the same reading. If they differ, the readings are reported side by side with no pooled conclusion.
+- Holm correction stays within each model × regime, so a third model adds no correction inside a family. It does add a family, and with it another chance that some family reads H₁ or H₀ by chance. The unanimity rule above is the guard; no model's reading is promoted to a general claim on its own.
+
+**Size comparison (secondary, descriptive).** Qwen2.5-VL-3B vs. Qwen2.5-VL-7B is a within-generation comparison of two sizes. It is reported as the difference in ρ_bind, with a 95% item-bootstrap CI, on the intersection of the two models' competency- and gate-passing items. It is not a scaling law: two points cannot show a trend. Qwen2-VL-2B differs from the others in generation as well as size, so no size conclusion is drawn from it.
 
 **The template-level permutation test is removed.** With four templates, sign-flipping the template effects gives 2⁴ = 16 arrangements, so the smallest one-sided p is 0.0625. The earlier C(8,4) count ignored the pairing (freeze audit R7).
 
@@ -467,6 +477,8 @@ ChartQA-Conflict keeps `--dev_size 30` (199 confirm items). A ChartQA model ente
 confirmatory family only if at least 100 items survive competency and edit gates, counted
 before any transplant row is decoded; otherwise it is secondary. Qwen2-VL-2B on
 ChartQA-Conflict is secondary regardless. Changes §3.1, §3.2, §7.2 and §8.
+*(Superseded on 2026-11-11: the 2B exception is removed and the entry rule applies to all
+three models alike. See §3.2, §7.2 and §11.)*
 
 **R6. Estimand, verdict pairs and ceiling.**
 - On v4 dev, 94 of 96 usable donor verdicts name the typed text. D is therefore aliased
@@ -503,9 +515,11 @@ Changes §7.1 and §7.2.
 1. Templates in §4.2 and §4.4 are literal text for every arm and every k.
 2. The v5 harness exists, with tests for order rendering, margin scoring and edit gates.
 3. One v5 dev pass has run on the 200 spent GSM8K/SVAMP dev items and the 30 ChartQA dev
-   items for both models. It records: competency yield, edit-gate pass rate, the share of
+   items for all three models (Qwen2-VL-2B, Qwen2.5-VL-3B, Qwen2.5-VL-7B), in `bfloat16`
+   on the GPU class of §3.4. It records: competency yield, edit-gate pass rate, the share of
    answer-only decodes on ChartQA that match one of the two answers, the dev wording
-   floor, and seconds per item.
+   floor, and seconds per item. It also records, per model, the GPU model and peak VRAM
+   from the manifest, and the size of the three-way competency intersection.
 4. `max_pixels` for ChartQA-Conflict is fixed from that pass.
 No number from the dev pass changes R3, R4 or R7.
 
@@ -531,4 +545,7 @@ No number from the dev pass changes R3, R4 or R7.
 - §3.3 and §7.5, the full-set analysis is removed: under R5, items that fail the competency filter are never transplanted.
 - §2, H₁ rests on T2 alone. T1 is a separate binding question that only qualifies the H₁ reading. The decision table has one row per outcome and names every column it consults.
 - §7.6, the wording-floor gate has two parts: the signed mean within ±5.0 pp, and a churn rate of at most 5.0%. The earlier signed-mean test alone passed when answers moved in both directions.
+- §3.4, §7.2 and R8 (2026-11-11): `Qwen/Qwen2.5-VL-7B-Instruct` is added as a third confirmatory model. Claims are per model; a cross-model statement needs all confirmatory models to agree. The 3B vs. 7B contrast is a secondary, descriptive size comparison. **Implemented in `analyze_v5.py`**: computes the difference in $\rho_{\text{bind}}$ on the intersection of competent and gated items with a 95% paired bootstrap CI, rendered in `analysis_v5.md` and saved in `analysis_v5.json`, covered by unit tests.
+- §3.2 and §7.2 (2026-11-11): the "Qwen2-VL-2B on ChartQA-Conflict is secondary regardless" exception is removed. The ≥ 100-item entry rule now decides for every model.
+- §3.4 (2026-11-11): precision and hardware are fixed at `bfloat16` on one GPU class with compute capability ≥ 8 and at least 24 GB. This replaces "FP16 on T4/V100". The harness enforces the dtype.
 - §3.2, ChartQA `conflict_id` 45 is excluded, following the *Which Source Wins?* artifact. The release has 230 rows; 229 are analysed.

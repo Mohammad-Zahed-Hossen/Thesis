@@ -1,6 +1,8 @@
 # v5 Runbook: verdict transplant
 
-These are the exact commands for the v5 dev pass, which the pre-registration requires before it can be frozen (`../Docs/PREREGISTRATION_VERDICT_TRANSPLANT.md`, §10 R8). "Local" means the Ryzen machine, which has no CUDA. "Colab" means a T4 or V100 session.
+These are the exact commands for the v5 dev pass, which the pre-registration requires before it can be frozen (`../Docs/PREREGISTRATION_VERDICT_TRANSPLANT.md`, §10 R8). "Local" means the Ryzen machine, which has no CUDA. "GPU" means a session on the pre-registered GPU class (§3.4): CUDA compute capability ≥ 8 and at least 24 GB, for example an NVIDIA L4 or A100 on Colab Pro, or an RTX 3090/4090. **Do not use a T4 or V100.** On those the loader falls back to `float16`, and `harness_v5.HFBackend` stops with an error; the 7B model would not fit anyway.
+
+Three models are run, all confirmatory: `Qwen/Qwen2-VL-2B-Instruct`, `Qwen/Qwen2.5-VL-3B-Instruct` and `Qwen/Qwen2.5-VL-7B-Instruct`. Run every stage of one model × regime on the same GPU model.
 
 The dev pass uses **items that are already spent**: the 200 GSM8K/SVAMP dev items and the 30 ChartQA dev items. Nothing here produces confirmatory data.
 
@@ -10,11 +12,12 @@ The dev pass uses **items that are already spent**: the 200 GSM8K/SVAMP dev item
 cd Experiment
 python -m unittest discover tests
 python harness_v5.py --dry_run --print_example --run_tag x
+python harness_v5.py --dry_run --print_example --model_id Qwen/Qwen2.5-VL-7B-Instruct --run_tag test_7b_render
 ```
 
-The second command prints the prompt layout using the fake template. It should show the instruction first, then the two sources (image first, then typed text, then the reverse), then the format line, and no "Source A/B".
+The second command prints the prompt layout using the fake template. It should show the instruction first, then the two sources (image first, then typed text, then the reverse), then the format line, and no "Source A/B". The dry run uses the same fake template for every model, so the third command only confirms that the 7B model id is accepted. The real 7B template is checked in step 3.
 
-## 2. Colab setup
+## 2. GPU session setup
 
 Upload these files into one folder: `harness_v4.py`, `score_v4.py`, `harness_v5.py`, `score_v5.py`, `transplant_v5.py`. Then:
 
@@ -22,15 +25,20 @@ Upload these files into one folder: `harness_v4.py`, `score_v4.py`, `harness_v5.
 pip install transformers accelerate datasets pillow qwen-vl-utils
 ```
 
-Use the versions recorded in the v4 manifests if you can (transformers 5.22.2 on T4). Run `pip freeze > results_v5/pip_freeze.txt` once, before step 3.
+Use the transformers version recorded in the v4 manifests if you can (5.22.2), and the same versions for all three models. Check the GPU first: `nvidia-smi` should show an L4, A100 or RTX 3090/4090. Run `pip freeze > results_v5/pip_freeze.txt` once, before step 3.
 
 ## 3. Render gate (prereg §8): real chat template, both orders
 
 ```bash
 python harness_v5.py --print_example --split conflict --phase dev --run_tag render_check --model_id Qwen/Qwen2.5-VL-3B-Instruct
 python harness_v5.py --print_example --split conflict --phase dev --run_tag render_check --model_id Qwen/Qwen2-VL-2B-Instruct
+python harness_v5.py --print_example --split conflict --phase dev --run_tag render_check --model_id Qwen/Qwen2.5-VL-7B-Instruct
 python harness_v5.py --print_example --split chartqa  --phase dev --run_tag render_check --model_id Qwen/Qwen2.5-VL-3B-Instruct
+python harness_v5.py --print_example --split chartqa  --phase dev --run_tag render_check --model_id Qwen/Qwen2-VL-2B-Instruct
+python harness_v5.py --print_example --split chartqa  --phase dev --run_tag render_check --model_id Qwen/Qwen2.5-VL-7B-Instruct
 ```
+
+Each command prints both orders (`image_first`, then `text_first`). `--print_example` loads only the processor, so it needs no GPU memory. The three pinned revisions ship the same chat template (checked on the Hub on 2026-11-11), so the six printouts should differ only in the item text.
 
 Check every printout:
 - `<|vision_start|><|image_pad|><|vision_end|>` sits right after `Image: ` (or `Chart: `).
@@ -42,7 +50,7 @@ If anything differs from §4.1, **stop**: the real template doesn't match the te
 
 ## 4. Dev pass: one block per model and regime
 
-Run all four blocks:
+Run all six blocks:
 
 | Block | MODEL | TAG | SPLIT |
 |---|---|---|---|
@@ -50,23 +58,44 @@ Run all four blocks:
 | 2 | `Qwen/Qwen2-VL-2B-Instruct` | `qwen2` | `conflict` |
 | 3 | `Qwen/Qwen2.5-VL-3B-Instruct` | `qwen25` | `chartqa` |
 | 4 | `Qwen/Qwen2-VL-2B-Instruct` | `qwen2` | `chartqa` |
+| 5 | `Qwen/Qwen2.5-VL-7B-Instruct` | `qwen25_7b` | `conflict` |
+| 6 | `Qwen/Qwen2.5-VL-7B-Instruct` | `qwen25_7b` | `chartqa` |
 
 Set the variables for one block, then run its three stages:
 
 ```bash
-MODEL=Qwen/Qwen2.5-VL-3B-Instruct; TAG=qwen25; SPLIT=conflict
+MODEL=Qwen/Qwen2.5-VL-3B-Instruct; TAG=qwen25; SPLIT=conflict; BS=8
+```
+
+**Batch size for the 7B model (mandatory on 24 GB).** The 7B weights take about 16.6 GB in `bfloat16`, which leaves roughly 6 GB on a 24 GB card.
+
+| GPU | 2B and 3B | 7B |
+|---|---|---|
+| 24 GB (L4, RTX 3090/4090) | `BS=8` | `BS=2` |
+| 40 or 80 GB (A100) | `BS=8` | `BS=8` |
+
+- `--batch_size` matters in **all three stages**, because each one generates: the base stage (512-token solving), the donor stage, and the behavioural rows of the transplant.
+- Margin scoring ignores it: it always runs one request at a time.
+- Batch size is not expected to change greedy outputs, but padding can shift low-order bits. Use one value for all stages of a model × regime, and record it (it is in the manifest).
+- An out-of-memory batch is split in half and retried automatically. If that happens often, lower `BS` and start again under a new tag.
+- The 24 GB figures are estimates, not measurements. Read `peak_vram_gb` in the first 7B manifest before running the rest.
+
+So for block 5:
+
+```bash
+MODEL=Qwen/Qwen2.5-VL-7B-Instruct; TAG=qwen25_7b; SPLIT=conflict; BS=2
 ```
 
 ```bash
-python harness_v5.py --stage base  --split $SPLIT --phase dev --model_id $MODEL --run_tag v5dev_${SPLIT}_base_$TAG
+python harness_v5.py --stage base  --split $SPLIT --phase dev --model_id $MODEL --batch_size $BS --run_tag v5dev_${SPLIT}_base_$TAG
 ```
 
 ```bash
-python harness_v5.py --stage donor --split $SPLIT --phase dev --model_id $MODEL --run_tag v5dev_${SPLIT}_donor_$TAG
+python harness_v5.py --stage donor --split $SPLIT --phase dev --model_id $MODEL --batch_size $BS --run_tag v5dev_${SPLIT}_donor_$TAG
 ```
 
 ```bash
-python transplant_v5.py --split $SPLIT --phase dev --model_id $MODEL \
+python transplant_v5.py --split $SPLIT --phase dev --model_id $MODEL --batch_size $BS \
   --base_file results_v5/v5dev_${SPLIT}_base_$TAG.jsonl \
   --donor_file results_v5/v5dev_${SPLIT}_donor_$TAG.jsonl \
   --run_tag v5dev_${SPLIT}_tp_$TAG
@@ -81,7 +110,7 @@ Notes:
 
 ### ChartQA `max_pixels` (R8.4)
 
-The default is `--max_pixels 200704` (256·28·28), the same as GSM8K/SVAMP. Charts carry small text. If the ChartQA `base_image` yield in block 3 is low, rerun **only blocks 3 and 4** under new tags with `--max_pixels 401408` (512·28·28). Keep whichever value the pre-registration records before the freeze. Do not change it afterwards.
+The default is `--max_pixels 200704` (256·28·28), the same as GSM8K/SVAMP. Charts carry small text. If the ChartQA `base_image` yield in block 3 is low, rerun **only the ChartQA blocks (3, 4 and 6)** under new tags with `--max_pixels 401408` (512·28·28). Keep whichever value the pre-registration records before the freeze. Do not change it afterwards.
 
 ## 5. What to bring back
 
@@ -97,6 +126,8 @@ Copy `results_v5/` to the local machine. For each block, record these into the p
 | Whitespace token | `ws_skipped` in `dl` rows: 2 means a separate space token was skipped for both candidates, 0 means the tokenizer has none |
 | Manipulation check | `free_binding` vs `donor` rows of the donor file: share of answers that follow the stated verdict |
 | Seconds per item | Sum of `wall_s` over an item's rows, from the transplant file |
+| GPU, dtype, peak VRAM | Each manifest: `gpu`, `dtype` (must be `torch.bfloat16`), `peak_vram_gb`, `batch_size` |
+| Competency intersection | Item ids that pass competency for all three models, per regime (from the three `gates.json` files or base files) |
 
 Then run the analysis locally. It reports most of the quantities above, plus T1, ρ, TOST and every secondary analysis:
 
@@ -125,6 +156,6 @@ Dev numbers go into the freeze record. They are not findings, and they don't cha
 ## 6. After the freeze (not yet)
 
 1. Tag `prereg-v5`.
-2. Run the base stage with `--phase confirm` over the whole confirm pool.
+2. For each of the three models, on the same GPU class and with the batch size used in the dev pass: run the base stage with `--phase confirm` over the whole confirm pool.
 3. Run the donor stage.
 4. Run `transplant_v5.py --phase confirm --n_competent 250`. Record the tag hash in each manifest.

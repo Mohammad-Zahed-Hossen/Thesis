@@ -462,12 +462,13 @@ In Pearl's notation the prefill is treated as $do(M = m)$. Two cautions: it edit
 #### 3. Why a ~3B model
 1. **The method needs continuation scoring after a forced prefix.** *Which Source Wins?* reports that GPT-5.6-Luna, Gemini-3.5-Flash and InternVL2-8B "lack the continuation-scoring interface the CLL margin requires" (§3.1). Open weights provide it. [Verified]
 2. **The model can do the single-source tasks, most of the time.** On v4 dev it solved 72.8% of problems from the image alone and 75.4% from the text alone (195 distinct problems); 110 of 200 items passed both.
-3. **Size and faithfulness.** Lanham et al. report that larger, more capable text LLMs produced less faithful reasoning on most of their tasks (13B vs. 175B). That finding is Lanham's, not Turpin's. Whether it extends to 2–4B VLMs is a [Hypothesis]; two models cannot establish a trend.
+3. **Size and faithfulness.** Lanham et al. report that larger, more capable text LLMs produced less faithful reasoning on most of their tasks (13B vs. 175B). That finding is Lanham's, not Turpin's. To investigate whether this extends to modern VLMs without confounding architecture generations, this thesis evaluates the **Qwen Triad**: two compact models (2B and 3B) plus a flagship 7B model. While three models across two generations cannot establish a general scaling law, comparing `Qwen2.5-VL-3B` against `Qwen2.5-VL-7B` provides a clean, within-generation size comparison on the intersection of competent items.
 
-| Model | Pinned revision | Parameters (Hub) |
-|:---|:---|:---|
-| `Qwen/Qwen2.5-VL-3B-Instruct` | `66285546d2b821cf421d4f5eb2576359d3770cd3` | 3,754.6M |
-| `Qwen/Qwen2-VL-2B-Instruct` | `895c3a49bc3fa70a340399125c650a463535e71c` | 2,209.0M |
+| Model | Pinned revision | Parameters (Hub) | Role |
+|:---|:---|:---|:---|
+| `Qwen/Qwen2.5-VL-3B-Instruct` | `66285546d2b821cf421d4f5eb2576359d3770cd3` | 3,754.6M | Confirmatory (workhorse) |
+| `Qwen/Qwen2.5-VL-7B-Instruct` | `cc594898137f460bfe9f0759e9844b3ce807cfb5` | 8,292.2M | Confirmatory (flagship, matches *Which Source Wins?*) |
+| `Qwen/Qwen2-VL-2B-Instruct` | `895c3a49bc3fa70a340399125c650a463535e71c` | 2,209.0M | Confirmatory (previous generation) |
 
 Pins: [`harness_v4.py`, lines 45–48](../../../Experiment/harness_v4.py#L45-L48). The "3B" model has about 3.75B parameters. [Verified, Hub, 2026-11-11]
 
