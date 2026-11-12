@@ -1,16 +1,18 @@
 # 🚀 Google Colab Pro Execution Guide for v5 Dev Pass
 
-> **Workspace:** Causal Conflict Verbalization and Source Arbitration  
-> **Study:** Version 5 (v5) Verdict Transplant & Log-Likelihood Margin Scoring  
-> **Hardware Target:** Google Colab Pro (NVIDIA A100 40/80GB or L4 24GB)  
-> **Pre-Registered Requirements:** Full `bfloat16` precision, Compute Capability $\ge 8$, 24GB+ VRAM  
+> **Workspace:** Causal Conflict Verbalization and Source Arbitration
+> **Study:** Version 5 (v5) Verdict Transplant & Log-Likelihood Margin Scoring
+> **Hardware Target:** Google Colab Pro (NVIDIA A100 40/80GB or L4 24GB)
+> **Pre-Registered Requirements:** Full `bfloat16` precision, Compute Capability $\ge 8$, 24GB+ VRAM
 
 ---
 
 ## ⚠️ Critical Setup Guidelines (Read Before Starting)
 
 ### 1. GPU Selection in Colab Pro
+
 Go to **Runtime** $\rightarrow$ **Change runtime type**:
+
 * **Hardware accelerator:** Select **A100 GPU** (recommended) or **L4 GPU**.
 * **GPU type:** Standard or High-RAM.
 * ❌ **DO NOT SELECT T4 or V100:** These legacy GPUs lack native `bfloat16` (compute capability < 8) and fall back to `float16`. `harness_v5.py` will intentionally abort with an error to preserve pre-registered numerical precision.
@@ -19,8 +21,9 @@ Go to **Runtime** $\rightarrow$ **Change runtime type**:
 ---
 
 ### 2. Eliminating Disconnect Losses (Google Drive Mount)
+
 > [!IMPORTANT]
-> **Never upload code directly to `/content/`!**  
+> **Never upload code directly to `/content/`!**
 > If Colab disconnects, files in `/content/` are permanently wiped. By mounting Google Drive, your Python scripts and partial results live safely on Drive. If disconnected, simply reconnect, mount Drive, and resume—**zero re-uploading and zero lost progress**.
 
 ---
@@ -43,6 +46,7 @@ Go to **Runtime** $\rightarrow$ **Change runtime type**:
 Open a new Colab notebook, ensure your runtime is set to **A100 GPU**, and run these cells:
 
 ### Cell 1: Mount Drive & Set Working Directory
+
 ```python
 from google.colab import drive
 import os
@@ -58,11 +62,13 @@ os.chdir(WORK_DIR)
 print("Current Working Directory:", os.getcwd())
 !ls -la
 ```
+
 *(Verify you see the 5 Python files listed).*
 
 ---
 
 ### Cell 2: Install Pinned Dependencies & Check GPU
+
 ```bash
 !pip install -q transformers accelerate datasets pillow qwen-vl-utils
 
@@ -73,17 +79,21 @@ print("Current Working Directory:", os.getcwd())
 !mkdir -p results_v5
 !pip freeze > results_v5/pip_freeze.txt
 ```
+
 *(Confirm `nvidia-smi` shows an NVIDIA A100 or L4).*
 
 ---
 
 ### Cell 3: Pre-Flight Chat Template Render Check (1 minute)
+
 Confirm that the real Hugging Face tokenizer places vision tokens and assistant prefills in the exact pre-registered positions:
+
 ```bash
 !python harness_v5.py --print_example --split conflict --phase dev --run_tag render_check --model_id Qwen/Qwen2.5-VL-3B-Instruct
 !python harness_v5.py --print_example --split conflict --phase dev --run_tag render_check --model_id Qwen/Qwen2-VL-2B-Instruct
 !python harness_v5.py --print_example --split conflict --phase dev --run_tag render_check --model_id Qwen/Qwen2.5-VL-7B-Instruct
 ```
+
 *Verification Check: Output must show `<|vision_start|><|image_pad|><|vision_end|>` after `Image:` or `Chart:`, followed by the assistant prefill `The verdict.\n\n####`.*
 
 ---
@@ -92,6 +102,7 @@ Confirm that the real Hugging Face tokenizer places vision tokens and assistant 
 
 > [!TIP]
 > **Recommended Batch Sizes:**
+>
 > * **On A100 (40/80 GB):** Use `--batch_size 8` for all models (including 7B).
 > * **On L4 (24 GB):** Use `--batch_size 8` for 2B and 3B, and `--batch_size 2` for 7B.
 
@@ -171,7 +182,7 @@ Confirm that the real Hugging Face tokenizer places vision tokens and assistant 
 
 ### 🔹 BLOCK 5: `Qwen2.5-VL-7B` on Math Conflict (200 Dev Items)
 
-> **L4 GPU Configuration:** Configured below with `--batch_size 2` to safely fit within L4's 24GB VRAM.  
+> **L4 GPU Configuration:** Configured below with `--batch_size 2` to safely fit within L4's 24GB VRAM.
 > *(If running on A100 40/80GB in the future, you can change `--batch_size 2` to `--batch_size 8` for faster throughput).*
 
 ```bash
@@ -192,7 +203,7 @@ Confirm that the real Hugging Face tokenizer places vision tokens and assistant 
 
 ### 🔹 BLOCK 6: `Qwen2.5-VL-7B` on ChartQA Evidence Conflict (30 Dev Items)
 
-> **L4 GPU Configuration:** Configured below with `--batch_size 2` for L4 24GB.  
+> **L4 GPU Configuration:** Configured below with `--batch_size 2` for L4 24GB.
 > *(If running on A100 40/80GB in the future, you can change `--batch_size 2` to `--batch_size 8`).*
 
 ```bash
@@ -214,6 +225,7 @@ Confirm that the real Hugging Face tokenizer places vision tokens and assistant 
 ## 🔄 Disconnect Recovery Protocol
 
 If Colab disconnects or times out at any moment:
+
 1. Re-open the notebook and select your **A100** or **L4** runtime.
 2. Run **Cell 1** (`drive.mount(...)` and `os.chdir('/content/drive/MyDrive/Thesis_v5')`).
 3. Run **Cell 2** (`pip install ...`).
@@ -225,6 +237,7 @@ If Colab disconnects or times out at any moment:
 ## 📊 Step 4: Local Statistical Analysis
 
 Once all 6 blocks finish on Google Colab:
+
 1. All result files are already safely stored in your Google Drive at `MyDrive/Thesis_v5/results_v5/`.
 2. Download that `results_v5/` folder to your local PC:
    `d:\Thesis\Important\Causal Conflict Verbalization and Source Arbitration\Experiment\results_v5\`
@@ -236,5 +249,6 @@ python analyze_v5.py --runs results_v5/v5dev_*_tp_*.jsonl --gates results_v5/v5d
 ```
 
 This generates:
+
 * `results_v5/analysis_dev/analysis_v5.md` & `.json` (Competency yield, edit-gate pass rates, log-likelihood margins $\Delta\ell$, TOST tests).
 * `results_v5/analysis_dev/long_v5.csv` (Full dataset exported for mixed-effects regression in R).

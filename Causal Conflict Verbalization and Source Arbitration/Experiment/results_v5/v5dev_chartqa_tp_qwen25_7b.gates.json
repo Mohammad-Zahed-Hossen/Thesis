@@ -1,0 +1,26 @@
+{
+  "items": 30,
+  "competent": 13,
+  "taken": 13,
+  "no_donor": 0,
+  "passed": 2,
+  "jaccard_multiset_flip_min": 0.9481,
+  "jaccard_multiset_flip_mean": 0.9774,
+  "swaps_per_flip": {
+    "1": 1,
+    "2": 3
+  },
+  "own_source_by_order": {
+    "image_first:report": 2,
+    "text_first:report": 2
+  },
+  "fail_reasons_by_order": {
+    "gate3_too_many_swaps": 8,
+    "own_absent": 3,
+    "own_wrong_regime": 1
+  },
+  "passed_ids": [
+    "15",
+    "16"
+  ]
+}
