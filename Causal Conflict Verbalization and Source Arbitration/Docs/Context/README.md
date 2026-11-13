@@ -1,13 +1,18 @@
-# Docs/Context — Historical Project Context (Sept 2026)
+# Docs/Context — Project Context & Master Technical Audit
 
-Background "single-source-of-truth" documents written during topic discovery and immediately after the v3 pilot (≈ 14–24 September 2026). They explain **how the project got here**: the frozen parent field, which research fields were ranked, parked or rejected, and the original topic lock.
+This folder contains two tiers of contextual documentation:
 
-**Trust level:** Historical / reference only. All files are AI-generated.
+1. **Primary Contextual & Technical Audit Reference (Nov 2026 — Highest Priority):**
+   - **[End-to-End Technical & Scientific Audit.md](<End-to-End Technical & Scientific Audit.md>)** (`2026-11-13`): Comprehensive, bottom-up multi-agent verification of the entire codebase (`Experiment/*.py`, `Experiment/tests/`), stored datasets (`results_v5/`, `results_v4/`, `results_v3/`), pre-registration specification ([../PREREGISTRATION_VERDICT_TRANSPLANT.md](../PREREGISTRATION_VERDICT_TRANSPLANT.md)), runbooks, and `Thesis/` docs. **Prioritize this report (immediately after actual ground-truth data and active code, and over all other AI-generated files)** for project state, code bugs, pre-freeze blockers, and the step-by-step roadmap to completion.
+2. **Historical Project Context (Sept 2026 — Reference Only):**
+   - Background documents written during topic discovery and immediately after the v3 pilot (≈ 14–24 September 2026). They explain **how the project got here**: the frozen parent field, which research fields were ranked, parked or rejected, and the original topic lock.
 
-> [!WARNING]
-> **These files contain claims that later audits withdrew.** Several state the topic is "frozen & empirically validated" on N = 1,619 with Δ_arb = +63.74 pp, p = 1.2 × 10⁻²¹⁵, and that verbalization *causally* steers arbitration. That v3 contrast compared two **instructions**, not verbalizations (see [../../Experiment/results_v3/README.md](../../Experiment/results_v3/README.md)). The current design is the verdict transplant in [../PREREGISTRATION_VERDICT_TRANSPLANT.md](../PREREGISTRATION_VERDICT_TRANSPLANT.md), and **no confirmatory data exists**. The old title "Causal Conflict Verbalization and Source Arbitration in VLMs" has been replaced by *Does the Verdict Decide?*.
+> [!IMPORTANT]
+> **Trust Hierarchy for `Docs/Context/`:**
+> - **[End-to-End Technical & Scientific Audit.md](<End-to-End Technical & Scientific Audit.md>)** (`2026-11-13`) is verified directly against Tier 1–3 ground truth (`Experiment/results_v5/`, `Experiment/*.py`, `Docs/PREREGISTRATION_VERDICT_TRANSPLANT.md`) and supersedes older AI summaries and READMEs where they conflict.
+> - **All September 2026 files below are historical reference only** and contain claims that later audits withdrew (e.g., stating the topic is "frozen & empirically validated" on $N = 1,619$ with $\Delta_{\text{arb}} = +63.74\text{ pp}$, $p = 1.2 \times 10^{-215}$, and that verbalization *causally* steers arbitration). That v3 contrast compared two **instructions**, not verbalizations (see [../../Experiment/results_v3/README.md](../../Experiment/results_v3/README.md)). The current design is the verdict transplant in [../PREREGISTRATION_VERDICT_TRANSPLANT.md](../PREREGISTRATION_VERDICT_TRANSPLANT.md), and **no confirmatory data exists**. The old title "Causal Conflict Verbalization and Source Arbitration in VLMs" has been replaced by *Does the Verdict Decide?*.
 
-> **Token tip for agents:** These files are large (up to 174 KB). You rarely need them. Use them only to answer "why was field X rejected?" or "what did the project look like in September?". For current state go to [../../Experiment/README.md](../../Experiment/README.md) and [../../Thesis/README.md](../../Thesis/README.md).
+> **Token tip for agents:** For current project state, code/spec discrepancies, and next steps, read **[End-to-End Technical & Scientific Audit.md](<End-to-End Technical & Scientific Audit.md>)**, [../../Experiment/README.md](../../Experiment/README.md), and [../../Thesis/README.md](../../Thesis/README.md). Open the large September 2026 files (up to 174 KB) only to answer "why was field X rejected?" or "what did the project look like in September?".
 
 ---
 
@@ -15,6 +20,7 @@ Background "single-source-of-truth" documents written during topic discovery and
 
 | File | Size | Date | What it contains | Still useful for |
 |---|---|---|---|---|
+| **[End-to-End Technical & Scientific Audit.md](<End-to-End Technical & Scientific Audit.md>)** | **44 KB** | **2026-11-13** | **Independent end-to-end technical & scientific audit** across `results_v5/` (29,880 rows), `results_v4/`, `results_v3/`, `Experiment/*.py`, `Experiment/tests/` (196 tests), `PREREGISTRATION_VERDICT_TRANSPLANT.md`, runbooks, and `Thesis/docs/Archive/`. Documents 5 pre-freeze blockers, 7 code/pipeline bugs, consistency matrix, verified cell-level tables, and a 4-phase action plan. | **Primary contextual reference** (prioritize alongside ground-truth data/code and over all other AI-generated files). |
 | [Canonical Thesis Field Specification.md](<Canonical Thesis Field Specification.md>) | 72 KB | Sept 2026 (v2.0) | Converted `.docx`. Defines the **frozen parent field** (Multimodal / Vision-Language Learning and Systems) and three ranked research fields while topic discovery was still open. | Parent-field definition and the original field ranking. |
 | [Canonical_Context.md](Canonical_Context.md) | 54 KB | updated 2026-09-24 | "Research operating system": researcher profile, hardware, frozen field, locked topic, v3 census results, operating rules. | Researcher/hardware background. **Results section is stale** (see warning). |
 | [Canonical_Rejected_and_Parked_Thesis_Fields_Report.md](Canonical_Rejected_and_Parked_Thesis_Fields_Report.md) | 174 KB | Sept 2026 | Converted `.docx`. Long-term decision record of every rejected/parked field (Bengali cultural VLM, medical imaging, federated learning, multimodal agents, reasoning-trace degradation, binding IDs, …) and why. | The authoritative "why not X?" record. Pairs with [../../Archive/](../../Archive/) (raw evidence) and [../Parked_Proposals/](../Parked_Proposals/). |
