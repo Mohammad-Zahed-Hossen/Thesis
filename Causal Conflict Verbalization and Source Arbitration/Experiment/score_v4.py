@@ -85,12 +85,13 @@ def answer_source(answer: Optional[str], y_image: str, y_text: str) -> str:
 
 # ─── Segmenting verbalization from solving ───────────────────────────────────
 
-_ABBREV = re.compile(r"\b(?:Mr|Mrs|Ms|Dr|St|vs|etc|e\.g|i\.e)\.$", re.I)
+_ABBREV = re.compile(r"\b(?:Mr|Mrs|Ms|Dr|St|vs|etc|e\.g|i\.e|U\.S|U\.K)\.$", re.I)
 _SENT_END = re.compile(r"[.!?][\"')\]]*(?=\s|$)")
 # A solving cue counts only at the start of a sentence or line. Matching anywhere cut
 # "a clear problem to solve." in half, which corrupted transplant donors.
 _PIVOT = re.compile(
     r"\n\s*\n"
+    r"|####"
     r"|(?:^|(?<=[.!?:]\s)|(?<=[\"')]\s)|(?<=\n))"
     r"(?:to (?:solve|find|calculate|determine|figure)\b"
     r"|let'?s\b|let us\b|first,|step 1\b|solution\b|the solution\b|\d+\.\s)",

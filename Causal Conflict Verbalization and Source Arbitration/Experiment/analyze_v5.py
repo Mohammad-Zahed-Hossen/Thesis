@@ -90,17 +90,21 @@ def orientation(row: Dict[str, Any]) -> int:
     return -1 if own == "image" else 1
 
 
-def follows_named(row: Dict[str, Any]) -> Optional[bool]:
+def follows_named(row: Dict[str, Any], allow_math_fallback: bool = True) -> Optional[bool]:
     """Behavioural: does the answer match the source this row's verdict names?"""
-    src, _, _ = sc.behavioural_source(row["full_text"], row["regime"], row["y_image"], row["y_text"])
+    src, _, _ = sc.behavioural_source(
+        row["full_text"], row["regime"], row["y_image"], row["y_text"], allow_math_fallback=allow_math_fallback
+    )
     named = side(row.get("named_source"))
     if named is None:
         return None
     return src == named
 
 
-def follows_image(row: Dict[str, Any]) -> Optional[int]:
-    src, _, _ = sc.behavioural_source(row["full_text"], row["regime"], row["y_image"], row["y_text"])
+def follows_image(row: Dict[str, Any], allow_math_fallback: bool = True) -> Optional[int]:
+    src, _, _ = sc.behavioural_source(
+        row["full_text"], row["regime"], row["y_image"], row["y_text"], allow_math_fallback=allow_math_fallback
+    )
     return {"image": 1, "text": 0}.get(src)
 
 
@@ -326,14 +330,22 @@ def paired(a: Dict[str, float], b: Dict[str, float]) -> Tuple[List[str], List[fl
 # ─── Behavioural (§6.2, §7.3) ────────────────────────────────────────────────
 
 
-def behaviour_table(rows: Sequence[Dict[str, Any]]) -> Dict[Tuple, Dict[str, Any]]:
+def behaviour_table(rows: Sequence[Dict[str, Any]], allow_math_fallback: bool = True) -> Dict[Tuple, Dict[str, Any]]:
     """(id, family, verdict, order) -> {'follow': bool, 'image': 0/1/None}, k = lowest available."""
     out: Dict[Tuple, Dict[str, Any]] = {}
     for r in sorted((r for r in rows if r["outcome"] == "beh"), key=lambda r: r["k"]):
         key = (r["id"], r["family"], r["verdict"], r["order"])
         if key not in out:
-            src, _, _ = sc.behavioural_source(r["full_text"], r["regime"], r["y_image"], r["y_text"])
-            out[key] = {"follow": follows_named(r), "image": follows_image(r), "src": src, "row": r}
+            src, _, method = sc.behavioural_source(
+                r["full_text"], r["regime"], r["y_image"], r["y_text"], allow_math_fallback=allow_math_fallback
+            )
+            out[key] = {
+                "follow": follows_named(r, allow_math_fallback=allow_math_fallback),
+                "image": follows_image(r, allow_math_fallback=allow_math_fallback),
+                "src": src,
+                "method": method,
+                "row": r,
+            }
     return out
 
 
@@ -358,14 +370,28 @@ def beh_diff(beh, ids, fam: str, a: str, b: str) -> Dict[str, float]:
 
 
 def change_rate(beh, ids, fam: str, a: str, b: str) -> Optional[float]:
+    """Share of attributable (image/text in both arms) (item, order) pairs that flip image<->text."""
     n = changed = 0
+    for i in ids:
+        for o in ("image_first", "text_first"):
+            x, y = beh.get((i, fam, a, o)), beh.get((i, fam, b, o))
+            if x and y and x["src"] in ("image", "text") and y["src"] in ("image", "text"):
+                n += 1
+                changed += x["src"] != y["src"]
+    return changed / n if n else None
+
+
+def neither_transition_rate(beh, ids, fam: str, a: str, b: str) -> Optional[float]:
+    """Share of (item, order) pairs where either arm produced a non-attributable ('neither'/'both') answer."""
+    n = non_attr = 0
     for i in ids:
         for o in ("image_first", "text_first"):
             x, y = beh.get((i, fam, a, o)), beh.get((i, fam, b, o))
             if x and y:
                 n += 1
-                changed += x["image"] != y["image"]
-    return changed / n if n else None
+                if x["src"] not in ("image", "text") or y["src"] not in ("image", "text"):
+                    non_attr += 1
+    return non_attr / n if n else None
 
 
 # ─── Secondary analyses from the base and donor files (§7.5) ─────────────────
@@ -383,7 +409,7 @@ def load_jsonl(paths: Iterable[str]) -> List[Dict[str, Any]]:
     return rows
 
 
-def manipulation_check(donor_rows: Sequence[Dict[str, Any]]) -> Dict[str, Any]:
+def manipulation_check(donor_rows: Sequence[Dict[str, Any]], reps: int = N_BOOT, seed: int = SEED) -> Dict[str, Any]:
     """Free generation, nothing forced: does the stated verdict predict the answer's source?
 
     Reported for the non-binding rows (family "donor") and the binding rows
@@ -391,26 +417,32 @@ def manipulation_check(donor_rows: Sequence[Dict[str, Any]]) -> Dict[str, Any]:
     """
     out: Dict[str, Any] = {}
     for fam in ("donor", "free_binding"):
-        n = stated = attributable = agree = 0
+        n = stated = attributable = 0
+        agrees: List[float] = []
         for r in donor_rows:
             if r.get("family") != fam or "full_text" not in r:
                 continue
             n += 1
             verb, _ = sc.split_verbalization(r["full_text"])
-            named = sc.stated_reliable_source(verb)
+            named = sc.stated_reliable_source(verb, regime=r.get("regime"))
             if named not in sc.SOURCES[r["regime"]]:
                 continue
             stated += 1
-            src, _, _ = sc.behavioural_source(r["full_text"], r["regime"], r["y_image"], r["y_text"])
+            src, _, _ = sc.behavioural_source(
+                r["full_text"], r["regime"], r["y_image"], r["y_text"], allow_math_fallback=True
+            )
             if src in ("image", "text"):
                 attributable += 1
-                agree += src == side(named)
-        out[fam] = {
+                agrees.append(1.0 if src == side(named) else 0.0)
+        entry: Dict[str, Any] = {
             "rows": n,
             "with_stated_verdict": stated,
             "attributable_answers": attributable,
-            "answer_follows_stated_verdict": agree / attributable if attributable else None,
+            "answer_follows_stated_verdict": mean(agrees) if agrees else None,
         }
+        if len(agrees) > 1:
+            entry["answer_follows_stated_verdict_ci95"] = summarize_ci(agrees, reps, seed, 0.95)["ci95"]
+        out[fam] = entry
     return out
 
 
@@ -458,7 +490,14 @@ def logistic_1d(xs: Sequence[float], ys: Sequence[int], iters: int = 50) -> Opti
     return b0, b1
 
 
-def uncertainty_strata(dh: Dict[str, float], baseline: Dict[str, float], cde: Dict[str, float], radius: float = 0.5) -> Dict[str, Any]:
+def uncertainty_strata(
+    dh: Dict[str, float],
+    baseline: Dict[str, float],
+    cde: Dict[str, float],
+    radius: float = 0.5,
+    reps: int = N_BOOT,
+    seed: int = SEED,
+) -> Dict[str, Any]:
     """CDE inside vs. outside ±radius of the balance point.
 
     The balance point is the ΔH_rel at which the baseline answer (sign of Δℓ under
@@ -471,12 +510,14 @@ def uncertainty_strata(dh: Dict[str, float], baseline: Dict[str, float], cde: Di
     bp = -fit[0] / fit[1]
     inside = [cde[i] for i in ids if abs(dh[i] - bp) <= radius]
     outside = [cde[i] for i in ids if abs(dh[i] - bp) > radius]
+    in_sum = summarize_ci(inside, reps, seed, 0.95) if len(inside) > 1 else {"n": len(inside), "mean": mean(inside) if inside else None}
+    out_sum = summarize_ci(outside, reps, seed, 0.95) if len(outside) > 1 else {"n": len(outside), "mean": mean(outside) if outside else None}
     return {
         "n": len(ids),
         "balance_point": bp,
         "slope": fit[1],
-        "inside": {"n": len(inside), "cde_mean": mean(inside) if inside else None},
-        "outside": {"n": len(outside), "cde_mean": mean(outside) if outside else None},
+        "inside": {"n": len(inside), "cde_mean": in_sum["mean"], "cde_ci95": in_sum.get("ci95")},
+        "outside": {"n": len(outside), "cde_mean": out_sum["mean"], "cde_ci95": out_sum.get("ci95")},
     }
 
 
@@ -546,22 +587,26 @@ def analyze_group(
         else:
             boots = sorted(x for x in boot_ratio(vals, vc, idx) if x is not None)
             rho_ci = (percentile(boots, 0.05), percentile(boots, 0.95))
+            p_dec = (1 + sum(x <= RHO_BOUND for x in boots)) / (len(boots) + 1)
+            p_eq = (1 + max(sum(x >= RHO_BOUND for x in boots), sum(x <= -RHO_BOUND for x in boots))) / (len(boots) + 1)
             entry.update(
                 rho=mean(vals) / mean(vc),
                 rho_ci90=list(rho_ci),
                 reading=rho_reading((c_lo95, c_hi95), rho_ci),
-                p_decision_relevant=(1 + sum(x <= RHO_BOUND for x in boots)) / (len(boots) + 1),
-                p_equivalent=(1 + max(sum(x >= RHO_BOUND for x in boots), sum(x <= -RHO_BOUND for x in boots))) / (len(boots) + 1),
+                p_decision_relevant=p_dec,
+                p_equivalent=p_eq,
             )
             key = name.split("_")[0]
-            pvals[f"{key}_decision_relevant"] = entry["p_decision_relevant"]
-            pvals[f"{key}_equivalent"] = entry["p_equivalent"]
+            pvals[key] = min(p_dec, p_eq)
         res[name] = entry
     res["holm_adjusted"] = holm(pvals)
+    for key, name in (("T2", "T2_rho_binding"), ("T3", "T3_rho_nonbinding")):
+        if key in res["holm_adjusted"]:
+            res[name]["holm_p"] = res["holm_adjusted"][key]
 
     # Behavioural (secondary): TOST and wording floor, per binding level.
-    beh = behaviour_table(rows)
-    floor_ok = True
+    beh = behaviour_table(rows, allow_math_fallback=True)
+    floor_ok = {"binding": True, "nonbinding": True}
     for fam in ("binding", "nonbinding"):
         delta = beh_diff(beh, ids, fam, "flip", "own")
         floor = beh_diff(beh, ids, fam, "para", "own")
@@ -574,39 +619,70 @@ def analyze_group(
             entry[f"mean_abs_dl_gap_own_vs_{other}"] = mean(list(gap.values())) if gap else None
         entry["change_rate_own_vs_para"] = change_rate(beh, ids, fam, "own", "para")
         entry["change_rate_own_vs_flip"] = change_rate(beh, ids, fam, "own", "flip")
+        entry["neither_transition_rate_own_vs_para"] = neither_transition_rate(beh, ids, fam, "own", "para")
+        entry["neither_transition_rate_own_vs_flip"] = neither_transition_rate(beh, ids, fam, "own", "flip")
         if len(floor) > 1:
             entry["wording_floor_para_minus_own"] = wording_floor(list(floor.values()), entry["change_rate_own_vs_para"])
-            if fam == "binding" and not entry["wording_floor_para_minus_own"]["floor_ok"]:
-                floor_ok = False
+            if not entry["wording_floor_para_minus_own"]["floor_ok"]:
+                floor_ok[fam] = False
         res[f"behaviour_{fam}"] = entry
     tost = res.get("behaviour_binding", {}).get("delta_flip_minus_own", {}).get("reading", "not available")
-    res["wording_floor_ok_binding"] = floor_ok
+    tost_nb = res.get("behaviour_nonbinding", {}).get("delta_flip_minus_own", {}).get("reading", "not available")
+    res["wording_floor_ok_binding"] = floor_ok["binding"]
+    res["wording_floor_ok_nonbinding"] = floor_ok["nonbinding"]
     # Readings use the unadjusted criteria, with Holm-adjusted values beside them (prereg §7.2).
     res["T1_did"]["holm_p"] = res["holm_adjusted"]["T1"]
     res["T1_did"]["significant"] = res["T1_did"]["p"] <= ALPHA
     res["T1_did"]["significant_after_holm"] = res["holm_adjusted"]["T1"] <= ALPHA
-    res["reading_binding"] = combined_reading(res["T2_rho_binding"]["reading"], tost, floor_ok, res["T1_did"]["significant"])
+    res["reading_binding"] = combined_reading(res["T2_rho_binding"]["reading"], tost, floor_ok["binding"], res["T1_did"]["significant"])
+    res["reading_nonbinding"] = combined_reading(res["T3_rho_nonbinding"]["reading"], tost_nb, floor_ok["nonbinding"], False)
 
-    # Secondary: matched pair, order, saturation, neither-rate.
+    # Secondary: matched pair, decomposition, order, template/LOTO, saturation, neither-rate.
     sec: Dict[str, Any] = {}
+    decomp: Dict[str, Any] = {}
     for fam in ("binding", "nonbinding"):
         mp = per_item(dl, ids, cde_fn(dl, fam, ("para_flip", "para")))
         if len(mp) > 1:
             sec[f"matched_pair_{fam}"] = summarize_ci(list(mp.values()), reps, seed, 0.95)
+        for part, pair in (("none_minus_own", ("none", "own")), ("flip_minus_none", ("flip", "none"))):
+            dc = per_item(dl, common, cde_fn(dl, fam, pair))
+            if len(dc) > 1:
+                decomp[f"{fam}_{part}"] = summarize_ci(list(dc.values()), reps, seed, 0.95)
         for order in ("image_first", "text_first"):
             od = per_item(dl, ids, order_only(cde_fn(dl, fam), order))
             if len(od) > 1:
                 sec[f"cde_{fam}_{order}"] = summarize_ci(list(od.values()), reps, seed, 0.95)
+    if decomp:
+        sec["cde_decomposition"] = decomp
+    per_tpl: Dict[str, Any] = {}
+    loto: Dict[str, Any] = {}
+    for k_idx in range(1, 5):
+        for fam in ("binding", "nonbinding"):
+            base_fn = cde_fn(dl, fam)
+            tk = per_item(dl, common, lambda i, k, o, fn=base_fn, target=k_idx: fn(i, k, o) if k == target else None)
+            if len(tk) > 1:
+                per_tpl[f"{fam}_k{k_idx}"] = summarize_ci(list(tk.values()), reps, seed, 0.95)
+            lk = per_item(dl, common, lambda i, k, o, fn=base_fn, excl=k_idx: fn(i, k, o) if k != excl else None)
+            if len(lk) > 1:
+                loto[f"{fam}_excl_k{k_idx}"] = summarize_ci(list(lk.values()), reps, seed, 0.95)
+    if per_tpl:
+        sec["per_template"] = per_tpl
+    if loto:
+        sec["loto"] = loto
     base = per_item(dl, common, lambda i, k, o: _get(dl, i, "nonbinding", "none", k, o))
     if len(base) >= 6:
         ranked = sorted(common, key=lambda i: abs(base.get(i, 0.0)))
         third = len(ranked) // 3
         for t, chunk in enumerate((ranked[:third], ranked[third : 2 * third], ranked[2 * third :]), 1):
             vals = [d_bind[i] for i in chunk]
-            sec[f"cde_binding_baseline_abs_dl_tertile{t}"] = {"n": len(vals), "mean": mean(vals) if vals else None}
+            if len(vals) > 1:
+                sec[f"cde_binding_baseline_abs_dl_tertile{t}"] = summarize_ci(vals, reps, seed, 0.95)
+            else:
+                sec[f"cde_binding_baseline_abs_dl_tertile{t}"] = {"n": len(vals), "mean": mean(vals) if vals else None}
     beh_rows = [r for r in rows if r["outcome"] == "beh"]
     if beh_rows:
-        sec["behaviour_neither_rate"] = sum(follows_image(r) is None for r in beh_rows) / len(beh_rows)
+        sec["behaviour_neither_rate"] = sum(follows_image(r, allow_math_fallback=True) is None for r in beh_rows) / len(beh_rows)
+        sec["behaviour_neither_rate_strict"] = sum(follows_image(r, allow_math_fallback=False) is None for r in beh_rows) / len(beh_rows)
         if regime == "chartqa":
             sec["chartqa_answer_only_match_share"] = 1 - sec["behaviour_neither_rate"]
     secs = defaultdict(float)
@@ -621,10 +697,10 @@ def analyze_group(
         sec["verdict_nll_mean_by_verdict"] = {k: mean(v) for k, v in sorted(verdict_nll.items())}
     mine = lambda rs: [r for r in rs if r.get("model_id") == res["model_id"] and r.get("regime") == regime]
     if mine(donor_rows):
-        sec["manipulation_check"] = manipulation_check(mine(donor_rows))
+        sec["manipulation_check"] = manipulation_check(mine(donor_rows), reps=reps, seed=seed)
     dh = relative_uncertainty(mine(base_rows))
     if dh:
-        sec["relative_uncertainty_binding"] = uncertainty_strata(dh, base, d_bind)
+        sec["relative_uncertainty_binding"] = uncertainty_strata(dh, base, d_bind, reps=reps, seed=seed)
     res["secondary"] = sec
     return res
 
@@ -700,7 +776,7 @@ def analyze_size_comparison(
 
 # ─── Output ──────────────────────────────────────────────────────────────────
 
-CSV_FIELDS = ["model_id", "regime", "item", "outcome", "family", "verdict", "k", "order", "D", "B", "O", "dl", "y_image", "named_source", "own_source"]
+CSV_FIELDS = ["model_id", "regime", "item", "outcome", "family", "verdict", "k", "order", "D", "B", "O", "dl", "verdict_nll", "y_image", "named_source", "own_source"]
 
 
 def export_long(rows: Sequence[Dict[str, Any]], path: str) -> int:
@@ -714,6 +790,7 @@ def export_long(rows: Sequence[Dict[str, Any]], path: str) -> int:
                 continue
             if r["outcome"] == "dl" and r.get("boundary_mismatch"):
                 continue
+            fi = None if r["outcome"] == "dl" else follows_image(r, allow_math_fallback=True)
             w.writerow(
                 {
                     "model_id": r["model_id"],
@@ -728,7 +805,8 @@ def export_long(rows: Sequence[Dict[str, Any]], path: str) -> int:
                     "B": r["B"],
                     "O": r["O"],
                     "dl": r.get("dl") if r["outcome"] == "dl" else "",
-                    "y_image": "" if r["outcome"] == "dl" else ("" if follows_image(r) is None else follows_image(r)),
+                    "verdict_nll": r.get("verdict_nll") if r["outcome"] == "dl" and r.get("verdict_nll") is not None else "",
+                    "y_image": "" if fi is None else fi,
                     "named_source": r["named_source"],
                     "own_source": r["own_source"],
                 }
@@ -773,10 +851,50 @@ def fmt(x, digits=3):
     return f"{x:.{digits}f}" if isinstance(x, float) else str(x)
 
 
+def provenance_check(run_paths: Sequence[str], rows: Sequence[Dict[str, Any]]) -> Dict[str, Any]:
+    """Check duplicate row keys and inspect sibling .manifest.json files."""
+    seen = set()
+    duplicates = 0
+    for r in rows:
+        k = (r.get("model_id"), r.get("regime"), r.get("id"), r.get("family"), r.get("verdict"), r.get("k"), r.get("order"), r.get("outcome"))
+        if k in seen:
+            duplicates += 1
+        seen.add(k)
+    manifests: Dict[str, Any] = {}
+    for p in run_paths:
+        mp = p[:-len(".jsonl")] + ".manifest.json" if p.endswith(".jsonl") else p + ".manifest.json"
+        if os.path.exists(mp):
+            with open(mp, encoding="utf-8") as f:
+                m = json.load(f)
+            env = m.get("environment", {})
+            manifests[os.path.basename(mp)] = {
+                "resolved_model_commit": env.get("resolved_model_commit"),
+                "peak_vram_gb": env.get("peak_vram_gb"),
+                "written_at": m.get("written_at"),
+                "n_items": m.get("n_items"),
+            }
+    return {"duplicate_rows": duplicates, "manifests": manifests}
+
+
+def three_way_intersections(groups: Dict[Tuple[str, str], List[Dict[str, Any]]]) -> Dict[str, Any]:
+    """Compute 3-way (2B ∩ 3B ∩ 7B) item intersections per regime."""
+    out: Dict[str, Any] = {}
+    by_reg: Dict[str, Dict[str, set]] = defaultdict(dict)
+    for (mid, reg), rs in groups.items():
+        by_reg[reg][mid] = set(item_ids(rs))
+    for reg, model_sets in sorted(by_reg.items()):
+        if len(model_sets) >= 2:
+            common = set.intersection(*model_sets.values())
+            out[reg] = {"models": sorted(model_sets), "n_intersection": len(common), "per_model_counts": {m: len(s) for m, s in sorted(model_sets.items())}}
+    return out
+
+
 def render(
     results: Sequence[Dict[str, Any]],
     gates: Dict[str, Any],
     size_comparisons: Sequence[Dict[str, Any]] = (),
+    intersections: Optional[Dict[str, Any]] = None,
+    provenance: Optional[Dict[str, Any]] = None,
 ) -> str:
     lines = ["# v5 analysis", "", "Δℓ is image minus text. CDE is oriented toward the source the reversed verdict names.", ""]
     if any(r.get("phase") == "dev" for r in results):
@@ -818,7 +936,13 @@ def render(
                     f"churn rate {fmt(fl['churn_rate'])} (limit {MAX_CHURN}), gate: **{'pass' if fl['floor_ok'] else 'FAIL'}**; "
                     f"TOST power at this noise {fmt(fl['tost_power_at_this_noise'], 2)}"
                 ]
-        lines += [f"- **Combined reading under binding: {r['reading_binding']}**", "", "Secondary:", ""]
+        lines += [
+            f"- **Combined reading under binding: {r['reading_binding']}**",
+            f"- **Combined reading under non-binding: {r['reading_nonbinding']}**",
+            "",
+            "Secondary:",
+            "",
+        ]
         for k, v in r["secondary"].items():
             lines += [f"- {k}: {fmt(v) if not isinstance(v, dict) else json.dumps({a: (round(b, 4) if isinstance(b, float) else b) for a, b in v.items()})}"]
         lines += [""]
@@ -840,6 +964,15 @@ def render(
         lines += ["## Gate reports", ""]
         for name, g in gates.items():
             lines += [f"- {name}: " + json.dumps({k: v for k, v in g.items() if k != "passed_ids"})]
+    if intersections:
+        lines += ["", "## Multi-model item intersections", ""]
+        for reg, info in intersections.items():
+            lines += [f"- {reg}: intersection N = {info['n_intersection']} across {info['per_model_counts']}"]
+    if provenance:
+        lines += ["", "## Provenance", ""]
+        lines += [f"- Duplicate rows: {provenance['duplicate_rows']}"]
+        for mname, minfo in provenance["manifests"].items():
+            lines += [f"- {mname}: {json.dumps(minfo)}"]
     return "\n".join(lines) + "\n"
 
 
@@ -879,11 +1012,24 @@ def main() -> int:
         with open(p, encoding="utf-8") as f:
             gates[os.path.basename(p)] = json.load(f)
 
+    intersections = three_way_intersections(groups)
+    provenance = provenance_check(args.runs, rows)
+
     os.makedirs(args.output_dir, exist_ok=True)
     with open(os.path.join(args.output_dir, "analysis_v5.json"), "w", encoding="utf-8") as f:
-        json.dump({"results": results, "size_comparisons": size_comparisons, "gates": gates}, f, indent=2)
+        json.dump(
+            {
+                "results": results,
+                "size_comparisons": size_comparisons,
+                "gates": gates,
+                "intersections": intersections,
+                "provenance": provenance,
+            },
+            f,
+            indent=2,
+        )
     with open(os.path.join(args.output_dir, "analysis_v5.md"), "w", encoding="utf-8") as f:
-        f.write(render(results, gates, size_comparisons))
+        f.write(render(results, gates, size_comparisons, intersections, provenance))
     n = export_long(rows, os.path.join(args.output_dir, "long_v5.csv"))
     with open(os.path.join(args.output_dir, "analyze_v5_lme4.R"), "w", encoding="utf-8") as f:
         f.write(R_SCRIPT)

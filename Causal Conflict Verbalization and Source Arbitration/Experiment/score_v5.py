@@ -48,18 +48,22 @@ _NOUN_LABEL = {
     "chart": "chart",
     "report": "report",
 }
-_REL_SENT = re.compile(r"[^.\n]*\breliable\b[^.\n]*", re.I)
-_REL_NEG = re.compile(r"\b(?:cannot|can't|unable|not possible|impossible|neither|equally)\b", re.I)
+_REL_SENT = re.compile(r"[^.\n]*\b(?:un)?reliable\b[^.\n]*", re.I)
+_REL_NEG = re.compile(
+    r"\b(?:cannot|can't|unable|not possible|impossible|neither|equally|less reliable|not (?:as )?reliable|unreliable|no more reliable)\b",
+    re.I,
+)
 
 SOURCES = {"math": ("image", "text"), "chartqa": ("chart", "report")}
 
 
-def stated_reliable_source(verbalization: str) -> str:
+def stated_reliable_source(verbalization: str, regime: Optional[str] = None) -> str:
     """Return image, text, chart, report, undetermined or absent.
 
-    Uses the first sentence that contains "reliable". Inside it, the source noun
-    nearest before "reliable" wins ("the typed text is more reliable"). With none
-    before, the first one after it wins ("the more reliable source is the chart").
+    Uses the first sentence that contains "reliable" (or "unreliable"). Inside it,
+    the source noun nearest before "reliable" wins ("the typed text is more reliable").
+    With none before, the first one after it wins ("the more reliable source is the chart").
+    When regime is provided, only nouns belonging to SOURCES[regime] are considered.
     """
     m = _REL_SENT.search(verbalization)
     if not m:
@@ -67,11 +71,20 @@ def stated_reliable_source(verbalization: str) -> str:
     s = m.group(0)
     if _REL_NEG.search(s):
         return "undetermined"
+    allowed = set(SOURCES[regime]) if regime is not None else None
     idx = s.lower().find("reliable")
-    before = [_NOUN_LABEL[x.group(1).lower()] for x in _SOURCE_NOUN.finditer(s[:idx])]
+    before = [
+        _NOUN_LABEL[x.group(1).lower()]
+        for x in _SOURCE_NOUN.finditer(s[:idx])
+        if allowed is None or _NOUN_LABEL[x.group(1).lower()] in allowed
+    ]
     if before:
         return before[-1]
-    after = [_NOUN_LABEL[x.group(1).lower()] for x in _SOURCE_NOUN.finditer(s[idx:])]
+    after = [
+        _NOUN_LABEL[x.group(1).lower()]
+        for x in _SOURCE_NOUN.finditer(s[idx:])
+        if allowed is None or _NOUN_LABEL[x.group(1).lower()] in allowed
+    ]
     return after[0] if after else "undetermined"
 
 
@@ -147,10 +160,29 @@ def answer_source_v5(answer: Optional[str], y_image: str, y_text: str) -> str:
     return "both" if i and t else "image" if i else "text" if t else "neither"
 
 
-def behavioural_source(text: str, regime: str, y_image: str, y_text: str) -> Tuple[str, Optional[str], str]:
+_MATH_FINAL_ANSWER = re.compile(
+    r"(?:the\s+(?:final\s+)?(?:answer|number|result|total)\s+(?:is|=|:)|\\boxed\s*\{)\s*\$?\s*([+-]?\d[\d,]*(?:\.\d+)?)",
+    re.I,
+)
+
+
+def extract_math_final_answer(text: str) -> Optional[str]:
+    """Extract an explicit final-answer declaration when #### is omitted."""
+    matches = _MATH_FINAL_ANSWER.findall(text)
+    return v4._clean_number(matches[-1]) if matches else None
+
+
+def behavioural_source(
+    text: str,
+    regime: str,
+    y_image: str,
+    y_text: str,
+    allow_math_fallback: bool = False,
+) -> Tuple[str, Optional[str], str]:
     """Secondary outcome. Returns (source, answer, method).
 
-    math     score_v4.extract_answer, but a last-number fallback counts as no answer
+    math     score_v4.extract_answer; rejects fallback_last_number when allow_math_fallback is False,
+             and rescues structured final-answer declarations or fallback_last_number when True.
     chartqa  extract_answer_strict
     """
     if regime == "chartqa":
@@ -158,7 +190,14 @@ def behavioural_source(text: str, regime: str, y_image: str, y_text: str) -> Tup
     else:
         ans, method = v4.extract_answer(text)
         if method in ("fallback_last_number", "hash_no_number", "none"):
-            ans = None
+            if allow_math_fallback:
+                structured = extract_math_final_answer(text)
+                if structured is not None:
+                    ans, method = structured, "structured_final_answer"
+                elif method != "fallback_last_number":
+                    ans = None
+            else:
+                ans = None
     return answer_source_v5(ans, y_image, y_text), ans, method
 
 

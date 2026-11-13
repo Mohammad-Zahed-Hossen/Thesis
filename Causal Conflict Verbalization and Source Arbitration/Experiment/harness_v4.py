@@ -385,6 +385,7 @@ class HFBackend:
 
         self.torch = torch
         self.transformers_version = transformers.__version__
+        self.model_revision = cfg.model_revision
 
         # Same CUDA 13 NVRTC workaround as v3: integer .prod() on CPU.
         original_prod = torch.Tensor.prod
@@ -433,7 +434,7 @@ class HFBackend:
             "cuda": t.version.cuda,
             "gpu": t.cuda.get_device_name(0) if t.cuda.is_available() else None,
             "dtype": self.dtype,
-            "resolved_model_commit": getattr(self.model.config, "_commit_hash", None),
+            "resolved_model_commit": getattr(self.model.config, "_commit_hash", None) or getattr(self, "model_revision", None),
             "generation_config": self.model.generation_config.to_dict(),
             "eos_ids": sorted(self.eos_ids),
             "peak_vram_gb": t.cuda.max_memory_allocated() / 2**30 if t.cuda.is_available() else None,
@@ -598,7 +599,14 @@ def report_missing(requests: Sequence[Request], out_path: str) -> int:
     return 0
 
 
-def write_manifest(path: str, cfg: RunConfig, backend, n_items: int, script_paths: Sequence[str]) -> None:
+def write_manifest(
+    path: str,
+    cfg: RunConfig,
+    backend,
+    n_items: int,
+    script_paths: Sequence[str],
+    force_write: bool = True,
+) -> None:
     """Record the run, and refuse to continue one with different settings."""
     config = asdict(cfg)
     config.pop("limit", None)
@@ -606,7 +614,8 @@ def write_manifest(path: str, cfg: RunConfig, backend, n_items: int, script_path
     for p in script_paths:
         with open(p, "rb") as f:
             scripts[os.path.basename(p)] = hashlib.sha256(f.read()).hexdigest()
-    if os.path.exists(path):
+    existed = os.path.exists(path)
+    if existed:
         with open(path, encoding="utf-8") as f:
             previous = json.load(f)
         if previous["config"] != config:
@@ -615,6 +624,8 @@ def write_manifest(path: str, cfg: RunConfig, backend, n_items: int, script_path
         changed = sorted(k for k, v in scripts.items() if previous.get("scripts_sha256", {}).get(k) != v)
         if changed:
             print(f"Warning: {changed} changed since this run tag started. Earlier rows came from the old code.", file=sys.stderr)
+    if existed and not force_write:
+        return
     manifest = {
         "config": config,
         "n_items": n_items,

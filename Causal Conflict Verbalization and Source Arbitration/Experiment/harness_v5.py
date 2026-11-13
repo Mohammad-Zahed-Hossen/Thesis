@@ -494,13 +494,13 @@ class HFBackend(h4.HFBackend):
         t.cuda.empty_cache()
         return results
 
-    def _continuation(self, full_text: str, prefix_ids: List[int], images, extra_from: Optional[int] = None):
-        """Summed log-prob of the tokens after prefix_ids, and of tokens from extra_from to the prefix end."""
+    def _continuation(self, full_text: str, prefix_ids: List[int], images, extra_span: Optional[Tuple[int, int]] = None):
+        """Summed log-prob of the tokens after prefix_ids, and of tokens in extra_span."""
         t = self.torch
         enc = self._encode([full_text], images).to(self.model.device)
         ids = enc["input_ids"][0].tolist()
         mismatch = ids[: len(prefix_ids)] != prefix_ids
-        start = extra_from if extra_from is not None else len(prefix_ids)
+        start = extra_span[0] if extra_span is not None else len(prefix_ids)
         keep = len(ids) - start + 1  # logit rows needed: positions start-1 .. len-2
         with t.inference_mode():
             try:
@@ -519,7 +519,7 @@ class HFBackend(h4.HFBackend):
         tokenizer = self.processor.tokenizer
         skip = sc.leading_ws_skip([tokenizer.decode([i]) for i in ids[len(prefix_ids) :]]) if not mismatch else 0
         cont = total(len(prefix_ids) + skip, len(ids))
-        extra = total(extra_from, len(prefix_ids)) if extra_from is not None and extra_from < len(prefix_ids) else None
+        extra = total(extra_span[0], extra_span[1]) if extra_span is not None and 0 < extra_span[0] < extra_span[1] else None
         del enc, logits, lp
         return cont, extra, mismatch, skip
 
@@ -535,12 +535,18 @@ class HFBackend(h4.HFBackend):
             base = render_chat(self.apply_chat_template, r.content, None)
             prefix_ids = self._encode([prefix], images)["input_ids"][0].tolist()
             base_ids = self._encode([base], images)["input_ids"][0].tolist()
-            verdict_from = len(base_ids) if prefix.startswith(base) and prefix_ids[: len(base_ids)] == base_ids else None
+            verdict_text = r.prefill[: -len("\n\n####")] if r.prefill.endswith("\n\n####") else ("" if r.prefill == "####" else r.prefill)
+            extra_span = None
+            if verdict_text and prefix.startswith(base) and prefix_ids[: len(base_ids)] == base_ids:
+                verdict_prefix = render_chat(self.apply_chat_template, r.content, verdict_text)
+                verdict_ids = self._encode([verdict_prefix], images)["input_ids"][0].tolist()
+                if prefix_ids[: len(verdict_ids)] == verdict_ids and len(base_ids) < len(verdict_ids):
+                    extra_span = (len(base_ids), len(verdict_ids))
             res: Dict[str, Any] = {"boundary_mismatch": False, "verdict_nll": None, "ws_skipped": 0}
             try:
                 for side, y in (("image", r.item.y_image), ("text", r.item.y_text)):
                     full = prefix + " " + candidate_text(y)
-                    (lp, n), extra, mismatch, skip = self._continuation(full, prefix_ids, images, verdict_from if side == "image" else None)
+                    (lp, n), extra, mismatch, skip = self._continuation(full, prefix_ids, images, extra_span if side == "image" else None)
                     res[f"lp_{side}"], res[f"n_{side}"] = lp, n
                     res["boundary_mismatch"] |= mismatch
                     res["ws_skipped"] += skip
@@ -747,8 +753,8 @@ def print_example(args: argparse.Namespace, cfg: V5Config, items: Sequence[Item]
     return 0
 
 
-def write_manifest(path: str, cfg: V5Config, backend, n_items: int, scripts: Sequence[str]) -> None:
-    h4.write_manifest(path, cfg, backend, n_items, scripts)
+def write_manifest(path: str, cfg: V5Config, backend, n_items: int, scripts: Sequence[str], force_write: bool = True) -> None:
+    h4.write_manifest(path, cfg, backend, n_items, scripts, force_write=force_write)
 
 
 def main() -> int:
@@ -768,9 +774,10 @@ def main() -> int:
     out_path = os.path.join(args.output_dir, f"{cfg.run_tag}.jsonl")
     manifest = os.path.join(args.output_dir, f"{cfg.run_tag}.manifest.json")
     scripts = [os.path.abspath(__file__), os.path.join(HERE, "score_v5.py"), os.path.join(HERE, "harness_v4.py"), os.path.join(HERE, "score_v4.py")]
-    write_manifest(manifest, cfg, backend, len(items), scripts)
+    write_manifest(manifest, cfg, backend, len(items), scripts, force_write=not os.path.exists(manifest))
     written = run(reqs, backend, cfg, out_path)
-    write_manifest(manifest, cfg, backend, len(items), scripts)
+    if written > 0:
+        write_manifest(manifest, cfg, backend, len(items), scripts, force_write=True)
     print(f"Wrote {written} rows to {out_path}")
     return report_missing(reqs, out_path)
 

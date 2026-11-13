@@ -46,6 +46,8 @@ import score_v5 as sc
 HERE = os.path.dirname(os.path.abspath(__file__))
 JACCARD_MIN = 0.85  # prereg §5.3, gate 3a
 MAX_SWAPS = 2  # prereg §5.3, gate 3b
+MIN_ITEMS = {"math": 150, "chartqa": 100}  # prereg R5
+MIN_EDIT_GATE_RATE = 0.60  # prereg R5
 VERDICTS = ("own", "flip", "none", "para", "para_flip")
 PARA_TEMPLATES = (  # prereg §5.2
     "I consider {X} more reliable.",
@@ -112,7 +114,9 @@ _SWAP = {
         "visual information": "textual information",
         "image": "typed text",
         "picture": "typed text",
+        "visual": "typed text",
         "text": "image",
+        "written": "image",
     },
     "chartqa": {"chart": "report", "report": "chart"},
 }
@@ -124,9 +128,9 @@ def _swap_pattern(regime: str):
 
 
 _A_BEFORE_VOWEL = re.compile(r"\b([Aa]) (?=image\b)")
-_AN_BEFORE_CONSONANT = re.compile(r"\b([Aa])n (?=(?:typed|text|chart|report|picture)\b)", re.I)
+_AN_BEFORE_CONSONANT = re.compile(r"\b([Aa])n (?=(?:typed|text|chart|report|picture|visual|written)\b)", re.I)
 _BAD_GRAMMAR = re.compile(
-    r"\b(?:image|text|chart|report|picture)\s+are\b|\ban\s+(?:typed|text|chart|report|picture)\b|\ba\s+image\b", re.I
+    r"\b(?:image|text|chart|report|picture)\s+are\b|\ban\s+(?:typed|text|chart|report|picture|visual|written)\b|\ba\s+image\b", re.I
 )
 
 
@@ -194,10 +198,42 @@ def _one_sentence_differs(v: str, m: str) -> bool:
     return len(sv) == len(sm) and sum(x != y for x, y in zip(sv, sm)) == 1
 
 
-def make_variants(v: str, regime: str) -> Variants:
+_NUM_IN_TEXT = re.compile(r"(?<![\w.,])[+-]?\$?\d[\d,]*(?:\.\d+)?%?")
+
+
+def _has_answer_leakage(m_none: str, y_image: Optional[str], y_text: Optional[str]) -> bool:
+    """True if Sentence-1 context (m_none) already states either gold candidate answer."""
+    if not m_none:
+        return False
+    nums = _NUM_IN_TEXT.findall(m_none)
+    low_none = re.sub(r"\s+", " ", m_none.lower())
+    for y in (y_image, y_text):
+        if y is None:
+            continue
+        ny = sc.normalize_answer(y)
+        if ny is None:
+            continue
+        if sc._as_decimal(ny) is not None:
+            if any(sc.answers_match(num, y) for num in nums):
+                return True
+        elif len(ny) >= 3 and re.search(r"\b" + re.escape(ny) + r"\b", low_none):
+            return True
+    return False
+
+
+def make_variants(
+    v: str,
+    regime: str,
+    y_image: Optional[str] = None,
+    y_text: Optional[str] = None,
+) -> Variants:
     """Build own/flip/none/para/para_flip from a donor verbalization, applying all gates."""
     v = v.strip()
-    own = sc.stated_reliable_source(v)
+    own = sc.stated_reliable_source(v, regime=regime)
+    if own == "undetermined":
+        raw_own = sc.stated_reliable_source(v)
+        if raw_own not in ("undetermined", "absent") and raw_own not in sc.SOURCES[regime]:
+            own = raw_own
     if own not in sc.SOURCES[regime]:
         return Variants(False, f"own_{own}" if own in ("undetermined", "absent") else "own_wrong_regime", own_source=own)
     opp = sc.opposite_source(own, regime)
@@ -230,11 +266,11 @@ def make_variants(v: str, regime: str) -> Variants:
     elif len(sentences(m_none)) != len(spans) - 1:
         result.ok, result.reason = False, "gate1_none"
     # Gate 2: the stated source reverses or holds as intended.
-    elif sc.stated_reliable_source(m_flip) != opp:
+    elif sc.stated_reliable_source(m_flip, regime=regime) != opp:
         result.ok, result.reason = False, "gate2_flip_not_reversed"
-    elif sc.stated_reliable_source(m_para) != own or sc.stated_reliable_source(m_para_flip) != opp:
+    elif sc.stated_reliable_source(m_para, regime=regime) != own or sc.stated_reliable_source(m_para_flip, regime=regime) != opp:
         result.ok, result.reason = False, "gate2_para"
-    elif sc.stated_reliable_source(m_none) != "absent":
+    elif sc.stated_reliable_source(m_none, regime=regime) != "absent":
         result.ok, result.reason = False, "gate2_none"
     # Gate 3a: token Jaccard. Gate 3b: at most MAX_SWAPS source noun phrases swapped.
     elif j < JACCARD_MIN:
@@ -244,6 +280,9 @@ def make_variants(v: str, regime: str) -> Variants:
     # Gate 4: grammar.
     elif not all(grammar_ok(edited[k], original if k == "flip" else "") for k in edited):
         result.ok, result.reason = False, "gate4_grammar"
+    # Gate 5: pre-verdict answer leakage in Sentence 1 (m_none).
+    elif _has_answer_leakage(m_none, y_image, y_text):
+        result.ok, result.reason = False, "gate_answer_leakage"
     return result
 
 
@@ -336,7 +375,7 @@ def plan(items, regime, competent, donors, phase, n_competent, seed, beh_k):
         if any((it.id, o) not in donors for o in h5.ORDERS):
             gates["no_donor"] += 1
             continue
-        vs = {o: make_variants(donors[(it.id, o)], regime) for o in h5.ORDERS}
+        vs = {o: make_variants(donors[(it.id, o)], regime, y_image=it.y_image, y_text=it.y_text) for o in h5.ORDERS}
         bad = [vs[o].reason for o in h5.ORDERS if not vs[o].ok]
         if bad:
             for r in bad:
@@ -348,6 +387,10 @@ def plan(items, regime, competent, donors, phase, n_competent, seed, beh_k):
         swaps.update(vs[o].n_swaps for o in h5.ORDERS)
         reqs += build_cells(it, regime, vs, beh_k)
     gates["passed"] = len(passed)
+    pass_rate = (len(passed) / gates["taken"]) if gates["taken"] else None
+    gates["edit_gate_pass_rate"] = round(pass_rate, 4) if pass_rate is not None else None
+    gates["edit_gate_ok"] = bool(pass_rate is not None and pass_rate >= MIN_EDIT_GATE_RATE)
+    gates["meets_min_items"] = len(passed) >= MIN_ITEMS[regime]
     gates["jaccard_multiset_flip_min"] = round(min(jaccards), 4) if jaccards else None
     gates["jaccard_multiset_flip_mean"] = round(sum(jaccards) / len(jaccards), 4) if jaccards else None
     gates["swaps_per_flip"] = {str(k): n for k, n in sorted(swaps.items())}
@@ -379,6 +422,13 @@ def main() -> int:
     print(f"Gates: {json.dumps(gates)}")
     if args.gates_only:
         return 0
+    if cfg.phase == "confirm" and not args.dry_run and (not gates["edit_gate_ok"] or not gates["meets_min_items"]):
+        print(
+            f"R5 stopping rule triggered: passed={gates['passed']} (min {MIN_ITEMS[cfg.regime]}), "
+            f"edit_gate_pass_rate={gates['edit_gate_pass_rate']} (min {MIN_EDIT_GATE_RATE}).",
+            file=sys.stderr,
+        )
+        return 2
     if not reqs:
         print("No requests: no item passed competency and the edit gates.", file=sys.stderr)
         return 2
@@ -387,10 +437,11 @@ def main() -> int:
     out_path = os.path.join(args.output_dir, f"{cfg.run_tag}.jsonl")
     manifest = os.path.join(args.output_dir, f"{cfg.run_tag}.manifest.json")
     scripts = [os.path.abspath(__file__), os.path.join(HERE, "harness_v5.py"), os.path.join(HERE, "score_v5.py"), os.path.join(HERE, "harness_v4.py"), os.path.join(HERE, "score_v4.py")]
-    h5.write_manifest(manifest, cfg, backend, len(passed), scripts)
+    h5.write_manifest(manifest, cfg, backend, len(passed), scripts, force_write=not os.path.exists(manifest))
     print(f"{len(passed)} items; {len(reqs)} requests")
     written = h5.run(reqs, backend, cfg, out_path)
-    h5.write_manifest(manifest, cfg, backend, len(passed), scripts)
+    if written > 0:
+        h5.write_manifest(manifest, cfg, backend, len(passed), scripts, force_write=True)
     print(f"Wrote {written} rows to {out_path}")
     return h5.report_missing(reqs, out_path)
 
