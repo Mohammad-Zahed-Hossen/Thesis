@@ -12,9 +12,20 @@
 - **Secondary behavioural — ΔP(follow reversed verdict) at k=1 (`structured`):**
   - T1_beh (flip−own DiD, bind−nonbind) = 0.000 (95% CI [0.000, 0.000]), p = 1.0000, Holm p = 1.0000
   - Co-primary T1_beh matched-pair (para_flip−para DiD) = 0.000 (95% CI [0.000, 0.000]), p = 1.0000
+  - Explicit-instruction benchmark B_beh = 0.250 (95% CI [0.083, 0.417]); image direction 0.417 (95% CI [0.167, 0.667]), text direction 0.083 (95% CI [0.000, 0.250]). A benchmark, not a ceiling.
+  - **T2_beh**: Δ = 0.083 (90% CI [0.000, 0.250]) vs ε = 0.05; reading: **inconclusive (TOST power 0.00 < 0.80; not evidence for either hypothesis)**; Holm p = 1.0000; TOST power 0.00; ρ_beh (descriptive) = 0.333
+  - **T2_beh_pair**: Δ = 0.083 (90% CI [0.000, 0.250]) vs ε = 0.05; reading: **inconclusive (TOST power 0.00 < 0.80; not evidence for either hypothesis)**; Holm p = 1.0000; TOST power 0.00; ρ_beh (descriptive) = 0.333
+  - **T3_beh**: Δ = 0.083 (90% CI [0.000, 0.250]) vs ε = 0.05; reading: **inconclusive (TOST power 0.00 < 0.80; not evidence for either hypothesis)**; Holm p = 1.0000; TOST power 0.00; ρ_beh (descriptive) = 0.333
+  - Directional (descriptive) binding_toward_image: Δ = 0.083 (95% CI [0.000, 0.250], n = 6); benchmark 0.417; ρ_beh 0.200
+  - Directional (descriptive) binding_toward_text: Δ = n/a (95% CI n/a, n = 0); benchmark 0.083; ρ_beh n/a
+  - Directional (descriptive) nonbinding_toward_image: Δ = 0.083 (95% CI [0.000, 0.250], n = 6); benchmark 0.417; ρ_beh 0.200
+  - Directional (descriptive) nonbinding_toward_text: Δ = n/a (95% CI n/a, n = 0); benchmark 0.083; ρ_beh n/a
   - binding: flip−own = 0.083 (95% CI [0.000, 0.250], p = 0.5020); para_flip−para = 0.083 (95% CI [0.000, 0.250], p = 0.5020); decomp [none−own=0.000, flip−none=0.083, para_flip−none=0.083]
   - nonbinding: flip−own = 0.083 (95% CI [0.000, 0.250], p = 0.5020); para_flip−para = 0.083 (95% CI [0.000, 0.250], p = 0.5020); decomp [none−own=0.000, flip−none=0.083, para_flip−none=0.083]
-- Replay noise (donor vs nonbinding own): attributable flips = n/a (n = 0); any-change = 0.750; suggested churn cap (replay + 0.05) = n/a
+- **PRIMARY READING under binding: EXPLORATORY REGIME, not a confirmatory reading: NOT A READING: n = 6 is below the R5 minimum of 100; the edit-gate pass rate is below 60% (prereg §8). The decision table alone would say: H1: the verdict decides, and binding strengthens it**
+- **PRIMARY READING under non-binding: EXPLORATORY REGIME, not a confirmatory reading: NOT A READING: n = 6 is below the R5 minimum of 100; the edit-gate pass rate is below 60% (prereg §8). The decision table alone would say: H1: the verdict decides; no evidence that binding strengthens it**
+- Wording-floor gate deciding the readings: fixed (signed mean, image<->text churn, neither shift) (prereg §7.6)
+- Replay noise (donor vs nonbinding own): attributable flips = n/a (n = 0); any-change = 0.750; (diagnostic only; it does not move the wording-floor limit)
 - Ceil_ℓ: 1.148, 95% CI [0.903, 1.401]
   - image direction vs non-binding: 0.607, 95% CI [0.446, 0.766]
   - text direction vs non-binding: 0.541, 95% CI [0.442, 0.651]
@@ -23,11 +34,11 @@
 - **T3** CDE = 0.357 (95% CI [0.252, 0.494]); ρ = 0.311, 90% CI [0.260, 0.371]; reading: **decision-relevant**
 - Holm-adjusted p: {"T2": 0.0006, "T3": 0.0228, "T1": 0.0228}
 - Behavioural, binding: Δ = 0.083, 90% CI [0.000, 0.250], TOST: not equivalent; change rate own vs flip 0.000
-  - Wording floor (para vs own): signed mean 0.000 (limit ±0.05), churn rate 0.000 (fixed limit 0.05), gate: **pass**; TOST power at this noise 1.00
+  - Wording floor (para vs own): signed mean 0.000 (limit ±0.05), image<->text churn 0.000 (limit 0.05), neither shift 0.000 (limit ±0.1), gate: **pass**; diagnostics: any-change churn 0.000, replay flips n/a; TOST power at this noise 1.00
 - Behavioural, nonbinding: Δ = 0.083, 90% CI [0.000, 0.250], TOST: not equivalent; change rate own vs flip 0.000
-  - Wording floor (para vs own): signed mean 0.000 (limit ±0.05), churn rate 0.000 (fixed limit 0.05), gate: **pass**; TOST power at this noise 1.00
-- **Combined reading under binding: NOT A READING: n = 6 is below the R5 minimum of 100; the edit-gate pass rate is below 60% (prereg §8). The decision table alone would say: H1: the verdict decides, and binding strengthens it**
-- **Combined reading under non-binding: NOT A READING: n = 6 is below the R5 minimum of 100; the edit-gate pass rate is below 60% (prereg §8). The decision table alone would say: H1: the verdict decides; no evidence that binding strengthens it**
+  - Wording floor (para vs own): signed mean 0.000 (limit ±0.05), image<->text churn 0.000 (limit 0.05), neither shift 0.000 (limit ±0.1), gate: **pass**; diagnostics: any-change churn 0.000, replay flips n/a; TOST power at this noise 1.00
+- Δℓ decision table (§2.2), binding: NOT A READING: n = 6 is below the R5 minimum of 100; the edit-gate pass rate is below 60% (prereg §8). The decision table alone would say: H1: the verdict decides, and binding strengthens it
+- Δℓ decision table (§2.2), non-binding: NOT A READING: n = 6 is below the R5 minimum of 100; the edit-gate pass rate is below 60% (prereg §8). The decision table alone would say: H1: the verdict decides; no evidence that binding strengthens it
 
 Behavioural numbers by answer parser (the lines above use `structured` per pre-freeze D3):
 
@@ -72,9 +83,21 @@ Secondary:
 - **PRIMARY (D1) — ΔP(follow reversed verdict) at k=1 (`structured`):**
   - T1_beh (flip−own DiD, bind−nonbind) = 0.113 (95% CI [0.019, 0.206]), p = 0.0155, Holm p = 0.0155
   - Co-primary T1_beh matched-pair (para_flip−para DiD) = 0.231 (95% CI [0.150, 0.312]), p = 0.0001
+  - Explicit-instruction benchmark B_beh = 0.484 (95% CI [0.422, 0.547]); image direction 0.463 (95% CI [0.388, 0.537]), text direction 0.506 (95% CI [0.425, 0.588]). A benchmark, not a ceiling.
+  - **T2_beh**: Δ = 0.494 (90% CI [0.425, 0.562]) vs ε = 0.05; reading: **decision-relevant**; Holm p = 0.0008; TOST power 0.00; ρ_beh (descriptive) = 1.019
+  - **T2_beh_pair**: Δ = 0.637 (90% CI [0.575, 0.700]) vs ε = 0.05; reading: **decision-relevant**; Holm p = 0.0008; TOST power 0.00; ρ_beh (descriptive) = 1.316
+  - **T3_beh**: Δ = 0.381 (90% CI [0.306, 0.450]) vs ε = 0.05; reading: **decision-relevant**; Holm p = 0.0008; TOST power 0.00; ρ_beh (descriptive) = 0.787
+  - Directional (descriptive) binding_toward_image: Δ = 0.456 (95% CI [0.361, 0.544], n = 79); benchmark 0.463; ρ_beh 0.985
+  - Directional (descriptive) binding_toward_text: Δ = 0.609 (95% CI [0.438, 0.766], n = 32); benchmark 0.506; ρ_beh 1.204
+  - Directional (descriptive) nonbinding_toward_image: Δ = 0.392 (95% CI [0.291, 0.487], n = 79); benchmark 0.463; ρ_beh 0.848
+  - Directional (descriptive) nonbinding_toward_text: Δ = 0.422 (95% CI [0.234, 0.609], n = 32); benchmark 0.506; ρ_beh 0.833
   - binding: flip−own = 0.494 (95% CI [0.412, 0.575], p = 0.0001); para_flip−para = 0.637 (95% CI [0.562, 0.713], p = 0.0001); decomp [none−own=0.106, flip−none=0.388, para_flip−none=0.512]
   - nonbinding: flip−own = 0.381 (95% CI [0.294, 0.463], p = 0.0001); para_flip−para = 0.406 (95% CI [0.331, 0.487], p = 0.0001); decomp [none−own=0.125, flip−none=0.256, para_flip−none=0.244]
-- Replay noise (donor vs nonbinding own): attributable flips = 0.032 (n = 93); any-change = 0.119; suggested churn cap (replay + 0.05) = 0.082
+- **PRIMARY READING under binding: NOT A READING: n = 80 is below the R5 minimum of 150. The decision table alone would say: H1: the verdict decides, and binding strengthens it (flip−own and para_flip−para agree)**
+- **PRIMARY READING under non-binding: NOT A READING: n = 80 is below the R5 minimum of 150. The decision table alone would say: H1: the verdict decides; no evidence that binding strengthens it**
+- Wording-floor gate deciding the readings: fixed (signed mean, image<->text churn, neither shift) (prereg §7.6)
+- The Δℓ lines below are secondary/diagnostic in this regime (D1).
+- Replay noise (donor vs nonbinding own): attributable flips = 0.032 (n = 93); any-change = 0.119; (diagnostic only; it does not move the wording-floor limit)
 - Ceil_ℓ: 0.152, 95% CI [0.117, 0.193]
   - image direction vs non-binding: -0.009, 95% CI [-0.041, 0.021]
   - text direction vs non-binding: 0.161, 95% CI [0.117, 0.212]
@@ -83,11 +106,11 @@ Secondary:
 - **T3** CDE = 0.150 (95% CI [0.106, 0.204]); ρ = 0.984, 90% CI [0.736, 1.305]; reading: **decision-relevant**
 - Holm-adjusted p: {"T1": 0.0003, "T2": 0.0004, "T3": 0.0004}
 - Behavioural, binding: Δ = 0.494, 90% CI [0.425, 0.562], TOST: not equivalent; change rate own vs flip 0.772
-  - Wording floor (para vs own): signed mean -0.044 (limit ±0.05), churn rate 0.032 (fixed limit 0.05), gate: **pass**; replay-adjusted limit 0.082 (pass); TOST power at this noise 0.00
+  - Wording floor (para vs own): signed mean -0.044 (limit ±0.05), image<->text churn 0.032 (limit 0.05), neither shift 0.062 (limit ±0.1), gate: **pass**; diagnostics: any-change churn 0.231, replay flips 0.032; TOST power at this noise 0.00
 - Behavioural, nonbinding: Δ = 0.381, 90% CI [0.306, 0.450], TOST: not equivalent; change rate own vs flip 0.676
-  - Wording floor (para vs own): signed mean 0.000 (limit ±0.05), churn rate 0.076 (fixed limit 0.05), gate: **FAIL**; replay-adjusted limit 0.082 (pass); TOST power at this noise 0.00
-- **Combined reading under binding: NOT A READING: n = 80 is below the R5 minimum of 150. The decision table alone would say: H1: the verdict decides, and binding strengthens it**
-- **Combined reading under non-binding: NOT A READING: n = 80 is below the R5 minimum of 150. The decision table alone would say: H1: the verdict decides; no evidence that binding strengthens it**
+  - Wording floor (para vs own): signed mean 0.000 (limit ±0.05), image<->text churn 0.076 (limit 0.05), neither shift 0.037 (limit ±0.1), gate: **FAIL**; diagnostics: any-change churn 0.287, replay flips 0.032; TOST power at this noise 0.00
+- Δℓ decision table (§2.2), binding: NOT A READING: n = 80 is below the R5 minimum of 150. The decision table alone would say: H1: the verdict decides, and binding strengthens it
+- Δℓ decision table (§2.2), non-binding: NOT A READING: n = 80 is below the R5 minimum of 150. The decision table alone would say: H1: the verdict decides; no evidence that binding strengthens it
 
 Behavioural numbers by answer parser (the lines above use `structured` per pre-freeze D3):
 
@@ -135,9 +158,20 @@ Secondary:
 - **Secondary behavioural — ΔP(follow reversed verdict) at k=1 (`structured`):**
   - T1_beh (flip−own DiD, bind−nonbind) = 0.000 (95% CI [0.000, 0.000]), p = 1.0000, Holm p = 1.0000
   - Co-primary T1_beh matched-pair (para_flip−para DiD) = 0.250 (95% CI [0.000, 0.500]), p = 0.4967
+  - Explicit-instruction benchmark B_beh = 0.500 (95% CI [0.000, 1.000]); image direction 0.500 (95% CI [0.000, 1.000]), text direction 0.500 (95% CI [0.000, 1.000]). A benchmark, not a ceiling.
+  - **T2_beh**: Δ = 0.000 (90% CI [0.000, 0.000]) vs ε = 0.05; reading: **undetermined: explicit-instruction control too weak**; Holm p = 0.0008; TOST power 1.00; ρ_beh (descriptive) = 0.000
+  - **T2_beh_pair**: Δ = 0.250 (90% CI [0.000, 0.500]) vs ε = 0.05; reading: **undetermined: explicit-instruction control too weak**; Holm p = 0.9939; TOST power 0.00; ρ_beh (descriptive) = 0.500
+  - **T3_beh**: Δ = 0.000 (90% CI [0.000, 0.000]) vs ε = 0.05; reading: **undetermined: explicit-instruction control too weak**; Holm p = 0.0008; TOST power 1.00; ρ_beh (descriptive) = 0.000
+  - Directional (descriptive) binding_toward_image: Δ = 0.000 (95% CI [0.000, 0.000], n = 2); benchmark 0.500; ρ_beh 0.000
+  - Directional (descriptive) binding_toward_text: Δ = n/a (95% CI n/a, n = 0); benchmark 0.500; ρ_beh n/a
+  - Directional (descriptive) nonbinding_toward_image: Δ = 0.000 (95% CI [0.000, 0.000], n = 2); benchmark 0.500; ρ_beh 0.000
+  - Directional (descriptive) nonbinding_toward_text: Δ = n/a (95% CI n/a, n = 0); benchmark 0.500; ρ_beh n/a
   - binding: flip−own = 0.000 (95% CI [0.000, 0.000], p = 1.0000); para_flip−para = 0.250 (95% CI [0.000, 0.500], p = 0.4967); decomp [none−own=0.000, flip−none=0.000, para_flip−none=0.250]
   - nonbinding: flip−own = 0.000 (95% CI [0.000, 0.000], p = 1.0000); para_flip−para = 0.000 (95% CI [0.000, 0.000], p = 1.0000); decomp [none−own=0.000, flip−none=0.000, para_flip−none=0.000]
-- Replay noise (donor vs nonbinding own): attributable flips = 0.000 (n = 4); any-change = 0.000; suggested churn cap (replay + 0.05) = 0.050
+- **PRIMARY READING under binding: EXPLORATORY REGIME, not a confirmatory reading: NOT A READING: n = 2 is below the R5 minimum of 100; the edit-gate pass rate is below 60% (prereg §8). The decision table alone would say: inconclusive**
+- **PRIMARY READING under non-binding: EXPLORATORY REGIME, not a confirmatory reading: NOT A READING: n = 2 is below the R5 minimum of 100; the edit-gate pass rate is below 60% (prereg §8). The decision table alone would say: H0: saying is not choosing**
+- Wording-floor gate deciding the readings: fixed (signed mean, image<->text churn, neither shift) (prereg §7.6)
+- Replay noise (donor vs nonbinding own): attributable flips = 0.000 (n = 4); any-change = 0.000; (diagnostic only; it does not move the wording-floor limit)
 - Ceil_ℓ: 0.956, 95% CI [0.269, 1.644]
   - image direction vs non-binding: 0.409, 95% CI [0.101, 0.718]
   - text direction vs non-binding: 0.547, 95% CI [0.168, 0.926]
@@ -146,11 +180,11 @@ Secondary:
 - **T3** CDE = 0.172 (95% CI [-0.000, 0.344]); ρ = 0.180, 90% CI [-0.001, 0.210]; reading: **equivalent to no effect**
 - Holm-adjusted p: {"T3": 0.0006, "T1": 0.485, "T2": 0.5091}
 - Behavioural, binding: Δ = 0.000, 90% CI [0.000, 0.000], TOST: equivalent; change rate own vs flip 0.000
-  - Wording floor (para vs own): signed mean 0.000 (limit ±0.05), churn rate 0.000 (fixed limit 0.05), gate: **pass**; replay-adjusted limit 0.050 (pass); TOST power at this noise 1.00
+  - Wording floor (para vs own): signed mean 0.000 (limit ±0.05), image<->text churn 0.000 (limit 0.05), neither shift 0.000 (limit ±0.1), gate: **pass**; diagnostics: any-change churn 0.000, replay flips 0.000; TOST power at this noise 1.00
 - Behavioural, nonbinding: Δ = 0.000, 90% CI [0.000, 0.000], TOST: equivalent; change rate own vs flip 0.000
-  - Wording floor (para vs own): signed mean 0.000 (limit ±0.05), churn rate 0.000 (fixed limit 0.05), gate: **pass**; replay-adjusted limit 0.050 (pass); TOST power at this noise 1.00
-- **Combined reading under binding: NOT A READING: n = 2 is below the R5 minimum of 100; the edit-gate pass rate is below 60% (prereg §8). The decision table alone would say: inconclusive**
-- **Combined reading under non-binding: NOT A READING: n = 2 is below the R5 minimum of 100; the edit-gate pass rate is below 60% (prereg §8). The decision table alone would say: H0: saying is not choosing**
+  - Wording floor (para vs own): signed mean 0.000 (limit ±0.05), image<->text churn 0.000 (limit 0.05), neither shift 0.000 (limit ±0.1), gate: **pass**; diagnostics: any-change churn 0.000, replay flips 0.000; TOST power at this noise 1.00
+- Δℓ decision table (§2.2), binding: NOT A READING: n = 2 is below the R5 minimum of 100; the edit-gate pass rate is below 60% (prereg §8). The decision table alone would say: inconclusive
+- Δℓ decision table (§2.2), non-binding: NOT A READING: n = 2 is below the R5 minimum of 100; the edit-gate pass rate is below 60% (prereg §8). The decision table alone would say: H0: saying is not choosing
 
 Behavioural numbers by answer parser (the lines above use `structured` per pre-freeze D3):
 
@@ -190,11 +224,23 @@ Secondary:
 - Items: 115; analysed: 115; meets R5 minimum: False
 - Boundary mismatches: 0 rows (0.000; gate ≤ 0.01)
 - **PRIMARY (D1) — ΔP(follow reversed verdict) at k=1 (`structured`):**
-  - T1_beh (flip−own DiD, bind−nonbind) = 0.122 (95% CI [0.065, 0.178]), p = 0.0001, Holm p = 0.0003
+  - T1_beh (flip−own DiD, bind−nonbind) = 0.122 (95% CI [0.065, 0.178]), p = 0.0001, Holm p = 0.0004
   - Co-primary T1_beh matched-pair (para_flip−para DiD) = 0.409 (95% CI [0.339, 0.478]), p = 0.0001
+  - Explicit-instruction benchmark B_beh = 0.687 (95% CI [0.643, 0.728]); image direction 0.617 (95% CI [0.557, 0.678]), text direction 0.757 (95% CI [0.700, 0.813]). A benchmark, not a ceiling.
+  - **T2_beh**: Δ = 0.439 (90% CI [0.391, 0.487]) vs ε = 0.05; reading: **decision-relevant**; Holm p = 0.0006; TOST power 0.03; ρ_beh (descriptive) = 0.639
+  - **T2_beh_pair**: Δ = 0.643 (90% CI [0.591, 0.691]) vs ε = 0.05; reading: **decision-relevant**; Holm p = 0.0006; TOST power 0.00; ρ_beh (descriptive) = 0.937
+  - **T3_beh**: Δ = 0.317 (90% CI [0.265, 0.370]) vs ε = 0.05; reading: **decision-relevant**; Holm p = 0.0006; TOST power 0.00; ρ_beh (descriptive) = 0.462
+  - Directional (descriptive) binding_toward_image: Δ = 0.348 (95% CI [0.274, 0.426], n = 115); benchmark 0.617; ρ_beh 0.563
+  - Directional (descriptive) binding_toward_text: Δ = 0.592 (95% CI [0.479, 0.704], n = 71); benchmark 0.757; ρ_beh 0.782
+  - Directional (descriptive) nonbinding_toward_image: Δ = 0.265 (95% CI [0.196, 0.335], n = 115); benchmark 0.617; ρ_beh 0.430
+  - Directional (descriptive) nonbinding_toward_text: Δ = 0.366 (95% CI [0.254, 0.479], n = 71); benchmark 0.757; ρ_beh 0.484
   - binding: flip−own = 0.439 (95% CI [0.383, 0.496], p = 0.0001); para_flip−para = 0.643 (95% CI [0.578, 0.704], p = 0.0001); decomp [none−own=0.209, flip−none=0.230, para_flip−none=0.435]
   - nonbinding: flip−own = 0.317 (95% CI [0.257, 0.378], p = 0.0001); para_flip−para = 0.235 (95% CI [0.174, 0.296], p = 0.0001); decomp [none−own=0.191, flip−none=0.126, para_flip−none=0.078]
-- Replay noise (donor vs nonbinding own): attributable flips = 0.011 (n = 186); any-change = 0.087; suggested churn cap (replay + 0.05) = 0.061
+- **PRIMARY READING under binding: NOT A READING: n = 115 is below the R5 minimum of 150. The decision table alone would say: H1: the verdict decides, and binding strengthens it (flip−own and para_flip−para agree)**
+- **PRIMARY READING under non-binding: NOT A READING: n = 115 is below the R5 minimum of 150. The decision table alone would say: H1: the verdict decides; no evidence that binding strengthens it**
+- Wording-floor gate deciding the readings: fixed (signed mean, image<->text churn, neither shift) (prereg §7.6)
+- The Δℓ lines below are secondary/diagnostic in this regime (D1).
+- Replay noise (donor vs nonbinding own): attributable flips = 0.011 (n = 186); any-change = 0.087; (diagnostic only; it does not move the wording-floor limit)
 - Ceil_ℓ: 1.423, 95% CI [1.214, 1.633]
   - image direction vs non-binding: 0.670, 95% CI [0.559, 0.790]
   - text direction vs non-binding: 0.753, 95% CI [0.609, 0.903]
@@ -203,11 +249,11 @@ Secondary:
 - **T3** CDE = 1.342 (95% CI [1.082, 1.626]); ρ = 0.943, 90% CI [0.835, 1.052]; reading: **decision-relevant**
 - Holm-adjusted p: {"T1": 0.0003, "T2": 0.0004, "T3": 0.0004}
 - Behavioural, binding: Δ = 0.439, 90% CI [0.391, 0.487], TOST: not equivalent; change rate own vs flip 0.506
-  - Wording floor (para vs own): signed mean -0.030 (limit ±0.05), churn rate 0.000 (fixed limit 0.05), gate: **pass**; replay-adjusted limit 0.061 (pass); TOST power at this noise 0.24
+  - Wording floor (para vs own): signed mean -0.030 (limit ±0.05), image<->text churn 0.000 (limit 0.05), neither shift 0.030 (limit ±0.1), gate: **pass**; diagnostics: any-change churn 0.152, replay flips 0.011; TOST power at this noise 0.24
 - Behavioural, nonbinding: Δ = 0.317, 90% CI [0.265, 0.370], TOST: not equivalent; change rate own vs flip 0.369
-  - Wording floor (para vs own): signed mean -0.057 (limit ±0.05), churn rate 0.066 (fixed limit 0.05), gate: **FAIL**; replay-adjusted limit 0.061 (FAIL); TOST power at this noise 0.26
-- **Combined reading under binding: NOT A READING: n = 115 is below the R5 minimum of 150. The decision table alone would say: H1: the verdict decides, and binding strengthens it**
-- **Combined reading under non-binding: NOT A READING: n = 115 is below the R5 minimum of 150. The decision table alone would say: H1: the verdict decides; no evidence that binding strengthens it**
+  - Wording floor (para vs own): signed mean -0.057 (limit ±0.05), image<->text churn 0.066 (limit 0.05), neither shift 0.022 (limit ±0.1), gate: **FAIL**; diagnostics: any-change churn 0.161, replay flips 0.011; TOST power at this noise 0.26
+- Δℓ decision table (§2.2), binding: NOT A READING: n = 115 is below the R5 minimum of 150. The decision table alone would say: H1: the verdict decides, and binding strengthens it
+- Δℓ decision table (§2.2), non-binding: NOT A READING: n = 115 is below the R5 minimum of 150. The decision table alone would say: H1: the verdict decides; no evidence that binding strengthens it
 
 Behavioural numbers by answer parser (the lines above use `structured` per pre-freeze D3):
 

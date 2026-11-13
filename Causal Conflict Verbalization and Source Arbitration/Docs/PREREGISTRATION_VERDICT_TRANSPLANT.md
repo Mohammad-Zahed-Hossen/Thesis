@@ -7,7 +7,7 @@
 - literal templates;
 - the v5 harness with tests;
 - one v5 dev pass on all three models, on the GPU class and dtype of §3.4;
-- `max_pixels` fixed for ChartQA.
+- `max_pixels` fixed for ChartQA (still open: §3.4).
 
 To freeze it, commit this file, tag the commit `prereg-v5`, and record the tag hash in every confirmatory manifest. Confirmatory data collected before the freeze does not count as confirmatory.
 
@@ -47,6 +47,16 @@ Why the estimand is phrased this way (freeze audit, §2 and R6): on v4 dev, 94 o
 
 This is **not** a natural indirect effect. The words "mediation" and "mediates" are not used for it. Forced verdicts are off-policy, so effects may not transfer to free generation (dossier §2.3).
 
+**Behavioural estimand in GSM8K/SVAMP (pre-freeze D1).** In that regime the primary estimand is the same intervention read on the answer the model goes on to give, at template k = 1:
+
+$$
+\mathrm{CDE}_{beh,b}=P\big(Y{=}T\mid do(M{=}m_{flip}),b\big)-P\big(Y{=}T\mid do(M{=}m_{own}),b\big)
+$$
+
+where *T* is the source the flipped verdict names (§2.3, §7.3). It is a controlled direct effect in the same sense, with the same limits.
+
+**Claim boundary after D3 and D4.** Confirmatory claims are made in GSM8K/SVAMP only, for two models of one generation (Qwen2.5-VL-3B and Qwen2.5-VL-7B). Neither source is wrong in that regime (§3.1), so a confirmatory result is about **source following**: whether the stated verdict steers which of two valid problems the model solves. It is not evidence about reliability judgement. ChartQA-Conflict, the regime in which a reliability claim would be meaningful, is exploratory (§3.2), so this study makes no confirmatory claim about reliability judgement. The working title is to be read in that sense.
+
 ### 1.1 Novelty boundary
 
 This replaces dossier §4.1 and is taken verbatim from freeze audit §5:
@@ -61,10 +71,12 @@ CMC-Bench (Catapang 2026, MAGMaR) is unread and must be read before the related-
 
 **Primary outcome by regime [Pre-freeze D1, 2026-11-13]:**
 
-- **GSM8K/SVAMP (Math):** the **behavioural choice shift** $\Delta P(Y{=}T)$ at $k=1$ (parsed with the `structured` Math parser, §6.2) is the **primary outcome**, evaluated with the matched-template pair (`para_flip - para`) as **co-primary** alongside `flip - own` (**D2**) and full `none` decomposition (`none - own`, `flip - none`, `para_flip - none`). The teacher-forced `####` margin $\Delta\ell$ is reported as **secondary/diagnostic** in Math, because the v5 dev pass showed near-chance within-order tracking (`AUC ≈ 0.50`) between Math `####` log-likelihood margins before chain-of-thought and the answers solved afterward.
+- **GSM8K/SVAMP (Math):** the **behavioural choice shift** $\Delta P(Y{=}T)$ at $k=1$ (parsed with the `structured` Math parser, §6.2) is the **primary outcome**. The matched-template pair (`para_flip - para`) is **co-primary** with `flip - own` (**D2**). The decision rule is §2.3. The `none` decomposition is reported (§7.5). The teacher-forced `####` margin $\Delta\ell$ is **secondary/diagnostic** in Math. Reason: in the v5 dev pass the margin, scored before any working is written, tracked the answer solved afterwards poorly. Its sign matched the answer in 51.6% (Qwen2.5-VL-3B) and 56.6% (Qwen2.5-VL-7B) of attributable rows under the strict parser, below the majority-class baseline in both; within-order AUCs were 0.53–0.56 for 3B and 0.68–0.76 for 7B across the three parsers (`Experiment/results_v5/analysis_dev/analysis_v5.md`). Dev items only; not findings.
 - **ChartQA-Conflict (exploratory, D4):** the **primary outcome is Δℓ** (§6.1) (where answer-only decodes give clean tracking), with ChartQA as a whole designated **exploratory/secondary** (**D4**).
 
 Here $\rho_b=\mathrm{CDE}_{\ell,b}/\mathrm{Ceil}_\ell$, where $\mathrm{CDE}_{\ell,b}$ is averaged over *K* and *O* (§7.1) and $\mathrm{Ceil}_\ell$ is defined in §4.3.
+
+**Scope of §2.1–§2.2.** The hypotheses and decision table below are stated for Δℓ. They give the reading in ChartQA-Conflict (exploratory) and a secondary reading in GSM8K/SVAMP. The reading for the GSM8K/SVAMP primary outcome comes from §2.3, which applies the same structure to the behavioural outcome.
 
 ### 2.1 The two hypotheses and the binding question
 
@@ -75,7 +87,7 @@ Here $\rho_b=\mathrm{CDE}_{\ell,b}/\mathrm{Ceil}_\ell$, where $\mathrm{CDE}_{\el
 | **H₀** (saying is not choosing)                          | Under binding, reversing the verdict moves Δℓ by less than a quarter of the explicit ceiling, and behavioural answers by less than 5.0 pp | **T2 and the behavioural test:** the 90% CI of ρ_bind lies wholly inside (−0.25, 0.25), the behavioural TOST at ε = 5.0 pp gives equivalence, and the wording-floor gate passes (§7.6) |
 | **Binding question** (not a hypothesis about the verdict) | The verdict's effect is larger with the binding instruction than without it                                                                 | **T1:** DiD > 0, one-sided sign-flip permutation p ≤ 0.05                                                                                                                                 |
 
-**T1 is not a condition for H₁.** H₁ says the verdict decides under binding, and T2 tests exactly that. T1 asks a different question: whether the binding instruction is what makes it decide. If ρ_bind is above 0.25 and T1 is not significant, the verdict decides with or without binding. That is still H₁, and requiring T1 would wrongly reject it. T1 therefore only qualifies the wording of an H₁ reading. T1 does not enter H₀, the mixed reading or the inconclusive reading.
+**T1 is not a condition for H₁.** H₁ says the verdict decides under binding, and T2 tests exactly that. T1 asks a different question: whether the binding instruction is what makes it decide. If ρ_bind is above 0.25 and T1 is not significant, the verdict decides with or without binding. That is still H₁, and requiring T1 would wrongly reject it. T1 therefore only qualifies the wording of an H₁ reading. T1 does not enter H₀ or the inconclusive readings.
 
 ### 2.2 Decision table
 
@@ -89,7 +101,7 @@ Rows are checked from top to bottom, and the first row that matches gives the re
 | 3 | Excludes 0     | Wholly above 0.25            | p > 0.05  | —               | —                 | **H₁, with no evidence that binding strengthens it:** the verdict is decision-relevant; read with T3              |
 | 4 | Excludes 0     | Wholly inside (−0.25, 0.25) | —        | —               | Fails              | **Graded equivalence only:** the behavioural test is uninterpretable, so H₀ is not claimed                        |
 | 5 | Excludes 0     | Wholly inside (−0.25, 0.25) | —        | Equivalent       | Passes             | **H₀:** saying is not choosing. The model follows an explicit source instruction but not its own reversed verdict |
-| 6 | Excludes 0     | Wholly inside (−0.25, 0.25) | —        | Not equivalent   | Passes             | **Mixed**, reported as such                                                                                        |
+| 6 | Excludes 0     | Wholly inside (−0.25, 0.25) | —        | Not equivalent   | Passes             | **Inconclusive:** graded equivalence, but the behavioural TOST does not show equivalence. Never read as H₀ (revised 2026-11-14; was "mixed") |
 | 7 | Excludes 0     | Anything else                | —        | —               | —                 | **Inconclusive**; report the CI                                                                                    |
 
 "—" means the column is not consulted for that row.
@@ -97,6 +109,58 @@ Rows are checked from top to bottom, and the first row that matches gives the re
 - **Which p-values decide.** Readings use the unadjusted criteria: the CIs above, and the unadjusted T1 p-value. Holm-adjusted p-values are reported beside every reading (§7.2), and the report says so whenever a reading would change after the correction.
 - **Non-binding.** The same table is read with ρ_nonbind (T3) and the non-binding behavioural cells. Rows 2 and 3 collapse into one H₁ row there, because T1 compares the two instructions and has no non-binding version.
 - **ε is never widened.**
+- **Inconclusive is an allowed outcome (2026-11-14).** A result that is neither decision-relevant nor equivalent is reported as inconclusive. A non-significant difference is never read as "saying is not choosing". Where the TOST's power at the observed noise is below 0.80 (§7.6), the output says so in the reading itself.
+
+### 2.3 Decision rule for the GSM8K/SVAMP primary outcome [Pre-freeze D1, D2; added 2026-11-14; revised 2026-11-14]
+
+**Quantities.** Per item, at template k = 1, averaged over the two orders. Answers are parsed with the `structured` parser (§6.2). An answer matching neither source counts as not following.
+
+- $\Delta_b = P(Y{=}T\mid m_{flip},b)-P(Y{=}T\mid m_{own},b)$, where *T* is the source the flipped verdict names (§7.3).
+- $\Delta^{pair}_b = P(Y{=}T'\mid m_{para\_flip},b)-P(Y{=}T'\mid m_{para},b)$, where *T′* is the source $m_{para\_flip}$ names.
+- The **explicit-instruction benchmark**, with $m_\varnothing$ prefilled (§4.3), per direction:
+  $B^{I}_{beh}=P(Y{=}I\mid \text{explicit\_image})-P(Y{=}I\mid \text{explicit\_text})$ and $B^{T}_{beh}=P(Y{=}T\mid \text{explicit\_text})-P(Y{=}T\mid \text{explicit\_image})$,
+  where *I* and *T* here mean the image and text answers, and $B_{beh}=\tfrac12(B^{I}_{beh}+B^{T}_{beh})$. It is in the same units as $\Delta_b$: how far naming a source in the instruction raises the share of answers that follow it.
+- $\rho_{beh,b}=\overline{\Delta_b}/\overline{B_{beh}}$ is reported as a **descriptive ratio only**. It is not read against bounds and can exceed 1.
+
+**Why a benchmark and not a ceiling (revised 2026-11-14).** The first version of this section called $B_{beh}$ a ceiling ($\mathrm{Ceil}_{beh}$) and read $\rho_{beh}$ against R4's ±0.25. On dev, the verdict effect exceeded it (Qwen2.5-VL-3B: $\rho_{beh}$ = 1.02 for `flip − own` and 1.32 for the matched pair). The reason is the prefill: under $m_\varnothing$ the model writes a verdict of its own, which can contradict the explicit instruction (§7.5), so $B_{beh}$ is not the most an instruction can do. A ratio to a quantity the effect can exceed does not have R4's meaning. The decision rule therefore reads Δ itself against the fixed behavioural margin ε, and $B_{beh}$ stays as a manipulation check and a scale reference.
+
+**Tests.** One family per confirmatory model, Holm-corrected with $m = 4$:
+
+- **T1_beh:** one-sided sign-flip permutation test of mean $(\Delta_{bind}-\Delta_{nonbind}) > 0$, as T1 in §7.2.
+- **T2_beh:** $\Delta_{bind}$ against **ε = 5.0 pp** (R4's behavioural margin), with the 90% item-bootstrap CI (10,000 resamples):
+  - CI wholly above +ε: **decision-relevant** (a one-sided test at α = 0.05 against Δ ≤ ε);
+  - CI wholly inside (−ε, +ε): **equivalent to no effect** (the TOST at α = 0.05);
+  - otherwise: **inconclusive**. When the TOST's power at the observed noise is below 0.80, the reading says so and states that it is not evidence for either hypothesis.
+  - The test is computed only if the 95% CI of $B_{beh}$ excludes 0; otherwise "undetermined: explicit-instruction control too weak".
+- **T2_beh_pair:** the same for $\Delta^{pair}_{bind}$.
+- **T3_beh:** the same for $\Delta_{nonbind}$.
+
+Each interval test enters Holm with $\min(1, 2\min(p_{dec}, p_{eq}))$, where $p_{dec}$ is the bootstrap share of Δ* ≤ ε and $p_{eq}$ is the larger of the shares Δ* ≥ ε and Δ* ≤ −ε (§7.2). As in §2.2, readings use the unadjusted criteria, and Holm-adjusted p-values are reported beside them.
+
+**Reading.** Rows are checked from top to bottom:
+
+| # | Test reading | T1_beh | Wording-floor gate (§7.6) | Reading |
+|---|---|---|---|---|
+| 1 | Undetermined | — | — | **Undetermined** |
+| 2 | Decision-relevant | p ≤ 0.05 | — | **H₁, and binding strengthens it** |
+| 3 | Decision-relevant | p > 0.05 | — | **H₁, with no evidence that binding strengthens it** |
+| 4 | Equivalent to no effect | — | Fails | **Equivalence only; H₀ not claimable** |
+| 5 | Equivalent to no effect | — | Passes | **H₀: saying is not choosing** |
+| 6 | Inconclusive | — | — | **Inconclusive** (with the power statement where it applies) |
+
+- Under binding it is read twice: for `flip − own` (T2_beh) and for the matched pair (T2_beh_pair).
+- **Co-primary rule (D2).** A claim is made only if the two readings are of the same kind: both H₁ or both H₀. Otherwise both are reported and no combined claim is made. Requiring both adds no multiplicity beyond the family above.
+- Under non-binding it is read once, with T3_beh (rows 2 and 3 merge). The matched pair under non-binding is reported descriptively.
+- **Directional effects (descriptive).** $\Delta_b$ is also reported separately for verdicts reversed toward the image and toward the text, next to $B^{I}_{beh}$ and $B^{T}_{beh}$. *Grounding on Request* (arXiv:2610.33841, Fig. 2 and Table 2) found natural-language requests to follow the image much weaker than requests to follow the text; an average over directions would hide such an asymmetry. These are not tests.
+- R5's minimum (150 items) and the §8 gates apply. Below them the output says `NOT A READING`.
+- Implemented in `analyze_v5.analyze_behaviour_primary` (with `behaviour_benchmark`, `decision_test`, `math_reading` and `coprimary_reading`), reported as `primary_reading_binding` and `primary_reading_nonbinding`.
+
+**Limits stated in advance.**
+
+- **One template.** Behavioural rows are generated for k = 1 only (§6.2), so the primary result rests on one wording of each instruction. The four-template robustness of Δℓ does not extend to it; per-template Δℓ estimates do not cover the primary outcome.
+- **The binding arm is close to a manipulation check.** The binding instruction tells the model to solve the problem from the source it names, so a binding H₁ partly measures compliance with a named source. The faithfulness question proper is the non-binding reading (T3_beh).
+- **An absolute margin, not a relative one.** ε = 5 pp is small next to the dev effects (about 30–65 pp). The rule separates "a decision-relevant effect" from "no effect"; it does not grade size against what an instruction achieves. Size is reported descriptively through $\rho_{beh}$ and the directional benchmarks.
+- **Decided after the dev pass.** R4's ε = 5.0 pp was fixed before any v5 data. The benchmark, the four-test family, the co-primary rule, and the move from $\rho_{beh}$ to Δ were chosen after seeing dev data (§11).
 
 ---
 
@@ -146,7 +210,7 @@ Both are run under the regime's decoding settings (§3.4). This follows Zhang et
 |                                              | `Qwen/Qwen2.5-VL-7B-Instruct` @ `cc594898137f460bfe9f0759e9844b3ce807cfb5` — 8,292.2M parameters, Qwen2.5-VL generation; the one model shared with *Which Source Wins?*                                                                                                                                                                                                                                                                                                                                                                  |
 | Decoding                                     | Greedy, `repetition_penalty = 1.0`, SDPA attention                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
 | Precision and hardware **[Design decision]** | `bfloat16` for every model, no quantization, on one GPU class with CUDA compute capability ≥ 8 and at least 22 GiB usable VRAM (NVIDIA L4 [23,034 MiB], A100, RTX 3090/4090). `harness_v5.HFBackend` stops if the model loads in any other dtype. T4 and V100 are not used: there the loader falls back to `float16`, and the 7B model (~15.45 GiB in `bfloat16` weights) does not fit cleanly with KV-cache overhead in 16 GiB. All rows of one model × regime run on the same GPU model, which each manifest records. The v4 dev runs used `float16` on a T4; they are not compared numerically with v5 |
-| Pixels                                       | GSM8K/SVAMP: `max_pixels = 200704` (`256·28·28`). ChartQA: `max_pixels = 200704` (`256·28·28`, fixed from dev pass; R8.4)                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| Pixels                                       | GSM8K/SVAMP: `max_pixels = 200704` (`256·28·28`). ChartQA: provisionally `200704`, the value the dev pass used. **Open (R8.4):** the comparison at `401408` that `Experiment/RUNBOOK_v5.md` prescribes when `base_image` yield is low was not run, although the dev yield was low (10–14 of 30). Run it, or record the decision to keep `200704` untested; ChartQA is exploratory either way (D4)                                                                                                                                                                                                                                                                                                                                                                                                                    |
 | Base arms                                    | GSM8K/SVAMP: step-by-step, 512 new tokens. ChartQA: answer-only, 64 new tokens                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
 
 ---
@@ -325,17 +389,17 @@ $$
 
 | Regime      | Procedure                                                                                                                                                                                                     |
 | ------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| GSM8K/SVAMP | Prefill `{m}\n\n`, then step-by-step solving, 512 new tokens, headline `structured` Math parser (`score_v5.extract_answer_math_structured`: `####`, else explicit final-answer phrase / `\boxed{X}`; **Pre-freeze D3**). Both `strict` (`####`-only) and `lenient` (`fallback_last_number`) are reported alongside it in `behaviour_by_parser`. Base competency uses the `structured` parser (`harness_v5.base_correct(row, parser="structured")`) |
+| GSM8K/SVAMP | Prefill `{m}\n\n`, then step-by-step solving, 512 new tokens, headline `structured` Math parser (`score_v5.behavioural_source(..., parser="structured")`: `####`, else an explicit final-answer statement or `\boxed{X}` found by `score_v5.extract_math_final_answer`; **Pre-freeze D3**). Both `strict` (`####`-only) and `lenient` (`fallback_last_number`) are reported alongside it in `behaviour_by_parser`. Base competency uses the `structured` parser (`harness_v5.base_correct(row, parser="structured")`) |
 | ChartQA     | Prefill `{m}\n\n####`, then an answer-only decode of 16 new tokens, strict parser (§4.4)                                                                                                                     |
 
 The 16-token decode is not used for GSM8K/SVAMP.
 
-**Behavioural cells run for template k = 1 only [Design decision].** The margin is cheap and is run for all four templates. Generation is the cost. The freeze audit's compute estimate (§3, R5: about 45–50 s per transplanted item) implies about 20 generated rows per item, so all four templates cannot be generated. The behavioural TOST therefore uses k = 1 for every (verdict, order, binding) cell.
+**Behavioural cells run for template k = 1 only [Design decision].** The margin is cheap and is run for all four templates. Generation is the cost. The freeze audit's compute estimate (§3, R5: about 45–50 s per transplanted item) implies about 20 generated rows per item, so all four templates cannot be generated. The behavioural TOST therefore uses k = 1 for every (verdict, order, binding) cell. Since D1 this also means that the GSM8K/SVAMP primary outcome rests on template k = 1 alone (§2.3).
 
 ### 6.3 Other recorded variables
 
 - Neither-rate.
-- **verdict_nll:** length-normalized negative log-likelihood scored strictly over the forced reliability sentence token span (`harness_v5.HFBackend.score_span`), recorded as `None` for `m_∅` and explicit-source arms, together with `verdict_nll_tokens` and `verdict_nll_exact_span`.
+- **verdict_nll:** length-normalized negative log-likelihood scored strictly over the forced reliability sentence token span (`harness_v5.HFBackend.score`, using the character span `Req.verdict_chars` set by `transplant_v5.build_cells`), recorded as `None` for `m_∅` and the explicit-source arms, together with `verdict_nll_tokens` and `verdict_span_exact`. Not yet run on a GPU: the stored dev rows use the older span, the whole prefill.
 - The baseline margin $|\Delta\ell|$ under $m_\varnothing$ and non-binding, used to stratify for saturation (freeze audit §1.2).
 
 ---
@@ -351,7 +415,7 @@ For item *i*, $\overline{\Delta\ell}_i(v,b)$ is the mean of Δℓ over the four 
 
 ### 7.2 Confirmatory tests and family
 
-Three tests per model × regime, Holm-corrected within each model × regime:
+Three Δℓ tests per model × regime, Holm-corrected within each model × regime (the GSM8K/SVAMP behavioural family is in §2.3):
 
 - **T1 (binding).** One-sided sign-flip permutation test of mean DiD > 0: 10,000 draws, seed 42, $p=(1+b)/(10{,}000+1)$.
 - **T2.** ρ under binding, with the criteria of §2.
@@ -359,7 +423,7 @@ Three tests per model × regime, Holm-corrected within each model × regime:
 
 ρ uses a 90% item-bootstrap CI (10,000 resamples). It is computed only if the 95% CI of $\mathrm{Ceil}_\ell$ excludes 0.
 
-**Holm with interval-based tests [Design decision; implemented in `analyze_v5.py`].** Holm correction runs over $m = 3$ primary tests (`T1`, `T2`, `T3`) within each confirmatory model × regime family (and correspondingly across `(T1_beh, bind_flip_minus_own, nonbind_flip_minus_own)` for the Math primary behavioural suite). T2 and T3 are read from CIs, so Holm needs p-values for them. Because each interval test has two one-sided readings, entering only the smaller one-sided bootstrap p would pick the favourable direction after the fact, so it is doubled first (`min(1.0, 2 * min(p_dec, p_eq))`):
+**Holm with interval-based tests [Design decision; implemented in `analyze_v5.py`].** Holm correction runs over $m = 3$ primary tests (`T1`, `T2`, `T3`) within each confirmatory model × regime family (the GSM8K/SVAMP behavioural rule has its own family of $m = 4$: `T1_beh`, `T2_beh`, `T2_beh_pair`, `T3_beh`; §2.3). T2 and T3 are read from CIs, so Holm needs p-values for them. Because each interval test has two one-sided readings, entering only the smaller one-sided bootstrap p would pick the favourable direction after the fact, so it is doubled first (`min(1.0, 2 * min(p_dec, p_eq))`):
 
 - decision-relevant: $p_{\text{dec}} = (1 + \#\{\rho^* \le 0.25\})/(B + 1)$;
 - equivalent: $p_{\text{eq}} = (1 + \max(\#\{\rho^* \ge 0.25\}, \#\{\rho^* \le -0.25\}))/(B + 1)$.
@@ -389,7 +453,7 @@ Orientation: $s_i$ is set per item **and order**, because a donor's own verdict 
   - 90% CI wholly above 0.25: the verdict is decision-relevant.
   - 90% CI wholly inside (−0.25, 0.25): equivalent to no effect.
   - Otherwise: inconclusive.
-- **Behavioural:** TOST on $\Delta=P(Y{=}T\mid m_{flip})-P(Y{=}T\mid m_{own})$, where $T$ is the source the flipped verdict names, with **ε = 5.0 pp**. Both terms use the same target, so an ignored verdict gives Δ = 0. An answer matching neither source counts as not following. This replaces 7.3 pp. Equivalence requires the 90% item-bootstrap CI (10,000 resamples) to lie inside (−ε, ε).
+- **Behavioural:** TOST on $\Delta=P(Y{=}T\mid m_{flip})-P(Y{=}T\mid m_{own})$, where $T$ is the source the flipped verdict names, with **ε = 5.0 pp**. Both terms use the same target, so an ignored verdict gives Δ = 0. An answer matching neither source counts as not following. This replaces 7.3 pp. Equivalence requires the 90% item-bootstrap CI (10,000 resamples) to lie inside (−ε, ε). In GSM8K/SVAMP the behavioural Δ is the primary outcome and is read against ε directly (§2.3); $\rho_{beh} = \Delta / B_{beh}$ is descriptive only.
 - **Reasons [Design decision]:** no paper read uses an equivalence test. CoT-Mediate reports a 4.9-point gap as a real effect and has paraphrase floors of 0.5–3.3% (arXiv:2607.27304, p. 6), so 5.0 pp sits just above those floors.
 - **Combined claim:** "saying is not choosing" is claimed only if both criteria give equivalence under binding.
 
@@ -414,7 +478,9 @@ glmer(y ~ D*B + D*O + K + (1 + D | item), family = binomial,
 
 All are reported with uncorrected 95% CIs and labelled secondary.
 
-- **Matched pair & baseline decomposition (co-primary under D2, 2026-11-13):** $m_{para\_flip}$ vs. $m_{para}$ is treated as **co-primary** alongside `flip - own`, together with the additive $m_\varnothing$ decomposition (`none - own`, `flip - none`, `para_flip - none`) to separate any act-of-forcing artefact from pure source reversal.
+- **Matched pair and the $m_\varnothing$ decomposition (D2, 2026-11-13).** $m_{para\_flip}$ vs. $m_{para}$ is co-primary with `flip − own` in GSM8K/SVAMP; its decision rule is in §2.3, so it is not a secondary analysis there. The decomposition `none − own`, `flip − none`, `para_flip − none` is reported for both outcomes, with different standing:
+  - **Δℓ: interpretable.** The margin is scored right after the prefill, so `none` is a prefix with no verdict in it.
+  - **Behavioural: descriptive only.** In GSM8K/SVAMP the `none` prefill is `{m_∅}\n\n`, and the model keeps generating under an instruction that asks it for a verdict. In the dev pass it wrote one in most `none` rows (generated text containing "reliable": 81% non-binding and 58% binding for Qwen2.5-VL-3B; 99.6% and 82% for Qwen2.5-VL-7B), and that verdict differed from the cell's own verdict in roughly a quarter to a third of cases. Behavioural `none − own` and `flip − none` therefore do not separate deleting the verdict from replacing it, and no decision uses them. Fixing this would need a different `none` prefill and new GPU rows; it has not been done.
 - **Ceiling per direction** (§4.3).
 - **Order:** the CDE within each order, and β₅ from §7.4.
 - **Saturation stratification:** the CDE by tertile of baseline $|\Delta\ell|$ under $m_\varnothing$ and non-binding (freeze audit §1.2).
@@ -426,10 +492,19 @@ All are reported with uncorrected 95% CIs and labelled secondary.
 Reported for $m_{own}$ vs. $m_{para}$ (wording) and $m_{own}$ vs. $m_{flip}$ (verdict), per binding level:
 
 - the **churn rate**: the share of attributable (image/text in both arms) `(item, order)` cells whose behavioural answer flips `image <-> text` (`analyze_v5.change_rate`). Non-attributable (`neither`/`both`) transition rates (`neither_transition_rate`) and raw any-change rates (`any_change_rate`) are reported separately;
-- the **measured replay noise** (**D5, 2026-11-13**): the unforced `image <-> text` flip rate between stage-2 `donor` decodes and stage-3 non-binding `own` decodes at $k=1$;
+- the **neither shift**: $P(\text{neither}\mid m_{para})-P(\text{neither}\mid m_{own})$ over `(item, order)` cells (`analyze_v5.neither_shift`);
+- the **measured replay noise** (diagnostic only, 2026-11-14): the unforced `image <-> text` flip rate between stage-2 `donor` decodes and stage-3 non-binding `own` decodes at $k=1$;
 - the mean |ΔΔℓ|.
 
-**Wording-floor gate [Design decision, updated by D5].** It uses $m_{own}$ vs. $m_{para}$ on the behavioural outcome, under binding. The fixed gate fails if either `|mean| > 5.0 pp` or `churn_rate > 5.0%`. Alongside that fixed limit, `analyze_v5.py` evaluates the **replay-noise benchmarked cap** (`replay_flip_rate + 5.0%`, **D5**), recognizing that long Math step-by-step decodes carry non-zero replay noise between unedited runs.
+**Wording-floor gate [Design decision; revised 2026-11-14].** It uses $m_{own}$ vs. $m_{para}$ on the behavioural outcome, per binding level. The gate fails if any of these holds:
+
+1. the signed mean is outside ±5.0 pp;
+2. the attributable `image <-> text` churn rate exceeds 5.0%;
+3. the neither shift is outside ±10 pp.
+
+The limits are fixed. Part 3 stops the attributable-pair churn from hiding a wording effect that moves answers into or out of "neither", which part 2 does not count. Any-change churn (`any_change_rate`, which counts source↔neither changes) and the replay noise are reported beside the gate as diagnostics; they never move a limit. `analyze_v5.py` records the basis as `wording_floor_decision_basis`.
+
+**Why the D5 replay clause was dropped (2026-11-14).** D5 (2026-11-13) let the churn limit rise to `replay_flip_rate + 5.0 pp` where replay noise was measured. On dev, that clause changed one outcome only: Qwen2.5-VL-3B non-binding, churn 7.6% against a replay-adjusted limit of 8.2%. Under binding, both models passed the fixed 5.0% limit without it. A clause chosen after the data that rescues exactly one failing cell is a relaxation, not a calibration, so it was removed. The attributable-pair definition of churn (D5) is kept: a source↔neither change is usually a parse or format change, not a source flip. It too was adopted after the any-change version failed on dev (any-change churn 23.1% for 3B and 15.2% for 7B under binding), which is why any-change churn is always reported and part 3 was added.
 
 Why both:
 
@@ -439,9 +514,20 @@ Why both:
 
 The analysis also reports the TOST's power at the observed wording noise, $2\Phi(\varepsilon/\mathrm{SE}-1.645)-1$ with SE from the per-item differences, and flags it when it is below 0.80. That flag is information, not a gate.
 
-The gate is evaluated on the dev pass and again on the confirmatory data. Failing either makes the behavioural equivalence test uninterpretable (§2.2, row 4).
+The gate is evaluated on the dev pass and again on the confirmatory data. Failing either makes the behavioural equivalence test uninterpretable (§2.2, row 4; §2.3, row 4). It never blocks an H₁ reading.
 
 **Expected consequence.** In the v4 dev data, rewording changed 22.7% of answers under 400-token solving (dossier §2.2). If v5's 512-token solving on GSM8K/SVAMP behaves alike, this gate fails there, and H₀ cannot be claimed in that regime: the strongest available reading is "graded equivalence only". The ChartQA answer-only decode is expected to be far more stable. The dev pass measures both.
+
+**Dev pass (spent items, not findings; recomputed 2026-11-14 with the fixed gate).** With the `structured` parser:
+
+| Model, instruction | Signed mean | Attributable churn | Neither shift | Any-change churn (diagnostic) | Replay flips (diagnostic) | Gate |
+|---|---|---|---|---|---|---|
+| Qwen2.5-VL-3B, binding | −4.4 pp | 3.2% | +6.2 pp | 23.1% | 3.2% | pass |
+| Qwen2.5-VL-3B, non-binding | 0.0 pp | 7.6% | +3.7 pp | 28.7% | 3.2% | **fail** |
+| Qwen2.5-VL-7B, binding | −3.0 pp | 0.0% | +3.0 pp | 15.2% | 1.1% | pass |
+| Qwen2.5-VL-7B, non-binding | −5.7 pp | 6.6% | +2.2 pp | 16.1% | 1.1% | **fail** |
+
+Under non-binding both models fail, so on dev data H₀ could not be claimed for the non-binding reading of either model. The 3B binding signed mean sits close to the ±5.0 pp limit.
 
 ---
 
@@ -454,7 +540,7 @@ The gate is evaluated on the dev pass and again on the confirmatory data. Failin
 | Boundary mismatches in margin scoring               | ≤ 1% of rows                                                                                                                                                  |
 | Minimal-edit gate pass rate                         | Reported (including pre-verdict Sentence-1 answer-leakage gate); analysis proceeds if ≥ 60% of competency items pass (`NOT A READING` otherwise)             |
 | ChartQA item count                                  | Exactly 230 rows and 229 analysed items from the pinned release; otherwise the harness stops (§3.2)                                                           |
-| Wording floor (binding, `para` vs. `own`)           | Signed mean within ±5.0 pp **and** attributable `image <-> text` churn benchmarked against both fixed 5.0% and measured replay noise + 5.0% (D5); otherwise equivalence test uninterpretable (§7.6) |
+| Wording floor (`para` vs. `own`, per binding level) | Signed mean within ±5.0 pp, attributable `image <-> text` churn ≤ 5.0%, and neither shift within ±10 pp; fixed limits (revised 2026-11-14); otherwise the equivalence test is uninterpretable (§7.6) |
 | ChartQA answer-only decodes matching *a_I* or *a_T* | Reported from the dev pass (R8.3)                                                                                                                              |
 | Competency yield                                    | Reported per model (R5 thresholds apply)                                                                                                                       |
 | Human coding of verdict labels                      | Two coders, about 200 items, κ reported before `stated_reliable_source` is used in any claim                                                                  |
@@ -494,6 +580,7 @@ teacher-forced after the prefill `{m}\n\n#### `. The behavioural outcome is seco
 uses the regime's native format: step-by-step solving (512 new tokens, strict `####`
 parser) for GSM8K/SVAMP, and an answer-only decode (16 new tokens) for ChartQA-Conflict.
 The 16-token decode is not used for GSM8K/SVAMP. Changes §6 and §7.
+*(Superseded for GSM8K/SVAMP by pre-freeze D1, 2026-11-13: behaviour is primary there and Δℓ secondary. See §2, §2.3 and §11.)*
 
 **R4. Margins.** [Design decision] No paper read for this project uses an equivalence test.
 
@@ -566,6 +653,8 @@ three models alike. See §3.2, §7.2 and §11.)*
 4. `max_pixels` for ChartQA-Conflict is fixed from that pass.
    No number from the dev pass changes R3, R4 or R7.
 
+*(Note, 2026-11-14: D1 changed R3 in response to dev numbers, which the last sentence forbids. It was a deliberate pre-freeze decision by the author, taken because the dev pass showed that R3's primary outcome did not measure the answer in GSM8K/SVAMP. It is recorded in §11 as a departure from R8, not as compliance. R4's bounds are unchanged; §2.3 applies them to the behavioural outcome. Item 4 is still open (§3.4).)*
+
 *Section references in R1–R8 are the audit's and follow the draft's numbering. In this version, Δℓ is defined in §6.1 (R3's "§6.2"), and the mixed models are in §7.4. R4's "dev wording floor … exceeds 5.0 pp" is the two-part gate of §7.6. R5's "199 confirm items" is 229 analysed items minus 30 dev items; the Hub release has 230 rows (§3.2).*
 
 ---
@@ -594,9 +683,24 @@ three models alike. See §3.2, §7.2 and §11.)*
 - §3.4 (2026-11-11): precision and hardware are fixed at `bfloat16` on one GPU class with compute capability ≥ 8 and at least 24 GB. This replaces "FP16 on T4/V100". The harness enforces the dtype.
 - §3.2, ChartQA `conflict_id` 45 is excluded, following the *Which Source Wins?* artifact. The release has 230 rows; 229 are analysed.
 - **2026-11-13 Pre-freeze Decisions (D1–D5) & Forensic Audit Fixes** (resolving `Thesis/docs/Archive/claude_v5_forensic_code_and_construct_audit.md` prior to confirm freeze):
-  - **D1:** Behavioural shift $\Delta P(Y{=}T)$ at $k=1$ is designated primary for GSM8K/SVAMP (Math), with $\Delta\ell$ retained as secondary/diagnostic because Math `####` pre-CoT margins did not track solved answers (`AUC ≈ 0.50` within order). $\Delta\ell$ remains primary for ChartQA.
+  - **D1:** Behavioural shift $\Delta P(Y{=}T)$ at $k=1$ is designated primary for GSM8K/SVAMP (Math), with $\Delta\ell$ retained as secondary/diagnostic because Math `####` margins, scored before any working, tracked the solved answers poorly (sign agreement 51.6% / 56.6% for 3B / 7B, below the majority-class baseline; within-order AUC 0.53–0.56 for 3B and 0.68–0.76 for 7B). $\Delta\ell$ remains primary for ChartQA.
   - **D2:** Report the full $m_\varnothing$ decomposition (`none - own`, `flip - none`, `para_flip - none`) and elevate the clean matched-template pair (`para_flip - para`) as **co-primary** alongside `flip - own`.
   - **D3:** Adopt the `structured` Math parser (`####`, else explicit final-answer statement / `\boxed{X}`) as headline parser for competency and behavioural scoring (retaining `strict` and `lenient` side by side), and designate `Qwen/Qwen2-VL-2B-Instruct` as **diagnostic-only** rather than confirmatory.
   - **D4:** Designate ChartQA-Conflict as **exploratory/secondary** due to low competency/edit-gate survival and Sentence-1 answer leakage.
   - **D5:** Measure wording churn as attributable `image <-> text` flips (`change_rate`, separating `neither` transitions) benchmarked against measured `donor` vs. non-binding `own` replay noise (`replay_flip_rate + 5.0%`) alongside the fixed 5.0% cap.
-  - **Pipeline & Doc Errata:** Fixed Holm interval `p`-value doubling (`min(1, 2*min(p_dec, p_eq))` over `m = 3`), regime-aware `stated_reliable_source` + comparative negation handling (`score_v5`), sentence splitter (`####`, `U.S.`/`U.K.`, up to 5 sentences in `score_v4`), pre-verdict Sentence-1 leakage gate (`transplant_v5`), exact `verdict_nll` reliability-sentence span scoring (`harness_v5`), hardware wording (`≥ 22 GiB` / L4 23,034 MiB, `~15.45 GiB` 7B weights), `max_pixels = 200704` fixed for ChartQA, and `Docs/Paper/` source paths. Added `Experiment/sample_v5_for_coding.py` for v5 human coding.
+  - **Pipeline & Doc Errata:** Fixed Holm interval `p`-value doubling (`min(1, 2*min(p_dec, p_eq))` over `m = 3`), regime-aware `stated_reliable_source` + comparative negation handling (`score_v5`), sentence splitter (`####`, `U.S.`/`U.K.`, up to 5 sentences in `score_v4`), pre-verdict Sentence-1 leakage gate (`transplant_v5`), exact `verdict_nll` reliability-sentence span scoring (`harness_v5`), hardware wording (`≥ 22 GiB` / L4 23,034 MiB, `~15.45 GiB` 7B weights), `max_pixels = 200704` kept provisionally for ChartQA (the R8.4 comparison run was not done; corrected on 2026-11-14 from "fixed"), and `Docs/Paper/` source paths. Added `Experiment/sample_v5_for_coding.py` for v5 human coding.
+- **2026-11-14, consistency fixes after D1–D5.** A review found that the D1–D5 edits left the document inconsistent. Changes:
+  - §2.3 added: the decision rule for the GSM8K/SVAMP behavioural primary outcome (behavioural ceiling, $\rho_{beh}$, a four-test Holm family, the co-primary rule). Before this, §2 made behaviour primary in Math but the only decision rule used Δℓ, and the analysis printed a Δℓ reading as the combined one. R4's bounds are reused; the behavioural ceiling, the family and the co-primary rule are new design choices made after seeing dev data, which is why they are recorded here. Implemented in `analyze_v5.py` with unit tests.
+  - §1: behavioural estimand, and the claim boundary that follows from D3 and D4 (source following in Math, not reliability judgement).
+  - §2 and this log: the dev evidence for D1 corrected. 7B's within-order AUC is 0.68–0.76, not ≈ 0.50.
+  - §2.3 and §6.2: the Math primary outcome rests on template k = 1 only.
+  - §7.5: the behavioural `none` decomposition is descriptive only (the `none` arm regenerates a verdict).
+  - §7.6: where replay noise is measured, the replay-benchmarked gate decides; dev results recorded.
+  - §3.4, status block, R8: ChartQA `max_pixels` marked open instead of fixed.
+  - §6.2, §6.3: references to functions and fields that do not exist replaced with the real names.
+  - R3, R8: the departure from R8's "no dev number changes R3" recorded.
+- **2026-11-14, gate revisions after an audit of the post-v5 plan** (`Thesis/docs/Archive/claude_v4_vs_v5_plan_audit.md`). All three tighten or clarify the rules; none loosens one. Changes:
+  - §7.6 and §8: the wording-floor limit is fixed at 5.0%. D5's replay clause (`replay_flip_rate + 5.0 pp`) is removed: on dev it changed only one outcome (3B non-binding), which now fails. A third part, the neither shift within ±10 pp, is added, and any-change churn is always reported.
+  - §2.3: the Math decision rule reads Δ itself against ε = 5.0 pp. The explicit-arm quantity is renamed from ceiling ($\mathrm{Ceil}_{beh}$) to benchmark ($B_{beh}$) because the dev effect exceeded it; $\rho_{beh}$ is descriptive only. Image- and text-direction benchmarks and directional effects are reported.
+  - §2.2 and §2.3: inconclusive is an allowed outcome, labelled with the TOST power where that is below 0.80. Row 6 of §2.2 ("mixed") is now an inconclusive reading.
+  - Dev readings recomputed: Math binding and non-binding readings are unchanged in kind (decision-relevant for 3B and 7B; below R5's minimum, so `NOT A READING`); the non-binding wording floor now fails for both models.

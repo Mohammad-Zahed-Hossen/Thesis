@@ -10,6 +10,9 @@ For each model and regime it reports:
   the behavioural TOST at ε = 5.0 pp, the wording floor, the explicit ceiling per
   direction, the matched para/para_flip pair, order-specific effects, saturation
   tertiles, gate counts and timings
+  In Math the primary rule is behavioural (prereg §2.3): the behavioural Δ itself is read
+  against ε = 5 pp (decision_test), with the explicit-instruction benchmark B_beh as a
+  manipulation check and ρ_beh descriptive only.
 It also writes a long-format CSV and an R script for the lme4 fits (§7.4), which are
 model-based estimates, not confirmatory tests.
 
@@ -47,6 +50,7 @@ import score_v5 as sc
 
 EPSILON = 0.05  # behavioural TOST margin (R4)
 MAX_CHURN = EPSILON  # wording-floor gate on the share of answers a paraphrase changes (prereg §7.6)
+MAX_NEITHER_SHIFT = 0.10  # wording-floor guard: |P(neither | para) − P(neither | own)| (prereg §7.6, revised 2026-11-14)
 ALPHA = 0.05
 POWER_TARGET = 0.80
 RHO_BOUND = 0.25  # graded margin (R4)
@@ -221,22 +225,28 @@ def sample_sd(xs: Sequence[float]) -> float:
 
 
 def wording_floor(
-    diffs: Sequence[float], churn: Optional[float], replay_flip_rate: Optional[float] = None
+    diffs: Sequence[float],
+    churn: Optional[float],
+    replay_flip_rate: Optional[float] = None,
+    neither_shift: Optional[float] = None,
+    any_change: Optional[float] = None,
 ) -> Dict[str, Any]:
-    """Both halves of the wording-floor gate for m_para vs. m_own (prereg §7.6 & pre-freeze D5).
+    """The wording-floor gate for m_para vs. m_own (prereg §7.6, revised 2026-11-14).
 
-    signed_mean   mean per-item difference; opposite changes cancel in it
-    churn_rate    share of attributable (item, order) cells whose answer source flipped image<->text
-    D5 benchmarks churn both against the fixed 0.05 cap and against measured donor->own replay
-    noise + 0.05.
+    The gate fails if any of these holds:
+      |signed mean| > ε          mean per-item difference; opposite changes cancel in it
+      churn_rate > ε             share of attributable (item, order) cells that flip image<->text
+      |neither_shift| > 0.10     change in the share of non-attributable answers, para − own
+    The limit is fixed. Replay noise and any-change churn are reported as diagnostics
+    only: they never move the limit (the D5 replay clause was dropped on 2026-11-14).
     """
     fm = mean(diffs)
     sd = sample_sd(diffs)
     power = tost_power(sd, len(diffs))
     signed_bad = abs(fm) > EPSILON
     churn_bad = churn is not None and churn > MAX_CHURN
+    neither_bad = neither_shift is not None and abs(neither_shift) > MAX_NEITHER_SHIFT
     replay_cap = (replay_flip_rate + MAX_CHURN) if replay_flip_rate is not None else None
-    churn_bad_replay = churn is not None and replay_cap is not None and churn > replay_cap
     return {
         "n": len(diffs),
         "signed_mean": fm,
@@ -246,14 +256,16 @@ def wording_floor(
         "churn_rate": churn,
         "max_churn": MAX_CHURN,
         "churn_exceeds_max": churn_bad,
-        "replay_flip_rate": replay_flip_rate,
-        "replay_adjusted_max_churn": replay_cap,
-        "churn_exceeds_replay_adjusted_max": churn_bad_replay,
-        "floor_ok_replay_adjusted": not (signed_bad or churn_bad_replay),
+        "neither_shift": neither_shift,
+        "max_neither_shift": MAX_NEITHER_SHIFT,
+        "neither_shift_exceeds_max": neither_bad,
+        "any_change_rate_diagnostic": any_change,
+        "replay_flip_rate_diagnostic": replay_flip_rate,
+        "replay_adjusted_max_churn": replay_cap,  # diagnostic only; not a limit
         "sd_item_difference": sd,
         "tost_power_at_this_noise": power,
         "power_below_target": power < POWER_TARGET,
-        "floor_ok": not (signed_bad or churn_bad),
+        "floor_ok": not (signed_bad or churn_bad or neither_bad),
     }
 
 
@@ -268,7 +280,9 @@ def combined_reading(rho: str, tost: str, floor_ok: bool, t1_significant: bool =
     if rho == "equivalent to no effect":
         if not floor_ok:
             return "graded equivalence only; behavioural test uninterpretable (wording floor > ε)"
-        return "H0: saying is not choosing" if tost == "equivalent" else "mixed"
+        if tost == "equivalent":
+            return "H0: saying is not choosing"
+        return "inconclusive: graded equivalence, but the behavioural TOST does not show equivalence"
     return "inconclusive"
 
 
@@ -391,7 +405,7 @@ def reversed_target(row: Dict[str, Any]) -> Optional[str]:
     return "text" if own == "image" else "image"
 
 
-def beh_diff(beh, ids, fam: str, a: str, b: str) -> Dict[str, float]:
+def beh_diff(beh, ids, fam: str, a: str, b: str, target_only: Optional[str] = None) -> Dict[str, float]:
     """Per item, mean over orders of [answer follows T | a] − [answer follows T | b].
 
     T is the source that verdict a names (or the reversed source when a == 'none').
@@ -407,7 +421,7 @@ def beh_diff(beh, ids, fam: str, a: str, b: str) -> Dict[str, float]:
             if not (x and y):
                 continue
             target = reversed_target(y["row"]) if a == "none" else (side(x["row"].get("named_source")) or reversed_target(x["row"]))
-            if target is not None:
+            if target is not None and (target_only is None or target == target_only):
                 diffs.append(float(x["src"] == target) - float(y["src"] == target))
         if diffs:
             out[i] = mean(diffs)
@@ -442,7 +456,6 @@ def donor_replay_noise(
         "attributable_pairs": attributable,
         "replay_flip_rate": flip_rate,
         "replay_any_change_rate": any_changes / total,
-        "suggested_churn_cap": (flip_rate + EPSILON) if flip_rate is not None else None,
     }
 
 
@@ -469,6 +482,19 @@ def neither_transition_rate(beh, ids, fam: str, a: str, b: str) -> Optional[floa
                 if x["src"] not in ("image", "text") or y["src"] not in ("image", "text"):
                     non_attr += 1
     return non_attr / n if n else None
+
+
+def neither_shift(beh, ids, fam: str, a: str, b: str) -> Optional[float]:
+    """P(non-attributable | a) − P(non-attributable | b) over (item, order) pairs present in both arms."""
+    n = 0
+    total = 0.0
+    for i in ids:
+        for o in ("image_first", "text_first"):
+            x, y = beh.get((i, fam, a, o)), beh.get((i, fam, b, o))
+            if x and y:
+                n += 1
+                total += float(x["src"] not in ("image", "text")) - float(y["src"] not in ("image", "text"))
+    return total / n if n else None
 
 
 def any_change_rate(beh, ids, fam: str, a: str, b: str) -> Optional[float]:
@@ -744,6 +770,146 @@ def _beh_summary(
     return entry
 
 
+def behaviour_benchmark(
+    beh: Dict[Tuple, Dict[str, Any]], ids: Sequence[str], direction: Optional[str] = None
+) -> Dict[str, float]:
+    """Per item, the behavioural explicit-instruction benchmark B_beh (prereg §2.3), k = 1, m∅ prefill.
+
+    image direction: P(Y=image | explicit_image) − P(Y=image | explicit_text)
+    text direction:  P(Y=text | explicit_text) − P(Y=text | explicit_image)
+    B_beh (direction=None) is their average, each averaged over the two orders. It is in the
+    units of the behavioural Δ: how far naming a source in the instruction raises the share
+    of answers that follow it. An answer matching neither source follows neither.
+
+    It is NOT a ceiling. The m∅ prefill lets the model write its own verdict, which can
+    contradict the explicit instruction, and on dev the verdict effect exceeded B_beh. It is
+    a benchmark for scale and a manipulation check (its 95% CI must exclude 0); the decision
+    rule reads Δ itself (decision_test).
+    """
+    out = {}
+    for i in ids:
+        vals = []
+        for o in ("image_first", "text_first"):
+            ei, et = beh.get((i, "explicit_image", "none", o)), beh.get((i, "explicit_text", "none", o))
+            if ei and et:
+                img = float(ei["src"] == "image") - float(et["src"] == "image")
+                txt = float(et["src"] == "text") - float(ei["src"] == "text")
+                vals.append({"image": img, "text": txt}.get(direction, (img + txt) / 2))
+        if vals:
+            out[i] = mean(vals)
+    return out
+
+
+behaviour_ceiling = behaviour_benchmark  # earlier name; the quantity is a benchmark, not a ceiling
+
+
+def delta_reading(lo90: float, hi90: float, eps: float = EPSILON) -> str:
+    """§2.3 reading of the behavioural Δ itself against the fixed margin ε."""
+    if lo90 > eps:
+        return "decision-relevant"
+    if -eps < lo90 and hi90 < eps:
+        return "equivalent to no effect"
+    return "inconclusive"
+
+
+def decision_test(effect: Dict[str, float], benchmark: Dict[str, float], reps: int, seed: int) -> Dict[str, Any]:
+    """Math decision test on the behavioural Δ (prereg §2.3, revised 2026-11-14).
+
+    decision-relevant        90% CI of Δ lies above +ε (one-sided α = 0.05 against Δ ≤ ε)
+    equivalent to no effect  90% CI inside (−ε, +ε)  (TOST at α = 0.05)
+    inconclusive             otherwise; with TOST power < 0.80 it is labelled as such and is
+                             never read as evidence for either hypothesis
+    undetermined             the benchmark B_beh's 95% CI includes 0 (explicit control failed)
+    p_entered = min(1, 2·min(p_dec, p_eq)) goes into Holm, as for T2/T3 on Δℓ.
+    ρ_beh = Δ / B_beh is reported as a descriptive ratio only; it can exceed 1.
+    """
+    out: Dict[str, Any] = {"n": len(effect), "epsilon": EPSILON}
+    if len(effect) < 2:
+        out["reading"] = "undetermined: fewer than two items"
+        return out
+    xs = [effect[i] for i in sorted(effect)]
+    idx = resample_indices(len(xs), reps, seed)
+    lo95, hi95, boots = boot_ci(xs, idx, 0.95)
+    lo90, hi90, _ = boot_ci(xs, idx, 0.90)
+    power = tost_power(sample_sd(xs), len(xs))
+    out.update(effect=mean(xs), effect_ci95=[lo95, hi95], effect_ci90=[lo90, hi90], tost_power_at_this_noise=power)
+    p_dec = (1 + sum(x <= EPSILON for x in boots)) / (len(boots) + 1)
+    p_eq = (1 + max(sum(x >= EPSILON for x in boots), sum(x <= -EPSILON for x in boots))) / (len(boots) + 1)
+    out.update(p_decision_relevant=p_dec, p_equivalent=p_eq, p_entered=min(1.0, 2 * min(p_dec, p_eq)))
+    reading = delta_reading(lo90, hi90)
+    bids, ve, vb = paired(effect, benchmark)
+    if len(bids) >= 2:
+        bidx = resample_indices(len(bids), reps, seed)
+        b_lo, b_hi, _ = boot_ci(vb, bidx, 0.95)
+        out.update(benchmark=mean(vb), benchmark_ci95=[b_lo, b_hi], benchmark_n=len(bids))
+        if mean(vb) != 0:
+            out["rho_beh_descriptive"] = mean(ve) / mean(vb)
+        if b_lo <= 0 <= b_hi:
+            reading = "undetermined: explicit-instruction control too weak"
+    else:
+        reading = "undetermined: no explicit-instruction benchmark"
+    if reading == "inconclusive" and power < POWER_TARGET:
+        reading = f"inconclusive (TOST power {power:.2f} < {POWER_TARGET:.2f}; not evidence for either hypothesis)"
+    out["reading"] = reading
+    return out
+
+
+def math_reading(test_reading: str, floor_ok: bool, t1_significant: bool = False) -> str:
+    """§2.3 Math reading from one decision_test, the wording-floor gate and T1_beh."""
+    if test_reading.startswith("undetermined"):
+        return "undetermined"
+    if test_reading == "decision-relevant":
+        if t1_significant:
+            return "H1: the verdict decides, and binding strengthens it"
+        return "H1: the verdict decides; no evidence that binding strengthens it"
+    if test_reading == "equivalent to no effect":
+        if not floor_ok:
+            return "equivalence only; H0 not claimable (wording floor failed)"
+        return "H0: saying is not choosing"
+    return test_reading
+
+
+def ratio_test(num: Dict[str, float], den: Dict[str, float], reps: int, seed: int) -> Dict[str, Any]:
+    """ρ = mean(num)/mean(den) read like R4. Kept as a utility; no longer the Math decision rule."""
+    ids, vn, vd = paired(num, den)
+    out: Dict[str, Any] = {"n": len(ids)}
+    if len(ids) < 2:
+        out["reading"] = "undetermined: fewer than two items"
+        return out
+    idx = resample_indices(len(ids), reps, seed)
+    c_lo, c_hi, _ = boot_ci(vd, idx, 0.95)
+    e_lo, e_hi, _ = boot_ci(vn, idx, 0.95)
+    out.update(effect=mean(vn), effect_ci95=[e_lo, e_hi], ceiling=mean(vd), ceiling_ci95=[c_lo, c_hi])
+    if c_lo <= 0 <= c_hi or mean(vd) == 0:
+        out["reading"] = rho_reading((c_lo, c_hi), None)
+        return out
+    boots = sorted(x for x in boot_ratio(vn, vd, idx) if x is not None)
+    rho_ci = (percentile(boots, 0.05), percentile(boots, 0.95))
+    p_dec = (1 + sum(x <= RHO_BOUND for x in boots)) / (len(boots) + 1)
+    p_eq = (1 + max(sum(x >= RHO_BOUND for x in boots), sum(x <= -RHO_BOUND for x in boots))) / (len(boots) + 1)
+    out.update(
+        rho=mean(vn) / mean(vd),
+        rho_ci90=list(rho_ci),
+        reading=rho_reading((c_lo, c_hi), rho_ci),
+        p_decision_relevant=p_dec,
+        p_equivalent=p_eq,
+        p_entered=min(1.0, 2 * min(p_dec, p_eq)),
+    )
+    return out
+
+
+def coprimary_reading(flip_reading: str, pair_reading: str) -> str:
+    """Math reading from the two co-primary contrasts (pre-freeze D2, prereg §2.3).
+
+    A claim is made only when both contrasts give the same kind of reading. If they
+    differ, both are reported and no combined claim is made.
+    """
+    kind = lambda r: "H1" if r.startswith("H1") else "H0" if r.startswith("H0") else r.split(" (")[0].split(":")[0]
+    if kind(flip_reading) == kind(pair_reading):
+        return flip_reading if kind(flip_reading) != "H1" else f"{flip_reading} (flip−own and para_flip−para agree)"
+    return f"split, no combined claim: flip−own reads '{flip_reading}'; para_flip−para reads '{pair_reading}'"
+
+
 def analyze_behaviour_primary(
     beh: Dict[Tuple, Dict[str, Any]],
     common: Sequence[str],
@@ -751,10 +917,19 @@ def analyze_behaviour_primary(
     draws: int,
     seed: int,
     regime: str,
+    floor_ok: Optional[Dict[str, bool]] = None,
 ) -> Optional[Dict[str, Any]]:
-    """Pre-freeze D1/D2 behavioural primary & co-primary matched-pair contrasts at k = 1."""
+    """Behavioural contrasts at k = 1: primary in Math (D1), co-primary matched pair (D2).
+
+    Decision rule (prereg §2.3, revised 2026-11-14): Δ itself against ε = 5 pp
+    (decision_test), the wording-floor gate, and T1_beh. B_beh is a benchmark and
+    manipulation check; ρ_beh is descriptive.
+    Holm family (m = 4): T1_beh, T2_beh (flip, binding), T2_beh_pair (para_flip−para,
+    binding), T3_beh (flip, non-binding).
+    """
     if not beh or len(common) < 2:
         return None
+    floor_ok = floor_ok or {"binding": True, "nonbinding": True}
     idx = resample_indices(len(common), reps, seed)
     out: Dict[str, Any] = {
         "is_primary_for_regime": regime == "math",
@@ -793,22 +968,51 @@ def analyze_behaviour_primary(
             sf = sign_flip_test(did_vals, draws, seed)
             out[did_key] = {"n": len(did_vals), "mean": sf["mean"], "ci95": [lo95, hi95], "p": sf["p"], "significant": sf["p"] <= ALPHA}
 
-    pvals = {}
+    # Decision rule (prereg §2.3): Δ itself against ε; B_beh is a benchmark, not a ceiling.
+    bench = behaviour_benchmark(beh, common)
+    out["benchmark"] = summarize_ci(list(bench.values()), reps, seed, 0.95) if len(bench) > 1 else {"n": len(bench)}
+    for direction in ("image", "text"):
+        bd = behaviour_benchmark(beh, common, direction)
+        out[f"benchmark_{direction}"] = summarize_ci(list(bd.values()), reps, seed, 0.95) if len(bd) > 1 else {"n": len(bd)}
+    out["ceiling"] = out["benchmark"]  # earlier key name
+    tests = {
+        "T2_beh": decision_test(by_fam["binding"].get("flip_minus_own", {}), bench, reps, seed),
+        "T2_beh_pair": decision_test(by_fam["binding"].get("matched_pair_para_flip_minus_para", {}), bench, reps, seed),
+        "T3_beh": decision_test(by_fam["nonbinding"].get("flip_minus_own", {}), bench, reps, seed),
+    }
+    out["decision_tests"] = tests
+    # Descriptive, per direction of the reversed verdict (Grounding on Request reports image
+    # requests weaker than text requests; an average over directions would hide that).
+    directional: Dict[str, Any] = {}
+    for fam in ("binding", "nonbinding"):
+        for direction in ("image", "text"):
+            d = beh_diff(beh, common, fam, "flip", "own", target_only=direction)
+            entry: Dict[str, Any] = {"n": len(d)}
+            if len(d) >= 2:
+                entry.update(summarize_ci(list(d.values()), reps, seed, 0.95))
+            bmean = out[f"benchmark_{direction}"].get("mean")
+            entry["benchmark"] = bmean
+            if entry.get("mean") is not None and bmean:
+                entry["rho_beh_descriptive"] = entry["mean"] / bmean
+            directional[f"{fam}_toward_{direction}"] = entry
+    out["directional_flip_minus_own"] = directional
+    pvals = {k: v["p_entered"] for k, v in tests.items() if "p_entered" in v}
     if "T1_beh_did" in out:
         pvals["T1_beh"] = out["T1_beh_did"]["p"]
-    if out.get("binding", {}).get("flip_minus_own"):
-        pvals["bind_flip_minus_own"] = out["binding"]["flip_minus_own"]["p"]
-    if out.get("nonbinding", {}).get("flip_minus_own"):
-        pvals["nonbind_flip_minus_own"] = out["nonbinding"]["flip_minus_own"]["p"]
     if pvals:
         adj = holm(pvals)
         out["holm_adjusted"] = adj
-        if "T1_beh_did" in out and "T1_beh" in adj:
+        if "T1_beh" in adj:
             out["T1_beh_did"]["holm_p"] = adj["T1_beh"]
             out["T1_beh_did"]["significant_after_holm"] = adj["T1_beh"] <= ALPHA
-        for fam, pk in (("binding", "bind_flip_minus_own"), ("nonbinding", "nonbind_flip_minus_own")):
-            if pk in adj and out.get(fam, {}).get("flip_minus_own"):
-                out[fam]["flip_minus_own"]["holm_p"] = adj[pk]
+        for k, v in tests.items():
+            if k in adj:
+                v["holm_p"] = adj[k]
+    t1_sig = bool(out.get("T1_beh_did", {}).get("significant"))
+    out["reading_binding_flip"] = math_reading(tests["T2_beh"]["reading"], floor_ok["binding"], t1_sig)
+    out["reading_binding_pair"] = math_reading(tests["T2_beh_pair"]["reading"], floor_ok["binding"], t1_sig)
+    out["reading_binding"] = coprimary_reading(out["reading_binding_flip"], out["reading_binding_pair"])
+    out["reading_nonbinding"] = math_reading(tests["T3_beh"]["reading"], floor_ok["nonbinding"], False)
     return out
 
 
@@ -913,22 +1117,28 @@ def analyze_group(
         entry["change_rate_own_vs_flip"] = change_rate(beh, ids, fam, "own", "flip")
         entry["neither_transition_rate_own_vs_para"] = neither_transition_rate(beh, ids, fam, "own", "para")
         entry["neither_transition_rate_own_vs_flip"] = neither_transition_rate(beh, ids, fam, "own", "flip")
+        entry["neither_shift_para_minus_own"] = neither_shift(beh, ids, fam, "para", "own")
+        entry["any_change_rate_own_vs_para"] = any_change_rate(beh, ids, fam, "own", "para")
         if len(floor) > 1:
             entry["wording_floor_para_minus_own"] = wording_floor(
-                list(floor.values()), entry["change_rate_own_vs_para"], replay_flip_rate=replay_flip_rate
+                list(floor.values()),
+                entry["change_rate_own_vs_para"],
+                replay_flip_rate=replay_flip_rate,
+                neither_shift=entry["neither_shift_para_minus_own"],
+                any_change=entry["any_change_rate_own_vs_para"],
             )
             if not entry["wording_floor_para_minus_own"]["floor_ok"]:
                 floor_ok[fam] = False
         res[f"behaviour_{fam}"] = entry
-    beh_primary = analyze_behaviour_primary(beh, common, reps, draws, seed, regime)
+    # The wording-floor limit is fixed (revision 2026-11-14): replay noise is a diagnostic only.
+    res["wording_floor_decision_basis"] = "fixed (signed mean, image<->text churn, neither shift)"
+    beh_primary = analyze_behaviour_primary(beh, common, reps, draws, seed, regime, floor_ok=floor_ok)
     if beh_primary is not None:
         res["behaviour_primary"] = beh_primary
     tost = res.get("behaviour_binding", {}).get("delta_flip_minus_own", {}).get("reading", "not available")
     tost_nb = res.get("behaviour_nonbinding", {}).get("delta_flip_minus_own", {}).get("reading", "not available")
     res["wording_floor_ok_binding"] = floor_ok["binding"]
     res["wording_floor_ok_nonbinding"] = floor_ok["nonbinding"]
-    res["wording_floor_ok_replay_adjusted_binding"] = res.get("behaviour_binding", {}).get("wording_floor_para_minus_own", {}).get("floor_ok_replay_adjusted")
-    res["wording_floor_ok_replay_adjusted_nonbinding"] = res.get("behaviour_nonbinding", {}).get("wording_floor_para_minus_own", {}).get("floor_ok_replay_adjusted")
     # Readings use the unadjusted criteria, with Holm-adjusted values beside them (prereg §7.2).
     res["T1_did"]["holm_p"] = res["holm_adjusted"]["T1"]
     res["T1_did"]["significant"] = res["T1_did"]["p"] <= ALPHA
@@ -943,6 +1153,18 @@ def analyze_group(
     res["edit_gate_ok"] = edit_gate_ok
     for key in ("reading_binding", "reading_nonbinding"):
         res[f"{key}_reported"], res["reading_caveats"] = qualify_reading(res[key], len(common), MIN_ITEMS[regime], edit_gate_ok)
+    # The primary reading: behavioural in Math (D1, prereg §2.3), Δℓ in ChartQA (§2.2).
+    # reading_binding/_nonbinding above stay the Δℓ table, which is secondary in Math.
+    if res["primary_outcome"] == "behaviour" and beh_primary is not None:
+        prim_b, prim_nb = beh_primary["reading_binding"], beh_primary["reading_nonbinding"]
+    else:
+        prim_b, prim_nb = res["reading_binding"], res["reading_nonbinding"]
+    res["primary_reading_binding"], _ = qualify_reading(prim_b, len(common), MIN_ITEMS[regime], edit_gate_ok)
+    res["primary_reading_nonbinding"], _ = qualify_reading(prim_nb, len(common), MIN_ITEMS[regime], edit_gate_ok)
+    if res["confirmatory_role"] != "confirmatory":
+        for key in ("primary_reading_binding", "primary_reading_nonbinding"):
+            label = {"diagnostic_only": "DIAGNOSTIC MODEL", "exploratory": "EXPLORATORY REGIME"}.get(res["confirmatory_role"], res["confirmatory_role"])
+            res[key] = f"{label}, not a confirmatory reading: {res[key]}"
     res["behaviour_by_parser"] = behaviour_by_parser(rows, ids, reps, seed)
     res["validity_dl_vs_behaviour"] = {
         p: validity_diagnostics(rows, p) for p in (sc.MATH_PARSERS if regime == "math" else ("strict",))
@@ -1249,6 +1471,25 @@ def render(
                 lines += [
                     f"  - Co-primary T1_beh matched-pair (para_flip−para DiD) = {fmt(t1mp['mean'])} (95% CI {fmt(t1mp['ci95'])}), p = {fmt(t1mp['p'], 4)}"
                 ]
+            ce = bp_prim.get("benchmark", {})
+            if ce.get("mean") is not None:
+                bi, bt = bp_prim.get("benchmark_image", {}), bp_prim.get("benchmark_text", {})
+                lines += [
+                    f"  - Explicit-instruction benchmark B_beh = {fmt(ce['mean'])} (95% CI {fmt(ce.get('ci95'))}); "
+                    f"image direction {fmt(bi.get('mean'))} (95% CI {fmt(bi.get('ci95'))}), "
+                    f"text direction {fmt(bt.get('mean'))} (95% CI {fmt(bt.get('ci95'))}). A benchmark, not a ceiling."
+                ]
+            for tname, te in bp_prim.get("decision_tests", {}).items():
+                lines += [
+                    f"  - **{tname}**: Δ = {fmt(te.get('effect'))} (90% CI {fmt(te.get('effect_ci90'))}) vs ε = {EPSILON}; "
+                    f"reading: **{te['reading']}**; Holm p = {fmt(te.get('holm_p'), 4)}; "
+                    f"TOST power {fmt(te.get('tost_power_at_this_noise'), 2)}; ρ_beh (descriptive) = {fmt(te.get('rho_beh_descriptive'))}"
+                ]
+            for dkey, de in bp_prim.get("directional_flip_minus_own", {}).items():
+                lines += [
+                    f"  - Directional (descriptive) {dkey}: Δ = {fmt(de.get('mean'))} (95% CI {fmt(de.get('ci95'))}, n = {de.get('n')}); "
+                    f"benchmark {fmt(de.get('benchmark'))}; ρ_beh {fmt(de.get('rho_beh_descriptive'))}"
+                ]
             for fam in ("binding", "nonbinding"):
                 fe = bp_prim.get(fam, {})
                 fo = fe.get("flip_minus_own")
@@ -1265,12 +1506,20 @@ def render(
                     parts.append(f"decomp [none−own={fmt(no['mean'])}, flip−none={fmt(fn['mean'])}, para_flip−none={fmt(pn['mean'])}]")
                 if parts:
                     lines += [f"  - {fam}: {'; '.join(parts)}"]
+        if r.get("primary_reading_binding"):
+            lines += [
+                f"- **PRIMARY READING under binding: {r['primary_reading_binding']}**",
+                f"- **PRIMARY READING under non-binding: {r['primary_reading_nonbinding']}**",
+                f"- Wording-floor gate deciding the readings: {r.get('wording_floor_decision_basis')} (prereg §7.6)",
+            ]
+            if r.get("primary_outcome") == "behaviour":
+                lines += ["- The Δℓ lines below are secondary/diagnostic in this regime (D1)."]
         rn = r.get("replay_noise")
         if rn:
             lines += [
                 f"- Replay noise (donor vs nonbinding own): attributable flips = {fmt(rn.get('replay_flip_rate'))} "
                 f"(n = {rn.get('attributable_pairs')}); any-change = {fmt(rn.get('replay_any_change_rate'))}; "
-                f"suggested churn cap (replay + {EPSILON}) = {fmt(rn.get('suggested_churn_cap'))}"
+                "(diagnostic only; it does not move the wording-floor limit)"
             ]
         lines += [f"- Ceil_ℓ: {fmt(r['ceil']['mean'])}, 95% CI {fmt(r['ceil']['ci95'])}"]
         for wd in ("image", "text"):
@@ -1297,20 +1546,17 @@ def render(
                 f"change rate own vs flip {fmt(b.get('change_rate_own_vs_flip'))}"
             ]
             if fl:
-                replay_info = (
-                    f"; replay-adjusted limit {fmt(fl.get('replay_adjusted_max_churn'))} "
-                    f"({'pass' if fl.get('floor_ok_replay_adjusted') else 'FAIL'})"
-                    if fl.get("replay_adjusted_max_churn") is not None
-                    else ""
-                )
                 lines += [
                     f"  - Wording floor (para vs own): signed mean {fmt(fl['signed_mean'])} (limit ±{EPSILON}), "
-                    f"churn rate {fmt(fl['churn_rate'])} (fixed limit {MAX_CHURN}), gate: **{'pass' if fl['floor_ok'] else 'FAIL'}**{replay_info}; "
+                    f"image<->text churn {fmt(fl['churn_rate'])} (limit {MAX_CHURN}), "
+                    f"neither shift {fmt(fl.get('neither_shift'))} (limit ±{MAX_NEITHER_SHIFT}), "
+                    f"gate: **{'pass' if fl['floor_ok'] else 'FAIL'}**; diagnostics: any-change churn "
+                    f"{fmt(fl.get('any_change_rate_diagnostic'))}, replay flips {fmt(fl.get('replay_flip_rate_diagnostic'))}; "
                     f"TOST power at this noise {fmt(fl['tost_power_at_this_noise'], 2)}"
                 ]
         lines += [
-            f"- **Combined reading under binding: {r.get('reading_binding_reported', r['reading_binding'])}**",
-            f"- **Combined reading under non-binding: {r.get('reading_nonbinding_reported', r['reading_nonbinding'])}**",
+            f"- Δℓ decision table (§2.2), binding: {r.get('reading_binding_reported', r['reading_binding'])}",
+            f"- Δℓ decision table (§2.2), non-binding: {r.get('reading_nonbinding_reported', r['reading_nonbinding'])}",
             "",
         ]
         bp = r.get("behaviour_by_parser")

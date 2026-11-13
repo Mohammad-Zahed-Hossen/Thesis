@@ -2,10 +2,10 @@
 
 Start here. This folder holds all experiment code and data for the thesis. **It is ground truth** (AGENTS.md §2): code + raw rows outrank every `.md` report, including this one.
 
-**Last updated:** 2026-11-13
-**Stage:** The v5 **dev pass has run** on an L4 in `bfloat16` for all three models (29,880 rows in [results_v5/](results_v5/)). It has been audited twice ([../Thesis/docs/Archive/](../Thesis/docs/Archive/)). `analyze_v5.py` has **not** been run on these rows, and there is no `results_v5/analysis_dev/` yet. The pre-registration is **not frozen**. **No confirmatory data exists.**
+**Last updated:** 2026-11-14
+**Stage:** The v5 **dev pass has run** on an L4 in `bfloat16` for all three models (29,880 rows in [results_v5/](results_v5/)). It has been audited ([../Thesis/docs/Archive/](../Thesis/docs/Archive/)), and `analyze_v5.py` has been run on it ([results_v5/analysis_dev/](results_v5/analysis_dev/)). The pre-freeze decisions D1–D5 are made and written into the pre-registration: behaviour is the primary outcome in Math, ChartQA is exploratory, Qwen2-VL-2B is diagnostic only. On 2026-11-14 three gates were tightened after an audit of the post-v5 plan ([../Thesis/docs/Archive/claude_v4_vs_v5_plan_audit.md](../Thesis/docs/Archive/claude_v4_vs_v5_plan_audit.md)): a fixed wording-floor limit, a Math decision rule on Δ itself, and an explicit inconclusive reading. The pre-registration is **not frozen**. **No confirmatory data exists.**
 **Design spec:** [../Docs/PREREGISTRATION_VERDICT_TRANSPLANT.md](../Docs/PREREGISTRATION_VERDICT_TRANSPLANT.md) (draft; freeze conditions in §10, R8).
-**Next action:** Settle the pre-freeze decisions in [the deep audit §10](../Thesis/docs/Archive/claude_v5_independent_deep_audit.md). Then run `analyze_v5.py` on `results_v5/` ([RUNBOOK_v5.md](RUNBOOK_v5.md), "analysis" step) so a stored analysis output exists, and log any deviations before freezing.
+**Next action:** Finish the open pre-freeze items listed in the pre-registration (§3.4 and the R8 note): human coding of verdict labels ([coding_v5/](coding_v5/)), the ChartQA `max_pixels` decision and render check, a short GPU check of the new `verdict_nll` span, and the researcher's decision on the thesis scope and title (source following vs. reliability). Then freeze (tag `prereg-v5`).
 
 > **Token tip for agents:** Never `cat` the JSONL files. The `*_tp_*` files are 10–16 MB. Read the `*.manifest.json` / `*.gates.json` files, the result-folder READMEs, or summarise rows with a short script.
 

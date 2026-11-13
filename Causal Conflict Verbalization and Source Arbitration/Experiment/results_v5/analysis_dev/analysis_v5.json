@@ -89,8 +89,7 @@
         "n_pairs": 12,
         "attributable_pairs": 0,
         "replay_flip_rate": null,
-        "replay_any_change_rate": 0.75,
-        "suggested_churn_cap": null
+        "replay_any_change_rate": 0.75
       },
       "behaviour_binding": {
         "delta_flip_minus_own": {
@@ -108,6 +107,8 @@
         "change_rate_own_vs_flip": 0.0,
         "neither_transition_rate_own_vs_para": 0.3333333333333333,
         "neither_transition_rate_own_vs_flip": 0.3333333333333333,
+        "neither_shift_para_minus_own": 0.0,
+        "any_change_rate_own_vs_para": 0.0,
         "wording_floor_para_minus_own": {
           "n": 6,
           "signed_mean": 0.0,
@@ -117,10 +118,12 @@
           "churn_rate": 0.0,
           "max_churn": 0.05,
           "churn_exceeds_max": false,
-          "replay_flip_rate": null,
+          "neither_shift": 0.0,
+          "max_neither_shift": 0.1,
+          "neither_shift_exceeds_max": false,
+          "any_change_rate_diagnostic": 0.0,
+          "replay_flip_rate_diagnostic": null,
           "replay_adjusted_max_churn": null,
-          "churn_exceeds_replay_adjusted_max": false,
-          "floor_ok_replay_adjusted": true,
           "sd_item_difference": 0.0,
           "tost_power_at_this_noise": 1.0,
           "power_below_target": false,
@@ -143,6 +146,8 @@
         "change_rate_own_vs_flip": 0.0,
         "neither_transition_rate_own_vs_para": 0.25,
         "neither_transition_rate_own_vs_flip": 0.25,
+        "neither_shift_para_minus_own": 0.0,
+        "any_change_rate_own_vs_para": 0.0,
         "wording_floor_para_minus_own": {
           "n": 6,
           "signed_mean": 0.0,
@@ -152,16 +157,19 @@
           "churn_rate": 0.0,
           "max_churn": 0.05,
           "churn_exceeds_max": false,
-          "replay_flip_rate": null,
+          "neither_shift": 0.0,
+          "max_neither_shift": 0.1,
+          "neither_shift_exceeds_max": false,
+          "any_change_rate_diagnostic": 0.0,
+          "replay_flip_rate_diagnostic": null,
           "replay_adjusted_max_churn": null,
-          "churn_exceeds_replay_adjusted_max": false,
-          "floor_ok_replay_adjusted": true,
           "sd_item_difference": 0.0,
           "tost_power_at_this_noise": 1.0,
           "power_below_target": false,
           "floor_ok": true
         }
       },
+      "wording_floor_decision_basis": "fixed (signed mean, image<->text churn, neither shift)",
       "behaviour_primary": {
         "is_primary_for_regime": false,
         "parser": "structured",
@@ -178,8 +186,7 @@
               0.25
             ],
             "p": 0.502049795020498,
-            "tost_reading": "not equivalent",
-            "holm_p": 1.0
+            "tost_reading": "not equivalent"
           },
           "matched_pair_para_flip_minus_para": {
             "n": 6,
@@ -248,8 +255,7 @@
               0.25
             ],
             "p": 0.502049795020498,
-            "tost_reading": "not equivalent",
-            "holm_p": 1.0
+            "tost_reading": "not equivalent"
           },
           "matched_pair_para_flip_minus_para": {
             "n": 6,
@@ -327,16 +333,161 @@
           "p": 1.0,
           "significant": false
         },
+        "benchmark": {
+          "n": 6,
+          "mean": 0.25,
+          "ci95": [
+            0.08333333333333333,
+            0.4166666666666667
+          ]
+        },
+        "benchmark_image": {
+          "n": 6,
+          "mean": 0.4166666666666667,
+          "ci95": [
+            0.16666666666666666,
+            0.6666666666666666
+          ]
+        },
+        "benchmark_text": {
+          "n": 6,
+          "mean": 0.08333333333333333,
+          "ci95": [
+            0.0,
+            0.25
+          ]
+        },
+        "ceiling": {
+          "n": 6,
+          "mean": 0.25,
+          "ci95": [
+            0.08333333333333333,
+            0.4166666666666667
+          ]
+        },
+        "decision_tests": {
+          "T2_beh": {
+            "n": 6,
+            "epsilon": 0.05,
+            "effect": 0.08333333333333333,
+            "effect_ci95": [
+              0.0,
+              0.25
+            ],
+            "effect_ci90": [
+              0.0,
+              0.25
+            ],
+            "tost_power_at_this_noise": 0.0,
+            "p_decision_relevant": 0.33226677332266774,
+            "p_equivalent": 0.6678332166783322,
+            "p_entered": 0.6645335466453355,
+            "benchmark": 0.25,
+            "benchmark_ci95": [
+              0.08333333333333333,
+              0.4166666666666667
+            ],
+            "benchmark_n": 6,
+            "rho_beh_descriptive": 0.3333333333333333,
+            "reading": "inconclusive (TOST power 0.00 < 0.80; not evidence for either hypothesis)",
+            "holm_p": 1.0
+          },
+          "T2_beh_pair": {
+            "n": 6,
+            "epsilon": 0.05,
+            "effect": 0.08333333333333333,
+            "effect_ci95": [
+              0.0,
+              0.25
+            ],
+            "effect_ci90": [
+              0.0,
+              0.25
+            ],
+            "tost_power_at_this_noise": 0.0,
+            "p_decision_relevant": 0.33226677332266774,
+            "p_equivalent": 0.6678332166783322,
+            "p_entered": 0.6645335466453355,
+            "benchmark": 0.25,
+            "benchmark_ci95": [
+              0.08333333333333333,
+              0.4166666666666667
+            ],
+            "benchmark_n": 6,
+            "rho_beh_descriptive": 0.3333333333333333,
+            "reading": "inconclusive (TOST power 0.00 < 0.80; not evidence for either hypothesis)",
+            "holm_p": 1.0
+          },
+          "T3_beh": {
+            "n": 6,
+            "epsilon": 0.05,
+            "effect": 0.08333333333333333,
+            "effect_ci95": [
+              0.0,
+              0.25
+            ],
+            "effect_ci90": [
+              0.0,
+              0.25
+            ],
+            "tost_power_at_this_noise": 0.0,
+            "p_decision_relevant": 0.33226677332266774,
+            "p_equivalent": 0.6678332166783322,
+            "p_entered": 0.6645335466453355,
+            "benchmark": 0.25,
+            "benchmark_ci95": [
+              0.08333333333333333,
+              0.4166666666666667
+            ],
+            "benchmark_n": 6,
+            "rho_beh_descriptive": 0.3333333333333333,
+            "reading": "inconclusive (TOST power 0.00 < 0.80; not evidence for either hypothesis)",
+            "holm_p": 1.0
+          }
+        },
+        "directional_flip_minus_own": {
+          "binding_toward_image": {
+            "n": 6,
+            "mean": 0.08333333333333333,
+            "ci95": [
+              0.0,
+              0.25
+            ],
+            "benchmark": 0.4166666666666667,
+            "rho_beh_descriptive": 0.19999999999999998
+          },
+          "binding_toward_text": {
+            "n": 0,
+            "benchmark": 0.08333333333333333
+          },
+          "nonbinding_toward_image": {
+            "n": 6,
+            "mean": 0.08333333333333333,
+            "ci95": [
+              0.0,
+              0.25
+            ],
+            "benchmark": 0.4166666666666667,
+            "rho_beh_descriptive": 0.19999999999999998
+          },
+          "nonbinding_toward_text": {
+            "n": 0,
+            "benchmark": 0.08333333333333333
+          }
+        },
         "holm_adjusted": {
-          "bind_flip_minus_own": 1.0,
-          "nonbind_flip_minus_own": 1.0,
+          "T2_beh": 1.0,
+          "T2_beh_pair": 1.0,
+          "T3_beh": 1.0,
           "T1_beh": 1.0
-        }
+        },
+        "reading_binding_flip": "inconclusive (TOST power 0.00 < 0.80; not evidence for either hypothesis)",
+        "reading_binding_pair": "inconclusive (TOST power 0.00 < 0.80; not evidence for either hypothesis)",
+        "reading_binding": "inconclusive (TOST power 0.00 < 0.80; not evidence for either hypothesis)",
+        "reading_nonbinding": "inconclusive (TOST power 0.00 < 0.80; not evidence for either hypothesis)"
       },
       "wording_floor_ok_binding": true,
       "wording_floor_ok_nonbinding": true,
-      "wording_floor_ok_replay_adjusted_binding": true,
-      "wording_floor_ok_replay_adjusted_nonbinding": true,
       "reading_binding": "H1: the verdict decides, and binding strengthens it",
       "reading_nonbinding": "H1: the verdict decides; no evidence that binding strengthens it",
       "edit_gate_ok": false,
@@ -346,6 +497,8 @@
         "the edit-gate pass rate is below 60% (prereg \u00a78)"
       ],
       "reading_nonbinding_reported": "NOT A READING: n = 6 is below the R5 minimum of 100; the edit-gate pass rate is below 60% (prereg \u00a78). The decision table alone would say: H1: the verdict decides; no evidence that binding strengthens it",
+      "primary_reading_binding": "EXPLORATORY REGIME, not a confirmatory reading: NOT A READING: n = 6 is below the R5 minimum of 100; the edit-gate pass rate is below 60% (prereg \u00a78). The decision table alone would say: H1: the verdict decides, and binding strengthens it",
+      "primary_reading_nonbinding": "EXPLORATORY REGIME, not a confirmatory reading: NOT A READING: n = 6 is below the R5 minimum of 100; the edit-gate pass rate is below 60% (prereg \u00a78). The decision table alone would say: H1: the verdict decides; no evidence that binding strengthens it",
       "behaviour_by_parser": {
         "strict": {
           "neither_rate": 0.24305555555555555,
@@ -763,8 +916,7 @@
         "n_pairs": 160,
         "attributable_pairs": 93,
         "replay_flip_rate": 0.03225806451612903,
-        "replay_any_change_rate": 0.11875,
-        "suggested_churn_cap": 0.08225806451612903
+        "replay_any_change_rate": 0.11875
       },
       "behaviour_binding": {
         "delta_flip_minus_own": {
@@ -782,6 +934,8 @@
         "change_rate_own_vs_flip": 0.7721518987341772,
         "neither_transition_rate_own_vs_para": 0.4125,
         "neither_transition_rate_own_vs_flip": 0.50625,
+        "neither_shift_para_minus_own": 0.0625,
+        "any_change_rate_own_vs_para": 0.23125,
         "wording_floor_para_minus_own": {
           "n": 80,
           "signed_mean": -0.04375,
@@ -791,10 +945,12 @@
           "churn_rate": 0.031914893617021274,
           "max_churn": 0.05,
           "churn_exceeds_max": false,
-          "replay_flip_rate": 0.03225806451612903,
+          "neither_shift": 0.0625,
+          "max_neither_shift": 0.1,
+          "neither_shift_exceeds_max": false,
+          "any_change_rate_diagnostic": 0.23125,
+          "replay_flip_rate_diagnostic": 0.03225806451612903,
           "replay_adjusted_max_churn": 0.08225806451612903,
-          "churn_exceeds_replay_adjusted_max": false,
-          "floor_ok_replay_adjusted": true,
           "sd_item_difference": 0.2997229733595569,
           "tost_power_at_this_noise": 0.0,
           "power_below_target": true,
@@ -817,6 +973,8 @@
         "change_rate_own_vs_flip": 0.6756756756756757,
         "neither_transition_rate_own_vs_para": 0.50625,
         "neither_transition_rate_own_vs_flip": 0.5375,
+        "neither_shift_para_minus_own": 0.0375,
+        "any_change_rate_own_vs_para": 0.2875,
         "wording_floor_para_minus_own": {
           "n": 80,
           "signed_mean": 0.0,
@@ -826,16 +984,19 @@
           "churn_rate": 0.0759493670886076,
           "max_churn": 0.05,
           "churn_exceeds_max": true,
-          "replay_flip_rate": 0.03225806451612903,
+          "neither_shift": 0.0375,
+          "max_neither_shift": 0.1,
+          "neither_shift_exceeds_max": false,
+          "any_change_rate_diagnostic": 0.2875,
+          "replay_flip_rate_diagnostic": 0.03225806451612903,
           "replay_adjusted_max_churn": 0.08225806451612903,
-          "churn_exceeds_replay_adjusted_max": false,
-          "floor_ok_replay_adjusted": true,
           "sd_item_difference": 0.3081180112566604,
           "tost_power_at_this_noise": 0.0,
           "power_below_target": true,
           "floor_ok": false
         }
       },
+      "wording_floor_decision_basis": "fixed (signed mean, image<->text churn, neither shift)",
       "behaviour_primary": {
         "is_primary_for_regime": true,
         "parser": "structured",
@@ -852,8 +1013,7 @@
               0.5625
             ],
             "p": 9.999000099990002e-05,
-            "tost_reading": "not equivalent",
-            "holm_p": 0.00029997000299970003
+            "tost_reading": "not equivalent"
           },
           "matched_pair_para_flip_minus_para": {
             "n": 80,
@@ -922,8 +1082,7 @@
               0.45
             ],
             "p": 9.999000099990002e-05,
-            "tost_reading": "not equivalent",
-            "holm_p": 0.00029997000299970003
+            "tost_reading": "not equivalent"
           },
           "matched_pair_para_flip_minus_para": {
             "n": 80,
@@ -1001,16 +1160,173 @@
           "p": 9.999000099990002e-05,
           "significant": true
         },
+        "benchmark": {
+          "n": 80,
+          "mean": 0.484375,
+          "ci95": [
+            0.421875,
+            0.546875
+          ]
+        },
+        "benchmark_image": {
+          "n": 80,
+          "mean": 0.4625,
+          "ci95": [
+            0.3875,
+            0.5375
+          ]
+        },
+        "benchmark_text": {
+          "n": 80,
+          "mean": 0.50625,
+          "ci95": [
+            0.425,
+            0.5875
+          ]
+        },
+        "ceiling": {
+          "n": 80,
+          "mean": 0.484375,
+          "ci95": [
+            0.421875,
+            0.546875
+          ]
+        },
+        "decision_tests": {
+          "T2_beh": {
+            "n": 80,
+            "epsilon": 0.05,
+            "effect": 0.49375,
+            "effect_ci95": [
+              0.4125,
+              0.575
+            ],
+            "effect_ci90": [
+              0.425,
+              0.5625
+            ],
+            "tost_power_at_this_noise": 0.0,
+            "p_decision_relevant": 9.999000099990002e-05,
+            "p_equivalent": 1.0,
+            "p_entered": 0.00019998000199980003,
+            "benchmark": 0.484375,
+            "benchmark_ci95": [
+              0.421875,
+              0.546875
+            ],
+            "benchmark_n": 80,
+            "rho_beh_descriptive": 1.0193548387096774,
+            "reading": "decision-relevant",
+            "holm_p": 0.0007999200079992001
+          },
+          "T2_beh_pair": {
+            "n": 80,
+            "epsilon": 0.05,
+            "effect": 0.6375,
+            "effect_ci95": [
+              0.5625,
+              0.7125
+            ],
+            "effect_ci90": [
+              0.575,
+              0.7
+            ],
+            "tost_power_at_this_noise": 0.0,
+            "p_decision_relevant": 9.999000099990002e-05,
+            "p_equivalent": 1.0,
+            "p_entered": 0.00019998000199980003,
+            "benchmark": 0.484375,
+            "benchmark_ci95": [
+              0.421875,
+              0.546875
+            ],
+            "benchmark_n": 80,
+            "rho_beh_descriptive": 1.3161290322580643,
+            "reading": "decision-relevant",
+            "holm_p": 0.0007999200079992001
+          },
+          "T3_beh": {
+            "n": 80,
+            "epsilon": 0.05,
+            "effect": 0.38125,
+            "effect_ci95": [
+              0.29375,
+              0.4625
+            ],
+            "effect_ci90": [
+              0.30625,
+              0.45
+            ],
+            "tost_power_at_this_noise": 0.0,
+            "p_decision_relevant": 9.999000099990002e-05,
+            "p_equivalent": 1.0,
+            "p_entered": 0.00019998000199980003,
+            "benchmark": 0.484375,
+            "benchmark_ci95": [
+              0.421875,
+              0.546875
+            ],
+            "benchmark_n": 80,
+            "rho_beh_descriptive": 0.7870967741935483,
+            "reading": "decision-relevant",
+            "holm_p": 0.0007999200079992001
+          }
+        },
+        "directional_flip_minus_own": {
+          "binding_toward_image": {
+            "n": 79,
+            "mean": 0.45569620253164556,
+            "ci95": [
+              0.36075949367088606,
+              0.5443037974683544
+            ],
+            "benchmark": 0.4625,
+            "rho_beh_descriptive": 0.9852890865549092
+          },
+          "binding_toward_text": {
+            "n": 32,
+            "mean": 0.609375,
+            "ci95": [
+              0.4375,
+              0.765625
+            ],
+            "benchmark": 0.50625,
+            "rho_beh_descriptive": 1.2037037037037037
+          },
+          "nonbinding_toward_image": {
+            "n": 79,
+            "mean": 0.3924050632911392,
+            "ci95": [
+              0.2911392405063291,
+              0.4873417721518987
+            ],
+            "benchmark": 0.4625,
+            "rho_beh_descriptive": 0.8484433800889496
+          },
+          "nonbinding_toward_text": {
+            "n": 32,
+            "mean": 0.421875,
+            "ci95": [
+              0.234375,
+              0.609375
+            ],
+            "benchmark": 0.50625,
+            "rho_beh_descriptive": 0.8333333333333334
+          }
+        },
         "holm_adjusted": {
-          "bind_flip_minus_own": 0.00029997000299970003,
-          "nonbind_flip_minus_own": 0.00029997000299970003,
+          "T2_beh": 0.0007999200079992001,
+          "T2_beh_pair": 0.0007999200079992001,
+          "T3_beh": 0.0007999200079992001,
           "T1_beh": 0.015498450154984501
-        }
+        },
+        "reading_binding_flip": "H1: the verdict decides, and binding strengthens it",
+        "reading_binding_pair": "H1: the verdict decides, and binding strengthens it",
+        "reading_binding": "H1: the verdict decides, and binding strengthens it (flip\u2212own and para_flip\u2212para agree)",
+        "reading_nonbinding": "H1: the verdict decides; no evidence that binding strengthens it"
       },
       "wording_floor_ok_binding": true,
       "wording_floor_ok_nonbinding": false,
-      "wording_floor_ok_replay_adjusted_binding": true,
-      "wording_floor_ok_replay_adjusted_nonbinding": true,
       "reading_binding": "H1: the verdict decides, and binding strengthens it",
       "reading_nonbinding": "H1: the verdict decides; no evidence that binding strengthens it",
       "edit_gate_ok": true,
@@ -1019,6 +1335,8 @@
         "n = 80 is below the R5 minimum of 150"
       ],
       "reading_nonbinding_reported": "NOT A READING: n = 80 is below the R5 minimum of 150. The decision table alone would say: H1: the verdict decides; no evidence that binding strengthens it",
+      "primary_reading_binding": "NOT A READING: n = 80 is below the R5 minimum of 150. The decision table alone would say: H1: the verdict decides, and binding strengthens it (flip\u2212own and para_flip\u2212para agree)",
+      "primary_reading_nonbinding": "NOT A READING: n = 80 is below the R5 minimum of 150. The decision table alone would say: H1: the verdict decides; no evidence that binding strengthens it",
       "behaviour_by_parser": {
         "strict": {
           "neither_rate": 0.44947916666666665,
@@ -1531,8 +1849,7 @@
         "n_pairs": 4,
         "attributable_pairs": 4,
         "replay_flip_rate": 0.0,
-        "replay_any_change_rate": 0.0,
-        "suggested_churn_cap": 0.05
+        "replay_any_change_rate": 0.0
       },
       "behaviour_binding": {
         "delta_flip_minus_own": {
@@ -1550,6 +1867,8 @@
         "change_rate_own_vs_flip": 0.0,
         "neither_transition_rate_own_vs_para": 0.0,
         "neither_transition_rate_own_vs_flip": 0.0,
+        "neither_shift_para_minus_own": 0.0,
+        "any_change_rate_own_vs_para": 0.0,
         "wording_floor_para_minus_own": {
           "n": 2,
           "signed_mean": 0.0,
@@ -1559,10 +1878,12 @@
           "churn_rate": 0.0,
           "max_churn": 0.05,
           "churn_exceeds_max": false,
-          "replay_flip_rate": 0.0,
+          "neither_shift": 0.0,
+          "max_neither_shift": 0.1,
+          "neither_shift_exceeds_max": false,
+          "any_change_rate_diagnostic": 0.0,
+          "replay_flip_rate_diagnostic": 0.0,
           "replay_adjusted_max_churn": 0.05,
-          "churn_exceeds_replay_adjusted_max": false,
-          "floor_ok_replay_adjusted": true,
           "sd_item_difference": 0.0,
           "tost_power_at_this_noise": 1.0,
           "power_below_target": false,
@@ -1585,6 +1906,8 @@
         "change_rate_own_vs_flip": 0.0,
         "neither_transition_rate_own_vs_para": 0.0,
         "neither_transition_rate_own_vs_flip": 0.0,
+        "neither_shift_para_minus_own": 0.0,
+        "any_change_rate_own_vs_para": 0.0,
         "wording_floor_para_minus_own": {
           "n": 2,
           "signed_mean": 0.0,
@@ -1594,16 +1917,19 @@
           "churn_rate": 0.0,
           "max_churn": 0.05,
           "churn_exceeds_max": false,
-          "replay_flip_rate": 0.0,
+          "neither_shift": 0.0,
+          "max_neither_shift": 0.1,
+          "neither_shift_exceeds_max": false,
+          "any_change_rate_diagnostic": 0.0,
+          "replay_flip_rate_diagnostic": 0.0,
           "replay_adjusted_max_churn": 0.05,
-          "churn_exceeds_replay_adjusted_max": false,
-          "floor_ok_replay_adjusted": true,
           "sd_item_difference": 0.0,
           "tost_power_at_this_noise": 1.0,
           "power_below_target": false,
           "floor_ok": true
         }
       },
+      "wording_floor_decision_basis": "fixed (signed mean, image<->text churn, neither shift)",
       "behaviour_primary": {
         "is_primary_for_regime": false,
         "parser": "structured",
@@ -1620,8 +1946,7 @@
               0.0
             ],
             "p": 1.0,
-            "tost_reading": "equivalent",
-            "holm_p": 1.0
+            "tost_reading": "equivalent"
           },
           "matched_pair_para_flip_minus_para": {
             "n": 2,
@@ -1690,8 +2015,7 @@
               0.0
             ],
             "p": 1.0,
-            "tost_reading": "equivalent",
-            "holm_p": 1.0
+            "tost_reading": "equivalent"
           },
           "matched_pair_para_flip_minus_para": {
             "n": 2,
@@ -1769,16 +2093,161 @@
           "p": 0.49665033496650335,
           "significant": false
         },
+        "benchmark": {
+          "n": 2,
+          "mean": 0.5,
+          "ci95": [
+            0.0,
+            1.0
+          ]
+        },
+        "benchmark_image": {
+          "n": 2,
+          "mean": 0.5,
+          "ci95": [
+            0.0,
+            1.0
+          ]
+        },
+        "benchmark_text": {
+          "n": 2,
+          "mean": 0.5,
+          "ci95": [
+            0.0,
+            1.0
+          ]
+        },
+        "ceiling": {
+          "n": 2,
+          "mean": 0.5,
+          "ci95": [
+            0.0,
+            1.0
+          ]
+        },
+        "decision_tests": {
+          "T2_beh": {
+            "n": 2,
+            "epsilon": 0.05,
+            "effect": 0.0,
+            "effect_ci95": [
+              0.0,
+              0.0
+            ],
+            "effect_ci90": [
+              0.0,
+              0.0
+            ],
+            "tost_power_at_this_noise": 1.0,
+            "p_decision_relevant": 1.0,
+            "p_equivalent": 9.999000099990002e-05,
+            "p_entered": 0.00019998000199980003,
+            "benchmark": 0.5,
+            "benchmark_ci95": [
+              0.0,
+              1.0
+            ],
+            "benchmark_n": 2,
+            "rho_beh_descriptive": 0.0,
+            "reading": "undetermined: explicit-instruction control too weak",
+            "holm_p": 0.0007999200079992001
+          },
+          "T2_beh_pair": {
+            "n": 2,
+            "epsilon": 0.05,
+            "effect": 0.25,
+            "effect_ci95": [
+              0.0,
+              0.5
+            ],
+            "effect_ci90": [
+              0.0,
+              0.5
+            ],
+            "tost_power_at_this_noise": 0.0,
+            "p_decision_relevant": 0.24847515248475152,
+            "p_equivalent": 0.7516248375162484,
+            "p_entered": 0.49695030496950304,
+            "benchmark": 0.5,
+            "benchmark_ci95": [
+              0.0,
+              1.0
+            ],
+            "benchmark_n": 2,
+            "rho_beh_descriptive": 0.5,
+            "reading": "undetermined: explicit-instruction control too weak",
+            "holm_p": 0.9939006099390061
+          },
+          "T3_beh": {
+            "n": 2,
+            "epsilon": 0.05,
+            "effect": 0.0,
+            "effect_ci95": [
+              0.0,
+              0.0
+            ],
+            "effect_ci90": [
+              0.0,
+              0.0
+            ],
+            "tost_power_at_this_noise": 1.0,
+            "p_decision_relevant": 1.0,
+            "p_equivalent": 9.999000099990002e-05,
+            "p_entered": 0.00019998000199980003,
+            "benchmark": 0.5,
+            "benchmark_ci95": [
+              0.0,
+              1.0
+            ],
+            "benchmark_n": 2,
+            "rho_beh_descriptive": 0.0,
+            "reading": "undetermined: explicit-instruction control too weak",
+            "holm_p": 0.0007999200079992001
+          }
+        },
+        "directional_flip_minus_own": {
+          "binding_toward_image": {
+            "n": 2,
+            "mean": 0.0,
+            "ci95": [
+              0.0,
+              0.0
+            ],
+            "benchmark": 0.5,
+            "rho_beh_descriptive": 0.0
+          },
+          "binding_toward_text": {
+            "n": 0,
+            "benchmark": 0.5
+          },
+          "nonbinding_toward_image": {
+            "n": 2,
+            "mean": 0.0,
+            "ci95": [
+              0.0,
+              0.0
+            ],
+            "benchmark": 0.5,
+            "rho_beh_descriptive": 0.0
+          },
+          "nonbinding_toward_text": {
+            "n": 0,
+            "benchmark": 0.5
+          }
+        },
         "holm_adjusted": {
-          "T1_beh": 1.0,
-          "bind_flip_minus_own": 1.0,
-          "nonbind_flip_minus_own": 1.0
-        }
+          "T2_beh": 0.0007999200079992001,
+          "T3_beh": 0.0007999200079992001,
+          "T2_beh_pair": 0.9939006099390061,
+          "T1_beh": 1.0
+        },
+        "reading_binding_flip": "undetermined",
+        "reading_binding_pair": "undetermined",
+        "reading_binding": "undetermined",
+        "reading_nonbinding": "undetermined"
       },
       "wording_floor_ok_binding": true,
       "wording_floor_ok_nonbinding": true,
-      "wording_floor_ok_replay_adjusted_binding": true,
-      "wording_floor_ok_replay_adjusted_nonbinding": true,
       "reading_binding": "inconclusive",
       "reading_nonbinding": "H0: saying is not choosing",
       "edit_gate_ok": false,
@@ -1788,6 +2257,8 @@
         "the edit-gate pass rate is below 60% (prereg \u00a78)"
       ],
       "reading_nonbinding_reported": "NOT A READING: n = 2 is below the R5 minimum of 100; the edit-gate pass rate is below 60% (prereg \u00a78). The decision table alone would say: H0: saying is not choosing",
+      "primary_reading_binding": "EXPLORATORY REGIME, not a confirmatory reading: NOT A READING: n = 2 is below the R5 minimum of 100; the edit-gate pass rate is below 60% (prereg \u00a78). The decision table alone would say: inconclusive",
+      "primary_reading_nonbinding": "EXPLORATORY REGIME, not a confirmatory reading: NOT A READING: n = 2 is below the R5 minimum of 100; the edit-gate pass rate is below 60% (prereg \u00a78). The decision table alone would say: H0: saying is not choosing",
       "behaviour_by_parser": {
         "strict": {
           "neither_rate": 0.0,
@@ -2189,8 +2660,7 @@
         "n_pairs": 230,
         "attributable_pairs": 186,
         "replay_flip_rate": 0.010752688172043012,
-        "replay_any_change_rate": 0.08695652173913043,
-        "suggested_churn_cap": 0.06075268817204302
+        "replay_any_change_rate": 0.08695652173913043
       },
       "behaviour_binding": {
         "delta_flip_minus_own": {
@@ -2208,6 +2678,8 @@
         "change_rate_own_vs_flip": 0.5064935064935064,
         "neither_transition_rate_own_vs_para": 0.30434782608695654,
         "neither_transition_rate_own_vs_flip": 0.33043478260869563,
+        "neither_shift_para_minus_own": 0.030434782608695653,
+        "any_change_rate_own_vs_para": 0.15217391304347827,
         "wording_floor_para_minus_own": {
           "n": 115,
           "signed_mean": -0.030434782608695653,
@@ -2217,10 +2689,12 @@
           "churn_rate": 0.0,
           "max_churn": 0.05,
           "churn_exceeds_max": false,
-          "replay_flip_rate": 0.010752688172043012,
+          "neither_shift": 0.030434782608695653,
+          "max_neither_shift": 0.1,
+          "neither_shift_exceeds_max": false,
+          "any_change_rate_diagnostic": 0.15217391304347827,
+          "replay_flip_rate_diagnostic": 0.010752688172043012,
           "replay_adjusted_max_churn": 0.06075268817204302,
-          "churn_exceeds_replay_adjusted_max": false,
-          "floor_ok_replay_adjusted": true,
           "sd_item_difference": 0.2753542894971311,
           "tost_power_at_this_noise": 0.23766841836652453,
           "power_below_target": true,
@@ -2243,6 +2717,8 @@
         "change_rate_own_vs_flip": 0.3693181818181818,
         "neither_transition_rate_own_vs_para": 0.20869565217391303,
         "neither_transition_rate_own_vs_flip": 0.23478260869565218,
+        "neither_shift_para_minus_own": 0.021739130434782608,
+        "any_change_rate_own_vs_para": 0.1608695652173913,
         "wording_floor_para_minus_own": {
           "n": 115,
           "signed_mean": -0.05652173913043478,
@@ -2252,16 +2728,19 @@
           "churn_rate": 0.06593406593406594,
           "max_churn": 0.05,
           "churn_exceeds_max": true,
-          "replay_flip_rate": 0.010752688172043012,
+          "neither_shift": 0.021739130434782608,
+          "max_neither_shift": 0.1,
+          "neither_shift_exceeds_max": false,
+          "any_change_rate_diagnostic": 0.1608695652173913,
+          "replay_flip_rate_diagnostic": 0.010752688172043012,
           "replay_adjusted_max_churn": 0.06075268817204302,
-          "churn_exceeds_replay_adjusted_max": true,
-          "floor_ok_replay_adjusted": false,
           "sd_item_difference": 0.27116720897818575,
           "tost_power_at_this_noise": 0.26047935247795295,
           "power_below_target": true,
           "floor_ok": false
         }
       },
+      "wording_floor_decision_basis": "fixed (signed mean, image<->text churn, neither shift)",
       "behaviour_primary": {
         "is_primary_for_regime": true,
         "parser": "structured",
@@ -2278,8 +2757,7 @@
               0.48695652173913045
             ],
             "p": 9.999000099990002e-05,
-            "tost_reading": "not equivalent",
-            "holm_p": 0.00029997000299970003
+            "tost_reading": "not equivalent"
           },
           "matched_pair_para_flip_minus_para": {
             "n": 115,
@@ -2348,8 +2826,7 @@
               0.3695652173913043
             ],
             "p": 9.999000099990002e-05,
-            "tost_reading": "not equivalent",
-            "holm_p": 0.00029997000299970003
+            "tost_reading": "not equivalent"
           },
           "matched_pair_para_flip_minus_para": {
             "n": 115,
@@ -2414,7 +2891,7 @@
           ],
           "p": 9.999000099990002e-05,
           "significant": true,
-          "holm_p": 0.00029997000299970003,
+          "holm_p": 0.00039996000399960006,
           "significant_after_holm": true
         },
         "T1_beh_matched_pair_did": {
@@ -2427,16 +2904,173 @@
           "p": 9.999000099990002e-05,
           "significant": true
         },
+        "benchmark": {
+          "n": 115,
+          "mean": 0.6869565217391305,
+          "ci95": [
+            0.6434782608695652,
+            0.7282608695652174
+          ]
+        },
+        "benchmark_image": {
+          "n": 115,
+          "mean": 0.6173913043478261,
+          "ci95": [
+            0.5565217391304348,
+            0.6782608695652174
+          ]
+        },
+        "benchmark_text": {
+          "n": 115,
+          "mean": 0.7565217391304347,
+          "ci95": [
+            0.7,
+            0.8130434782608695
+          ]
+        },
+        "ceiling": {
+          "n": 115,
+          "mean": 0.6869565217391305,
+          "ci95": [
+            0.6434782608695652,
+            0.7282608695652174
+          ]
+        },
+        "decision_tests": {
+          "T2_beh": {
+            "n": 115,
+            "epsilon": 0.05,
+            "effect": 0.4391304347826087,
+            "effect_ci95": [
+              0.3826086956521739,
+              0.4956521739130435
+            ],
+            "effect_ci90": [
+              0.391304347826087,
+              0.48695652173913045
+            ],
+            "tost_power_at_this_noise": 0.030265665802551966,
+            "p_decision_relevant": 9.999000099990002e-05,
+            "p_equivalent": 1.0,
+            "p_entered": 0.00019998000199980003,
+            "benchmark": 0.6869565217391305,
+            "benchmark_ci95": [
+              0.6434782608695652,
+              0.7282608695652174
+            ],
+            "benchmark_n": 115,
+            "rho_beh_descriptive": 0.6392405063291139,
+            "reading": "decision-relevant",
+            "holm_p": 0.0005999400059994001
+          },
+          "T2_beh_pair": {
+            "n": 115,
+            "epsilon": 0.05,
+            "effect": 0.6434782608695652,
+            "effect_ci95": [
+              0.5782608695652174,
+              0.7043478260869566
+            ],
+            "effect_ci90": [
+              0.591304347826087,
+              0.691304347826087
+            ],
+            "tost_power_at_this_noise": 0.0,
+            "p_decision_relevant": 9.999000099990002e-05,
+            "p_equivalent": 1.0,
+            "p_entered": 0.00019998000199980003,
+            "benchmark": 0.6869565217391305,
+            "benchmark_ci95": [
+              0.6434782608695652,
+              0.7282608695652174
+            ],
+            "benchmark_n": 115,
+            "rho_beh_descriptive": 0.9367088607594936,
+            "reading": "decision-relevant",
+            "holm_p": 0.0005999400059994001
+          },
+          "T3_beh": {
+            "n": 115,
+            "epsilon": 0.05,
+            "effect": 0.3173913043478261,
+            "effect_ci95": [
+              0.2565217391304348,
+              0.3782608695652174
+            ],
+            "effect_ci90": [
+              0.26521739130434785,
+              0.3695652173913043
+            ],
+            "tost_power_at_this_noise": 0.0,
+            "p_decision_relevant": 9.999000099990002e-05,
+            "p_equivalent": 1.0,
+            "p_entered": 0.00019998000199980003,
+            "benchmark": 0.6869565217391305,
+            "benchmark_ci95": [
+              0.6434782608695652,
+              0.7282608695652174
+            ],
+            "benchmark_n": 115,
+            "rho_beh_descriptive": 0.46202531645569617,
+            "reading": "decision-relevant",
+            "holm_p": 0.0005999400059994001
+          }
+        },
+        "directional_flip_minus_own": {
+          "binding_toward_image": {
+            "n": 115,
+            "mean": 0.34782608695652173,
+            "ci95": [
+              0.27391304347826084,
+              0.4260869565217391
+            ],
+            "benchmark": 0.6173913043478261,
+            "rho_beh_descriptive": 0.5633802816901409
+          },
+          "binding_toward_text": {
+            "n": 71,
+            "mean": 0.5915492957746479,
+            "ci95": [
+              0.4788732394366197,
+              0.704225352112676
+            ],
+            "benchmark": 0.7565217391304347,
+            "rho_beh_descriptive": 0.7819329771733852
+          },
+          "nonbinding_toward_image": {
+            "n": 115,
+            "mean": 0.26521739130434785,
+            "ci95": [
+              0.1956521739130435,
+              0.3347826086956522
+            ],
+            "benchmark": 0.6173913043478261,
+            "rho_beh_descriptive": 0.42957746478873243
+          },
+          "nonbinding_toward_text": {
+            "n": 71,
+            "mean": 0.36619718309859156,
+            "ci95": [
+              0.2535211267605634,
+              0.4788732394366197
+            ],
+            "benchmark": 0.7565217391304347,
+            "rho_beh_descriptive": 0.48405374777400034
+          }
+        },
         "holm_adjusted": {
-          "T1_beh": 0.00029997000299970003,
-          "bind_flip_minus_own": 0.00029997000299970003,
-          "nonbind_flip_minus_own": 0.00029997000299970003
-        }
+          "T1_beh": 0.00039996000399960006,
+          "T2_beh": 0.0005999400059994001,
+          "T2_beh_pair": 0.0005999400059994001,
+          "T3_beh": 0.0005999400059994001
+        },
+        "reading_binding_flip": "H1: the verdict decides, and binding strengthens it",
+        "reading_binding_pair": "H1: the verdict decides, and binding strengthens it",
+        "reading_binding": "H1: the verdict decides, and binding strengthens it (flip\u2212own and para_flip\u2212para agree)",
+        "reading_nonbinding": "H1: the verdict decides; no evidence that binding strengthens it"
       },
       "wording_floor_ok_binding": true,
       "wording_floor_ok_nonbinding": false,
-      "wording_floor_ok_replay_adjusted_binding": true,
-      "wording_floor_ok_replay_adjusted_nonbinding": false,
       "reading_binding": "H1: the verdict decides, and binding strengthens it",
       "reading_nonbinding": "H1: the verdict decides; no evidence that binding strengthens it",
       "edit_gate_ok": true,
@@ -2445,6 +3079,8 @@
         "n = 115 is below the R5 minimum of 150"
       ],
       "reading_nonbinding_reported": "NOT A READING: n = 115 is below the R5 minimum of 150. The decision table alone would say: H1: the verdict decides; no evidence that binding strengthens it",
+      "primary_reading_binding": "NOT A READING: n = 115 is below the R5 minimum of 150. The decision table alone would say: H1: the verdict decides, and binding strengthens it (flip\u2212own and para_flip\u2212para agree)",
+      "primary_reading_nonbinding": "NOT A READING: n = 115 is below the R5 minimum of 150. The decision table alone would say: H1: the verdict decides; no evidence that binding strengthens it",
       "behaviour_by_parser": {
         "strict": {
           "neither_rate": 0.6268115942028986,

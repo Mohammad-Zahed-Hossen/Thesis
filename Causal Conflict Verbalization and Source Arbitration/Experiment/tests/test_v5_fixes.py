@@ -384,6 +384,15 @@ class TestSecondBatchFixes(unittest.TestCase):
                                 "full_text": f"The final answer is {ans}.",
                             }
                         )
+            for fam, ans in (("explicit_image", "4"), ("explicit_text", "9")):
+                for order in ("image_first", "text_first"):
+                    beh_rows.append(
+                        {
+                            "model_id": "M", "regime": "math", "phase": "dev", "id": i, "family": fam, "verdict": "none",
+                            "k": 1, "order": order, "outcome": "beh", "y_image": "4", "y_text": "9", "own_source": "text",
+                            "named_source": None, "full_text": f"The final answer is {ans}.",
+                        }
+                    )
             for order in ("image_first", "text_first"):
                 donor_rows.append(
                     {
@@ -404,6 +413,8 @@ class TestSecondBatchFixes(unittest.TestCase):
         for i in ids:
             self.assertAlmostEqual(d_no[i] + d_fn[i], d_fo[i], places=9)
 
+        # The fixture's own behavioural rows would shadow these (behaviour_table keeps the first per cell).
+        rows = [r for r in rows if r["outcome"] != "beh"]
         res = an.analyze_group(rows + beh_rows, reps=100, draws=100, donor_rows=donor_rows)
         self.assertEqual(res["primary_outcome"], "behaviour")
         self.assertEqual(res["confirmatory_role"], "confirmatory")
@@ -412,9 +423,113 @@ class TestSecondBatchFixes(unittest.TestCase):
         self.assertIn("none_minus_own", res["behaviour_primary"]["binding"])
         self.assertIn("flip_minus_none", res["behaviour_primary"]["binding"])
         self.assertIn("para_flip_minus_none", res["behaviour_primary"]["binding"])
-        self.assertEqual(len(res["behaviour_primary"]["holm_adjusted"]), 3)
+        # Holm family for the Math behavioural rule (prereg §2.3): T1_beh, T2_beh, T2_beh_pair, T3_beh.
+        self.assertEqual(set(res["behaviour_primary"]["holm_adjusted"]), {"T1_beh", "T2_beh", "T2_beh_pair", "T3_beh"})
+        self.assertAlmostEqual(res["behaviour_primary"]["ceiling"]["mean"], 1.0)
+        self.assertTrue(res["primary_reading_binding"].startswith("NOT A READING"))
+        self.assertIn("H1", res["primary_reading_binding"])
         self.assertIsNotNone(res["replay_noise"])
         self.assertIn("replay_adjusted_max_churn", res["behaviour_binding"]["wording_floor_para_minus_own"])
+        self.assertTrue(res["wording_floor_decision_basis"].startswith("fixed"))
+        bp = res["behaviour_primary"]
+        self.assertEqual(set(bp["decision_tests"]), {"T2_beh", "T2_beh_pair", "T3_beh"})
+        self.assertIn("rho_beh_descriptive", bp["decision_tests"]["T2_beh"])
+        self.assertAlmostEqual(bp["benchmark_image"]["mean"], 1.0)
+        self.assertAlmostEqual(bp["benchmark_text"]["mean"], 1.0)
+        self.assertIn("binding_toward_image", bp["directional_flip_minus_own"])
+
+    def test_wording_floor_limit_is_fixed_and_guards_neither_shift(self):
+        diffs = [0.0] * 100
+        # Churn 0.076 fails the fixed 0.05 limit even with replay noise 0.032 (the old D5 cap was 0.082).
+        f = an.wording_floor(diffs, churn=0.076, replay_flip_rate=0.032)
+        self.assertFalse(f["floor_ok"])
+        self.assertAlmostEqual(f["replay_adjusted_max_churn"], 0.082)
+        self.assertNotIn("floor_ok_replay_adjusted", f)
+        self.assertTrue(an.wording_floor(diffs, churn=0.02, neither_shift=0.10)["floor_ok"])
+        bad = an.wording_floor(diffs, churn=0.02, neither_shift=-0.15)
+        self.assertTrue(bad["neither_shift_exceeds_max"])
+        self.assertFalse(bad["floor_ok"])
+
+    def test_neither_shift(self):
+        beh = {
+            ("a", "binding", "para", "image_first"): {"src": "neither"},
+            ("a", "binding", "own", "image_first"): {"src": "text"},
+            ("a", "binding", "para", "text_first"): {"src": "text"},
+            ("a", "binding", "own", "text_first"): {"src": "text"},
+        }
+        self.assertAlmostEqual(an.neither_shift(beh, ["a"], "binding", "para", "own"), 0.5)
+
+    def test_decision_test_reads_delta_against_epsilon(self):
+        ids = [str(i) for i in range(60)]
+        bench = {i: 0.4 for i in ids}
+        big = an.decision_test({i: 0.6 for i in ids}, bench, 200, 1)
+        self.assertEqual(big["reading"], "decision-relevant")
+        self.assertAlmostEqual(big["rho_beh_descriptive"], 1.5)  # may exceed 1: a benchmark, not a ceiling
+        null = an.decision_test({i: (0.01 if int(i) % 2 else -0.01) for i in ids}, bench, 200, 1)
+        self.assertEqual(null["reading"], "equivalent to no effect")
+        noisy = an.decision_test({i: (1.0 if int(i) % 3 == 0 else (-1.0 if int(i) % 3 == 1 else 0.0)) for i in ids}, bench, 200, 1)
+        self.assertTrue(noisy["reading"].startswith("inconclusive (TOST power"))
+        self.assertIn("not evidence for either hypothesis", noisy["reading"])
+        weak = an.decision_test({i: 0.6 for i in ids}, {i: (1.0 if int(i) % 2 else -1.0) for i in ids}, 200, 1)
+        self.assertTrue(weak["reading"].startswith("undetermined"))
+
+    def test_math_reading(self):
+        self.assertTrue(an.math_reading("decision-relevant", True).startswith("H1"))
+        self.assertEqual(an.math_reading("equivalent to no effect", True), "H0: saying is not choosing")
+        self.assertIn("not claimable", an.math_reading("equivalent to no effect", False))
+        inc = "inconclusive (TOST power 0.20 < 0.80; not evidence for either hypothesis)"
+        self.assertEqual(an.math_reading(inc, True), inc)
+        self.assertEqual(an.math_reading("undetermined: explicit-instruction control too weak", True), "undetermined")
+        other = "inconclusive (TOST power 0.30 < 0.80; not evidence for either hypothesis)"
+        self.assertFalse(an.coprimary_reading(inc, other).startswith("split"))
+
+    def test_directional_benchmark(self):
+        beh = {
+            ("a", "explicit_image", "none", "image_first"): {"src": "text"},
+            ("a", "explicit_text", "none", "image_first"): {"src": "text"},
+        }
+        self.assertAlmostEqual(an.behaviour_benchmark(beh, ["a"], "image")["a"], 0.0)
+        self.assertAlmostEqual(an.behaviour_benchmark(beh, ["a"], "text")["a"], 0.0)
+        beh[("a", "explicit_image", "none", "image_first")] = {"src": "image"}
+        self.assertAlmostEqual(an.behaviour_benchmark(beh, ["a"], "image")["a"], 1.0)
+        self.assertAlmostEqual(an.behaviour_benchmark(beh, ["a"], "text")["a"], 1.0)
+
+    def test_behaviour_ceiling_is_symmetric_and_counts_neither_as_not_following(self):
+        beh = {
+            ("a", "explicit_image", "none", "image_first"): {"src": "image"},
+            ("a", "explicit_text", "none", "image_first"): {"src": "text"},
+            ("a", "explicit_image", "none", "text_first"): {"src": "neither"},
+            ("a", "explicit_text", "none", "text_first"): {"src": "text"},
+        }
+        # image_first: (1 - 0 + 1 - 0)/2 = 1; text_first: (0 - 0 + 1 - 0)/2 = 0.5
+        self.assertAlmostEqual(an.behaviour_ceiling(beh, ["a"])["a"], 0.75)
+
+    def test_ratio_test_reading(self):
+        ids = [str(i) for i in range(40)]
+        strong = an.ratio_test({i: 0.8 for i in ids}, {i: 1.0 for i in ids}, 200, 1)
+        self.assertEqual(strong["reading"], "decision-relevant")
+        self.assertAlmostEqual(strong["rho"], 0.8)
+        null = an.ratio_test({i: (0.02 if int(i) % 2 else -0.02) for i in ids}, {i: 1.0 for i in ids}, 200, 1)
+        self.assertEqual(null["reading"], "equivalent to no effect")
+        flat = an.ratio_test({i: 0.5 for i in ids}, {i: (1.0 if int(i) % 2 else -1.0) for i in ids}, 200, 1)
+        self.assertTrue(flat["reading"].startswith("undetermined"))
+
+    def test_coprimary_reading(self):
+        h1a = "H1: the verdict decides, and binding strengthens it"
+        h1b = "H1: the verdict decides; no evidence that binding strengthens it"
+        self.assertIn("agree", an.coprimary_reading(h1a, h1b))
+        self.assertTrue(an.coprimary_reading(h1a, "inconclusive").startswith("split"))
+        self.assertEqual(an.coprimary_reading("H0: saying is not choosing", "H0: saying is not choosing"), "H0: saying is not choosing")
+
+    def test_primary_reading_uses_dl_outside_math_and_labels_roles(self):
+        rows = synth(eff_bind=1.0, eff_non=0.2, ceil=2.0)
+        chart = [{**r, "regime": "chartqa", "model_id": "Qwen/Qwen2.5-VL-3B-Instruct"} for r in rows]
+        res = an.analyze_group(chart, reps=100, draws=100)
+        self.assertEqual(res["primary_outcome"], "dl")
+        self.assertTrue(res["primary_reading_binding"].startswith("EXPLORATORY REGIME, not a confirmatory reading"))
+        self.assertIn(res["reading_binding"], res["primary_reading_binding"])
+        diag = [{**r, "model_id": "Qwen/Qwen2-VL-2B-Instruct"} for r in rows]
+        self.assertTrue(an.analyze_group(diag, reps=100, draws=100)["primary_reading_binding"].startswith("DIAGNOSTIC MODEL, not a confirmatory reading"))
 
     def test_sample_v5_for_coding_sample_and_evaluate(self):
         import sample_v5_for_coding as sv5

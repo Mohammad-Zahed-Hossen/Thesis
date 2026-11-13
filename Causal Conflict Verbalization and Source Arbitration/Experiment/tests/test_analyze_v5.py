@@ -85,7 +85,7 @@ class TestHelpers(unittest.TestCase):
         self.assertEqual(an.tost_reading((-0.03, 0.04)), "equivalent")
         self.assertEqual(an.tost_reading((-0.03, 0.06)), "not equivalent")
         self.assertEqual(an.combined_reading("equivalent to no effect", "equivalent", True), "H0: saying is not choosing")
-        self.assertEqual(an.combined_reading("equivalent to no effect", "not equivalent", True), "mixed")
+        self.assertTrue(an.combined_reading("equivalent to no effect", "not equivalent", True).startswith("inconclusive"))
         self.assertIn("uninterpretable", an.combined_reading("equivalent to no effect", "equivalent", False))
 
     def test_t1_qualifies_h1_but_never_decides_it(self):
