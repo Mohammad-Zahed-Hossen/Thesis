@@ -138,19 +138,88 @@ def _match_case(src: str, repl: str) -> str:
     return repl[0].upper() + repl[1:] if src[:1].isupper() else repl
 
 
-def swap_sources(sentence: str, regime: str) -> Tuple[str, int]:
-    """Swap image-side and text-side nouns at once. Returns (sentence, article fixes)."""
+# Which source nouns a flip swaps. This changes the intervention text, so it is a
+# pre-registration decision; the default is what the prereg draft (§5.2) and the v5 dev
+# pass use.
+#   "sentence"  every source noun in the reliability sentence. The justification is
+#               mirrored, which reads coherently but can state something false or odd:
+#               "The chart is more reliable as it provides the exact response shares in
+#               the pie report."
+#   "clause"    only the clause that holds "reliable". The justification keeps its nouns,
+#               which keeps its facts but can contradict the new verdict: "The image is
+#               more reliable ..., while the image involves a sports question."
+# On the v5 dev donors each scope leaves about a quarter of flips with one of these
+# problems (41/160 Qwen2.5-VL-3B Math cells either way). gates.json records the scope and
+# how many source nouns each flip leaves outside it.
+SWAP_SCOPE = "sentence"
+_CLAUSE_BREAK = re.compile(r"[,;:]|\b(?:as|because|since|while|whereas|although|though|but)\b", re.I)
+
+
+def reliability_clause(sentence: str, regime: str) -> Tuple[int, int]:
+    """Character span of the verdict clause: the clause with "reliable" and its source noun.
+
+    Clauses are cut at , ; : and at as/because/since/while/whereas/although/though/but.
+    stated_reliable_source reads the nearest source noun before "reliable", so the span
+    grows leftwards until it holds one ("The chart, being a summary, is more reliable").
+    With no noun before "reliable" it grows rightwards instead ("The more reliable source
+    is the chart"). A sentence without "reliable" is returned whole.
+    """
+    m = _RELIABLE.search(sentence)
+    if not m:
+        return 0, len(sentence)
+    pat = _swap_pattern(regime)
+    cuts = [0] + [b.start() for b in _CLAUSE_BREAK.finditer(sentence) if b.start() > 0] + [len(sentence)]
+    idx = max(i for i in range(len(cuts) - 1) if cuts[i] <= m.start())
+    lo = hi = idx
+    while lo > 0 and not pat.search(sentence[cuts[lo] : m.start()]):
+        lo -= 1
+    if not pat.search(sentence[cuts[lo] : m.start()]):
+        lo = idx
+        while hi < len(cuts) - 2 and not pat.search(sentence[m.end() : cuts[hi + 1]]):
+            hi += 1
+    return cuts[lo], cuts[hi + 1]
+
+
+def _swap_span(sentence: str, regime: str, scope: Optional[str]) -> Tuple[int, int]:
+    scope = SWAP_SCOPE if scope is None else scope
+    if scope == "sentence":
+        return 0, len(sentence)
+    if scope != "clause":
+        raise ValueError(f"unknown swap scope {scope!r}")
+    return reliability_clause(sentence, regime)
+
+
+def swap_sources(sentence: str, regime: str, scope: Optional[str] = None) -> Tuple[str, int]:
+    """Swap image-side and text-side nouns at once, inside the swap scope only.
+
+    Returns (sentence, article fixes). scope=None uses SWAP_SCOPE.
+    """
     pat = _swap_pattern(regime)
     table = _SWAP[regime]
-    out = pat.sub(lambda m: _match_case(m.group(0), table[m.group(0).lower()]), sentence)
+    a, b = _swap_span(sentence, regime, scope)
+    swapped = pat.sub(lambda m: _match_case(m.group(0), table[m.group(0).lower()]), sentence[a:b])
+    out = sentence[:a] + swapped + sentence[b:]
     out, n1 = _A_BEFORE_VOWEL.subn(lambda m: m.group(1) + "n ", out)
     out, n2 = _AN_BEFORE_CONSONANT.subn(lambda m: m.group(1) + " ", out)
     return out, n1 + n2
 
 
-def count_swaps(sentence: str, regime: str) -> int:
+def count_swaps(sentence: str, regime: str, scope: Optional[str] = None) -> int:
     """How many source noun phrases swap_sources would replace in this sentence."""
-    return len(_swap_pattern(regime).findall(sentence))
+    a, b = _swap_span(sentence, regime, scope)
+    return len(_swap_pattern(regime).findall(sentence[a:b]))
+
+
+def nouns_outside_scope(sentence: str, regime: str, scope: Optional[str] = None) -> int:
+    """Source nouns the flip leaves untouched (reported in gates.json, not a gate).
+
+    Under clause scope a justification keeps its nouns, so a flip can read "The image is
+    more reliable ..., while the image is a screenshot". This count shows how often the
+    reliability sentence has such text outside the verdict clause.
+    """
+    a, b = _swap_span(sentence, regime, scope)
+    pat = _swap_pattern(regime)
+    return len(pat.findall(sentence[:a])) + len(pat.findall(sentence[b:]))
 
 
 def grammar_ok(edited: str, original: str = "") -> bool:
@@ -185,6 +254,9 @@ class Variants:
     n_swaps: Optional[int] = None
     article_fixes: int = 0
     para_template: Optional[int] = None
+    # Character span of the verdict sentence inside texts[verdict]; absent for "none".
+    verdict_chars: Optional[Dict[str, Tuple[int, int]]] = None
+    nouns_outside_scope: Optional[int] = None
 
 
 def _replace_span(text: str, span: Tuple[int, int], new: str) -> str:
@@ -258,7 +330,17 @@ def make_variants(
     texts = {"own": v, "flip": m_flip, "none": m_none, "para": m_para, "para_flip": m_para_flip}
     j = jaccard(v, m_flip)
     n_swaps = count_swaps(original, regime)
-    result = Variants(True, "ok", own, opp, texts, j, jaccard_multiset(v, m_flip), changed_tokens(v, m_flip), n_swaps, fixes, t_idx)
+    start = span[0] + len(v[span[0] : span[1]]) - len(v[span[0] : span[1]].lstrip())
+    verdict_chars = {
+        "own": (start, span[1]),
+        "flip": (start, start + len(flipped)),
+        "para": (start, start + len(para_own)),
+        "para_flip": (start, start + len(para_opp)),
+    }
+    result = Variants(
+        True, "ok", own, opp, texts, j, jaccard_multiset(v, m_flip), changed_tokens(v, m_flip), n_swaps, fixes, t_idx,
+        verdict_chars, nouns_outside_scope(original, regime),
+    )
 
     # Gate 1: exactly one sentence differs (one removed for "none").
     if not all(_one_sentence_differs(v, texts[k]) for k in ("flip", "para", "para_flip")):
@@ -325,7 +407,12 @@ def build_cells(item: h5.Item, regime: str, variants: Dict[str, Variants], beh_k
                 instr = h5.instruction(regime, fam, k, item.image_only_question)
                 content = h5.build_content(regime, item, instr, order)
                 cell = {**cell_base, "k": k}
-                reqs.append(h5.Req(item, f"dl|{fam}|{ver}|k{k}|{order}", content, "score", score_prefill(m), 0, {**cell, "outcome": "dl"}))
+                reqs.append(
+                    h5.Req(
+                        item, f"dl|{fam}|{ver}|k{k}|{order}", content, "score", score_prefill(m), 0, {**cell, "outcome": "dl"},
+                        verdict_chars=(var.verdict_chars or {}).get(ver),
+                    )
+                )
                 if k in beh_k:
                     max_new = 512 if regime == "math" else 16
                     reqs.append(
@@ -371,6 +458,7 @@ def plan(items, regime, competent, donors, phase, n_competent, seed, beh_k):
     jaccards: List[float] = []
     swaps: Counter = Counter()
     own_sources: List[Tuple[str, str]] = []
+    outside: Counter = Counter()
     for it in pool:
         if any((it.id, o) not in donors for o in h5.ORDERS):
             gates["no_donor"] += 1
@@ -385,6 +473,7 @@ def plan(items, regime, competent, donors, phase, n_competent, seed, beh_k):
         own_sources += [(o, vs[o].own_source) for o in h5.ORDERS]
         jaccards += [vs[o].jaccard_multiset_flip for o in h5.ORDERS]
         swaps.update(vs[o].n_swaps for o in h5.ORDERS)
+        outside.update(vs[o].nouns_outside_scope for o in h5.ORDERS)
         reqs += build_cells(it, regime, vs, beh_k)
     gates["passed"] = len(passed)
     pass_rate = (len(passed) / gates["taken"]) if gates["taken"] else None
@@ -394,6 +483,8 @@ def plan(items, regime, competent, donors, phase, n_competent, seed, beh_k):
     gates["jaccard_multiset_flip_min"] = round(min(jaccards), 4) if jaccards else None
     gates["jaccard_multiset_flip_mean"] = round(sum(jaccards) / len(jaccards), 4) if jaccards else None
     gates["swaps_per_flip"] = {str(k): n for k, n in sorted(swaps.items())}
+    gates["swap_scope"] = SWAP_SCOPE
+    gates["source_nouns_outside_swap_scope"] = {str(k): n for k, n in sorted(outside.items())}
     gates["own_source_by_order"] = dict(Counter(f"{o}:{vs_own}" for o, vs_own in own_sources))
     gates["fail_reasons_by_order"] = reasons
     return reqs, gates, passed
@@ -406,14 +497,16 @@ def main() -> int:
     parser.add_argument("--donor_file", required=True)
     parser.add_argument("--n_competent", type=int, default=250, help="Confirm phase only (prereg R5)")
     parser.add_argument("--beh_k", type=int, nargs="*", default=[1], help="Templates that also get a behavioural decode")
+    parser.add_argument("--competency_parser", default="structured", choices=list(sc.MATH_PARSERS), help="Math answer parser for base competency (D3)")
     parser.add_argument("--gates_only", action="store_true", help="Write the gate report and stop")
     args = parser.parse_args()
 
-    cfg = h5.config_from_args(args, "transplant", beh_k=list(args.beh_k), n_competent=args.n_competent)
+    cfg = h5.config_from_args(args, "transplant", beh_k=list(args.beh_k), n_competent=args.n_competent, competency_parser=args.competency_parser)
     items = h5.select_items(args, cfg)
-    competent = h5.competent_ids(args.base_file)
+    competent = h5.competent_ids(args.base_file, parser=args.competency_parser)
     donors = load_donor_verbalizations(args.donor_file, cfg.model_id)
     reqs, gates, passed = plan(items, cfg.regime, competent, donors, cfg.phase, args.n_competent, cfg.seed, args.beh_k)
+    gates["competency_parser"] = args.competency_parser
 
     os.makedirs(args.output_dir, exist_ok=True)
     gates_path = os.path.join(args.output_dir, f"{cfg.run_tag}.gates.json")

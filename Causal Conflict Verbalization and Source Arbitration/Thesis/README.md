@@ -7,7 +7,7 @@ Writing guides, conceptual FAQs, execution runbooks, compute evaluations, and v5
 **Ground truth:** Active code and raw outputs live in [../Experiment/](../Experiment/) (start at [../Experiment/README.md](../Experiment/README.md)). The pre-registration draft is [../Docs/PREREGISTRATION_VERDICT_TRANSPLANT.md](../Docs/PREREGISTRATION_VERDICT_TRANSPLANT.md).
 
 > [!NOTE]
-> [../AGENTS.md](../AGENTS.md) still says the v5 dev pass "has not run". `results_v5/` and [../Experiment/README.md](../Experiment/README.md) (updated 2026-11-13) show it has. Trust the result files.
+> See [../Experiment/README.md](../Experiment/README.md) and [../AGENTS.md](../AGENTS.md) for current v5 dev-pass status and pre-freeze decisions.
 
 ---
 

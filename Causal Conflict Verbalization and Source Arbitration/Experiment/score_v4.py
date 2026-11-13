@@ -98,6 +98,8 @@ _PIVOT = re.compile(
     re.I,
 )
 _MAX_VERBALIZATION_CHARS = 900
+_MAX_VERBALIZATION_SENTENCES = 5  # the fallback looks this far for a reliability verdict
+_RELIABILITY_WORD = re.compile(r"\b(?:un)?reliable\b", re.I)
 
 
 def _sentence_ends(text: str) -> list:
@@ -112,8 +114,9 @@ def split_verbalization(text: str) -> Tuple[str, str]:
     """Split an output into (verbalization, solve) at the first solving cue.
 
     Model outputs often run to three sentences before solving, so a fixed count of
-    two cuts off the reliability statement. Falls back to two sentences when no
-    cue exists early in the output. Whitespace is preserved at the boundary so that
+    two cuts off the reliability statement. With no cue early in the output it falls
+    back to two sentences, extended to the end of the first later sentence (up to the
+    fifth) that contains "reliable". Whitespace is preserved at the boundary so that
     verbalization + solve == text.
     """
     window = text[:_MAX_VERBALIZATION_CHARS]
@@ -127,7 +130,16 @@ def split_verbalization(text: str) -> Tuple[str, str]:
         if m.start() >= first_end:
             return text[: m.start()], text[m.start() :]
     if len(ends) >= 2:
-        return text[: ends[1]], text[ends[1] :]
+        # No solving cue: keep two sentences, but do not cut off a reliability verdict that
+        # follows them. Models often write two framing sentences and then the verdict; the
+        # two-sentence cut dropped it (76/400 Qwen2-VL-2B Math donors in the v5 dev pass).
+        cut, prev = ends[1], ends[1]
+        for end in ends[2:_MAX_VERBALIZATION_SENTENCES]:
+            if _RELIABILITY_WORD.search(window[prev:end]):
+                cut = end
+                break
+            prev = end
+        return text[:cut], text[cut:]
     return text, ""
 
 

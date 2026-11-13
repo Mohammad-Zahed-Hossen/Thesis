@@ -308,6 +308,9 @@ class Req:
     prefill: Optional[str] = None
     max_new_tokens: int = 512
     cell: Dict[str, Any] = field(default_factory=dict)
+    # Score requests only: character span of the verdict sentence inside the prefill.
+    # None when the prefill holds no verdict (the "none" verdict and the explicit arms).
+    verdict_chars: Optional[tuple] = None
 
     @property
     def uses_image(self) -> bool:
@@ -535,14 +538,28 @@ class HFBackend(h4.HFBackend):
             base = render_chat(self.apply_chat_template, r.content, None)
             prefix_ids = self._encode([prefix], images)["input_ids"][0].tolist()
             base_ids = self._encode([base], images)["input_ids"][0].tolist()
-            verdict_text = r.prefill[: -len("\n\n####")] if r.prefill.endswith("\n\n####") else ("" if r.prefill == "####" else r.prefill)
-            extra_span = None
-            if verdict_text and prefix.startswith(base) and prefix_ids[: len(base_ids)] == base_ids:
-                verdict_prefix = render_chat(self.apply_chat_template, r.content, verdict_text)
-                verdict_ids = self._encode([verdict_prefix], images)["input_ids"][0].tolist()
-                if prefix_ids[: len(verdict_ids)] == verdict_ids and len(base_ids) < len(verdict_ids):
-                    extra_span = (len(base_ids), len(verdict_ids))
-            res: Dict[str, Any] = {"boundary_mismatch": False, "verdict_nll": None, "ws_skipped": 0}
+            # verdict_nll covers the reliability sentence only: not the sentences before it,
+            # and not "\n\n####". It stays None when the prefill has no verdict.
+            extra_span, span_exact = None, None
+            if r.verdict_chars and prefix.startswith(base) and prefix_ids[: len(base_ids)] == base_ids:
+                v_start, v_end = r.verdict_chars
+                before_text = r.prefill[:v_start].rstrip()
+                before_ids = (
+                    self._encode([render_chat(self.apply_chat_template, r.content, before_text)], images)["input_ids"][0].tolist()
+                    if before_text
+                    else base_ids
+                )
+                through_ids = self._encode([render_chat(self.apply_chat_template, r.content, r.prefill[:v_end])], images)["input_ids"][0].tolist()
+                span = sc.verdict_token_span(prefix_ids, before_ids, through_ids)
+                if span is not None and span[0] >= len(base_ids):
+                    extra_span, span_exact = (span[0], span[1]), span[2]
+            res: Dict[str, Any] = {
+                "boundary_mismatch": False,
+                "verdict_nll": None,
+                "verdict_nll_tokens": None,
+                "verdict_span_exact": span_exact,
+                "ws_skipped": 0,
+            }
             try:
                 for side, y in (("image", r.item.y_image), ("text", r.item.y_text)):
                     full = prefix + " " + candidate_text(y)
@@ -552,6 +569,7 @@ class HFBackend(h4.HFBackend):
                     res["ws_skipped"] += skip
                     if extra is not None and extra[1] > 0:
                         res["verdict_nll"] = -extra[0] / extra[1]
+                        res["verdict_nll_tokens"] = extra[1]
             except t.cuda.OutOfMemoryError as exc:
                 t.cuda.empty_cache()
                 raise h4.BackendOutOfMemory() from exc
@@ -660,21 +678,21 @@ def donor_requests(items: Sequence[Item], regime: str) -> List[Req]:
     return reqs
 
 
-def base_correct(row: Dict[str, Any]) -> bool:
-    """Did a base generation row give the gold answer for its source? Strict parsing (prereg §3.3)."""
+def base_correct(row: Dict[str, Any], parser: str = "structured") -> bool:
+    """Did a base generation row give the gold answer for its source? Default 'structured' (pre-freeze D3)."""
     if "full_text" not in row:  # a gold-answer score row
         return False
     gold = row["y_image"] if row["family"] == "base_image" else row["y_text"]
-    src, _, _ = sc.behavioural_source(row["full_text"], row["regime"], gold, gold)
+    src, _, _ = sc.behavioural_source(row["full_text"], row["regime"], gold, gold, parser=parser)
     return src == "both"
 
 
-def competent_ids(base_path: str) -> Set[str]:
+def competent_ids(base_path: str, parser: str = "structured") -> Set[str]:
     ok: Dict[str, Set[str]] = {}
     with open(base_path, encoding="utf-8") as f:
         for line in f:
             row = json.loads(line)
-            if base_correct(row):
+            if base_correct(row, parser=parser):
                 ok.setdefault(row["id"], set()).add(row["family"])
     return {i for i, s in ok.items() if s == {"base_image", "base_text"}}
 

@@ -5,7 +5,8 @@ v5 dev pass outputs across all three models (`Qwen2-VL-2B-Instruct`, `Qwen2.5-VL
 **Status:** **Dev data only — do not cite as confirmatory findings.**
 - Total stored artifacts: 39 files (16 `.jsonl`, 16 `.manifest.json`, 6 `.gates.json`, plus `pip_freeze.txt`), **29,880 rows**.
 - Audited twice in [../../Thesis/docs/Archive/](../../Thesis/docs/Archive/) (`v5_dev_evidence_audit.md` and `claude_v5_independent_deep_audit.md`).
-- `analyze_v5.py` has **not** yet been run on these files (there is no `analysis_dev/` folder yet). To generate it, follow the analysis step in [../RUNBOOK_v5.md](../RUNBOOK_v5.md).
+- `analysis_dev/` holds the output of `analyze_v5.py` on these files (`analysis_v5.md`, `analysis_v5.json`, `long_v5.csv`, `analyze_v5_lme4.R`). To regenerate it, follow the analysis step in [../RUNBOOK_v5.md](../RUNBOOK_v5.md).
+- The `*.gates.json` and transplant rows were produced by the code at commit `09216b0`. The scorers have changed since (verdict labelling, verbalization splitting, an answer-in-prefix gate), so re-running `transplant_v5.py --gates_only` today gives different gate counts. The stored files record what was run.
 
 > **Token tip for agents:** Never `cat` the `.jsonl` files (the `*_tp_*` files are 10–16 MB). Read the `*.gates.json` / `*.manifest.json` files or the audit reports instead.
 
@@ -25,7 +26,7 @@ v5 dev pass outputs across all three models (`Qwen2-VL-2B-Instruct`, `Qwen2.5-VL
 
 | File prefix | Rows (`.jsonl`) | Gates (`items → competent → passed`) | Notes |
 |---|---|---|---|
-| `v5dev_conflict_base_qwen2` | 800 | — | 200 items × 2 orders × 2 sources |
+| `v5dev_conflict_base_qwen2` | 800 | — | 200 items × 2 single-source arms (`base_image`, `base_text`) × 2 rows (one generation, one gold-answer score). No evidence order |
 | `v5dev_conflict_donor_qwen2` | 800 | — | |
 | `v5dev_conflict_tp_qwen2` | *(none)* | `200 → 0 → 0` | 2B wrote no `####` in Math; no transplant `.jsonl` |
 | `v5dev_conflict_base_qwen25` | 800 | — | |
@@ -34,7 +35,7 @@ v5 dev pass outputs across all three models (`Qwen2-VL-2B-Instruct`, `Qwen2.5-VL
 | `v5dev_conflict_base_qwen25_7b` | 800 | — | |
 | `v5dev_conflict_donor_qwen25_7b` | 800 | — | |
 | `v5dev_conflict_tp_qwen25_7b` | 13,800 | `200 → 124 → 115` | |
-| `v5dev_chartqa_base_qwen2` | 120 | — | 30 items × 2 orders × 2 sources |
+| `v5dev_chartqa_base_qwen2` | 120 | — | 30 items × 2 single-source arms × 2 rows. No evidence order |
 | `v5dev_chartqa_donor_qwen2` | 120 | — | |
 | `v5dev_chartqa_tp_qwen2` | *(none)* | `30 → 10 → 0` | Failed gates (`own_absent` 18, `own_undetermined` 2); no `.jsonl` |
 | `v5dev_chartqa_base_qwen25` | 120 | — | |

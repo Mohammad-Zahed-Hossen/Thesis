@@ -4,6 +4,8 @@
       "model_id": "Qwen/Qwen2.5-VL-3B-Instruct",
       "regime": "chartqa",
       "phase": "dev",
+      "confirmatory_role": "exploratory",
+      "primary_outcome": "dl",
       "n_items": 6,
       "boundary_mismatch_rows": 0,
       "boundary_mismatch_share": 0.0,
@@ -41,7 +43,7 @@
           0.05283167572777326,
           0.15165441275763036
         ],
-        "holm_p": 0.0156984301569843,
+        "holm_p": 0.022797720227977204,
         "significant": true,
         "significant_after_holm": true
       },
@@ -59,7 +61,7 @@
         "reading": "decision-relevant",
         "p_decision_relevant": 9.999000099990002e-05,
         "p_equivalent": 1.0,
-        "holm_p": 0.00029997000299970003
+        "holm_p": 0.0005999400059994001
       },
       "T3_rho_nonbinding": {
         "cde": 0.35669954089359335,
@@ -75,12 +77,20 @@
         "reading": "decision-relevant",
         "p_decision_relevant": 0.005699430056994301,
         "p_equivalent": 0.9944005599440056,
-        "holm_p": 0.011398860113988602
+        "holm_p": 0.022797720227977204
       },
       "holm_adjusted": {
-        "T2": 0.00029997000299970003,
-        "T3": 0.011398860113988602,
-        "T1": 0.0156984301569843
+        "T2": 0.0005999400059994001,
+        "T3": 0.022797720227977204,
+        "T1": 0.022797720227977204
+      },
+      "headline_parser": "structured",
+      "replay_noise": {
+        "n_pairs": 12,
+        "attributable_pairs": 0,
+        "replay_flip_rate": null,
+        "replay_any_change_rate": 0.75,
+        "suggested_churn_cap": null
       },
       "behaviour_binding": {
         "delta_flip_minus_own": {
@@ -107,6 +117,10 @@
           "churn_rate": 0.0,
           "max_churn": 0.05,
           "churn_exceeds_max": false,
+          "replay_flip_rate": null,
+          "replay_adjusted_max_churn": null,
+          "churn_exceeds_replay_adjusted_max": false,
+          "floor_ok_replay_adjusted": true,
           "sd_item_difference": 0.0,
           "tost_power_at_this_noise": 1.0,
           "power_below_target": false,
@@ -138,16 +152,240 @@
           "churn_rate": 0.0,
           "max_churn": 0.05,
           "churn_exceeds_max": false,
+          "replay_flip_rate": null,
+          "replay_adjusted_max_churn": null,
+          "churn_exceeds_replay_adjusted_max": false,
+          "floor_ok_replay_adjusted": true,
           "sd_item_difference": 0.0,
           "tost_power_at_this_noise": 1.0,
           "power_below_target": false,
           "floor_ok": true
         }
       },
+      "behaviour_primary": {
+        "is_primary_for_regime": false,
+        "parser": "structured",
+        "binding": {
+          "flip_minus_own": {
+            "n": 6,
+            "mean": 0.08333333333333333,
+            "ci95": [
+              0.0,
+              0.25
+            ],
+            "ci90": [
+              0.0,
+              0.25
+            ],
+            "p": 0.502049795020498,
+            "tost_reading": "not equivalent",
+            "holm_p": 1.0
+          },
+          "matched_pair_para_flip_minus_para": {
+            "n": 6,
+            "mean": 0.08333333333333333,
+            "ci95": [
+              0.0,
+              0.25
+            ],
+            "ci90": [
+              0.0,
+              0.25
+            ],
+            "p": 0.502049795020498,
+            "tost_reading": "not equivalent"
+          },
+          "none_minus_own": {
+            "n": 6,
+            "mean": 0.0,
+            "ci95": [
+              0.0,
+              0.0
+            ],
+            "ci90": [
+              0.0,
+              0.0
+            ],
+            "p": 1.0
+          },
+          "flip_minus_none": {
+            "n": 6,
+            "mean": 0.08333333333333333,
+            "ci95": [
+              0.0,
+              0.25
+            ],
+            "ci90": [
+              0.0,
+              0.25
+            ],
+            "p": 0.502049795020498
+          },
+          "para_flip_minus_none": {
+            "n": 6,
+            "mean": 0.08333333333333333,
+            "ci95": [
+              0.0,
+              0.25
+            ],
+            "ci90": [
+              0.0,
+              0.25
+            ],
+            "p": 0.502049795020498
+          }
+        },
+        "nonbinding": {
+          "flip_minus_own": {
+            "n": 6,
+            "mean": 0.08333333333333333,
+            "ci95": [
+              0.0,
+              0.25
+            ],
+            "ci90": [
+              0.0,
+              0.25
+            ],
+            "p": 0.502049795020498,
+            "tost_reading": "not equivalent",
+            "holm_p": 1.0
+          },
+          "matched_pair_para_flip_minus_para": {
+            "n": 6,
+            "mean": 0.08333333333333333,
+            "ci95": [
+              0.0,
+              0.25
+            ],
+            "ci90": [
+              0.0,
+              0.25
+            ],
+            "p": 0.502049795020498,
+            "tost_reading": "not equivalent"
+          },
+          "none_minus_own": {
+            "n": 6,
+            "mean": 0.0,
+            "ci95": [
+              0.0,
+              0.0
+            ],
+            "ci90": [
+              0.0,
+              0.0
+            ],
+            "p": 1.0
+          },
+          "flip_minus_none": {
+            "n": 6,
+            "mean": 0.08333333333333333,
+            "ci95": [
+              0.0,
+              0.25
+            ],
+            "ci90": [
+              0.0,
+              0.25
+            ],
+            "p": 0.502049795020498
+          },
+          "para_flip_minus_none": {
+            "n": 6,
+            "mean": 0.08333333333333333,
+            "ci95": [
+              0.0,
+              0.25
+            ],
+            "ci90": [
+              0.0,
+              0.25
+            ],
+            "p": 0.502049795020498
+          }
+        },
+        "T1_beh_did": {
+          "n": 6,
+          "mean": 0.0,
+          "ci95": [
+            0.0,
+            0.0
+          ],
+          "p": 1.0,
+          "significant": false,
+          "holm_p": 1.0,
+          "significant_after_holm": false
+        },
+        "T1_beh_matched_pair_did": {
+          "n": 6,
+          "mean": 0.0,
+          "ci95": [
+            0.0,
+            0.0
+          ],
+          "p": 1.0,
+          "significant": false
+        },
+        "holm_adjusted": {
+          "bind_flip_minus_own": 1.0,
+          "nonbind_flip_minus_own": 1.0,
+          "T1_beh": 1.0
+        }
+      },
       "wording_floor_ok_binding": true,
       "wording_floor_ok_nonbinding": true,
+      "wording_floor_ok_replay_adjusted_binding": true,
+      "wording_floor_ok_replay_adjusted_nonbinding": true,
       "reading_binding": "H1: the verdict decides, and binding strengthens it",
       "reading_nonbinding": "H1: the verdict decides; no evidence that binding strengthens it",
+      "edit_gate_ok": false,
+      "reading_binding_reported": "NOT A READING: n = 6 is below the R5 minimum of 100; the edit-gate pass rate is below 60% (prereg \u00a78). The decision table alone would say: H1: the verdict decides, and binding strengthens it",
+      "reading_caveats": [
+        "n = 6 is below the R5 minimum of 100",
+        "the edit-gate pass rate is below 60% (prereg \u00a78)"
+      ],
+      "reading_nonbinding_reported": "NOT A READING: n = 6 is below the R5 minimum of 100; the edit-gate pass rate is below 60% (prereg \u00a78). The decision table alone would say: H1: the verdict decides; no evidence that binding strengthens it",
+      "behaviour_by_parser": {
+        "strict": {
+          "neither_rate": 0.24305555555555555,
+          "binding": {
+            "delta_flip_minus_own": 0.08333333333333333,
+            "delta_ci90": [
+              0.0,
+              0.25
+            ],
+            "matched_pair_para_flip_minus_para": 0.08333333333333333,
+            "floor_signed_mean": 0.0,
+            "churn_any_change_own_vs_para": 0.0,
+            "flip_rate_attributable_own_vs_para": 0.0,
+            "attributable_pairs_own_vs_para": 8
+          },
+          "nonbinding": {
+            "delta_flip_minus_own": 0.08333333333333333,
+            "delta_ci90": [
+              0.0,
+              0.25
+            ],
+            "matched_pair_para_flip_minus_para": 0.08333333333333333,
+            "floor_signed_mean": 0.0,
+            "churn_any_change_own_vs_para": 0.0,
+            "flip_rate_attributable_own_vs_para": 0.0,
+            "attributable_pairs_own_vs_para": 9
+          }
+        }
+      },
+      "validity_dl_vs_behaviour": {
+        "strict": {
+          "parser": "strict",
+          "n_behavioural_rows": 144,
+          "n_attributable": 109,
+          "sign_agreement": 0.9908256880733946,
+          "majority_baseline": 0.9908256880733946,
+          "auc_image_first": 1.0,
+          "auc_text_first": null
+        }
+      },
       "secondary": {
         "matched_pair_binding": {
           "n": 6,
@@ -214,6 +452,14 @@
               0.37200952878174576
             ]
           },
+          "binding_para_flip_minus_none": {
+            "n": 6,
+            "mean": 0.36914290014827,
+            "ci95": [
+              0.2646783727904727,
+              0.4703755053418111
+            ]
+          },
           "nonbinding_none_minus_own": {
             "n": 6,
             "mean": 0.10539047460182094,
@@ -228,6 +474,14 @@
             "ci95": [
               0.16709860618054032,
               0.3355195264030044
+            ]
+          },
+          "nonbinding_para_flip_minus_none": {
+            "n": 6,
+            "mean": 0.3538375819831547,
+            "ci95": [
+              0.2362972857951617,
+              0.4710293967678615
             ]
           }
         },
@@ -387,6 +641,7 @@
             0.8359375205473043
           ]
         },
+        "behaviour_neither_rate_headline": 0.24305555555555555,
         "behaviour_neither_rate": 0.24305555555555555,
         "behaviour_neither_rate_strict": 0.24305555555555555,
         "chartqa_answer_only_match_share": 0.7569444444444444,
@@ -401,13 +656,13 @@
         "manipulation_check": {
           "donor": {
             "rows": 60,
-            "with_stated_verdict": 28,
+            "with_stated_verdict": 33,
             "attributable_answers": 0,
             "answer_follows_stated_verdict": null
           },
           "free_binding": {
             "rows": 60,
-            "with_stated_verdict": 12,
+            "with_stated_verdict": 14,
             "attributable_answers": 0,
             "answer_follows_stated_verdict": null
           }
@@ -423,6 +678,8 @@
       "model_id": "Qwen/Qwen2.5-VL-3B-Instruct",
       "regime": "math",
       "phase": "dev",
+      "confirmatory_role": "confirmatory",
+      "primary_outcome": "behaviour",
       "n_items": 80,
       "boundary_mismatch_rows": 0,
       "boundary_mismatch_share": 0.0,
@@ -478,7 +735,7 @@
         "reading": "decision-relevant",
         "p_decision_relevant": 9.999000099990002e-05,
         "p_equivalent": 1.0,
-        "holm_p": 0.00029997000299970003
+        "holm_p": 0.00039996000399960006
       },
       "T3_rho_nonbinding": {
         "cde": 0.149933943985828,
@@ -494,79 +751,386 @@
         "reading": "decision-relevant",
         "p_decision_relevant": 9.999000099990002e-05,
         "p_equivalent": 1.0,
-        "holm_p": 0.00029997000299970003
+        "holm_p": 0.00039996000399960006
       },
       "holm_adjusted": {
         "T1": 0.00029997000299970003,
-        "T2": 0.00029997000299970003,
-        "T3": 0.00029997000299970003
+        "T2": 0.00039996000399960006,
+        "T3": 0.00039996000399960006
+      },
+      "headline_parser": "structured",
+      "replay_noise": {
+        "n_pairs": 160,
+        "attributable_pairs": 93,
+        "replay_flip_rate": 0.03225806451612903,
+        "replay_any_change_rate": 0.11875,
+        "suggested_churn_cap": 0.08225806451612903
       },
       "behaviour_binding": {
         "delta_flip_minus_own": {
           "n": 80,
-          "mean": 0.58125,
+          "mean": 0.49375,
           "ci90": [
-            0.5125,
-            0.64375
+            0.425,
+            0.5625
           ],
           "reading": "not equivalent"
         },
         "mean_abs_dl_gap_own_vs_para": 0.16426834190654213,
         "mean_abs_dl_gap_own_vs_flip": 0.2808952899181895,
-        "change_rate_own_vs_para": 0.02857142857142857,
-        "change_rate_own_vs_flip": 0.8085106382978723,
-        "neither_transition_rate_own_vs_para": 0.34375,
-        "neither_transition_rate_own_vs_flip": 0.4125,
+        "change_rate_own_vs_para": 0.031914893617021274,
+        "change_rate_own_vs_flip": 0.7721518987341772,
+        "neither_transition_rate_own_vs_para": 0.4125,
+        "neither_transition_rate_own_vs_flip": 0.50625,
         "wording_floor_para_minus_own": {
           "n": 80,
-          "signed_mean": -0.08125,
-          "mean": -0.08125,
-          "signed_mean_exceeds_epsilon": true,
-          "exceeds_epsilon": true,
-          "churn_rate": 0.02857142857142857,
+          "signed_mean": -0.04375,
+          "mean": -0.04375,
+          "signed_mean_exceeds_epsilon": false,
+          "exceeds_epsilon": false,
+          "churn_rate": 0.031914893617021274,
           "max_churn": 0.05,
           "churn_exceeds_max": false,
-          "sd_item_difference": 0.29169680374741114,
+          "replay_flip_rate": 0.03225806451612903,
+          "replay_adjusted_max_churn": 0.08225806451612903,
+          "churn_exceeds_replay_adjusted_max": false,
+          "floor_ok_replay_adjusted": true,
+          "sd_item_difference": 0.2997229733595569,
           "tost_power_at_this_noise": 0.0,
           "power_below_target": true,
-          "floor_ok": false
+          "floor_ok": true
         }
       },
       "behaviour_nonbinding": {
         "delta_flip_minus_own": {
           "n": 80,
-          "mean": 0.4375,
+          "mean": 0.38125,
           "ci90": [
-            0.36875,
-            0.50625
+            0.30625,
+            0.45
           ],
           "reading": "not equivalent"
         },
         "mean_abs_dl_gap_own_vs_para": 0.14183710509714728,
         "mean_abs_dl_gap_own_vs_flip": 0.19656478638543678,
-        "change_rate_own_vs_para": 0.0761904761904762,
-        "change_rate_own_vs_flip": 0.6483516483516484,
-        "neither_transition_rate_own_vs_para": 0.34375,
-        "neither_transition_rate_own_vs_flip": 0.43125,
+        "change_rate_own_vs_para": 0.0759493670886076,
+        "change_rate_own_vs_flip": 0.6756756756756757,
+        "neither_transition_rate_own_vs_para": 0.50625,
+        "neither_transition_rate_own_vs_flip": 0.5375,
         "wording_floor_para_minus_own": {
           "n": 80,
-          "signed_mean": -0.03125,
-          "mean": -0.03125,
+          "signed_mean": 0.0,
+          "mean": 0.0,
           "signed_mean_exceeds_epsilon": false,
           "exceeds_epsilon": false,
-          "churn_rate": 0.0761904761904762,
+          "churn_rate": 0.0759493670886076,
           "max_churn": 0.05,
           "churn_exceeds_max": true,
-          "sd_item_difference": 0.2795084971874737,
+          "replay_flip_rate": 0.03225806451612903,
+          "replay_adjusted_max_churn": 0.08225806451612903,
+          "churn_exceeds_replay_adjusted_max": false,
+          "floor_ok_replay_adjusted": true,
+          "sd_item_difference": 0.3081180112566604,
           "tost_power_at_this_noise": 0.0,
           "power_below_target": true,
           "floor_ok": false
         }
       },
-      "wording_floor_ok_binding": false,
+      "behaviour_primary": {
+        "is_primary_for_regime": true,
+        "parser": "structured",
+        "binding": {
+          "flip_minus_own": {
+            "n": 80,
+            "mean": 0.49375,
+            "ci95": [
+              0.4125,
+              0.575
+            ],
+            "ci90": [
+              0.425,
+              0.5625
+            ],
+            "p": 9.999000099990002e-05,
+            "tost_reading": "not equivalent",
+            "holm_p": 0.00029997000299970003
+          },
+          "matched_pair_para_flip_minus_para": {
+            "n": 80,
+            "mean": 0.6375,
+            "ci95": [
+              0.5625,
+              0.7125
+            ],
+            "ci90": [
+              0.575,
+              0.7
+            ],
+            "p": 9.999000099990002e-05,
+            "tost_reading": "not equivalent"
+          },
+          "none_minus_own": {
+            "n": 80,
+            "mean": 0.10625,
+            "ci95": [
+              0.05625,
+              0.15625
+            ],
+            "ci90": [
+              0.0625,
+              0.15
+            ],
+            "p": 0.0006999300069993001
+          },
+          "flip_minus_none": {
+            "n": 80,
+            "mean": 0.3875,
+            "ci95": [
+              0.3,
+              0.475
+            ],
+            "ci90": [
+              0.3125,
+              0.45625
+            ],
+            "p": 9.999000099990002e-05
+          },
+          "para_flip_minus_none": {
+            "n": 80,
+            "mean": 0.5125,
+            "ci95": [
+              0.4375,
+              0.5875
+            ],
+            "ci90": [
+              0.45,
+              0.575
+            ],
+            "p": 9.999000099990002e-05
+          }
+        },
+        "nonbinding": {
+          "flip_minus_own": {
+            "n": 80,
+            "mean": 0.38125,
+            "ci95": [
+              0.29375,
+              0.4625
+            ],
+            "ci90": [
+              0.30625,
+              0.45
+            ],
+            "p": 9.999000099990002e-05,
+            "tost_reading": "not equivalent",
+            "holm_p": 0.00029997000299970003
+          },
+          "matched_pair_para_flip_minus_para": {
+            "n": 80,
+            "mean": 0.40625,
+            "ci95": [
+              0.33125,
+              0.4875
+            ],
+            "ci90": [
+              0.34375,
+              0.475
+            ],
+            "p": 9.999000099990002e-05,
+            "tost_reading": "not equivalent"
+          },
+          "none_minus_own": {
+            "n": 80,
+            "mean": 0.125,
+            "ci95": [
+              0.05625,
+              0.2
+            ],
+            "ci90": [
+              0.0625,
+              0.1875
+            ],
+            "p": 0.0008999100089991
+          },
+          "flip_minus_none": {
+            "n": 80,
+            "mean": 0.25625,
+            "ci95": [
+              0.1625,
+              0.35
+            ],
+            "ci90": [
+              0.175,
+              0.3375
+            ],
+            "p": 9.999000099990002e-05
+          },
+          "para_flip_minus_none": {
+            "n": 80,
+            "mean": 0.24375,
+            "ci95": [
+              0.15,
+              0.3375
+            ],
+            "ci90": [
+              0.1625,
+              0.31875
+            ],
+            "p": 9.999000099990002e-05
+          }
+        },
+        "T1_beh_did": {
+          "n": 80,
+          "mean": 0.1125,
+          "ci95": [
+            0.01875,
+            0.20625
+          ],
+          "p": 0.015498450154984501,
+          "significant": true,
+          "holm_p": 0.015498450154984501,
+          "significant_after_holm": true
+        },
+        "T1_beh_matched_pair_did": {
+          "n": 80,
+          "mean": 0.23125,
+          "ci95": [
+            0.15,
+            0.3125
+          ],
+          "p": 9.999000099990002e-05,
+          "significant": true
+        },
+        "holm_adjusted": {
+          "bind_flip_minus_own": 0.00029997000299970003,
+          "nonbind_flip_minus_own": 0.00029997000299970003,
+          "T1_beh": 0.015498450154984501
+        }
+      },
+      "wording_floor_ok_binding": true,
       "wording_floor_ok_nonbinding": false,
+      "wording_floor_ok_replay_adjusted_binding": true,
+      "wording_floor_ok_replay_adjusted_nonbinding": true,
       "reading_binding": "H1: the verdict decides, and binding strengthens it",
       "reading_nonbinding": "H1: the verdict decides; no evidence that binding strengthens it",
+      "edit_gate_ok": true,
+      "reading_binding_reported": "NOT A READING: n = 80 is below the R5 minimum of 150. The decision table alone would say: H1: the verdict decides, and binding strengthens it",
+      "reading_caveats": [
+        "n = 80 is below the R5 minimum of 150"
+      ],
+      "reading_nonbinding_reported": "NOT A READING: n = 80 is below the R5 minimum of 150. The decision table alone would say: H1: the verdict decides; no evidence that binding strengthens it",
+      "behaviour_by_parser": {
+        "strict": {
+          "neither_rate": 0.44947916666666665,
+          "binding": {
+            "delta_flip_minus_own": 0.45625,
+            "delta_ci90": [
+              0.3875,
+              0.525
+            ],
+            "matched_pair_para_flip_minus_para": 0.6125,
+            "floor_signed_mean": -0.05625,
+            "churn_any_change_own_vs_para": 0.25625,
+            "flip_rate_attributable_own_vs_para": 0.03571428571428571,
+            "attributable_pairs_own_vs_para": 84
+          },
+          "nonbinding": {
+            "delta_flip_minus_own": 0.35625,
+            "delta_ci90": [
+              0.28125,
+              0.425
+            ],
+            "matched_pair_para_flip_minus_para": 0.4,
+            "floor_signed_mean": -0.0125,
+            "churn_any_change_own_vs_para": 0.28125,
+            "flip_rate_attributable_own_vs_para": 0.08955223880597014,
+            "attributable_pairs_own_vs_para": 67
+          }
+        },
+        "structured": {
+          "neither_rate": 0.39375,
+          "binding": {
+            "delta_flip_minus_own": 0.49375,
+            "delta_ci90": [
+              0.425,
+              0.5625
+            ],
+            "matched_pair_para_flip_minus_para": 0.6375,
+            "floor_signed_mean": -0.04375,
+            "churn_any_change_own_vs_para": 0.23125,
+            "flip_rate_attributable_own_vs_para": 0.031914893617021274,
+            "attributable_pairs_own_vs_para": 94
+          },
+          "nonbinding": {
+            "delta_flip_minus_own": 0.38125,
+            "delta_ci90": [
+              0.30625,
+              0.45
+            ],
+            "matched_pair_para_flip_minus_para": 0.40625,
+            "floor_signed_mean": 0.0,
+            "churn_any_change_own_vs_para": 0.2875,
+            "flip_rate_attributable_own_vs_para": 0.0759493670886076,
+            "attributable_pairs_own_vs_para": 79
+          }
+        },
+        "lenient": {
+          "neither_rate": 0.3067708333333333,
+          "binding": {
+            "delta_flip_minus_own": 0.58125,
+            "delta_ci90": [
+              0.5125,
+              0.64375
+            ],
+            "matched_pair_para_flip_minus_para": 0.69375,
+            "floor_signed_mean": -0.08125,
+            "churn_any_change_own_vs_para": 0.20625,
+            "flip_rate_attributable_own_vs_para": 0.02857142857142857,
+            "attributable_pairs_own_vs_para": 105
+          },
+          "nonbinding": {
+            "delta_flip_minus_own": 0.4375,
+            "delta_ci90": [
+              0.36875,
+              0.50625
+            ],
+            "matched_pair_para_flip_minus_para": 0.43125,
+            "floor_signed_mean": -0.03125,
+            "churn_any_change_own_vs_para": 0.2,
+            "flip_rate_attributable_own_vs_para": 0.0761904761904762,
+            "attributable_pairs_own_vs_para": 105
+          }
+        }
+      },
+      "validity_dl_vs_behaviour": {
+        "strict": {
+          "parser": "strict",
+          "n_behavioural_rows": 1920,
+          "n_attributable": 1057,
+          "sign_agreement": 0.5156102175969726,
+          "majority_baseline": 0.5515610217596972,
+          "auc_image_first": 0.5308578650014868,
+          "auc_text_first": 0.5605084315605436
+        },
+        "structured": {
+          "parser": "structured",
+          "n_behavioural_rows": 1920,
+          "n_attributable": 1164,
+          "sign_agreement": 0.5060137457044673,
+          "majority_baseline": 0.5661512027491409,
+          "auc_image_first": 0.5322772777590605,
+          "auc_text_first": 0.55849577139002
+        },
+        "lenient": {
+          "parser": "lenient",
+          "n_behavioural_rows": 1920,
+          "n_attributable": 1331,
+          "sign_agreement": 0.5026296018031555,
+          "majority_baseline": 0.5529676934635612,
+          "auc_image_first": 0.5487574772170701,
+          "auc_text_first": 0.5573973333333333
+        }
+      },
       "secondary": {
         "matched_pair_binding": {
           "n": 80,
@@ -633,6 +1197,14 @@
               0.15030937652088444
             ]
           },
+          "binding_para_flip_minus_none": {
+            "n": 80,
+            "mean": 0.09062668241923044,
+            "ci95": [
+              0.04547689152518585,
+              0.1362998722978297
+            ]
+          },
           "nonbinding_none_minus_own": {
             "n": 80,
             "mean": 0.07555030267877252,
@@ -647,6 +1219,14 @@
             "ci95": [
               0.030931871689396137,
               0.12053277738868533
+            ]
+          },
+          "nonbinding_para_flip_minus_none": {
+            "n": 80,
+            "mean": 0.07009256403415444,
+            "ci95": [
+              0.029642695114557974,
+              0.11226497082951147
             ]
           }
         },
@@ -806,6 +1386,7 @@
             0.3811104771838082
           ]
         },
+        "behaviour_neither_rate_headline": 0.39375,
         "behaviour_neither_rate": 0.3067708333333333,
         "behaviour_neither_rate_strict": 0.44947916666666665,
         "seconds_per_item": 60.32130000000001,
@@ -829,7 +1410,7 @@
           },
           "free_binding": {
             "rows": 400,
-            "with_stated_verdict": 313,
+            "with_stated_verdict": 315,
             "attributable_answers": 213,
             "answer_follows_stated_verdict": 0.9436619718309859,
             "answer_follows_stated_verdict_ci95": [
@@ -865,6 +1446,8 @@
       "model_id": "Qwen/Qwen2.5-VL-7B-Instruct",
       "regime": "chartqa",
       "phase": "dev",
+      "confirmatory_role": "exploratory",
+      "primary_outcome": "dl",
       "n_items": 2,
       "boundary_mismatch_rows": 0,
       "boundary_mismatch_share": 0.0,
@@ -920,7 +1503,7 @@
         "reading": "inconclusive",
         "p_decision_relevant": 0.7455254474552545,
         "p_equivalent": 0.2545745425457454,
-        "holm_p": 0.48495150484951505
+        "holm_p": 0.5091490850914908
       },
       "T3_rho_nonbinding": {
         "cde": 0.17215996764016384,
@@ -936,12 +1519,20 @@
         "reading": "equivalent to no effect",
         "p_decision_relevant": 1.0,
         "p_equivalent": 9.999000099990002e-05,
-        "holm_p": 0.00029997000299970003
+        "holm_p": 0.0005999400059994001
       },
       "holm_adjusted": {
-        "T3": 0.00029997000299970003,
+        "T3": 0.0005999400059994001,
         "T1": 0.48495150484951505,
-        "T2": 0.48495150484951505
+        "T2": 0.5091490850914908
+      },
+      "headline_parser": "structured",
+      "replay_noise": {
+        "n_pairs": 4,
+        "attributable_pairs": 4,
+        "replay_flip_rate": 0.0,
+        "replay_any_change_rate": 0.0,
+        "suggested_churn_cap": 0.05
       },
       "behaviour_binding": {
         "delta_flip_minus_own": {
@@ -968,6 +1559,10 @@
           "churn_rate": 0.0,
           "max_churn": 0.05,
           "churn_exceeds_max": false,
+          "replay_flip_rate": 0.0,
+          "replay_adjusted_max_churn": 0.05,
+          "churn_exceeds_replay_adjusted_max": false,
+          "floor_ok_replay_adjusted": true,
           "sd_item_difference": 0.0,
           "tost_power_at_this_noise": 1.0,
           "power_below_target": false,
@@ -999,16 +1594,240 @@
           "churn_rate": 0.0,
           "max_churn": 0.05,
           "churn_exceeds_max": false,
+          "replay_flip_rate": 0.0,
+          "replay_adjusted_max_churn": 0.05,
+          "churn_exceeds_replay_adjusted_max": false,
+          "floor_ok_replay_adjusted": true,
           "sd_item_difference": 0.0,
           "tost_power_at_this_noise": 1.0,
           "power_below_target": false,
           "floor_ok": true
         }
       },
+      "behaviour_primary": {
+        "is_primary_for_regime": false,
+        "parser": "structured",
+        "binding": {
+          "flip_minus_own": {
+            "n": 2,
+            "mean": 0.0,
+            "ci95": [
+              0.0,
+              0.0
+            ],
+            "ci90": [
+              0.0,
+              0.0
+            ],
+            "p": 1.0,
+            "tost_reading": "equivalent",
+            "holm_p": 1.0
+          },
+          "matched_pair_para_flip_minus_para": {
+            "n": 2,
+            "mean": 0.25,
+            "ci95": [
+              0.0,
+              0.5
+            ],
+            "ci90": [
+              0.0,
+              0.5
+            ],
+            "p": 0.49665033496650335,
+            "tost_reading": "not equivalent"
+          },
+          "none_minus_own": {
+            "n": 2,
+            "mean": 0.0,
+            "ci95": [
+              0.0,
+              0.0
+            ],
+            "ci90": [
+              0.0,
+              0.0
+            ],
+            "p": 1.0
+          },
+          "flip_minus_none": {
+            "n": 2,
+            "mean": 0.0,
+            "ci95": [
+              0.0,
+              0.0
+            ],
+            "ci90": [
+              0.0,
+              0.0
+            ],
+            "p": 1.0
+          },
+          "para_flip_minus_none": {
+            "n": 2,
+            "mean": 0.25,
+            "ci95": [
+              0.0,
+              0.5
+            ],
+            "ci90": [
+              0.0,
+              0.5
+            ],
+            "p": 0.49665033496650335
+          }
+        },
+        "nonbinding": {
+          "flip_minus_own": {
+            "n": 2,
+            "mean": 0.0,
+            "ci95": [
+              0.0,
+              0.0
+            ],
+            "ci90": [
+              0.0,
+              0.0
+            ],
+            "p": 1.0,
+            "tost_reading": "equivalent",
+            "holm_p": 1.0
+          },
+          "matched_pair_para_flip_minus_para": {
+            "n": 2,
+            "mean": 0.0,
+            "ci95": [
+              0.0,
+              0.0
+            ],
+            "ci90": [
+              0.0,
+              0.0
+            ],
+            "p": 1.0,
+            "tost_reading": "equivalent"
+          },
+          "none_minus_own": {
+            "n": 2,
+            "mean": 0.0,
+            "ci95": [
+              0.0,
+              0.0
+            ],
+            "ci90": [
+              0.0,
+              0.0
+            ],
+            "p": 1.0
+          },
+          "flip_minus_none": {
+            "n": 2,
+            "mean": 0.0,
+            "ci95": [
+              0.0,
+              0.0
+            ],
+            "ci90": [
+              0.0,
+              0.0
+            ],
+            "p": 1.0
+          },
+          "para_flip_minus_none": {
+            "n": 2,
+            "mean": 0.0,
+            "ci95": [
+              0.0,
+              0.0
+            ],
+            "ci90": [
+              0.0,
+              0.0
+            ],
+            "p": 1.0
+          }
+        },
+        "T1_beh_did": {
+          "n": 2,
+          "mean": 0.0,
+          "ci95": [
+            0.0,
+            0.0
+          ],
+          "p": 1.0,
+          "significant": false,
+          "holm_p": 1.0,
+          "significant_after_holm": false
+        },
+        "T1_beh_matched_pair_did": {
+          "n": 2,
+          "mean": 0.25,
+          "ci95": [
+            0.0,
+            0.5
+          ],
+          "p": 0.49665033496650335,
+          "significant": false
+        },
+        "holm_adjusted": {
+          "T1_beh": 1.0,
+          "bind_flip_minus_own": 1.0,
+          "nonbind_flip_minus_own": 1.0
+        }
+      },
       "wording_floor_ok_binding": true,
       "wording_floor_ok_nonbinding": true,
+      "wording_floor_ok_replay_adjusted_binding": true,
+      "wording_floor_ok_replay_adjusted_nonbinding": true,
       "reading_binding": "inconclusive",
       "reading_nonbinding": "H0: saying is not choosing",
+      "edit_gate_ok": false,
+      "reading_binding_reported": "NOT A READING: n = 2 is below the R5 minimum of 100; the edit-gate pass rate is below 60% (prereg \u00a78). The decision table alone would say: inconclusive",
+      "reading_caveats": [
+        "n = 2 is below the R5 minimum of 100",
+        "the edit-gate pass rate is below 60% (prereg \u00a78)"
+      ],
+      "reading_nonbinding_reported": "NOT A READING: n = 2 is below the R5 minimum of 100; the edit-gate pass rate is below 60% (prereg \u00a78). The decision table alone would say: H0: saying is not choosing",
+      "behaviour_by_parser": {
+        "strict": {
+          "neither_rate": 0.0,
+          "binding": {
+            "delta_flip_minus_own": 0.0,
+            "delta_ci90": [
+              0.0,
+              0.0
+            ],
+            "matched_pair_para_flip_minus_para": 0.25,
+            "floor_signed_mean": 0.0,
+            "churn_any_change_own_vs_para": 0.0,
+            "flip_rate_attributable_own_vs_para": 0.0,
+            "attributable_pairs_own_vs_para": 4
+          },
+          "nonbinding": {
+            "delta_flip_minus_own": 0.0,
+            "delta_ci90": [
+              0.0,
+              0.0
+            ],
+            "matched_pair_para_flip_minus_para": 0.0,
+            "floor_signed_mean": 0.0,
+            "churn_any_change_own_vs_para": 0.0,
+            "flip_rate_attributable_own_vs_para": 0.0,
+            "attributable_pairs_own_vs_para": 4
+          }
+        }
+      },
+      "validity_dl_vs_behaviour": {
+        "strict": {
+          "parser": "strict",
+          "n_behavioural_rows": 48,
+          "n_attributable": 48,
+          "sign_agreement": 0.9791666666666666,
+          "majority_baseline": 0.875,
+          "auc_image_first": 1.0,
+          "auc_text_first": 0.9894736842105263
+        }
+      },
       "secondary": {
         "matched_pair_binding": {
           "n": 2,
@@ -1075,6 +1894,14 @@
               0.2703009242951339
             ]
           },
+          "binding_para_flip_minus_none": {
+            "n": 2,
+            "mean": 0.18183918999343404,
+            "ci95": [
+              0.07524113149593176,
+              0.2884372484909363
+            ]
+          },
           "nonbinding_none_minus_own": {
             "n": 2,
             "mean": -0.006718256279691533,
@@ -1089,6 +1916,14 @@
             "ci95": [
               0.07126088603072281,
               0.28649556180898794
+            ]
+          },
+          "nonbinding_para_flip_minus_none": {
+            "n": 2,
+            "mean": 0.16091715211819063,
+            "ci95": [
+              0.06269655085197876,
+              0.2591377533844025
             ]
           }
         },
@@ -1224,6 +2059,7 @@
             ]
           }
         },
+        "behaviour_neither_rate_headline": 0.0,
         "behaviour_neither_rate": 0.0,
         "behaviour_neither_rate_strict": 0.0,
         "chartqa_answer_only_match_share": 1.0,
@@ -1248,7 +2084,7 @@
           },
           "free_binding": {
             "rows": 60,
-            "with_stated_verdict": 55,
+            "with_stated_verdict": 57,
             "attributable_answers": 47,
             "answer_follows_stated_verdict": 0.7659574468085106,
             "answer_follows_stated_verdict_ci95": [
@@ -1268,6 +2104,8 @@
       "model_id": "Qwen/Qwen2.5-VL-7B-Instruct",
       "regime": "math",
       "phase": "dev",
+      "confirmatory_role": "confirmatory",
+      "primary_outcome": "behaviour",
       "n_items": 115,
       "boundary_mismatch_rows": 0,
       "boundary_mismatch_share": 0.0,
@@ -1323,7 +2161,7 @@
         "reading": "decision-relevant",
         "p_decision_relevant": 9.999000099990002e-05,
         "p_equivalent": 1.0,
-        "holm_p": 0.00029997000299970003
+        "holm_p": 0.00039996000399960006
       },
       "T3_rho_nonbinding": {
         "cde": 1.342056369945355,
@@ -1339,40 +2177,52 @@
         "reading": "decision-relevant",
         "p_decision_relevant": 9.999000099990002e-05,
         "p_equivalent": 1.0,
-        "holm_p": 0.00029997000299970003
+        "holm_p": 0.00039996000399960006
       },
       "holm_adjusted": {
         "T1": 0.00029997000299970003,
-        "T2": 0.00029997000299970003,
-        "T3": 0.00029997000299970003
+        "T2": 0.00039996000399960006,
+        "T3": 0.00039996000399960006
+      },
+      "headline_parser": "structured",
+      "replay_noise": {
+        "n_pairs": 230,
+        "attributable_pairs": 186,
+        "replay_flip_rate": 0.010752688172043012,
+        "replay_any_change_rate": 0.08695652173913043,
+        "suggested_churn_cap": 0.06075268817204302
       },
       "behaviour_binding": {
         "delta_flip_minus_own": {
           "n": 115,
-          "mean": 0.4956521739130435,
+          "mean": 0.4391304347826087,
           "ci90": [
-            0.44782608695652176,
-            0.5434782608695652
+            0.391304347826087,
+            0.48695652173913045
           ],
           "reading": "not equivalent"
         },
         "mean_abs_dl_gap_own_vs_para": 0.5425091875792608,
         "mean_abs_dl_gap_own_vs_flip": 1.657771439041208,
         "change_rate_own_vs_para": 0.0,
-        "change_rate_own_vs_flip": 0.553763440860215,
-        "neither_transition_rate_own_vs_para": 0.14347826086956522,
-        "neither_transition_rate_own_vs_flip": 0.19130434782608696,
+        "change_rate_own_vs_flip": 0.5064935064935064,
+        "neither_transition_rate_own_vs_para": 0.30434782608695654,
+        "neither_transition_rate_own_vs_flip": 0.33043478260869563,
         "wording_floor_para_minus_own": {
           "n": 115,
-          "signed_mean": 0.0,
-          "mean": 0.0,
+          "signed_mean": -0.030434782608695653,
+          "mean": -0.030434782608695653,
           "signed_mean_exceeds_epsilon": false,
           "exceeds_epsilon": false,
           "churn_rate": 0.0,
           "max_churn": 0.05,
           "churn_exceeds_max": false,
-          "sd_item_difference": 0.1873171623163388,
-          "tost_power_at_this_noise": 0.7766312397631445,
+          "replay_flip_rate": 0.010752688172043012,
+          "replay_adjusted_max_churn": 0.06075268817204302,
+          "churn_exceeds_replay_adjusted_max": false,
+          "floor_ok_replay_adjusted": true,
+          "sd_item_difference": 0.2753542894971311,
+          "tost_power_at_this_noise": 0.23766841836652453,
           "power_below_target": true,
           "floor_ok": true
         }
@@ -1380,38 +2230,333 @@
       "behaviour_nonbinding": {
         "delta_flip_minus_own": {
           "n": 115,
-          "mean": 0.32608695652173914,
+          "mean": 0.3173913043478261,
           "ci90": [
-            0.2782608695652174,
-            0.3739130434782609
+            0.26521739130434785,
+            0.3695652173913043
           ],
           "reading": "not equivalent"
         },
         "mean_abs_dl_gap_own_vs_para": 0.5096637579750698,
         "mean_abs_dl_gap_own_vs_flip": 1.395485618770035,
-        "change_rate_own_vs_para": 0.065,
-        "change_rate_own_vs_flip": 0.3723404255319149,
-        "neither_transition_rate_own_vs_para": 0.13043478260869565,
-        "neither_transition_rate_own_vs_flip": 0.1826086956521739,
+        "change_rate_own_vs_para": 0.06593406593406594,
+        "change_rate_own_vs_flip": 0.3693181818181818,
+        "neither_transition_rate_own_vs_para": 0.20869565217391303,
+        "neither_transition_rate_own_vs_flip": 0.23478260869565218,
         "wording_floor_para_minus_own": {
           "n": 115,
-          "signed_mean": -0.05217391304347826,
-          "mean": -0.05217391304347826,
+          "signed_mean": -0.05652173913043478,
+          "mean": -0.05652173913043478,
           "signed_mean_exceeds_epsilon": true,
           "exceeds_epsilon": true,
-          "churn_rate": 0.065,
+          "churn_rate": 0.06593406593406594,
           "max_churn": 0.05,
           "churn_exceeds_max": true,
-          "sd_item_difference": 0.2233508082009722,
-          "tost_power_at_this_noise": 0.5502371574408067,
+          "replay_flip_rate": 0.010752688172043012,
+          "replay_adjusted_max_churn": 0.06075268817204302,
+          "churn_exceeds_replay_adjusted_max": true,
+          "floor_ok_replay_adjusted": false,
+          "sd_item_difference": 0.27116720897818575,
+          "tost_power_at_this_noise": 0.26047935247795295,
           "power_below_target": true,
           "floor_ok": false
         }
       },
+      "behaviour_primary": {
+        "is_primary_for_regime": true,
+        "parser": "structured",
+        "binding": {
+          "flip_minus_own": {
+            "n": 115,
+            "mean": 0.4391304347826087,
+            "ci95": [
+              0.3826086956521739,
+              0.4956521739130435
+            ],
+            "ci90": [
+              0.391304347826087,
+              0.48695652173913045
+            ],
+            "p": 9.999000099990002e-05,
+            "tost_reading": "not equivalent",
+            "holm_p": 0.00029997000299970003
+          },
+          "matched_pair_para_flip_minus_para": {
+            "n": 115,
+            "mean": 0.6434782608695652,
+            "ci95": [
+              0.5782608695652174,
+              0.7043478260869566
+            ],
+            "ci90": [
+              0.591304347826087,
+              0.691304347826087
+            ],
+            "p": 9.999000099990002e-05,
+            "tost_reading": "not equivalent"
+          },
+          "none_minus_own": {
+            "n": 115,
+            "mean": 0.20869565217391303,
+            "ci95": [
+              0.1608695652173913,
+              0.25217391304347825
+            ],
+            "ci90": [
+              0.16956521739130434,
+              0.24782608695652175
+            ],
+            "p": 9.999000099990002e-05
+          },
+          "flip_minus_none": {
+            "n": 115,
+            "mean": 0.23043478260869565,
+            "ci95": [
+              0.16521739130434782,
+              0.3
+            ],
+            "ci90": [
+              0.17391304347826086,
+              0.28695652173913044
+            ],
+            "p": 9.999000099990002e-05
+          },
+          "para_flip_minus_none": {
+            "n": 115,
+            "mean": 0.43478260869565216,
+            "ci95": [
+              0.3565217391304348,
+              0.508695652173913
+            ],
+            "ci90": [
+              0.3695652173913043,
+              0.4956521739130435
+            ],
+            "p": 9.999000099990002e-05
+          }
+        },
+        "nonbinding": {
+          "flip_minus_own": {
+            "n": 115,
+            "mean": 0.3173913043478261,
+            "ci95": [
+              0.2565217391304348,
+              0.3782608695652174
+            ],
+            "ci90": [
+              0.26521739130434785,
+              0.3695652173913043
+            ],
+            "p": 9.999000099990002e-05,
+            "tost_reading": "not equivalent",
+            "holm_p": 0.00029997000299970003
+          },
+          "matched_pair_para_flip_minus_para": {
+            "n": 115,
+            "mean": 0.23478260869565218,
+            "ci95": [
+              0.17391304347826086,
+              0.2956521739130435
+            ],
+            "ci90": [
+              0.1826086956521739,
+              0.28695652173913044
+            ],
+            "p": 9.999000099990002e-05,
+            "tost_reading": "not equivalent"
+          },
+          "none_minus_own": {
+            "n": 115,
+            "mean": 0.19130434782608696,
+            "ci95": [
+              0.1391304347826087,
+              0.24347826086956523
+            ],
+            "ci90": [
+              0.14782608695652175,
+              0.23478260869565218
+            ],
+            "p": 9.999000099990002e-05
+          },
+          "flip_minus_none": {
+            "n": 115,
+            "mean": 0.12608695652173912,
+            "ci95": [
+              0.05652173913043478,
+              0.1956521739130435
+            ],
+            "ci90": [
+              0.06956521739130435,
+              0.1826086956521739
+            ],
+            "p": 0.00029997000299970003
+          },
+          "para_flip_minus_none": {
+            "n": 115,
+            "mean": 0.0782608695652174,
+            "ci95": [
+              0.004347826086956522,
+              0.15217391304347827
+            ],
+            "ci90": [
+              0.017391304347826087,
+              0.1391304347826087
+            ],
+            "p": 0.027697230276972302
+          }
+        },
+        "T1_beh_did": {
+          "n": 115,
+          "mean": 0.12173913043478261,
+          "ci95": [
+            0.06521739130434782,
+            0.1782608695652174
+          ],
+          "p": 9.999000099990002e-05,
+          "significant": true,
+          "holm_p": 0.00029997000299970003,
+          "significant_after_holm": true
+        },
+        "T1_beh_matched_pair_did": {
+          "n": 115,
+          "mean": 0.40869565217391307,
+          "ci95": [
+            0.3391304347826087,
+            0.4782608695652174
+          ],
+          "p": 9.999000099990002e-05,
+          "significant": true
+        },
+        "holm_adjusted": {
+          "T1_beh": 0.00029997000299970003,
+          "bind_flip_minus_own": 0.00029997000299970003,
+          "nonbind_flip_minus_own": 0.00029997000299970003
+        }
+      },
       "wording_floor_ok_binding": true,
       "wording_floor_ok_nonbinding": false,
+      "wording_floor_ok_replay_adjusted_binding": true,
+      "wording_floor_ok_replay_adjusted_nonbinding": false,
       "reading_binding": "H1: the verdict decides, and binding strengthens it",
       "reading_nonbinding": "H1: the verdict decides; no evidence that binding strengthens it",
+      "edit_gate_ok": true,
+      "reading_binding_reported": "NOT A READING: n = 115 is below the R5 minimum of 150. The decision table alone would say: H1: the verdict decides, and binding strengthens it",
+      "reading_caveats": [
+        "n = 115 is below the R5 minimum of 150"
+      ],
+      "reading_nonbinding_reported": "NOT A READING: n = 115 is below the R5 minimum of 150. The decision table alone would say: H1: the verdict decides; no evidence that binding strengthens it",
+      "behaviour_by_parser": {
+        "strict": {
+          "neither_rate": 0.6268115942028986,
+          "binding": {
+            "delta_flip_minus_own": 0.1826086956521739,
+            "delta_ci90": [
+              0.14347826086956522,
+              0.22608695652173913
+            ],
+            "matched_pair_para_flip_minus_para": 0.33043478260869563,
+            "floor_signed_mean": -0.030434782608695653,
+            "churn_any_change_own_vs_para": 0.20434782608695654,
+            "flip_rate_attributable_own_vs_para": 0.0,
+            "attributable_pairs_own_vs_para": 54
+          },
+          "nonbinding": {
+            "delta_flip_minus_own": 0.1608695652173913,
+            "delta_ci90": [
+              0.11739130434782609,
+              0.20434782608695654
+            ],
+            "matched_pair_para_flip_minus_para": 0.14782608695652175,
+            "floor_signed_mean": -0.05652173913043478,
+            "churn_any_change_own_vs_para": 0.20434782608695654,
+            "flip_rate_attributable_own_vs_para": 0.018518518518518517,
+            "attributable_pairs_own_vs_para": 54
+          }
+        },
+        "structured": {
+          "neither_rate": 0.2217391304347826,
+          "binding": {
+            "delta_flip_minus_own": 0.4391304347826087,
+            "delta_ci90": [
+              0.391304347826087,
+              0.48695652173913045
+            ],
+            "matched_pair_para_flip_minus_para": 0.6434782608695652,
+            "floor_signed_mean": -0.030434782608695653,
+            "churn_any_change_own_vs_para": 0.15217391304347827,
+            "flip_rate_attributable_own_vs_para": 0.0,
+            "attributable_pairs_own_vs_para": 160
+          },
+          "nonbinding": {
+            "delta_flip_minus_own": 0.3173913043478261,
+            "delta_ci90": [
+              0.26521739130434785,
+              0.3695652173913043
+            ],
+            "matched_pair_para_flip_minus_para": 0.23478260869565218,
+            "floor_signed_mean": -0.05652173913043478,
+            "churn_any_change_own_vs_para": 0.1608695652173913,
+            "flip_rate_attributable_own_vs_para": 0.06593406593406594,
+            "attributable_pairs_own_vs_para": 182
+          }
+        },
+        "lenient": {
+          "neither_rate": 0.10833333333333334,
+          "binding": {
+            "delta_flip_minus_own": 0.4956521739130435,
+            "delta_ci90": [
+              0.44782608695652176,
+              0.5434782608695652
+            ],
+            "matched_pair_para_flip_minus_para": 0.7217391304347827,
+            "floor_signed_mean": 0.0,
+            "churn_any_change_own_vs_para": 0.06956521739130435,
+            "flip_rate_attributable_own_vs_para": 0.0,
+            "attributable_pairs_own_vs_para": 197
+          },
+          "nonbinding": {
+            "delta_flip_minus_own": 0.32608695652173914,
+            "delta_ci90": [
+              0.2782608695652174,
+              0.3739130434782609
+            ],
+            "matched_pair_para_flip_minus_para": 0.2565217391304348,
+            "floor_signed_mean": -0.05217391304347826,
+            "churn_any_change_own_vs_para": 0.12173913043478261,
+            "flip_rate_attributable_own_vs_para": 0.065,
+            "attributable_pairs_own_vs_para": 200
+          }
+        }
+      },
+      "validity_dl_vs_behaviour": {
+        "strict": {
+          "parser": "strict",
+          "n_behavioural_rows": 2760,
+          "n_attributable": 1030,
+          "sign_agreement": 0.5660194174757281,
+          "majority_baseline": 0.7592233009708738,
+          "auc_image_first": 0.6994777018883086,
+          "auc_text_first": 0.6840465163109142
+        },
+        "structured": {
+          "parser": "structured",
+          "n_behavioural_rows": 2760,
+          "n_attributable": 2148,
+          "sign_agreement": 0.5735567970204841,
+          "majority_baseline": 0.6140595903165735,
+          "auc_image_first": 0.7635986224465726,
+          "auc_text_first": 0.6900791235544735
+        },
+        "lenient": {
+          "parser": "lenient",
+          "n_behavioural_rows": 2760,
+          "n_attributable": 2461,
+          "sign_agreement": 0.5741568468102397,
+          "majority_baseline": 0.5847216578626575,
+          "auc_image_first": 0.753215548492062,
+          "auc_text_first": 0.6926663421997447
+        }
+      },
       "secondary": {
         "matched_pair_binding": {
           "n": 115,
@@ -1478,6 +2623,14 @@
               0.2897866933752517
             ]
           },
+          "binding_para_flip_minus_none": {
+            "n": 115,
+            "mean": 0.7181159353478195,
+            "ci95": [
+              0.5674513121106388,
+              0.8827867951445278
+            ]
+          },
           "nonbinding_none_minus_own": {
             "n": 115,
             "mean": 1.2579884856160557,
@@ -1492,6 +2645,14 @@
             "ci95": [
               -0.09259764003626998,
               0.2547524678562926
+            ]
+          },
+          "nonbinding_para_flip_minus_none": {
+            "n": 115,
+            "mean": 0.5971081880988713,
+            "ci95": [
+              0.46193787055964985,
+              0.7443386947248908
             ]
           }
         },
@@ -1651,6 +2812,7 @@
             3.0594069707712284
           ]
         },
+        "behaviour_neither_rate_headline": 0.2217391304347826,
         "behaviour_neither_rate": 0.10833333333333334,
         "behaviour_neither_rate_strict": 0.6268115942028986,
         "seconds_per_item": 177.00995652173913,
@@ -1664,22 +2826,22 @@
         "manipulation_check": {
           "donor": {
             "rows": 400,
-            "with_stated_verdict": 396,
-            "attributable_answers": 329,
-            "answer_follows_stated_verdict": 0.9422492401215805,
+            "with_stated_verdict": 399,
+            "attributable_answers": 332,
+            "answer_follows_stated_verdict": 0.9397590361445783,
             "answer_follows_stated_verdict_ci95": [
-              0.9148936170212766,
-              0.9665653495440729
+              0.9126506024096386,
+              0.963855421686747
             ]
           },
           "free_binding": {
             "rows": 400,
-            "with_stated_verdict": 392,
-            "attributable_answers": 312,
-            "answer_follows_stated_verdict": 0.9839743589743589,
+            "with_stated_verdict": 396,
+            "attributable_answers": 316,
+            "answer_follows_stated_verdict": 0.9841772151898734,
             "answer_follows_stated_verdict_ci95": [
-              0.967948717948718,
-              0.9967948717948718
+              0.9683544303797469,
+              0.9968354430379747
             ]
           }
         },

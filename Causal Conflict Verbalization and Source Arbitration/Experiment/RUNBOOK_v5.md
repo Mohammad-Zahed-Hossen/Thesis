@@ -10,7 +10,7 @@ The dev pass uses **items that are already spent**: the 200 GSM8K/SVAMP dev item
 
 ```bash
 cd Experiment
-python -m unittest discover tests
+python -B -m unittest discover -s tests
 python harness_v5.py --dry_run --print_example --run_tag x
 python harness_v5.py --dry_run --print_example --model_id Qwen/Qwen2.5-VL-7B-Instruct --run_tag test_7b_render
 ```
@@ -140,6 +140,8 @@ Then run the analysis locally. It reports most of the quantities above, plus T1,
 python analyze_v5.py --runs results_v5/v5dev_*_tp_*.jsonl --gates results_v5/v5dev_*_tp_*.gates.json \
   --base results_v5/v5dev_*_base_*.jsonl --donor results_v5/v5dev_*_donor_*.jsonl --output_dir results_v5/analysis_dev
 ```
+
+On Windows PowerShell the `*` patterns are not expanded; list the files or run the command from Git Bash. The script refuses output from the fake `echo` model unless `--allow_dry_run` is given.
 
 It writes:
 

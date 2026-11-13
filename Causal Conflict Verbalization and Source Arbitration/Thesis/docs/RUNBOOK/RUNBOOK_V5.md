@@ -1,5 +1,12 @@
 # 🚀 Google Colab Pro Execution Guide for v5 Dev Pass
 
+> [!WARNING]
+> **Deprecated. Use [`Experiment/RUNBOOK_v5.md`](../../../Experiment/RUNBOOK_v5.md).** This copy is kept as the record of what the v5 dev pass followed. It is incomplete in three ways:
+>
+> - Cell 3 runs the render check for `--split conflict` only. The three `--split chartqa` checks were never run.
+> - The analysis command in Step 4 lacked `--base` and `--donor`, which drops the manipulation check and the relative-uncertainty strata. It is corrected below.
+> - It has no ChartQA `--max_pixels` step and no `Rscript` step.
+
 > **Workspace:** Causal Conflict Verbalization and Source Arbitration
 > **Study:** Version 5 (v5) Verdict Transplant & Log-Likelihood Margin Scoring
 > **Hardware Target:** Google Colab Pro (NVIDIA A100 40/80GB or L4 24GB)
@@ -245,7 +252,7 @@ Once all 6 blocks finish on Google Colab:
 
 ```bash
 cd Experiment
-python analyze_v5.py --runs results_v5/v5dev_*_tp_*.jsonl --gates results_v5/v5dev_*_tp_*.gates.json --output_dir results_v5/analysis_dev
+python analyze_v5.py --runs results_v5/v5dev_*_tp_*.jsonl --gates results_v5/v5dev_*_tp_*.gates.json --base results_v5/v5dev_*_base_*.jsonl --donor results_v5/v5dev_*_donor_*.jsonl --output_dir results_v5/analysis_dev
 ```
 
 This generates:

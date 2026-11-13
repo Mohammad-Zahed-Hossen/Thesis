@@ -45,7 +45,7 @@
 
 | Location | Trust Level | What It Contains |
 |:---------|:-----------|:-----------------|
-| `Experiment/*.py` | **Ground truth** | Active v4 code; start at `Experiment/README.md` |
+| `Experiment/*.py` | **Ground truth** | Active v4/v5 code; start at `Experiment/README.md` |
 | `Experiment/results_v5/`, `results_v4/`, `results_v3/` | **Ground truth** | Run outputs and analysis; each has a README |
 | `Experiment/archive/` | **Historical** | v3 harness and early pilots |
 | `Docs/PREREGISTRATION_VERDICT_TRANSPLANT.md` | **Design spec** | Pre-registration draft; check it against code |
@@ -103,5 +103,5 @@
 ## 6. Code Conventions
 
 - **Python & PyTorch:** Modular, reproducible, PEP8-compliant.
-- **Transformers:** Explicit revision tags, `torch_dtype=torch.float16`, `attn_implementation="sdpa"`.
+- **Transformers:** Explicit revision tags, `torch_dtype=torch.bfloat16` for v5 (`float16` for historical v4), `attn_implementation="sdpa"`.
 - **Paths:** Relative or configurable CLI args. Structured JSON/JSONL logging.

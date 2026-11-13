@@ -49,12 +49,36 @@ _NOUN_LABEL = {
     "report": "report",
 }
 _REL_SENT = re.compile(r"[^.\n]*\b(?:un)?reliable\b[^.\n]*", re.I)
-_REL_NEG = re.compile(
-    r"\b(?:cannot|can't|unable|not possible|impossible|neither|equally|less reliable|not (?:as )?reliable|unreliable|no more reliable)\b",
-    re.I,
-)
+# Words that make the whole sentence a non-verdict, wherever they stand.
+_REL_NEG = re.compile(r"\b(?:cannot|can't|unable|not possible|impossible|neither|equally)\b", re.I)
+# A negation or downgrade attached to the first "reliable" itself: "less reliable",
+# "not (as|very|fully) reliable", "no more reliable", "unreliable". It is matched against
+# the text just before that word, so a later clause does not count: "I consider the typed
+# text more reliable ..., while the image could be less reliable" still names the text.
+_REL_NEG_BEFORE = re.compile(r"(?:\b(?:less|no more|not(?:\s+(?:as|very|fully|so|that))?)\s+|\bun)$", re.I)
 
 SOURCES = {"math": ("image", "text"), "chartqa": ("chart", "report")}
+_RELIABLE_WORD = re.compile(r"\b(?:un)?reliable\b", re.I)
+
+
+def reliability_sentence(text: str) -> Optional[str]:
+    """The first sentence (or line) of text that contains "reliable", or None.
+
+    Sentences end where score_v4 says they end, and at line breaks. A period inside a
+    number ("14.8%") or an abbreviation ("U.S.") does not end one. _REL_SENT split at
+    every period, so "The chart shows 14.8% and is more reliable" lost its subject.
+    """
+    start = 0
+    for line in text.splitlines(keepends=True):
+        prev = 0
+        ends = v4._sentence_ends(line)
+        for end in ends + ([len(line)] if not ends or ends[-1] < len(line) else []):
+            sentence = line[prev:end]
+            if _RELIABLE_WORD.search(sentence):
+                return sentence
+            prev = end
+        start += len(line)
+    return None
 
 
 def stated_reliable_source(verbalization: str, regime: Optional[str] = None) -> str:
@@ -65,14 +89,13 @@ def stated_reliable_source(verbalization: str, regime: Optional[str] = None) -> 
     With none before, the first one after it wins ("the more reliable source is the chart").
     When regime is provided, only nouns belonging to SOURCES[regime] are considered.
     """
-    m = _REL_SENT.search(verbalization)
-    if not m:
+    s = reliability_sentence(verbalization)
+    if s is None:
         return "absent"
-    s = m.group(0)
-    if _REL_NEG.search(s):
+    idx = s.lower().find("reliable")
+    if _REL_NEG.search(s) or _REL_NEG_BEFORE.search(s[:idx]):
         return "undetermined"
     allowed = set(SOURCES[regime]) if regime is not None else None
-    idx = s.lower().find("reliable")
     before = [
         _NOUN_LABEL[x.group(1).lower()]
         for x in _SOURCE_NOUN.finditer(s[:idx])
@@ -172,31 +195,39 @@ def extract_math_final_answer(text: str) -> Optional[str]:
     return v4._clean_number(matches[-1]) if matches else None
 
 
+MATH_PARSERS = ("strict", "structured", "lenient")
+
+
 def behavioural_source(
     text: str,
     regime: str,
     y_image: str,
     y_text: str,
     allow_math_fallback: bool = False,
+    parser: Optional[str] = None,
 ) -> Tuple[str, Optional[str], str]:
     """Secondary outcome. Returns (source, answer, method).
 
-    math     score_v4.extract_answer; rejects fallback_last_number when allow_math_fallback is False,
-             and rescues structured final-answer declarations or fallback_last_number when True.
-    chartqa  extract_answer_strict
+    chartqa  extract_answer_strict, whatever the parser.
+    math     one of three parsers (MATH_PARSERS):
+      strict      the number after '####' only (prereg §6.2 as drafted)
+      structured  '####', else an explicit statement such as "The final answer is 595."
+      lenient     structured, else the last number in the output (score_v4's fallback)
+    parser=None keeps the older switch: lenient if allow_math_fallback else strict.
     """
+    if parser is None:
+        parser = "lenient" if allow_math_fallback else "strict"
+    if parser not in MATH_PARSERS:
+        raise ValueError(f"unknown parser {parser!r}; expected one of {MATH_PARSERS}")
     if regime == "chartqa":
         ans, method = extract_answer_strict(text)
     else:
         ans, method = v4.extract_answer(text)
         if method in ("fallback_last_number", "hash_no_number", "none"):
-            if allow_math_fallback:
-                structured = extract_math_final_answer(text)
-                if structured is not None:
-                    ans, method = structured, "structured_final_answer"
-                elif method != "fallback_last_number":
-                    ans = None
-            else:
+            structured = extract_math_final_answer(text) if parser != "strict" else None
+            if structured is not None:
+                ans, method = structured, "structured_final_answer"
+            elif parser != "lenient" or method != "fallback_last_number":
                 ans = None
     return answer_source_v5(ans, y_image, y_text), ans, method
 
@@ -219,6 +250,33 @@ def continuation_positions(prefix_len: int, full_len: int) -> list:
     if not 0 < prefix_len < full_len:
         raise ValueError(f"need 0 < prefix_len < full_len, got {prefix_len}, {full_len}")
     return [(j - 1, j) for j in range(prefix_len, full_len)]
+
+
+def common_prefix_len(a: Sequence[int], b: Sequence[int]) -> int:
+    n = 0
+    for x, y in zip(a, b):
+        if x != y:
+            break
+        n += 1
+    return n
+
+
+def verdict_token_span(
+    prefix_ids: Sequence[int], before_ids: Sequence[int], through_ids: Sequence[int]
+) -> Optional[Tuple[int, int, bool]]:
+    """Token span [start, end) of the verdict sentence inside prefix_ids, and whether it is exact.
+
+    before_ids   ids of the chat rendered up to the last character before the verdict sentence
+    through_ids  ids of the chat rendered through the verdict sentence's last character
+    Both should be prefixes of prefix_ids. Where a tokenizer merges characters across a
+    boundary (".\n\n" as one token, say), the straddling token is left out of the span and
+    exact is False. Returns None if no whole token is left.
+    """
+    a = common_prefix_len(prefix_ids, before_ids)
+    b = common_prefix_len(prefix_ids, through_ids)
+    exact = a == len(before_ids) and b == len(through_ids)
+    start = a if a == len(before_ids) else a + 1
+    return (start, b, exact) if start < b else None
 
 
 def leading_ws_skip(pieces: Sequence[str]) -> int:

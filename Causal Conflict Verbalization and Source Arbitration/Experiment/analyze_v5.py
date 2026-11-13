@@ -58,7 +58,19 @@ MIN_ITEMS = {"math": 150, "chartqa": 100}  # R5
 MODEL_3B = "Qwen/Qwen2.5-VL-3B-Instruct"
 MODEL_7B = "Qwen/Qwen2.5-VL-7B-Instruct"
 
+DIAGNOSTIC_MODELS = {"Qwen/Qwen2-VL-2B-Instruct"}  # Pre-freeze D3
+EXPLORATORY_REGIMES = {"chartqa"}  # Pre-freeze D4
+
 IMAGE_SIDE = {"image", "chart"}
+
+
+def confirmatory_role(model_id: str, regime: str) -> str:
+    """Confirmatory designation after pre-freeze decisions D3 & D4."""
+    if model_id in DIAGNOSTIC_MODELS:
+        return "diagnostic_only"
+    if regime in EXPLORATORY_REGIMES:
+        return "exploratory"
+    return "confirmatory"
 
 # ─── Loading ─────────────────────────────────────────────────────────────────
 
@@ -90,10 +102,16 @@ def orientation(row: Dict[str, Any]) -> int:
     return -1 if own == "image" else 1
 
 
-def follows_named(row: Dict[str, Any], allow_math_fallback: bool = True) -> Optional[bool]:
+# The Math answer parser used for the headline behavioural numbers (pre-freeze D3: "structured",
+# keeping #### as first choice and allowing clean final-answer statements / \boxed{X}).
+# Strict and lenient are still reported side by side in behaviour_by_parser.
+HEADLINE_PARSER = "structured"
+
+
+def follows_named(row: Dict[str, Any], allow_math_fallback: bool = True, parser: Optional[str] = None) -> Optional[bool]:
     """Behavioural: does the answer match the source this row's verdict names?"""
     src, _, _ = sc.behavioural_source(
-        row["full_text"], row["regime"], row["y_image"], row["y_text"], allow_math_fallback=allow_math_fallback
+        row["full_text"], row["regime"], row["y_image"], row["y_text"], allow_math_fallback=allow_math_fallback, parser=parser
     )
     named = side(row.get("named_source"))
     if named is None:
@@ -101,9 +119,9 @@ def follows_named(row: Dict[str, Any], allow_math_fallback: bool = True) -> Opti
     return src == named
 
 
-def follows_image(row: Dict[str, Any], allow_math_fallback: bool = True) -> Optional[int]:
+def follows_image(row: Dict[str, Any], allow_math_fallback: bool = True, parser: Optional[str] = None) -> Optional[int]:
     src, _, _ = sc.behavioural_source(
-        row["full_text"], row["regime"], row["y_image"], row["y_text"], allow_math_fallback=allow_math_fallback
+        row["full_text"], row["regime"], row["y_image"], row["y_text"], allow_math_fallback=allow_math_fallback, parser=parser
     )
     return {"image": 1, "text": 0}.get(src)
 
@@ -202,19 +220,23 @@ def sample_sd(xs: Sequence[float]) -> float:
     return math.sqrt(sum((x - m) ** 2 for x in xs) / (len(xs) - 1)) if len(xs) > 1 else 0.0
 
 
-def wording_floor(diffs: Sequence[float], churn: Optional[float]) -> Dict[str, Any]:
-    """Both halves of the wording-floor gate for m_para vs. m_own (prereg §7.6).
+def wording_floor(
+    diffs: Sequence[float], churn: Optional[float], replay_flip_rate: Optional[float] = None
+) -> Dict[str, Any]:
+    """Both halves of the wording-floor gate for m_para vs. m_own (prereg §7.6 & pre-freeze D5).
 
     signed_mean   mean per-item difference; opposite changes cancel in it
-    churn_rate    share of (item, order) cells whose answer source changed at all
-    The gate fails if either exceeds its limit. The churn rate bounds |signed_mean|, so
-    symmetric churn (as many answers moving one way as the other) cannot pass unseen.
+    churn_rate    share of attributable (item, order) cells whose answer source flipped image<->text
+    D5 benchmarks churn both against the fixed 0.05 cap and against measured donor->own replay
+    noise + 0.05.
     """
     fm = mean(diffs)
     sd = sample_sd(diffs)
     power = tost_power(sd, len(diffs))
     signed_bad = abs(fm) > EPSILON
     churn_bad = churn is not None and churn > MAX_CHURN
+    replay_cap = (replay_flip_rate + MAX_CHURN) if replay_flip_rate is not None else None
+    churn_bad_replay = churn is not None and replay_cap is not None and churn > replay_cap
     return {
         "n": len(diffs),
         "signed_mean": fm,
@@ -224,6 +246,10 @@ def wording_floor(diffs: Sequence[float], churn: Optional[float]) -> Dict[str, A
         "churn_rate": churn,
         "max_churn": MAX_CHURN,
         "churn_exceeds_max": churn_bad,
+        "replay_flip_rate": replay_flip_rate,
+        "replay_adjusted_max_churn": replay_cap,
+        "churn_exceeds_replay_adjusted_max": churn_bad_replay,
+        "floor_ok_replay_adjusted": not (signed_bad or churn_bad_replay),
         "sd_item_difference": sd,
         "tost_power_at_this_noise": power,
         "power_below_target": power < POWER_TARGET,
@@ -330,18 +356,23 @@ def paired(a: Dict[str, float], b: Dict[str, float]) -> Tuple[List[str], List[fl
 # ─── Behavioural (§6.2, §7.3) ────────────────────────────────────────────────
 
 
-def behaviour_table(rows: Sequence[Dict[str, Any]], allow_math_fallback: bool = True) -> Dict[Tuple, Dict[str, Any]]:
-    """(id, family, verdict, order) -> {'follow': bool, 'image': 0/1/None}, k = lowest available."""
+def behaviour_table(
+    rows: Sequence[Dict[str, Any]], allow_math_fallback: bool = True, parser: Optional[str] = None
+) -> Dict[Tuple, Dict[str, Any]]:
+    """(id, family, verdict, order) -> {'follow': bool, 'image': 0/1/None}, k = lowest available.
+
+    parser picks the Math answer parser (score_v5.MATH_PARSERS); None keeps allow_math_fallback.
+    """
     out: Dict[Tuple, Dict[str, Any]] = {}
     for r in sorted((r for r in rows if r["outcome"] == "beh"), key=lambda r: r["k"]):
         key = (r["id"], r["family"], r["verdict"], r["order"])
         if key not in out:
             src, _, method = sc.behavioural_source(
-                r["full_text"], r["regime"], r["y_image"], r["y_text"], allow_math_fallback=allow_math_fallback
+                r["full_text"], r["regime"], r["y_image"], r["y_text"], allow_math_fallback=allow_math_fallback, parser=parser
             )
             out[key] = {
-                "follow": follows_named(r, allow_math_fallback=allow_math_fallback),
-                "image": follows_image(r, allow_math_fallback=allow_math_fallback),
+                "follow": follows_named(r, allow_math_fallback=allow_math_fallback, parser=parser),
+                "image": follows_image(r, allow_math_fallback=allow_math_fallback, parser=parser),
                 "src": src,
                 "method": method,
                 "row": r,
@@ -349,24 +380,70 @@ def behaviour_table(rows: Sequence[Dict[str, Any]], allow_math_fallback: bool = 
     return out
 
 
+def reversed_target(row: Dict[str, Any]) -> Optional[str]:
+    """Side opposite own_source (the target that flip / para_flip point toward)."""
+    ns = side(row.get("named_source"))
+    if row.get("verdict") in ("flip", "para_flip") and ns is not None:
+        return ns
+    own = side(row.get("own_source"))
+    if own is None:
+        return None
+    return "text" if own == "image" else "image"
+
+
 def beh_diff(beh, ids, fam: str, a: str, b: str) -> Dict[str, float]:
     """Per item, mean over orders of [answer follows T | a] − [answer follows T | b].
 
-    T is the source that verdict a names. Both terms use the same target, so for
-    a = flip and b = own this is the behavioural CDE toward the reversed verdict's
-    source (prereg §7.3). An answer matching neither source counts as not following.
+    T is the source that verdict a names (or the reversed source when a == 'none').
+    Both terms use the same target, so for a = flip and b = own this is the behavioural
+    CDE toward the reversed verdict's source (prereg §7.3), and (none - own) + (flip - none)
+    sums identically to (flip - own).
     """
     out = {}
     for i in ids:
         diffs = []
         for o in ("image_first", "text_first"):
             x, y = beh.get((i, fam, a, o)), beh.get((i, fam, b, o))
-            target = side(x["row"].get("named_source")) if x else None
-            if x and y and target is not None:
+            if not (x and y):
+                continue
+            target = reversed_target(y["row"]) if a == "none" else (side(x["row"].get("named_source")) or reversed_target(x["row"]))
+            if target is not None:
                 diffs.append(float(x["src"] == target) - float(y["src"] == target))
         if diffs:
             out[i] = mean(diffs)
     return out
+
+
+def donor_replay_noise(
+    beh: Dict[Tuple, Dict[str, Any]], donor_rows: Sequence[Dict[str, Any]], ids: Sequence[str], parser: str
+) -> Optional[Dict[str, Any]]:
+    """Measure unforced replay noise by comparing stage-2 donor decodes vs stage-3 nonbinding own decodes (D5)."""
+    id_set = set(ids)
+    total = attributable = flips = any_changes = 0
+    for r in donor_rows:
+        if r.get("family") != "donor" or r.get("id") not in id_set or "full_text" not in r:
+            continue
+        own = beh.get((r["id"], "nonbinding", "own", r["order"]))
+        if not own:
+            continue
+        donor_src, _, _ = sc.behavioural_source(r["full_text"], r["regime"], r["y_image"], r["y_text"], parser=parser)
+        total += 1
+        if donor_src != own["src"]:
+            any_changes += 1
+        if donor_src in ("image", "text") and own["src"] in ("image", "text"):
+            attributable += 1
+            if donor_src != own["src"]:
+                flips += 1
+    if total == 0:
+        return None
+    flip_rate = flips / attributable if attributable else None
+    return {
+        "n_pairs": total,
+        "attributable_pairs": attributable,
+        "replay_flip_rate": flip_rate,
+        "replay_any_change_rate": any_changes / total,
+        "suggested_churn_cap": (flip_rate + EPSILON) if flip_rate is not None else None,
+    }
 
 
 def change_rate(beh, ids, fam: str, a: str, b: str) -> Optional[float]:
@@ -392,6 +469,123 @@ def neither_transition_rate(beh, ids, fam: str, a: str, b: str) -> Optional[floa
                 if x["src"] not in ("image", "text") or y["src"] not in ("image", "text"):
                     non_attr += 1
     return non_attr / n if n else None
+
+
+def any_change_rate(beh, ids, fam: str, a: str, b: str) -> Optional[float]:
+    """Share of (item, order) pairs whose answer source differs at all, "neither" included.
+
+    This is the letter of prereg §7.6 ("changes at all"). change_rate() counts only
+    image<->text flips among pairs where both answers are attributable. Both are reported.
+    """
+    n = changed = 0
+    for i in ids:
+        for o in ("image_first", "text_first"):
+            x, y = beh.get((i, fam, a, o)), beh.get((i, fam, b, o))
+            if x and y:
+                n += 1
+                changed += x["src"] != y["src"]
+    return changed / n if n else None
+
+
+def attributable_pairs(beh, ids, fam: str, a: str, b: str) -> int:
+    return sum(
+        1
+        for i in ids
+        for o in ("image_first", "text_first")
+        if beh.get((i, fam, a, o)) and beh.get((i, fam, b, o))
+        and beh[(i, fam, a, o)]["src"] in ("image", "text") and beh[(i, fam, b, o)]["src"] in ("image", "text")
+    )
+
+
+def auc(pos: Sequence[float], neg: Sequence[float]) -> Optional[float]:
+    """P(a random value in pos exceeds a random value in neg), ties counted as half."""
+    if not pos or not neg:
+        return None
+    ordered = sorted([(v, 1) for v in pos] + [(v, 0) for v in neg])
+    rank_sum, i = 0.0, 0
+    while i < len(ordered):
+        j = i
+        while j < len(ordered) and ordered[j][0] == ordered[i][0]:
+            j += 1
+        rank_sum += ((i + j + 1) / 2) * sum(lab for _, lab in ordered[i:j])
+        i = j
+    return (rank_sum - len(pos) * (len(pos) + 1) / 2) / (len(pos) * len(neg))
+
+
+def validity_diagnostics(rows: Sequence[Dict[str, Any]], parser: str = "strict") -> Dict[str, Any]:
+    """Does Δℓ track the answer the model then gives? Each behavioural row is paired with
+    the Δℓ row of the same (item, family, verdict, order) cell at the same template k.
+
+    sign_agreement     share of attributable answers whose source matches the sign of Δℓ
+    majority_baseline  what always guessing the commoner answer source would score
+    auc_<order>        AUC of Δℓ for image- vs text-source answers inside one evidence order,
+                       which removes the order offset that dominates the sign
+    Rows whose answer is neither source are left out; n_attributable counts the rest.
+    """
+    dl = {(r["id"], r["family"], r["verdict"], r["k"], r["order"]): r["dl"] for r in rows if r["outcome"] == "dl" and not r.get("boundary_mismatch")}
+    beh = [r for r in rows if r["outcome"] == "beh"]
+    agree = n = 0
+    by_order: Dict[str, Dict[str, List[float]]] = {o: {"image": [], "text": []} for o in ("image_first", "text_first")}
+    for r in beh:
+        src, _, _ = sc.behavioural_source(r["full_text"], r["regime"], r["y_image"], r["y_text"], parser=parser)
+        d = dl.get((r["id"], r["family"], r["verdict"], r["k"], r["order"]))
+        if src not in ("image", "text") or d is None:
+            continue
+        n += 1
+        agree += (d > 0) == (src == "image")
+        by_order[r["order"]][src].append(d)
+    n_image = sum(len(v["image"]) for v in by_order.values())
+    out: Dict[str, Any] = {
+        "parser": parser,
+        "n_behavioural_rows": len(beh),
+        "n_attributable": n,
+        "sign_agreement": agree / n if n else None,
+        "majority_baseline": max(n_image, n - n_image) / n if n else None,
+    }
+    for o, v in by_order.items():
+        out[f"auc_{o}"] = auc(v["image"], v["text"])
+    return out
+
+
+def behaviour_by_parser(rows: Sequence[Dict[str, Any]], ids: Sequence[str], reps: int, seed: int) -> Dict[str, Any]:
+    """The secondary behavioural numbers under every Math parser, so none is hidden.
+
+    ChartQA has one parser (strict answer-only), so it gets one entry.
+    """
+    regime = rows[0]["regime"]
+    out: Dict[str, Any] = {}
+    for parser in sc.MATH_PARSERS if regime == "math" else ("strict",):
+        beh = behaviour_table(rows, parser=parser)
+        entry: Dict[str, Any] = {"neither_rate": (sum(v["src"] not in ("image", "text") for v in beh.values()) / len(beh)) if beh else None}
+        for fam in ("binding", "nonbinding"):
+            delta = beh_diff(beh, ids, fam, "flip", "own")
+            floor = beh_diff(beh, ids, fam, "para", "own")
+            pair = beh_diff(beh, ids, fam, "para_flip", "para")
+            e: Dict[str, Any] = {}
+            if len(delta) > 1:
+                ci = summarize_ci(list(delta.values()), reps, seed, 0.90)
+                e["delta_flip_minus_own"] = ci["mean"]
+                e["delta_ci90"] = ci["ci90"]
+            e["matched_pair_para_flip_minus_para"] = mean(list(pair.values())) if pair else None
+            e["floor_signed_mean"] = mean(list(floor.values())) if floor else None
+            e["churn_any_change_own_vs_para"] = any_change_rate(beh, ids, fam, "own", "para")
+            e["flip_rate_attributable_own_vs_para"] = change_rate(beh, ids, fam, "own", "para")
+            e["attributable_pairs_own_vs_para"] = attributable_pairs(beh, ids, fam, "own", "para")
+            entry[fam] = e
+        out[parser] = entry
+    return out
+
+
+def qualify_reading(reading: str, n: int, minimum: int, edit_gate_ok: Optional[bool]) -> Tuple[str, List[str]]:
+    """A reading is reported as one only when R5 and the §8 edit gate hold."""
+    caveats = []
+    if n < minimum:
+        caveats.append(f"n = {n} is below the R5 minimum of {minimum}")
+    if edit_gate_ok is False:
+        caveats.append("the edit-gate pass rate is below 60% (prereg §8)")
+    if not caveats:
+        return reading, caveats
+    return f"NOT A READING: {'; '.join(caveats)}. The decision table alone would say: {reading}", caveats
 
 
 # ─── Secondary analyses from the base and donor files (§7.5) ─────────────────
@@ -530,6 +724,94 @@ def summarize_ci(values: Sequence[float], reps: int, seed: int, level: float) ->
     return {"n": len(values), "mean": mean(values), f"ci{int(level * 100)}": [lo, hi]}
 
 
+def _beh_summary(
+    vals_by_id: Dict[str, float],
+    idx: Sequence[Sequence[int]],
+    draws: int,
+    seed: int,
+    include_tost: bool = False,
+) -> Optional[Dict[str, Any]]:
+    if len(vals_by_id) < 2:
+        return None
+    xs = [vals_by_id[i] for i in sorted(vals_by_id)]
+    use_idx = idx if len(idx[0]) == len(xs) else resample_indices(len(xs), len(idx), seed)
+    lo95, hi95, _ = boot_ci(xs, use_idx, 0.95)
+    lo90, hi90, _ = boot_ci(xs, use_idx, 0.90)
+    sf = sign_flip_test(xs, draws, seed)
+    entry: Dict[str, Any] = {"n": len(xs), "mean": mean(xs), "ci95": [lo95, hi95], "ci90": [lo90, hi90], "p": sf["p"]}
+    if include_tost:
+        entry["tost_reading"] = tost_reading((lo90, hi90))
+    return entry
+
+
+def analyze_behaviour_primary(
+    beh: Dict[Tuple, Dict[str, Any]],
+    common: Sequence[str],
+    reps: int,
+    draws: int,
+    seed: int,
+    regime: str,
+) -> Optional[Dict[str, Any]]:
+    """Pre-freeze D1/D2 behavioural primary & co-primary matched-pair contrasts at k = 1."""
+    if not beh or len(common) < 2:
+        return None
+    idx = resample_indices(len(common), reps, seed)
+    out: Dict[str, Any] = {
+        "is_primary_for_regime": regime == "math",
+        "parser": HEADLINE_PARSER,
+    }
+    contrasts = (
+        ("flip_minus_own", "flip", "own", True),
+        ("matched_pair_para_flip_minus_para", "para_flip", "para", True),
+        ("none_minus_own", "none", "own", False),
+        ("flip_minus_none", "flip", "none", False),
+        ("para_flip_minus_none", "para_flip", "none", False),
+    )
+    by_fam: Dict[str, Dict[str, Dict[str, float]]] = {}
+    for fam in ("binding", "nonbinding"):
+        f_out: Dict[str, Any] = {}
+        by_fam[fam] = {}
+        for key, a, b, do_tost in contrasts:
+            d = beh_diff(beh, common, fam, a, b)
+            by_fam[fam][key] = d
+            if len(d) >= 2:
+                # Recompute CI indices if any item is missing a behavioural pair
+                ci_idx = idx if len(d) == len(common) else resample_indices(len(d), reps, seed)
+                f_out[key] = _beh_summary(d, ci_idx, draws, seed, include_tost=do_tost)
+        out[fam] = f_out
+
+    for did_key, contrast_key, p_key in (
+        ("T1_beh_did", "flip_minus_own", "T1_beh"),
+        ("T1_beh_matched_pair_did", "matched_pair_para_flip_minus_para", "T1_beh_mp"),
+    ):
+        b_map, nb_map = by_fam["binding"].get(contrast_key, {}), by_fam["nonbinding"].get(contrast_key, {})
+        pair_ids, vb, vn = paired(b_map, nb_map)
+        if len(pair_ids) >= 2:
+            did_vals = [b - n for b, n in zip(vb, vn)]
+            did_idx = idx if len(pair_ids) == len(common) else resample_indices(len(pair_ids), reps, seed)
+            lo95, hi95, _ = boot_ci(did_vals, did_idx, 0.95)
+            sf = sign_flip_test(did_vals, draws, seed)
+            out[did_key] = {"n": len(did_vals), "mean": sf["mean"], "ci95": [lo95, hi95], "p": sf["p"], "significant": sf["p"] <= ALPHA}
+
+    pvals = {}
+    if "T1_beh_did" in out:
+        pvals["T1_beh"] = out["T1_beh_did"]["p"]
+    if out.get("binding", {}).get("flip_minus_own"):
+        pvals["bind_flip_minus_own"] = out["binding"]["flip_minus_own"]["p"]
+    if out.get("nonbinding", {}).get("flip_minus_own"):
+        pvals["nonbind_flip_minus_own"] = out["nonbinding"]["flip_minus_own"]["p"]
+    if pvals:
+        adj = holm(pvals)
+        out["holm_adjusted"] = adj
+        if "T1_beh_did" in out and "T1_beh" in adj:
+            out["T1_beh_did"]["holm_p"] = adj["T1_beh"]
+            out["T1_beh_did"]["significant_after_holm"] = adj["T1_beh"] <= ALPHA
+        for fam, pk in (("binding", "bind_flip_minus_own"), ("nonbinding", "nonbind_flip_minus_own")):
+            if pk in adj and out.get(fam, {}).get("flip_minus_own"):
+                out[fam]["flip_minus_own"]["holm_p"] = adj[pk]
+    return out
+
+
 def analyze_group(
     rows: Sequence[Dict[str, Any]],
     reps: int = N_BOOT,
@@ -537,6 +819,7 @@ def analyze_group(
     seed: int = SEED,
     base_rows: Sequence[Dict[str, Any]] = (),
     donor_rows: Sequence[Dict[str, Any]] = (),
+    gate_info: Optional[Dict[str, Any]] = None,
 ) -> Dict[str, Any]:
     regime = rows[0]["regime"]
     dl, dropped = index_dl(rows)
@@ -546,6 +829,8 @@ def analyze_group(
         "model_id": rows[0]["model_id"],
         "regime": regime,
         "phase": rows[0].get("phase"),
+        "confirmatory_role": confirmatory_role(rows[0]["model_id"], regime),
+        "primary_outcome": "behaviour" if regime == "math" else "dl",
         "n_items": len(ids),
         "boundary_mismatch_rows": dropped,
         "boundary_mismatch_share": dropped / n_dl_rows if n_dl_rows else None,
@@ -597,15 +882,22 @@ def analyze_group(
                 p_equivalent=p_eq,
             )
             key = name.split("_")[0]
-            pvals[key] = min(p_dec, p_eq)
+            # Each interval test has two one-sided readings. Entering the smaller p alone would
+            # pick the favourable direction after the fact, so it is doubled first (capped at 1).
+            pvals[key] = min(1.0, 2 * min(p_dec, p_eq))
         res[name] = entry
     res["holm_adjusted"] = holm(pvals)
     for key, name in (("T2", "T2_rho_binding"), ("T3", "T3_rho_nonbinding")):
         if key in res["holm_adjusted"]:
             res[name]["holm_p"] = res["holm_adjusted"][key]
 
-    # Behavioural (secondary): TOST and wording floor, per binding level.
-    beh = behaviour_table(rows, allow_math_fallback=True)
+    # Behavioural (primary in Math per D1, secondary in ChartQA): TOST, shifts, wording floor.
+    mine = lambda rs: [r for r in rs if r.get("model_id") == res["model_id"] and r.get("regime") == regime]
+    beh = behaviour_table(rows, parser=HEADLINE_PARSER)
+    res["headline_parser"] = HEADLINE_PARSER
+    replay_noise = donor_replay_noise(beh, mine(donor_rows), ids, HEADLINE_PARSER) if mine(donor_rows) else None
+    res["replay_noise"] = replay_noise
+    replay_flip_rate = replay_noise.get("replay_flip_rate") if replay_noise else None
     floor_ok = {"binding": True, "nonbinding": True}
     for fam in ("binding", "nonbinding"):
         delta = beh_diff(beh, ids, fam, "flip", "own")
@@ -622,20 +914,39 @@ def analyze_group(
         entry["neither_transition_rate_own_vs_para"] = neither_transition_rate(beh, ids, fam, "own", "para")
         entry["neither_transition_rate_own_vs_flip"] = neither_transition_rate(beh, ids, fam, "own", "flip")
         if len(floor) > 1:
-            entry["wording_floor_para_minus_own"] = wording_floor(list(floor.values()), entry["change_rate_own_vs_para"])
+            entry["wording_floor_para_minus_own"] = wording_floor(
+                list(floor.values()), entry["change_rate_own_vs_para"], replay_flip_rate=replay_flip_rate
+            )
             if not entry["wording_floor_para_minus_own"]["floor_ok"]:
                 floor_ok[fam] = False
         res[f"behaviour_{fam}"] = entry
+    beh_primary = analyze_behaviour_primary(beh, common, reps, draws, seed, regime)
+    if beh_primary is not None:
+        res["behaviour_primary"] = beh_primary
     tost = res.get("behaviour_binding", {}).get("delta_flip_minus_own", {}).get("reading", "not available")
     tost_nb = res.get("behaviour_nonbinding", {}).get("delta_flip_minus_own", {}).get("reading", "not available")
     res["wording_floor_ok_binding"] = floor_ok["binding"]
     res["wording_floor_ok_nonbinding"] = floor_ok["nonbinding"]
+    res["wording_floor_ok_replay_adjusted_binding"] = res.get("behaviour_binding", {}).get("wording_floor_para_minus_own", {}).get("floor_ok_replay_adjusted")
+    res["wording_floor_ok_replay_adjusted_nonbinding"] = res.get("behaviour_nonbinding", {}).get("wording_floor_para_minus_own", {}).get("floor_ok_replay_adjusted")
     # Readings use the unadjusted criteria, with Holm-adjusted values beside them (prereg §7.2).
     res["T1_did"]["holm_p"] = res["holm_adjusted"]["T1"]
     res["T1_did"]["significant"] = res["T1_did"]["p"] <= ALPHA
     res["T1_did"]["significant_after_holm"] = res["holm_adjusted"]["T1"] <= ALPHA
     res["reading_binding"] = combined_reading(res["T2_rho_binding"]["reading"], tost, floor_ok["binding"], res["T1_did"]["significant"])
     res["reading_nonbinding"] = combined_reading(res["T3_rho_nonbinding"]["reading"], tost_nb, floor_ok["nonbinding"], False)
+    # reading_* are the bare decision-table labels. *_reported is what may be quoted: it
+    # refuses to call an under-sized or gate-failing group a reading.
+    edit_gate_ok = None
+    if gate_info and gate_info.get("competent"):
+        edit_gate_ok = gate_info.get("edit_gate_ok", gate_info["passed"] / gate_info["competent"] >= 0.60)
+    res["edit_gate_ok"] = edit_gate_ok
+    for key in ("reading_binding", "reading_nonbinding"):
+        res[f"{key}_reported"], res["reading_caveats"] = qualify_reading(res[key], len(common), MIN_ITEMS[regime], edit_gate_ok)
+    res["behaviour_by_parser"] = behaviour_by_parser(rows, ids, reps, seed)
+    res["validity_dl_vs_behaviour"] = {
+        p: validity_diagnostics(rows, p) for p in (sc.MATH_PARSERS if regime == "math" else ("strict",))
+    }
 
     # Secondary: matched pair, decomposition, order, template/LOTO, saturation, neither-rate.
     sec: Dict[str, Any] = {}
@@ -644,7 +955,11 @@ def analyze_group(
         mp = per_item(dl, ids, cde_fn(dl, fam, ("para_flip", "para")))
         if len(mp) > 1:
             sec[f"matched_pair_{fam}"] = summarize_ci(list(mp.values()), reps, seed, 0.95)
-        for part, pair in (("none_minus_own", ("none", "own")), ("flip_minus_none", ("flip", "none"))):
+        for part, pair in (
+            ("none_minus_own", ("none", "own")),
+            ("flip_minus_none", ("flip", "none")),
+            ("para_flip_minus_none", ("para_flip", "none")),
+        ):
             dc = per_item(dl, common, cde_fn(dl, fam, pair))
             if len(dc) > 1:
                 decomp[f"{fam}_{part}"] = summarize_ci(list(dc.values()), reps, seed, 0.95)
@@ -681,6 +996,7 @@ def analyze_group(
                 sec[f"cde_binding_baseline_abs_dl_tertile{t}"] = {"n": len(vals), "mean": mean(vals) if vals else None}
     beh_rows = [r for r in rows if r["outcome"] == "beh"]
     if beh_rows:
+        sec["behaviour_neither_rate_headline"] = sum(follows_image(r, parser=HEADLINE_PARSER) is None for r in beh_rows) / len(beh_rows)
         sec["behaviour_neither_rate"] = sum(follows_image(r, allow_math_fallback=True) is None for r in beh_rows) / len(beh_rows)
         sec["behaviour_neither_rate_strict"] = sum(follows_image(r, allow_math_fallback=False) is None for r in beh_rows) / len(beh_rows)
         if regime == "chartqa":
@@ -695,7 +1011,6 @@ def analyze_group(
             verdict_nll[r["verdict"]].append(r["verdict_nll"])
     if verdict_nll:
         sec["verdict_nll_mean_by_verdict"] = {k: mean(v) for k, v in sorted(verdict_nll.items())}
-    mine = lambda rs: [r for r in rs if r.get("model_id") == res["model_id"] and r.get("regime") == regime]
     if mine(donor_rows):
         sec["manipulation_check"] = manipulation_check(mine(donor_rows), reps=reps, seed=seed)
     dh = relative_uncertainty(mine(base_rows))
@@ -790,7 +1105,7 @@ def export_long(rows: Sequence[Dict[str, Any]], path: str) -> int:
                 continue
             if r["outcome"] == "dl" and r.get("boundary_mismatch"):
                 continue
-            fi = None if r["outcome"] == "dl" else follows_image(r, allow_math_fallback=True)
+            fi = None if r["outcome"] == "dl" else follows_image(r, parser=HEADLINE_PARSER)
             w.writerow(
                 {
                     "model_id": r["model_id"],
@@ -876,6 +1191,18 @@ def provenance_check(run_paths: Sequence[str], rows: Sequence[Dict[str, Any]]) -
     return {"duplicate_rows": duplicates, "manifests": manifests}
 
 
+def fake_backend_runs(run_paths: Sequence[str]) -> List[str]:
+    """Run files whose manifest says the rows came from the fake 'echo' model."""
+    fake = []
+    for p in run_paths:
+        mp = p[: -len(".jsonl")] + ".manifest.json" if p.endswith(".jsonl") else p + ".manifest.json"
+        if os.path.exists(mp):
+            with open(mp, encoding="utf-8") as f:
+                if json.load(f).get("environment", {}).get("backend") == "echo":
+                    fake.append(p)
+    return fake
+
+
 def three_way_intersections(groups: Dict[Tuple[str, str], List[Dict[str, Any]]]) -> Dict[str, Any]:
     """Compute 3-way (2B ∩ 3B ∩ 7B) item intersections per regime."""
     out: Dict[str, Any] = {}
@@ -901,11 +1228,50 @@ def render(
         lines += ["**Dev data: for tuning and the freeze record only, not findings.**", ""]
     for r in results:
         lines += [f"## {r['model_id']} | {r['regime']} | {r['phase']}", ""]
+        lines += [f"- Role: **{r.get('confirmatory_role', 'confirmatory')}**; primary outcome: **{r.get('primary_outcome', 'dl')}** (headline Math parser: `{r.get('headline_parser')}`)"]
         lines += [f"- Items: {r['n_items']}; analysed: {r.get('n_analysed')}; meets R5 minimum: {r.get('meets_min_items')}"]
         lines += [f"- Boundary mismatches: {r['boundary_mismatch_rows']} rows ({fmt(r['boundary_mismatch_share'])}; gate ≤ 0.01)"]
         if "error" in r:
             lines += [f"- **{r['error']}**", ""]
             continue
+        bp_prim = r.get("behaviour_primary")
+        if bp_prim:
+            tag = "PRIMARY (D1)" if bp_prim.get("is_primary_for_regime") else "Secondary behavioural"
+            lines += [f"- **{tag} — ΔP(follow reversed verdict) at k=1 (`{bp_prim.get('parser')}`):**"]
+            t1b = bp_prim.get("T1_beh_did")
+            if t1b:
+                lines += [
+                    f"  - T1_beh (flip−own DiD, bind−nonbind) = {fmt(t1b['mean'])} (95% CI {fmt(t1b['ci95'])}), "
+                    f"p = {fmt(t1b['p'], 4)}, Holm p = {fmt(t1b.get('holm_p'), 4)}"
+                ]
+            t1mp = bp_prim.get("T1_beh_matched_pair_did")
+            if t1mp:
+                lines += [
+                    f"  - Co-primary T1_beh matched-pair (para_flip−para DiD) = {fmt(t1mp['mean'])} (95% CI {fmt(t1mp['ci95'])}), p = {fmt(t1mp['p'], 4)}"
+                ]
+            for fam in ("binding", "nonbinding"):
+                fe = bp_prim.get(fam, {})
+                fo = fe.get("flip_minus_own")
+                mp = fe.get("matched_pair_para_flip_minus_para")
+                no = fe.get("none_minus_own")
+                fn = fe.get("flip_minus_none")
+                pn = fe.get("para_flip_minus_none")
+                parts = []
+                if fo:
+                    parts.append(f"flip−own = {fmt(fo['mean'])} (95% CI {fmt(fo['ci95'])}, p = {fmt(fo['p'], 4)})")
+                if mp:
+                    parts.append(f"para_flip−para = {fmt(mp['mean'])} (95% CI {fmt(mp['ci95'])}, p = {fmt(mp['p'], 4)})")
+                if no and fn and pn:
+                    parts.append(f"decomp [none−own={fmt(no['mean'])}, flip−none={fmt(fn['mean'])}, para_flip−none={fmt(pn['mean'])}]")
+                if parts:
+                    lines += [f"  - {fam}: {'; '.join(parts)}"]
+        rn = r.get("replay_noise")
+        if rn:
+            lines += [
+                f"- Replay noise (donor vs nonbinding own): attributable flips = {fmt(rn.get('replay_flip_rate'))} "
+                f"(n = {rn.get('attributable_pairs')}); any-change = {fmt(rn.get('replay_any_change_rate'))}; "
+                f"suggested churn cap (replay + {EPSILON}) = {fmt(rn.get('suggested_churn_cap'))}"
+            ]
         lines += [f"- Ceil_ℓ: {fmt(r['ceil']['mean'])}, 95% CI {fmt(r['ceil']['ci95'])}"]
         for wd in ("image", "text"):
             c = r.get(f"ceil_{wd}_direction")
@@ -931,18 +1297,55 @@ def render(
                 f"change rate own vs flip {fmt(b.get('change_rate_own_vs_flip'))}"
             ]
             if fl:
+                replay_info = (
+                    f"; replay-adjusted limit {fmt(fl.get('replay_adjusted_max_churn'))} "
+                    f"({'pass' if fl.get('floor_ok_replay_adjusted') else 'FAIL'})"
+                    if fl.get("replay_adjusted_max_churn") is not None
+                    else ""
+                )
                 lines += [
                     f"  - Wording floor (para vs own): signed mean {fmt(fl['signed_mean'])} (limit ±{EPSILON}), "
-                    f"churn rate {fmt(fl['churn_rate'])} (limit {MAX_CHURN}), gate: **{'pass' if fl['floor_ok'] else 'FAIL'}**; "
+                    f"churn rate {fmt(fl['churn_rate'])} (fixed limit {MAX_CHURN}), gate: **{'pass' if fl['floor_ok'] else 'FAIL'}**{replay_info}; "
                     f"TOST power at this noise {fmt(fl['tost_power_at_this_noise'], 2)}"
                 ]
         lines += [
-            f"- **Combined reading under binding: {r['reading_binding']}**",
-            f"- **Combined reading under non-binding: {r['reading_nonbinding']}**",
-            "",
-            "Secondary:",
+            f"- **Combined reading under binding: {r.get('reading_binding_reported', r['reading_binding'])}**",
+            f"- **Combined reading under non-binding: {r.get('reading_nonbinding_reported', r['reading_nonbinding'])}**",
             "",
         ]
+        bp = r.get("behaviour_by_parser")
+        if bp:
+            lines += [
+                f"Behavioural numbers by answer parser (the lines above use `{r.get('headline_parser')}` per pre-freeze D3):",
+                "",
+                "| Parser | Neither | Δ bind [90% CI] | Δ non-bind | Matched pair bind | Floor signed mean bind | Any-change churn bind / non-bind | image↔text flips bind (of attributable pairs) | flips non-bind |",
+                "|---|---:|---|---:|---:|---:|---|---|---|",
+            ]
+            for pname, e in bp.items():
+                b, nb = e.get("binding", {}), e.get("nonbinding", {})
+                lines += [
+                    f"| {pname} | {fmt(e.get('neither_rate'))} | {fmt(b.get('delta_flip_minus_own'))} {fmt(b.get('delta_ci90'))} | {fmt(nb.get('delta_flip_minus_own'))} "
+                    f"| {fmt(b.get('matched_pair_para_flip_minus_para'))} | {fmt(b.get('floor_signed_mean'))} "
+                    f"| {fmt(b.get('churn_any_change_own_vs_para'))} / {fmt(nb.get('churn_any_change_own_vs_para'))} "
+                    f"| {fmt(b.get('flip_rate_attributable_own_vs_para'))} (n = {b.get('attributable_pairs_own_vs_para')}) "
+                    f"| {fmt(nb.get('flip_rate_attributable_own_vs_para'))} (n = {nb.get('attributable_pairs_own_vs_para')}) |"
+                ]
+            lines += [""]
+        vd = r.get("validity_dl_vs_behaviour")
+        if vd:
+            lines += [
+                "Does Δℓ track the answer? (behavioural rows with an attributable answer, same cell and template):",
+                "",
+                "| Parser | Attributable rows | Sign agreement | Majority-class baseline | AUC image-first | AUC text-first |",
+                "|---|---:|---:|---:|---:|---:|",
+            ]
+            for pname, e in vd.items():
+                lines += [
+                    f"| {pname} | {e['n_attributable']}/{e['n_behavioural_rows']} | {fmt(e['sign_agreement'])} | {fmt(e['majority_baseline'])} "
+                    f"| {fmt(e['auc_image_first'])} | {fmt(e['auc_text_first'])} |"
+                ]
+            lines += [""]
+        lines += ["Secondary:", ""]
         for k, v in r["secondary"].items():
             lines += [f"- {k}: {fmt(v) if not isinstance(v, dict) else json.dumps({a: (round(b, 4) if isinstance(b, float) else b) for a, b in v.items()})}"]
         lines += [""]
@@ -986,7 +1389,17 @@ def main() -> int:
     parser.add_argument("--reps", type=int, default=N_BOOT)
     parser.add_argument("--draws", type=int, default=N_PERM)
     parser.add_argument("--seed", type=int, default=SEED)
+    parser.add_argument("--allow_dry_run", action="store_true", help="Accept rows from the fake 'echo' model (pipeline tests only)")
     args = parser.parse_args()
+
+    fake = fake_backend_runs(list(args.runs) + list(args.base) + list(args.donor))
+    if fake and not args.allow_dry_run:
+        print(
+            "Refusing to analyse fake-model ('echo' backend) output: " + ", ".join(os.path.basename(p) for p in fake)
+            + ". These numbers mean nothing. Pass --allow_dry_run for a pipeline test.",
+            file=sys.stderr,
+        )
+        return 2
 
     rows = load_rows(args.runs)
     if not rows:
@@ -996,7 +1409,14 @@ def main() -> int:
     for r in rows:
         groups[(r["model_id"], r["regime"])].append(r)
     base_rows, donor_rows = load_jsonl(args.base), load_jsonl(args.donor)
-    results = [analyze_group(g, args.reps, args.draws, args.seed, base_rows, donor_rows) for _, g in sorted(groups.items())]
+    gates = {}
+    for p in args.gates:
+        with open(p, encoding="utf-8") as f:
+            gates[os.path.basename(p)] = json.load(f)
+    results = [
+        analyze_group(g, args.reps, args.draws, args.seed, base_rows, donor_rows, gate_info=gates.get(f"{g[0].get('run_tag')}.gates.json"))
+        for _, g in sorted(groups.items())
+    ]
 
     # Within-generation size comparison: 3B vs 7B per regime (prereg §7.2)
     size_comparisons = []
@@ -1006,11 +1426,6 @@ def main() -> int:
         g7 = groups.get((MODEL_7B, reg))
         if g3 and g7:
             size_comparisons.append(analyze_size_comparison(g3, g7, args.reps, args.seed))
-
-    gates = {}
-    for p in args.gates:
-        with open(p, encoding="utf-8") as f:
-            gates[os.path.basename(p)] = json.load(f)
 
     intersections = three_way_intersections(groups)
     provenance = provenance_check(args.runs, rows)

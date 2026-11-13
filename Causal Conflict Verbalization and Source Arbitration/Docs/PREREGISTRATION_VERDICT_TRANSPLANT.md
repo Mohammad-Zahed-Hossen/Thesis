@@ -13,8 +13,8 @@ To freeze it, commit this file, tag the commit `prereg-v5`, and record the tag h
 
 **Sources:**
 
-- `Archive/Paper/lit-dossier-verdict-transplant/lit-dossier-verdict-transplant.md` (the dossier)
-- `Archive/Paper/prereg-freeze-audit/prereg-freeze-audit.md` (the freeze audit, 2026-11-10)
+- `Docs/Paper/lit-dossier-verdict-transplant/lit-dossier-verdict-transplant.md` (the dossier)
+- `Docs/Paper/prereg-freeze-audit/prereg-freeze-audit.md` (the freeze audit, 2026-11-10)
 - the PDFs in `Docs/Paper/`
 - `Experiment/*_v5.py`
 
@@ -59,7 +59,10 @@ CMC-Bench (Catapang 2026, MAGMaR) is unread and must be read before the related-
 
 ## 2. Hypotheses
 
-The **primary outcome is Δℓ** (§6.1), in both regimes. The behavioural outcome (§6.2) is secondary.
+**Primary outcome by regime [Pre-freeze D1, 2026-11-13]:**
+
+- **GSM8K/SVAMP (Math):** the **behavioural choice shift** $\Delta P(Y{=}T)$ at $k=1$ (parsed with the `structured` Math parser, §6.2) is the **primary outcome**, evaluated with the matched-template pair (`para_flip - para`) as **co-primary** alongside `flip - own` (**D2**) and full `none` decomposition (`none - own`, `flip - none`, `para_flip - none`). The teacher-forced `####` margin $\Delta\ell$ is reported as **secondary/diagnostic** in Math, because the v5 dev pass showed near-chance within-order tracking (`AUC ≈ 0.50`) between Math `####` log-likelihood margins before chain-of-thought and the answers solved afterward.
+- **ChartQA-Conflict (exploratory, D4):** the **primary outcome is Δℓ** (§6.1) (where answer-only decodes give clean tracking), with ChartQA as a whole designated **exploratory/secondary** (**D4**).
 
 Here $\rho_b=\mathrm{CDE}_{\ell,b}/\mathrm{Ceil}_\ell$, where $\mathrm{CDE}_{\ell,b}$ is averaged over *K* and *O* (§7.1) and $\mathrm{Ceil}_\ell$ is defined in §4.3.
 
@@ -120,7 +123,7 @@ Rows are checked from top to bottom, and the first row that matches gives the re
 - **Construction:** the original chart supports the ChartQA answer *a_I*. A reviewed counterfactual report supports *a_T*. The chart is the correct source.
 - **Known limitation** (arXiv:2608.17205, Limitations): the report states the value directly, while the chart has to be read. Barua et al. (arXiv:2610.19407, pp. 7–8) find text evidence 1.4–3.8 times stronger in that structure.
 - **Dev/confirm split:** `--dev_size 30`, leaving 199 confirm items. The harness default of 200 would leave 29.
-- **Entry rule (R5):** a model's ChartQA results enter the confirmatory family only if at least 100 items survive the competency and edit gates, counted before any transplant row is decoded. Otherwise they are secondary. The rule is the same for all three models. (An earlier draft made Qwen2-VL-2B on ChartQA-Conflict secondary regardless; that exception is removed, see §11.)
+- **Role & Entry rule (D4 & R5):** Following the v5 dev pass (low competency/edit-gate survival across models and pre-verdict Sentence-1 answer leakage in donor rationales), **ChartQA-Conflict is designated exploratory/secondary** (**Pre-freeze D4, 2026-11-13**). Inside ChartQA, at least 100 items surviving the competency and edit gates remains the quantitative R5 sufficiency bar before a reading is quoted (`NOT A READING` otherwise).
 - **About the 113 in *Which Source Wins?*:** Table 11 counts Qwen2-VL-2B items that are "decidable at all four required endpoints" across degradation levels (p. 18). It is not a competency yield. The 2B ChartQA yield is measured in the dev pass.
 
 ### 3.3 Competency conditioning
@@ -137,13 +140,13 @@ Both are run under the regime's decoding settings (§3.4). This follows Zhang et
 
 | Setting                                      | Value                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Models                                       | Three, all confirmatory (§7.2). Parameter counts are from the Hub model pages, read 2026-11-11:                                                                                                                                                                                                                                                                                                                                                                                                                                          |
-|                                              | `Qwen/Qwen2-VL-2B-Instruct` @ `895c3a49bc3fa70a340399125c650a463535e71c` — 2,209.0M parameters, Qwen2-VL generation                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| Models                                       | Three total — two confirmatory (`Qwen/Qwen2.5-VL-3B-Instruct`, `Qwen/Qwen2.5-VL-7B-Instruct`) and one **diagnostic-only** small/generation-contrast model (`Qwen/Qwen2-VL-2B-Instruct`, **Pre-freeze D3, 2026-11-13**). Parameter counts are from the Hub model pages, read 2026-11-11:                                                                                                                                                                                                                                   |
+|                                              | `Qwen/Qwen2-VL-2B-Instruct` @ `895c3a49bc3fa70a340399125c650a463535e71c` — 2,209.0M parameters, Qwen2-VL generation (diagnostic-only)                                                                                                                                                                                                                                                                                                                                                                            |
 |                                              | `Qwen/Qwen2.5-VL-3B-Instruct` @ `66285546d2b821cf421d4f5eb2576359d3770cd3` — 3,754.6M parameters, Qwen2.5-VL generation                                                                                                                                                                                                                                                                                                                                                                                                                  |
 |                                              | `Qwen/Qwen2.5-VL-7B-Instruct` @ `cc594898137f460bfe9f0759e9844b3ce807cfb5` — 8,292.2M parameters, Qwen2.5-VL generation; the one model shared with *Which Source Wins?*                                                                                                                                                                                                                                                                                                                                                                  |
 | Decoding                                     | Greedy, `repetition_penalty = 1.0`, SDPA attention                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| Precision and hardware **[Design decision]** | `bfloat16` for every model, no quantization, on one GPU class with CUDA compute capability ≥ 8 and at least 24 GB (NVIDIA L4, A100, RTX 3090/4090). `harness_v5.HFBackend` stops if the model loads in any other dtype. T4 and V100 are not used: there the loader falls back to `float16`, and the 7B model (about 16.6 GB of weights) does not fit in 16 GB. All rows of one model × regime run on the same GPU model, which each manifest records. The v4 dev runs used `float16` on a T4; they are not compared numerically with v5 |
-| Pixels                                       | GSM8K/SVAMP: `max_pixels = 256·28·28`. ChartQA: fixed from the dev pass (R8.4)                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| Precision and hardware **[Design decision]** | `bfloat16` for every model, no quantization, on one GPU class with CUDA compute capability ≥ 8 and at least 22 GiB usable VRAM (NVIDIA L4 [23,034 MiB], A100, RTX 3090/4090). `harness_v5.HFBackend` stops if the model loads in any other dtype. T4 and V100 are not used: there the loader falls back to `float16`, and the 7B model (~15.45 GiB in `bfloat16` weights) does not fit cleanly with KV-cache overhead in 16 GiB. All rows of one model × regime run on the same GPU model, which each manifest records. The v4 dev runs used `float16` on a T4; they are not compared numerically with v5 |
+| Pixels                                       | GSM8K/SVAMP: `max_pixels = 200704` (`256·28·28`). ChartQA: `max_pixels = 200704` (`256·28·28`, fixed from dev pass; R8.4)                                                                                                                                                                                                                                                                                                                                                                                                                    |
 | Base arms                                    | GSM8K/SVAMP: step-by-step, 512 new tokens. ChartQA: answer-only, 64 new tokens                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
 
 ---
@@ -293,15 +296,18 @@ A variant is used only if all of these hold. The item is dropped if any of its v
    - (b) **[Design decision]** The flip swaps at most two source noun phrases.
    - Part (a) alone has almost no force. When both source nouns also occur in another sentence, the two token sets are identical; this was the case for all 182 passing v4 dev donors. Part (b) bounds the edit directly. A multiset Jaccard (repeats counted) and the number of changed tokens are reported in `gates.json` but are not gates: as ratios they would reject short, clean verdicts for their length alone.
 4. **Grammar.** A regex finds no "image/text/chart/report are" and no article mismatch. A random 50 variants per model are also checked by a person.
-5. **Own verdict is usable.** `stated_reliable_source(v)` must name a source of the item's regime. Items labelled "undetermined" or "absent" are excluded.
+5. **Own verdict is usable.** `stated_reliable_source(v, regime=...)` must name a source of the item's regime (filtering nouns by regime and rejecting/inverting comparative negations such as "less reliable" / "not reliable"). Items labelled "undetermined", "absent", or `own_wrong_regime` are excluded.
+6. **Pre-verdict answer-leakage check.** The Sentence-1 prefix before the reliability sentence ($m_\varnothing$) must not already state either $y_I$ or $y_T$ (checked by `transplant_v5.make_variants` when candidate answers are supplied).
+
+Sentence splitting (`score_v4.split_verbalization`) treats `####` as a clause pivot alongside newlines, protects abbreviations (`e.g.`, `i.e.`, `etc.`, `U.S.`, `U.K.`), and extends the prefix scan up to the fifth sentence to locate the first sentence containing `"reliable"`. Clause swapping remains sentence-wide (`SWAP_SCOPE = "sentence"`) by default, as clause-only swapping produced contradictory flips in roughly a quarter of dev items.
 
 Counts at every gate are written to `{run_tag}.gates.json` and reported.
 
 ---
 
-## 6. Outcomes (R3)
+## 6. Outcomes (R3, updated 2026-11-13 by D1 & D3)
 
-### 6.1 Primary: log-likelihood margin at `####`
+### 6.1 Log-likelihood margin at `####` (primary in ChartQA; secondary/diagnostic in Math)
 
 $$
 \Delta\ell=\tfrac{1}{|y_I|}\log p(y_I\mid\cdot)-\tfrac{1}{|y_T|}\log p(y_T\mid\cdot)
@@ -314,12 +320,12 @@ $$
 - **Tokenization [Design decision]:** the prefill string ends at `####`. Each candidate is scored as the continuation `" " + y`, which yields the same string as `{m}\n\n#### {y}`. The prefix token ids must be an exact prefix of the full-sequence ids. If they are not, the row is flagged `boundary_mismatch` and dropped. If the first continuation token is whitespace only, it is not scored and not counted in $|y|$: both candidates share it, and counting it would change the length normalization. Each row records how many such tokens were skipped (`ws_skipped`).
 - *Which Source Wins?* scores its margin "after the fixed #### delimiter … with no chain-of-thought" (p. 5). Barua et al. report 75.3–82.0% agreement between the margin's sign and freely generated choices (Appendix B.5).
 
-### 6.2 Secondary: behavioural answer
+### 6.2 Behavioural answer (primary at k = 1 in GSM8K/SVAMP per D1; secondary in ChartQA)
 
 
 | Regime      | Procedure                                                                                                                                                                                                     |
 | ------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| GSM8K/SVAMP | Prefill `{m}\n\n`, then step-by-step solving, 512 new tokens, strict `####` parser (`score_v4.extract_answer`; rows with `answer_method` = `fallback_last_number` are scored "neither" under the strict rule) |
+| GSM8K/SVAMP | Prefill `{m}\n\n`, then step-by-step solving, 512 new tokens, headline `structured` Math parser (`score_v5.extract_answer_math_structured`: `####`, else explicit final-answer phrase / `\boxed{X}`; **Pre-freeze D3**). Both `strict` (`####`-only) and `lenient` (`fallback_last_number`) are reported alongside it in `behaviour_by_parser`. Base competency uses the `structured` parser (`harness_v5.base_correct(row, parser="structured")`) |
 | ChartQA     | Prefill `{m}\n\n####`, then an answer-only decode of 16 new tokens, strict parser (§4.4)                                                                                                                     |
 
 The 16-token decode is not used for GSM8K/SVAMP.
@@ -329,7 +335,7 @@ The 16-token decode is not used for GSM8K/SVAMP.
 ### 6.3 Other recorded variables
 
 - Neither-rate.
-- Perplexity of the forced verdict under the model, used as a covariate.
+- **verdict_nll:** length-normalized negative log-likelihood scored strictly over the forced reliability sentence token span (`harness_v5.HFBackend.score_span`), recorded as `None` for `m_∅` and explicit-source arms, together with `verdict_nll_tokens` and `verdict_nll_exact_span`.
 - The baseline margin $|\Delta\ell|$ under $m_\varnothing$ and non-binding, used to stratify for saturation (freeze audit §1.2).
 
 ---
@@ -353,19 +359,19 @@ Three tests per model × regime, Holm-corrected within each model × regime:
 
 ρ uses a 90% item-bootstrap CI (10,000 resamples). It is computed only if the 95% CI of $\mathrm{Ceil}_\ell$ excludes 0.
 
-**Holm with interval-based tests [Design decision; implemented in `analyze_v5.py`].** T2 and T3 are read from CIs, so Holm needs p-values for them. These are bootstrap p-values:
+**Holm with interval-based tests [Design decision; implemented in `analyze_v5.py`].** Holm correction runs over $m = 3$ primary tests (`T1`, `T2`, `T3`) within each confirmatory model × regime family (and correspondingly across `(T1_beh, bind_flip_minus_own, nonbind_flip_minus_own)` for the Math primary behavioural suite). T2 and T3 are read from CIs, so Holm needs p-values for them. Because each interval test has two one-sided readings, entering only the smaller one-sided bootstrap p would pick the favourable direction after the fact, so it is doubled first (`min(1.0, 2 * min(p_dec, p_eq))`):
 
-- decision-relevant: p = (1 + #{ρ* ≤ 0.25})/(B + 1);
-- equivalent: p = (1 + max(#{ρ* ≥ 0.25}, #{ρ* ≤ −0.25}))/(B + 1).
+- decision-relevant: $p_{\text{dec}} = (1 + \#\{\rho^* \le 0.25\})/(B + 1)$;
+- equivalent: $p_{\text{eq}} = (1 + \max(\#\{\rho^* \ge 0.25\}, \#\{\rho^* \le -0.25\}))/(B + 1)$.
 
 The pre-registered readings come from the unadjusted CIs, with the Holm-adjusted p-values reported beside them.
 
 Orientation: $s_i$ is set per item **and order**, because a donor's own verdict can name different sources in the two orders.
 
-**Confirmatory families.** Each model × regime is its own family of three tests:
+**Confirmatory families (updated by D3 & D4, 2026-11-13):**
 
-- GSM8K/SVAMP: Qwen2-VL-2B, Qwen2.5-VL-3B and Qwen2.5-VL-7B. Three families.
-- ChartQA-Conflict: each of the same three models, but only if that model meets the R5 entry rule (at least 100 items after the competency and edit gates). Up to three more families. A model that misses the rule is reported as secondary for ChartQA.
+- **GSM8K/SVAMP (confirmatory):** `Qwen/Qwen2.5-VL-3B-Instruct` and `Qwen/Qwen2.5-VL-7B-Instruct` (two confirmatory families; `Qwen/Qwen2-VL-2B-Instruct` is **diagnostic-only** per D3).
+- **ChartQA-Conflict (exploratory, D4):** reported across all models meeting/failing the 100-item R5 sufficiency bar (`NOT A READING` below threshold or below the 60% edit-gate rate) as **exploratory/secondary** evidence rather than a confirmatory family.
 
 **Claims are made per model [Design decision].**
 
@@ -408,7 +414,7 @@ glmer(y ~ D*B + D*O + K + (1 + D | item), family = binomial,
 
 All are reported with uncorrected 95% CIs and labelled secondary.
 
-- **Matched pair** (R6): $m_{para\_flip}$ vs. $m_{para}$, analysed as in §7.1. This is the robustness check in which both verdicts are edited.
+- **Matched pair & baseline decomposition (co-primary under D2, 2026-11-13):** $m_{para\_flip}$ vs. $m_{para}$ is treated as **co-primary** alongside `flip - own`, together with the additive $m_\varnothing$ decomposition (`none - own`, `flip - none`, `para_flip - none`) to separate any act-of-forcing artefact from pure source reversal.
 - **Ceiling per direction** (§4.3).
 - **Order:** the CDE within each order, and β₅ from §7.4.
 - **Saturation stratification:** the CDE by tertile of baseline $|\Delta\ell|$ under $m_\varnothing$ and non-binding (freeze audit §1.2).
@@ -419,13 +425,11 @@ All are reported with uncorrected 95% CIs and labelled secondary.
 
 Reported for $m_{own}$ vs. $m_{para}$ (wording) and $m_{own}$ vs. $m_{flip}$ (verdict), per binding level:
 
-- the **churn rate**: the share of (item, order) cells whose behavioural answer source changes at all;
+- the **churn rate**: the share of attributable (image/text in both arms) `(item, order)` cells whose behavioural answer flips `image <-> text` (`analyze_v5.change_rate`). Non-attributable (`neither`/`both`) transition rates (`neither_transition_rate`) and raw any-change rates (`any_change_rate`) are reported separately;
+- the **measured replay noise** (**D5, 2026-11-13**): the unforced `image <-> text` flip rate between stage-2 `donor` decodes and stage-3 non-binding `own` decodes at $k=1$;
 - the mean |ΔΔℓ|.
 
-**Wording-floor gate [Design decision].** It uses $m_{own}$ vs. $m_{para}$ on the behavioural outcome, under binding. The gate **fails if either** of these holds:
-
-1. the signed mean difference exceeds ε in size: |mean| > 5.0 pp;
-2. the churn rate exceeds 5.0% of cells.
+**Wording-floor gate [Design decision, updated by D5].** It uses $m_{own}$ vs. $m_{para}$ on the behavioural outcome, under binding. The fixed gate fails if either `|mean| > 5.0 pp` or `churn_rate > 5.0%`. Alongside that fixed limit, `analyze_v5.py` evaluates the **replay-noise benchmarked cap** (`replay_flip_rate + 5.0%`, **D5**), recognizing that long Math step-by-step decodes carry non-zero replay noise between unedited runs.
 
 Why both:
 
@@ -448,9 +452,9 @@ The gate is evaluated on the dev pass and again on the confirmatory data. Failin
 | ----------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Rendered order check                                | `harness_v5.py --print_example` output for one item in each order matches §4.1                                                                                |
 | Boundary mismatches in margin scoring               | ≤ 1% of rows                                                                                                                                                  |
-| Minimal-edit gate pass rate                         | Reported; analysis proceeds if ≥ 60% of competency items pass                                                                                                 |
+| Minimal-edit gate pass rate                         | Reported (including pre-verdict Sentence-1 answer-leakage gate); analysis proceeds if ≥ 60% of competency items pass (`NOT A READING` otherwise)             |
 | ChartQA item count                                  | Exactly 230 rows and 229 analysed items from the pinned release; otherwise the harness stops (§3.2)                                                           |
-| Wording floor (binding, `para` vs. `own`)           | Signed mean within ±5.0 pp **and** churn rate ≤ 5.0%; otherwise the behavioural equivalence test is uninterpretable (§7.6). This gate does not stop the run |
+| Wording floor (binding, `para` vs. `own`)           | Signed mean within ±5.0 pp **and** attributable `image <-> text` churn benchmarked against both fixed 5.0% and measured replay noise + 5.0% (D5); otherwise equivalence test uninterpretable (§7.6) |
 | ChartQA answer-only decodes matching *a_I* or *a_T* | Reported from the dev pass (R8.3)                                                                                                                              |
 | Competency yield                                    | Reported per model (R5 thresholds apply)                                                                                                                       |
 | Human coding of verdict labels                      | Two coders, about 200 items, κ reported before `stated_reliable_source` is used in any claim                                                                  |
@@ -589,3 +593,10 @@ three models alike. See §3.2, §7.2 and §11.)*
 - §3.2 and §7.2 (2026-11-11): the "Qwen2-VL-2B on ChartQA-Conflict is secondary regardless" exception is removed. The ≥ 100-item entry rule now decides for every model.
 - §3.4 (2026-11-11): precision and hardware are fixed at `bfloat16` on one GPU class with compute capability ≥ 8 and at least 24 GB. This replaces "FP16 on T4/V100". The harness enforces the dtype.
 - §3.2, ChartQA `conflict_id` 45 is excluded, following the *Which Source Wins?* artifact. The release has 230 rows; 229 are analysed.
+- **2026-11-13 Pre-freeze Decisions (D1–D5) & Forensic Audit Fixes** (resolving `Thesis/docs/Archive/claude_v5_forensic_code_and_construct_audit.md` prior to confirm freeze):
+  - **D1:** Behavioural shift $\Delta P(Y{=}T)$ at $k=1$ is designated primary for GSM8K/SVAMP (Math), with $\Delta\ell$ retained as secondary/diagnostic because Math `####` pre-CoT margins did not track solved answers (`AUC ≈ 0.50` within order). $\Delta\ell$ remains primary for ChartQA.
+  - **D2:** Report the full $m_\varnothing$ decomposition (`none - own`, `flip - none`, `para_flip - none`) and elevate the clean matched-template pair (`para_flip - para`) as **co-primary** alongside `flip - own`.
+  - **D3:** Adopt the `structured` Math parser (`####`, else explicit final-answer statement / `\boxed{X}`) as headline parser for competency and behavioural scoring (retaining `strict` and `lenient` side by side), and designate `Qwen/Qwen2-VL-2B-Instruct` as **diagnostic-only** rather than confirmatory.
+  - **D4:** Designate ChartQA-Conflict as **exploratory/secondary** due to low competency/edit-gate survival and Sentence-1 answer leakage.
+  - **D5:** Measure wording churn as attributable `image <-> text` flips (`change_rate`, separating `neither` transitions) benchmarked against measured `donor` vs. non-binding `own` replay noise (`replay_flip_rate + 5.0%`) alongside the fixed 5.0% cap.
+  - **Pipeline & Doc Errata:** Fixed Holm interval `p`-value doubling (`min(1, 2*min(p_dec, p_eq))` over `m = 3`), regime-aware `stated_reliable_source` + comparative negation handling (`score_v5`), sentence splitter (`####`, `U.S.`/`U.K.`, up to 5 sentences in `score_v4`), pre-verdict Sentence-1 leakage gate (`transplant_v5`), exact `verdict_nll` reliability-sentence span scoring (`harness_v5`), hardware wording (`≥ 22 GiB` / L4 23,034 MiB, `~15.45 GiB` 7B weights), `max_pixels = 200704` fixed for ChartQA, and `Docs/Paper/` source paths. Added `Experiment/sample_v5_for_coding.py` for v5 human coding.
