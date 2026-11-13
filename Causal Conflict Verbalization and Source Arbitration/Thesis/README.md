@@ -2,8 +2,24 @@
 
 Writing guides, conceptual FAQs, execution runbooks, compute evaluations, and v5 dev-pass audits for the BSc CSE thesis (*Does the Verdict Decide? Testing Whether Stated Source Reliability Steers Vision-Language Models under Image–Text Conflict*).
 
-**Status:** Reference materials and v5 dev-pass audits are present; dissertation chapter drafts have not been written here yet.  
-**Ground truth:** Active code and raw outputs live in [../Experiment/](../Experiment/) (start at [../Experiment/README.md](../Experiment/README.md)). The pre-registration draft is [../Docs/PREREGISTRATION_VERDICT_TRANSPLANT.md](../Docs/PREREGISTRATION_VERDICT_TRANSPLANT.md) (not yet frozen).
+**Last updated:** 2026-11-13
+**Status:** The v5 dev pass has run on all three models (39 files in [../Experiment/results_v5/](../Experiment/results_v5/)) and has been audited twice (`docs/Archive/`). The pre-registration is **not frozen**, and **no confirmatory data exists**. No dissertation chapters have been drafted here yet.
+**Ground truth:** Active code and raw outputs live in [../Experiment/](../Experiment/) (start at [../Experiment/README.md](../Experiment/README.md)). The pre-registration draft is [../Docs/PREREGISTRATION_VERDICT_TRANSPLANT.md](../Docs/PREREGISTRATION_VERDICT_TRANSPLANT.md).
+
+> [!NOTE]
+> [../AGENTS.md](../AGENTS.md) still says the v5 dev pass "has not run". `results_v5/` and [../Experiment/README.md](../Experiment/README.md) (updated 2026-11-13) show it has. Trust the result files.
+
+---
+
+## Quick start for AI agents (read in this order, stop when you have enough)
+
+1. **This file**: what is in `Thesis/`.
+2. [docs/Archive/claude_v5_independent_deep_audit.md](docs/Archive/claude_v5_independent_deep_audit.md) §1 and §10: the current evidence boundary and the blockers before freezing.
+3. [../Docs/PREREGISTRATION_VERDICT_TRANSPLANT.md](../Docs/PREREGISTRATION_VERDICT_TRANSPLANT.md): the design spec (freeze conditions §10, R8).
+4. [../Docs/Paper/README.md](../Docs/Paper/README.md): the 14 primary sources, the literature dossier and the freeze audit.
+5. [THESIS_NARRATIVE_AND_FRAMING_GUIDE.md](THESIS_NARRATIVE_AND_FRAMING_GUIDE.md): only when you are drafting thesis prose.
+
+Folder indexes elsewhere: [../Docs/README.md](../Docs/README.md) · [../Docs/Context/README.md](../Docs/Context/README.md) · [../Archive/README.md](../Archive/README.md) · [../Experiment/README.md](../Experiment/README.md).
 
 ---
 
@@ -42,8 +58,8 @@ Thesis/
 
 Two harmonized Q&A guides (AI-generated and audited on 2026-11-11 against code, `results_v4/dev2_*.jsonl`, the pre-registration draft, and primary papers) explaining the Controlled Direct Effect (CDE) estimand, datasets, pilot-to-v5 evolution, open risks, and defense preparation:
 
-- **[Thesis Understanding FAQ (Opus 4.6).md](docs/Understanding/Thesis%20Understanding%20FAQ%20(Opus%204.6).md)** — Compact, citation-dense reference.
-- **[Thesis Understanding FAQ (Gemini 3.8 Flash).md](docs/Understanding/Thesis%20Understanding%20FAQ%20(Gemini%203.8%20Flash).md)** — Longer teaching-style companion.
+- **[Thesis Understanding FAQ (Opus 4.6).md](<docs/Understanding/Thesis Understanding FAQ (Opus 4.6).md>)** — Compact, citation-dense reference.
+- **[Thesis Understanding FAQ (Gemini 3.8 Flash).md](<docs/Understanding/Thesis Understanding FAQ (Gemini 3.8 Flash).md>)** — Longer teaching-style companion.
 
 ### `docs/RUNBOOK/` — Thesis-Side Execution Guides
 
@@ -71,4 +87,20 @@ Records and independent AI audits of the v5 development run stored in [../Experi
 1. **Documents here are reference aids, not ground truth.** Always verify numbers, prompts, and implementation details against [../Experiment/](../Experiment/) (raw JSONL rows → manifests/gates → active Python code).
 2. **Do not cite dev data as findings.** Figures in `docs/Understanding/` (v4 `dev2`) and `docs/Archive/` (v5 dev pass) are exploratory/diagnostic only.
 3. **Preserve epistemic tags** (`[Verified]`, `[Inferred]`, `[Hypothesis]`, `[Unknown]`) when drafting thesis text from these references, per [../AGENTS.md](../AGENTS.md).
+4. **Do not reuse the old chapter drafts.** [../Archive/Thesis_Manuscript/](../Archive/Thesis_Manuscript/) holds Chapter 1 and Chapter 3 written under the withdrawn v3 claim that verbalization causally steers arbitration (N = 1,619). New chapters go in this folder and follow the framing guide.
+5. **Avoid the stale September documents.** The `CANONICAL_*` files and `Docs/Context/` present the v3 instruction contrast as validated causal proof. See [../Docs/README.md](../Docs/README.md) for which files are current.
+
+---
+
+## Where new work should go
+
+| Artifact | Location |
+|---|---|
+| Dissertation chapter drafts | `Thesis/` (e.g. `Thesis/chapters/`, to be created) |
+| Thesis-side runbooks, compute notes | `Thesis/docs/RUNBOOK/`, `Thesis/docs/Compute/` |
+| New dev or confirmatory run audits | `Thesis/docs/Archive/`, or a dated subfolder |
+| Code, raw results, analysis outputs | [../Experiment/](../Experiment/), never here |
+| Literature PDFs and dossiers | [../Docs/Paper/](../Docs/Paper/) |
+
+Update the **Layout** and **Contents** sections of this file whenever you add a file here.
 

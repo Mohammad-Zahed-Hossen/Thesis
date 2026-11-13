@@ -20,8 +20,8 @@
   - Task-selection conflict: `vlm-modality-research/modality-conflict-arbitration-v2` (GSM8K/SVAMP).
   - Evidence conflict: `vlm-modality-research/chartqa-evidence-conflict-v2` (229 analysed items; the 230-row release minus `conflict_id` 45).
   - Both come from *Which Source Wins?* (arXiv:2608.17205).
-- **Design Spec:** `Docs/PREREGISTRATION_VERDICT_TRANSPLANT.md` (draft, not yet frozen). Evidence base: `Archive/Paper/lit-dossier-verdict-transplant/lit-dossier-verdict-transplant.md`.
-- **Current Phase:** v3 pilot and v4 dev runs are done (exploratory only), and the literature audit is done. The v5 harness is written and passes its CPU tests but has not run on a GPU. Next: run the v5 dev pass (`Experiment/RUNBOOK_v5.md`), then freeze the pre-registration. **No confirmatory data exists.**
+- **Design Spec:** `Docs/PREREGISTRATION_VERDICT_TRANSPLANT.md` (draft, not yet frozen). Evidence base: `Docs/Paper/lit-dossier-verdict-transplant/lit-dossier-verdict-transplant.md`.
+- **Current Phase:** v3 pilot and v4 dev runs are done (exploratory only), and the literature audit is done. The v5 dev pass has run on an L4 in `bfloat16` for all three models (29,880 rows in `Experiment/results_v5/`) and has been audited twice (`Thesis/docs/Archive/`). Next: resolve the pre-freeze decisions in `Thesis/docs/Archive/claude_v5_independent_deep_audit.md` §10, run `Experiment/analyze_v5.py` on `results_v5/`, and freeze the pre-registration. **No confirmatory data exists.**
 
 ### What the Pilot Does and Does Not Show
 - The pipeline works on `Qwen/Qwen2.5-VL-3B-Instruct` on a T4 [Verified].
@@ -46,11 +46,11 @@
 | Location | Trust Level | What It Contains |
 |:---------|:-----------|:-----------------|
 | `Experiment/*.py` | **Ground truth** | Active v4 code; start at `Experiment/README.md` |
-| `Experiment/results_v4/`, `Experiment/results_v3/` | **Ground truth** | Run outputs and analysis; each has a README |
+| `Experiment/results_v5/`, `results_v4/`, `results_v3/` | **Ground truth** | Run outputs and analysis; each has a README |
 | `Experiment/archive/` | **Historical** | v3 harness and early pilots |
 | `Docs/PREREGISTRATION_VERDICT_TRANSPLANT.md` | **Design spec** | Pre-registration draft; check it against code |
 | `Docs/` (other files) | **Reference only** | AI-generated narrative, tracking, and decision logs; several are stale |
-| `Archive/Paper/` | **Primary sources** | Downloaded papers and the literature dossier |
+| `Docs/Paper/` | **Primary sources** | Downloaded papers, literature dossier, and pre-registration freeze audit |
 | `Archive/` (other files) | **Historical** | Parked explorations, not active |
 
 ---
@@ -80,13 +80,15 @@
 ```
 ├── Experiment/          ← CODE + DATA (ground truth)
 │   ├── README.md        ← Current status; read first
-│   ├── *.py, tests/     ← Active v4 code and tests
+│   ├── *.py, tests/     ← Active v4/v5 code and tests
+│   ├── results_v5/      ← v5 dev pass outputs (29,880 rows)
 │   ├── results_v4/      ← v4 runs and dev analysis
 │   ├── results_v3/      ← v3 pilot outputs and re-analysis
 │   ├── coding_v3/       ← Human-coding sheets
 │   └── archive/         ← v3 harness and early pilots
 ├── Docs/                ← AI-generated tracking (reference only)
 │   ├── PREREGISTRATION_VERDICT_TRANSPLANT.md ← Design spec (draft)
+│   ├── Paper/           ← Primary PDFs, literature dossier, freeze audit
 │   ├── Context/         ← Historical context
 │   ├── Decision_Audits/ ← Topic selection audits
 │   └── Parked_Proposals/← Deprecated proposals

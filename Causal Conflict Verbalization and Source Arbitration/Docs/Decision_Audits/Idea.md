@@ -3,8 +3,8 @@
 *Rewritten 2026-11-10. This replaces the earlier AI-generated narrative, which claimed a "100% untouched gap" and causal steering from v3. Neither claim survived the audit.*
 
 **Sources:**
-- `Archive/Paper/lit-dossier-verdict-transplant/lit-dossier-verdict-transplant.md` (the dossier)
-- the PDFs in `Archive/Paper/`
+- `Docs/Paper/lit-dossier-verdict-transplant/lit-dossier-verdict-transplant.md` (the dossier)
+- the PDFs in `Docs/Paper/`
 - the dev data in `Experiment/results_v4/`
 
 The design specification is `Docs/PREREGISTRATION_VERDICT_TRANSPLANT.md`.

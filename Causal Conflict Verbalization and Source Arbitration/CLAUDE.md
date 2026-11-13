@@ -10,15 +10,15 @@ The earlier title, *Causal Conflict Verbalization and Source Arbitration in Visi
 
 The thesis tests multimodal chain-of-thought faithfulness. When an image and a typed text support different answers, we prefix-force a reliability verdict into the model's own response ("I consider the image / the typed text more reliable"). The question is whether that verdict causally changes which source's answer the model then gives. Instruction, evidence order and wording are held fixed. The test is run with and without a binding instruction that tells the model to act on its verdict.
 
-The full design is in `Docs/PREREGISTRATION_VERDICT_TRANSPLANT.md`. The evidence behind it is in `Archive/Paper/lit-dossier-verdict-transplant/lit-dossier-verdict-transplant.md`.
+The full design is in `Docs/PREREGISTRATION_VERDICT_TRANSPLANT.md`. The evidence behind it is in `Docs/Paper/lit-dossier-verdict-transplant/lit-dossier-verdict-transplant.md`.
 
 ## Current Phase
 
 - **Done:** v3 pilot (N = 1,619) and v4 dev runs, both exploratory.
-- **Done:** literature audit. The original novelty claim does not hold; the current claim is in the dossier, §4.1.
-- **Done:** v5 harness and `analyze_v5.py` are written and pass their CPU tests (`harness_v5.py`, `transplant_v5.py`, `score_v5.py`, `analyze_v5.py`). Nothing in v5 has run on a GPU.
-- **Now:** run the v5 dev pass with `Experiment/RUNBOOK_v5.md` (all three models, on the 24 GB+ GPU class, 200 GSM8K/SVAMP and 30 ChartQA dev items). Record the dev-pass numbers, do the human coding of verdict labels, then freeze the pre-registration.
-- **No confirmatory data exists yet, and no v5 data of any kind.**
+- **Done:** literature audit and pre-registration freeze audit (`Docs/Paper/prereg-freeze-audit/`). The original novelty claim does not hold; the current claim is in the freeze audit §5 (replacing dossier §4.1).
+- **Done:** v5 dev pass across all three models on an L4 in `bfloat16` (29,880 rows in `Experiment/results_v5/`), audited twice in `Thesis/docs/Archive/`.
+- **Now:** resolve the pre-freeze decisions in `Thesis/docs/Archive/claude_v5_independent_deep_audit.md` §10, run `Experiment/analyze_v5.py` on `results_v5/`, complete human coding of verdict labels (`Experiment/coding_v3/`), and freeze the pre-registration.
+- **No confirmatory data exists yet.**
 
 For current status and next steps, read `Experiment/README.md` first.
 
@@ -27,10 +27,11 @@ For current status and next steps, read `Experiment/README.md` first.
 **Every `.md` document in `Docs/` was AI-generated** during research tracking. They are not ground truth. `Docs/PREREGISTRATION_VERDICT_TRANSPLANT.md` is the one exception: it is the design specification. Even so, check it against code before relying on it.
 
 **The actual ground truth is:**
+- `Experiment/results_v5/*.jsonl` and their manifests/gates: v5 dev pass outputs, for tuning/diagnostics only, not findings.
 - `Experiment/results_v4/*.jsonl` and their manifests: v4 dev runs, for tuning only, not findings.
 - `Experiment/results_v3/full_experiment_results v3.0.json`: v3 pilot outputs, exploratory and read-only.
 - `Experiment/*.py`: active code. `Experiment/archive/harness_v3/` holds the v3 harness.
-- `Archive/Paper/*.pdf`: the primary papers behind the dossier.
+- `Docs/Paper/*.pdf`: the primary papers behind the dossier.
 
 When in doubt, read the code, data and papers, not the narrative documents.
 
@@ -95,20 +96,22 @@ Recomputed from `Experiment/results_v4/dev2_*.jsonl` with `score_v4.py`, or read
 
 ```
 ├── Experiment/          ← CODE + DATA (ground truth); start at its README.md
-│   ├── *.py, tests/     ← Active v4 code and tests (v5 upgrade in progress)
-│   ├── RUNBOOK_v4.md    ← Exact commands, in order
+│   ├── *.py, tests/     ← Active v4/v5 code and tests
+│   ├── RUNBOOK_v4.md, RUNBOOK_v5.md ← Execution runbooks
+│   ├── results_v5/      ← v5 dev pass outputs (29,880 rows)
 │   ├── results_v4/      ← v4 runs and dev analysis
 │   ├── results_v3/      ← v3 pilot outputs and re-analysis (read-only)
 │   ├── coding_v3/       ← Human-coding sheets
 │   └── archive/         ← v3 harness and early pilots
 ├── Docs/                ← AI-GENERATED TRACKING (reference only)
 │   ├── PREREGISTRATION_VERDICT_TRANSPLANT.md ← Design spec (draft, not frozen)
+│   ├── Paper/           ← Primary PDFs, literature dossier, and freeze audit
 │   ├── *.md             ← Older topic spec, master report, roadmap (stale)
 │   ├── Context/         ← Historical context tracking
 │   ├── Decision_Audits/ ← Topic selection audit trail; Idea.md is current
 │   └── Parked_Proposals/← Deprecated proposal specs
-├── Thesis/              ← WHERE THESIS CHAPTERS WILL GO; docs/Understanding/ holds two AI-generated FAQs (audited 2026-11-11, reference only)
-├── Archive/             ← Parked exploration; Archive/Paper/ holds the primary PDFs and dossier
+├── Thesis/              ← WHERE THESIS CHAPTERS WILL GO; docs/ holds Understanding FAQs, Compute evals, RUNBOOKs, and Archive/ (v5 dev audits)
+├── Archive/             ← Parked exploration domains (inactive)
 └── .agents/             ← Antigravity agent config
 ```
 
@@ -118,4 +121,4 @@ Recomputed from `Experiment/results_v4/dev2_*.jsonl` with `score_v4.py`, or read
 2. **Epistemic honesty.** Tag claims as [Verified], [Inferred], [Hypothesis] or [Unknown]. Never invent papers, citations or datasets.
 3. **Level 3 rigor.** Competing hypotheses (H₁ vs H₀), noise floors and ceilings, deterministic metrics, pre-registered contrasts. No leaderboard chasing.
 4. **Code for the GPU session, not local.** Any model-touching code targets the pre-registered GPU class (Colab Pro L4/A100 or an RTX 3090/4090). The local machine is strictly for editing, tests and analysis.
-5. **Don't treat Docs/ as truth.** Cross-check against code, data and the papers in `Archive/Paper/`.
+5. **Don't treat Docs/ as truth.** Cross-check against code, data and the papers in `Docs/Paper/`.
