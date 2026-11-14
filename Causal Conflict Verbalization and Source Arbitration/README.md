@@ -29,7 +29,7 @@ When an image and a typed text support different answers, does a prefix-forced s
 │   ├── results_v4/ v4 dev runs and analysis; see its README
 │   └── results_v3/ v3 pilot, N = 1,619; see its README
 ├── Thesis/         Writing guides, FAQs, runbooks, compute evaluations, and v5 dev audits (chapters not yet drafted)
-├── Docs/           Pre-registration draft, 18-paper + CMC-Bench knowledge base / PDFs (Docs/Paper/), and historical decision records
+├── Docs/           Pre-registration draft, 18-paper + CMC-Bench knowledge base / 20 local PDFs + post-v5 audit (Docs/Paper/), and historical decision records
 ├── Archive/        Parked explorations (Bengali VLM, medical imaging, multimodal agents, etc.)
 ├── CLAUDE.md       Claude directives
 ├── AGENTS.md       Instructions for other agents

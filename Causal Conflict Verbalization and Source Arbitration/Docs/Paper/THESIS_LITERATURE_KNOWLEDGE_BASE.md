@@ -6,15 +6,16 @@
 1. Local primary-PDF audits: [lit-dossier-verdict-transplant.md](lit-dossier-verdict-transplant/lit-dossier-verdict-transplant.md) & [prereg-freeze-audit.md](prereg-freeze-audit/prereg-freeze-audit.md) (2026-11-10)
 2. Post-v5 plan audit: [claude_v4_vs_v5_plan_audit.md](<../../Thesis/docs/Archive/dev v5/claude_v4_vs_v5_plan_audit.md>) (2026-11-14)
 3. AlphaXiv OpenResearch Pass 1 (8 anchor papers) & Pass 2 (10 remaining papers + CMC-Bench) (2026-11-14)
+4. Post-v5 direct PDF audit (#15–#19 + 2 Ch. 2 leads): [post-v5-pdf-audit.md](post-v5-pdf-audit/post-v5-pdf-audit.md) (2026-11-14)
 
-> **Epistemic & Trust Policy:** `[Verified]` = directly checked in a local PDF, AlphaXiv page-cited read, or repo code/data. `[Inferred]` = methodological interpretation for this thesis. For verbatim thesis quotes, always double-check the exact wording against the PDF in `Docs/Paper/`.
+> **Epistemic & Trust Policy:** `[Verified]` = directly checked in a local PDF, open official proceedings page/abstract, or repo code/data. `[Inferred]` = methodological interpretation for this thesis. For verbatim thesis quotes, always double-check the exact wording against the PDF in `Docs/Paper/`.
 
 ---
 
-## 0. Local PDF Inventory (`Docs/Paper/`) & Missing PDFs to Download Later
+## 0. Local PDF Inventory (`Docs/Paper/`)
 
-### A. 14 PDFs Currently Present in `Docs/Paper/`
-| # | Local File | arXiv ID | Short Name | Audit Coverage |
+### A. 20 PDFs Currently Present in `Docs/Paper/` (19 Core + 1 Ch. 2 Lead; 0 Core Missing)
+| # | Local File | arXiv / Anthology ID | Short Name | Audit Coverage |
 |---|---|---|---|---|
 | 1 | [2503.02199.pdf](2503.02199.pdf) | `2503.02199` | *Words or Vision* (Deng et al., 2025) | Dossier (targeted) + AlphaXiv Pass 2 (full) |
 | 2 | [2504.08974.pdf](2504.08974.pdf) | `2504.08974` | *Mixed Signals* (Pezeshkpour et al., 2025) | Dossier (targeted) + AlphaXiv Pass 2 (full) |
@@ -30,19 +31,15 @@
 | 12 | [2610.19407.pdf](2610.19407.pdf) | `2610.19407` | *Biased Bayesian Observers* (Barua, Mahowald & Rudman, 2026) | Freeze Audit (pp. 1–9, 17–19) + AlphaXiv Pass 1 |
 | 13 | [2610.33841.pdf](2610.33841.pdf) | `2610.33841` | *Grounding on Request* (Dassen et al., 2026) | Freeze Audit (pp. 1–9, 15–16) + AlphaXiv Pass 1 |
 | 14 | [2610.38296.pdf](2610.38296.pdf) | `2610.38296` | *Hidden Commitment* (Assefa & Cho, ICML 2026) | Dossier (pp. 1–7) + AlphaXiv Pass 1 |
+| 15 | [2603.01437.pdf](2603.01437.pdf) | `2603.01437` | *Post-Hoc Reasoning in Chain of Thought* (Cox, Kianersi & Garriga-Alonso, ICML 2026 Wkshp) | AlphaXiv Pass 2 + **Full local PDF audit** |
+| 16 | [2510.27484.pdf](2510.27484.pdf) | `2510.27484` | *Thought Branches: Interpreting LLM Reasoning Requires Resampling* (Macar et al., ICLR 2026) | AlphaXiv Pass 2 + **Full local PDF audit** |
+| 17 | [2307.13702.pdf](2307.13702.pdf) | `2307.13702` | *Measuring Faithfulness in Chain-of-Thought Reasoning* (Lanham et al., 2023) | AlphaXiv Pass 2 + **Full local PDF audit** |
+| 18 | [2609.25366.pdf](2609.25366.pdf) | `2609.25366` | *From Decorative to Load-Bearing* (Jia & Mu, TMLR 2026) | AlphaXiv Pass 2 + **Full local PDF audit** |
+| 19 | [2026.magmar-main.3.pdf](2026.magmar-main.3.pdf) | `2026.magmar-main.3` | *CMC-Bench: When Image and Text Disagree in Multimodal RAG* (Catapang, MAGMaR 2026) | AlphaXiv Pass 2 + **Full local PDF audit** |
+| 20 | [2606.22862.pdf](2606.22862.pdf) | `2606.22862` | *Chains That See, Answers That Don't* (Fan, Li & Zhuang, EvalMG @ SIGIR 2026) | **Ch. 2 lead — Full local PDF audit** |
 
-### B. 5 Core Papers Missing Local PDFs (Download into `Docs/Paper/` Later)
-| # | Expected Filename | Paper & Authors | Why You Need the PDF Locally | Download URL |
-|---|---|---|---|---|
-| 15 | `2603.01437.pdf` | *Post-Hoc Reasoning in Chain of Thought* (Cox, Kianersi & Garriga-Alonso, ICML 2026 Wkshp) | Explains why pre-CoT probe/margin AUC drops when CoT computes the answer (supports D1) | https://arxiv.org/pdf/2603.01437 |
-| 16 | `2510.27484.pdf` | *Thought Branches: Interpreting LLM Reasoning Requires Resampling* (Macar, Bogdan, Rajamanoharan & Nanda, ICLR 2026) | Grounding for off-policy edit resilience & resampling vs. greedy single-decode limitation | https://arxiv.org/pdf/2510.27484 |
-| 17 | `2307.13702.pdf` | *Measuring Faithfulness in Chain-of-Thought Reasoning* (Lanham et al., 2023) | Classic CoT faithfulness interventions & "larger models less faithful" citation | https://arxiv.org/pdf/2307.13702 |
-| 18 | `2609.25366.pdf` | *From Decorative to Load-Bearing* (Jia & Mu, TMLR 2026) | Forced-continuation step perturbation, difficulty dependence, greedy decoding precedent | https://arxiv.org/pdf/2609.25366 |
-| 19 | `2026.magmar-main.3.pdf` | *CMC-Bench: When Image and Text Disagree: Cross-Modal Evidence Conflict in Multimodal RAG* (Catapang, MAGMaR 2026) | Cited in `Which Source Wins?` and required in §1.1 / Chapter 2 Related Work | https://aclanthology.org/2026.magmar-main.3.pdf |
-
-### C. 2 Optional Related-Work Leads (Surfaced in Pass 2 Search; Download If Citing in Ch. 2)
-- `2606.22862.pdf` (*A Multi-Aspect Evaluation Recipe for Forced Chain-of-...*, https://arxiv.org/pdf/2606.22862) — snippet notes authors avoided TOST because no margin was pre-specified.
-- *Testing Linguistic Invariance in Chain-of-Thought Monitoring* (2026) — snippet mentions TOST in CoT monitoring.
+### B. Gated Related-Work Lead Audited Without Local PDF
+- *Same Reasoning, Different Words: Testing Linguistic Invariance in Chain-of-Thought Monitoring* (Joe Smith, TAE @ NeurIPS 2026, OpenReview `uul4iRQSJ2`) — **`[PDF Not Available]`** (`HTTP 403 Forbidden` on OpenReview; no public arXiv/mirror). Audited strictly from the official NeurIPS 2026 workshop abstract and author CV in [post-v5-pdf-audit.md](post-v5-pdf-audit/post-v5-pdf-audit.md).
 
 *(Note: `Docs/Paper/Archive/` contains older, superseded calibration/hallucination/Bangla/peer-thesis PDFs — do not cite those for v5 claims without re-checking relevance.)*
 
@@ -56,6 +53,11 @@
 4. **`2503.02199` vs. `2504.08974` table overlap fixed:** AlphaXiv Pass 2 accidentally listed `+56.8 to −74.4 (Table 4, p. 14)` under *Words or Vision* (`2503.02199`); that range belongs to *Mixed Signals* (`2504.08974`).
 5. **Conference venue labels:** Rendered arXiv PDF title pages for `2503.02199`, `2504.08974`, and `2505.23945` do not print venue names (though `2505.23945` appears as EMNLP 2025 Findings in later bibliographies).
 6. **CMC-Bench exists:** Previously marked "Not found" in the Nov 10 dossier, verified in `prereg-freeze-audit.md` and Pass 2 (`2026.magmar-main.3`).
+7. **Post-v5 PDF verification refinements ([post-v5-pdf-audit.md](post-v5-pdf-audit/post-v5-pdf-audit.md)):**
+   - `2603.01437`: exact `Qwen2.5-7B` Logical Deduction probe AUC is `0.778` (Table 3, p. 4, not `0.78`); the `50` initially-correct sample is §2.2 only while §2.4 steers full `S_yes`/`S_no` test subsets; App. F adds a `GPT-OSS 20B` reasoning-model replication.
+   - `2510.27484`: specific models differ by experiment (`qwen-32b`, `qwen3-235b-a22b`, `llama-3.1-nemotron-ultra-235b-v1`, `deepseek-r1-0528` in §2–§3; `DeepSeek-R1-Qwen-14B` in §4.1; `Qwen3-8B` in §4.2), and in MATH (App. D.1 Table 5, p. 29) Handwritten edits yield higher local plan-shift % (`64.7%` vs. `55.1%`) while Resampled has the highest continuous effect (`3.84 ± 0.06` vs. `3.49 ± 0.02`).
+   - `2609.25366`: `temperature = 0` greedy decoding applies across *all* models/experiments (App. P p. 25), and App. S (p. 26) reports an `n = 500` blind two-annotator audit (`κ = 1.000` on `C-vs-non-C`, `κ = 0.927` 4-way).
+   - `2026.magmar-main.3`: all 4 VLMs run in 4-bit `mlx-vlm` quantization (none Qwen2.5-VL), and its `gpt-5-mini` judge lacks formal human validation (p. 8).
 
 ---
 
@@ -144,16 +146,16 @@
 
 ### 3.2 Remaining 10 Core Papers + CMC-Bench (Pass 2 Verified Reads)
 
-#### 9. Post-Hoc Reasoning in CoT — Cox, Kianersi & Garriga-Alonso (2026) | `[PDF Missing: 2603.01437]`
+#### 9. Post-Hoc Reasoning in CoT — Cox, Kianersi & Garriga-Alonso (2026) | `[Local PDF: 2603.01437.pdf]`
 - **Citation:** Kyle Cox, Darius Kianersi, Adrià Garriga-Alonso. *Post-Hoc Reasoning in Chain of Thought: Decoding and Steering Pre-Committed Answers*, arXiv:2603.01437v2 (ICML 2026 Mechanistic Interpretability Workshop, p. 1). `[Verified]`
-- **Paradigm & Intervention:** Five instruction-tuned Gemma-2 and Qwen2.5 models (incl. `Qwen2.5-3B`, `7B`) on Anachronisms, Logical Deduction, Social Chemistry, Sports Understanding (500 train / 500 test each, p. 2). Ellipsis CoT removal, misleading CoT substitution, pre-CoT residual probing, and probe-direction steering ($T=0.7$, 50 initially correct items/cell, pp. 2–3). `[Verified]`
-- **Key Findings:** Pre-CoT probe AUC is `0.996` on Anachronisms vs. **`0.690`** on Logical Deduction for `Qwen2.5-3B` (Table 3, p. 4) — `0.78` for 7B — because CoT performs actual computation on Logical Deduction. CoT removal shifts answers $\le 20\%$ in 18/20 pairs, whereas misleading-CoT swaps cause `52–78%` flips on Anachronisms (Table 8, p. 20). `[Verified]`
+- **Paradigm & Intervention:** Five instruction-tuned Gemma-2 and Qwen2.5 models (`2B/9B`, `1.5B/3B/7B`) plus `GPT-OSS 20B` (App. F, p. 21) on Anachronisms, Logical Deduction, Social Chemistry, Sports Understanding (500 train / 500 test each, p. 2). §2.2 runs Ellipsis / Incorrect CoT swaps on `50` initially-correct test items/cell; §2.3–§2.5 run pre-CoT residual probing and probe-direction steering ($T=0.7$) across full $S_{\text{yes}}/S_{\text{no}}$ correct subsets (`min n >= 20`) vs. `50` random test examples for the orthogonal baseline (pp. 2–5). `[Verified]`
+- **Key Findings:** Pre-CoT probe AUC is `0.996` on Anachronisms vs. **`0.690`** on Logical Deduction for `Qwen2.5-3B` (**`0.778`** for 7B; Table 3, p. 4) because CoT performs actual computation on Logical Deduction. CoT removal shifts answers $\le 20\%$ in 18/20 pairs, whereas misleading-CoT swaps cause `52–78%` flips on Anachronisms (`78%` on Qwen2.5-3B/7B; Table 8, p. 20). `[Verified]`
 - **Thesis Relevance & Limits:** Best mechanistic explanation for **D1**: why pre-CoT $\Delta\ell$ at `####` fails to predict multi-step Math solving (`51.6%` / `56.6%` sign agreement on dev). Text-only binary tasks; steering also ran at answer tokens (Sec. 4.1, p. 6). `[Inferred]`
 
-#### 10. Thought Branches — Macar et al. (2026) | `[PDF Missing: 2510.27484]`
+#### 10. Thought Branches — Macar et al. (2026) | `[Local PDF: 2510.27484.pdf]`
 - **Citation:** Uzay Macar, Paul C. Bogdan, Senthooran Rajamanoharan, Neel Nanda. *Thought Branches: Interpreting LLM Reasoning Requires Resampling*, arXiv:2510.27484v2 (ICLR 2026, p. 1). `[Verified]`
-- **Paradigm & Intervention:** Resamples trajectory segments ($T=0.7$, top-$p=0.95$, 20 base traces, 100 rollouts/sentence; Sec. 2, p. 2) in blackmail/whistleblowing, hinted MCQA, resume evals, and MATH (App. D.1, p. 29). Compares off-policy handwritten/copied edits vs. on-policy resampling; measures KL counterfactual importance and "resilience" (removed step reappearing later; Eqs. 1–2, p. 3). `[Verified]`
-- **Key Findings:** On-policy interventions yield larger directional shifts (67.4% blackmail, 87.4% whistleblowing plan shifts; Table 1, p. 5); MATH local plan shifts are `64.7%` handwritten / `55.1%` resampled (Table 5, p. 29). Off-policy edits can be ignored or overwritten. `[Verified]`
+- **Paradigm & Intervention:** Resamples trajectory segments ($T=0.7$, top-$p=0.95$, `20` base traces, `100` rollouts/sentence; Sec. 2, p. 2) in blackmail/whistleblowing (`qwen-32b`, `qwen3-235b-a22b`, `llama-3.1-nemotron-ultra-235b-v1`, `deepseek-r1-0528`), hinted MCQA (`DeepSeek-R1-Qwen-14B`), resume evals (`Qwen3-8B`), and MATH (App. D.1, p. 29). Compares off-policy handwritten/copied edits vs. on-policy resampling; measures KL counterfactual importance and "resilience" (removed step reappearing later; Eqs. 1–2, p. 3). `[Verified]`
+- **Key Findings:** On-policy interventions yield larger directional shifts (`67.4%` blackmail, `87.4%` whistleblowing plan shifts; Table 1, p. 5); in MATH (Table 5, p. 29), handwritten local plan-shift % is `64.7%` vs. `55.1%` resampled, while resampled leads continuous `0–5` effect (`3.84 ± 0.06` vs. `3.49 ± 0.02`). Off-policy edits can be ignored or overwritten. `[Verified]`
 - **Thesis Relevance & Limits:** Explains off-policy verdict caveats (`CDE`, not natural mediation) and resilience (e.g., `none` regenerating a verdict). Motivates an optional `T=0.7` sampled sensitivity check, though greedy decoding remains a valid deterministic target. `[Inferred]`
 
 #### 11. Counterfactual Tests for CoT Faithfulness in VLMs — Menzat et al. (2026) | `[Local PDF: 2609.06704.pdf]`
@@ -188,20 +190,32 @@
 - **Paradigm & Findings:** Counterfactual color images pitting visual perception against parametric memory (`Qwen2.5-VL-3B/7B`, `LLaVA-NeXT-7B`, `PaliGemma-3B/10B`, p. 3). Residual/head/MLP ablation shows sparse late "prior" heads: ablating them flips **68–96%** of prior-grounded answers vs. **0.8–7.5%** of visually grounded answers (Table 2, p. 7). `[Verified]`
 - **Thesis Relevance:** Mechanistic evidence of directional routing asymmetry, though for perception-vs-memory rather than image-vs-text conflict. `[Inferred]`
 
-#### 17. Measuring Faithfulness in CoT Reasoning — Lanham et al. (2023) | `[PDF Missing: 2307.13702]`
+#### 17. Measuring Faithfulness in CoT Reasoning — Lanham et al. (2023) | `[Local PDF: 2307.13702.pdf]`
 - **Citation:** Tamera Lanham et al., *Measuring Faithfulness in Chain-of-Thought Reasoning*, arXiv:2307.13702v1. `[Verified]`
-- **Paradigm & Findings:** Text-only 175B RLHF LM across 8 MCQA tasks + synthetic addition (`100` samples/item, $T=0.8$, top-$p=0.95$; Sec. 2.1, p. 3). Tests early truncation, mistake injection, filler, and paraphrase. Early-answering / mistake AOC is high on AQuA (`0.44` / `0.52`) vs. near zero on ARC Easy (`0.02` / `0.07`; Table 2, p. 5). Paraphrase accuracy is close to original descriptively (Sec. 2.6.1, p. 7) with **no TOST or churn bound**. `[Verified]`
-- **Thesis Relevance:** Foundational CoT intervention baseline (and source of "larger models are less faithful", not Turpin et al.); explains why non-significance ≠ equivalence. `[Verified/Inferred]`
+- **Paradigm & Findings:** Text-only 175B RLHF LM across 8 MCQA tasks + synthetic addition (`100` samples/item, $T=0.8$, top-$p=0.95$; Sec. 2.1, p. 3) plus `13B -> 175B` inverse scaling (§3.1 Fig. 7, p. 7). Tests early truncation, mistake injection, filler, and prefix paraphrasing (Footnote 3, p. 7 notes full-CoT paraphrasing trivially leaks the stated answer). Early-answering / mistake AOC is high on AQuA (`0.44` / `0.52`) vs. near zero on ARC Easy (`0.02` / `0.07`; Table 2, p. 5). Paraphrase accuracy is close to original descriptively (Sec. 2.6.1, p. 7) with **no TOST or churn bound**. `[Verified]`
+- **Thesis Relevance:** Foundational CoT intervention baseline (and source of "larger models are less faithful", not Turpin et al.); explains why non-significance ≠ equivalence and why prefix-only edits beat full-CoT rewrites. `[Verified/Inferred]`
 
-#### 18. From Decorative to Load-Bearing — Jia & Mu (2026) | `[PDF Missing: 2609.25366]`
+#### 18. From Decorative to Load-Bearing — Jia & Mu (2026) | `[Local PDF: 2609.25366.pdf]`
 - **Citation:** Renee Jia, Di Mu. *From Decorative to Load-Bearing: Task Difficulty Shapes the Causal Role of Chain-of-Thought*, arXiv:2609.25366 (TMLR, August 2026, p. 1). `[Verified]`
-- **Paradigm & Findings:** Forced continuation after perturbing one reasoning step (early/mid/late) on GSM8K, MMLU, BBH (`Gemma-2-9B-IT`, `Llama-3.1-8B-Instruct`, `DeepSeek-R1-Distill-Qwen-7B`; greedy in DeepSeek App. P, p. 25), validated with human annotation (Sec. 3.3, p. 5). Gemma shows `94.5%` bypass / `3.9%` error propagation on GSM8K vs. `37.4%` / `40.9%` on BBH (Table 1, p. 6); task difficulty explains `98.8%` of deviance vs. `0.8%` perturbation type (p. 2). `[Verified]`
+- **Paradigm & Findings:** Forced continuation after perturbing one reasoning step (early/mid/late) on GSM8K, MMLU, BBH (`Gemma-2-9B-IT`, `Llama-3.1-8B-Instruct`, `DeepSeek-R1-Distill-Qwen-7B`; `temperature = 0` greedy decoding across all experiments, App. P, p. 25), validated with `n = 500` blind two-annotator human audit (`κ = 1.000` on C-vs-non-C, `κ = 0.927` 4-way, App. S, p. 26). Gemma shows `94.5%` bypass / `3.9%` error propagation on GSM8K vs. `37.4%` / `40.9%` on BBH (Table 1, p. 6); task difficulty explains `98.8%` of deviance vs. `0.8%` perturbation type (p. 2); single-direction residual steering fails (§5.5, p. 9). `[Verified]`
 - **Thesis Relevance:** Confirms CoT causal load-bearingness is task/difficulty-dependent and provides a greedy-decoding forced-continuation precedent. `[Inferred]`
 
-#### 19. CMC-Bench — Catapang (2026) | `[PDF Missing: 2026.magmar-main.3]`
+#### 19. CMC-Bench — Catapang (2026) | `[Local PDF: 2026.magmar-main.3.pdf]`
 - **Citation:** Jasper Kyle Catapang. *When Image and Text Disagree: Cross-Modal Evidence Conflict in Multimodal Retrieval-Augmented Generation*, Proceedings of the 2nd Workshop on Multimodal Augmented Generation via Multimodal Retrieval (MAGMaR 2026, July 4, 2026; `https://aclanthology.org/2026.magmar-main.3/`). `[Verified]`
-- **Paradigm & Findings:** 3,768 multimodal RAG instances derived from ChartQA and MMMU across factual, temporal, entity, and granularity conflicts (aligned, image-correct, text-correct, both-wrong; Secs. 1–3, pp. 1–4). Evaluates 4 quantized 4-bit VLMs using an LLM judge `{IMAGE, TEXT, BOTH, NEITHER, ABSTAIN}` for modality preference, confabulation, and abstention (Table 3, p. 5). **Does NOT test CoT faithfulness or prefix-forced verdicts.** `[Verified]`
-- **Thesis Relevance:** Must be cited in related work (`PREREGISTRATION_VERDICT_TRANSPLANT.md` §1.1 & Ch. 2); scopes our novelty claim specifically to *prefix-forced verdict intervention + binding interaction*, not image–text ChartQA/MMMU conflict evaluation generally. `[Verified/Inferred]`
+- **Paradigm & Findings:** 942 examples / 3,768 multimodal RAG instances derived from ChartQA (`500`) and MMMU (`442`) across factual, temporal, entity, and granularity conflicts (`Aligned`, `Image-correct`, `Text-correct`, `Both-wrong`; Secs. 1–3, pp. 1–4). Evaluates 4 open VLMs in **4-bit `mlx-vlm` quantization** (none Qwen2.5-VL) using an unvalidated `gpt-5-mini` judge `{IMAGE, TEXT, BOTH, NEITHER, ABSTAIN}` (Table 3, p. 5; p. 8). **No CoT forcing, no prefix forcing, no verdict extraction, and no order counterbalancing.** `[Verified]`
+- **Thesis Relevance:** Cited in `PREREGISTRATION_VERDICT_TRANSPLANT.md` §1.1 & Ch. 2; scopes our novelty claim specifically to *prefix-forced verdict intervention + binding interaction*, not image–text ChartQA/MMMU conflict evaluation generally. `[Verified/Inferred]`
+
+### 3.3 Chapter 2 Related-Work Leads (Post-v5 Audit)
+
+#### Lead 1. Chains That See, Answers That Don't — Fan, Li & Zhuang (2026) | `[Local PDF: 2606.22862.pdf]`
+- **Citation:** Zhichao Fan, Yanhang Li, Zexin Zhuang. *Chains That See, Answers That Don't: A Multi-Aspect Evaluation Recipe for Forced Chain-of-Thought on Video-MME*, EvalMG @ SIGIR 2026 (`arXiv:2606.22862v1`). `[Verified, pp. 1–2]`
+- **Findings:** Evaluates prompt-instructed `>= 5`-step CoT (calling it *"forced CoT"*, App. F p. 9) on `Qwen2.5-VL-7B` (`bf16/fp16`, `n = 396`) and `32B` (`NF4 4-bit`, `n = 300`) with greedy decoding. Permissive regex fallbacks coerce `63/120` explicit video-swap refusals and flip `32B` `CoT - direct` sign (`-5.33 pp` raw strict vs. `+3.05 pp` all4 strict; Tables 1 & 5, pp. 4, 9). Evaluates a `±5 pp` post-hoc margin on `32B` (`90% CI`), **refusing to call it TOST** because no margin was pre-specified (`p. 4`). `[Verified]`
+- **Thesis Relevance:** Does not use assistant-turn prefix-forcing or image–text conflict (§1.1 novelty intact); disambiguates *"prompt-forced CoT"* from *assistant-turn verdict prefix-forcing* and supports strict refusal/unparseable separation + pre-specified TOST margins. `[Verified/Inferred]`
+
+#### Lead 2. Same Reasoning, Different Words — Smith (2026) | `[PDF Not Available — Abstract/CV Only]`
+- **Citation:** Joe Smith (Caltech). *Same Reasoning, Different Words: Testing Linguistic Invariance in Chain-of-Thought Monitoring*, `TAE @ NeurIPS 2026`, OpenReview `uul4iRQSJ2` (`HTTP 403` blocked). `[Verified via open NeurIPS 2026 workshop page & author CV]`
+- **Findings (verbatim abstract):** Rewrites completed `MMLU-Redux` traces (light paraphrase vs. syntactic/register change) *without resuming the policy* (fixed forced-answer trajectory) and checks an external soft CoT monitor. On `95` trajectories, aggregate disclosure shift passes a prespecified `±0.05` equivalence margin (`ΔD = -0.007`, `95% CI [-0.017, 0.003]`), **yet `20/95` (`21.1%`) item-level shifts exceed `±0.05`**. `[Verified via NeurIPS abstract]`
+- **Thesis Relevance:** First related-work paper seen using an explicit TOST-like equivalence test on CoT text variation, but for *external monitor disclosure* over fixed traces—not *generative VLM source choice under conflict*, and with no `≤ 5.0%` item-level churn precedent. Supports reporting both aggregate TOST and item-level churn. `[Inferred]`
 
 ---
 
@@ -221,9 +235,9 @@
    - Never move $I$ with text; never couple Source A/B letters with position (`2609.26986`).
    - Dual single-source competency filtering is mandatory (`2511.02243` p. 5; `2609.26986` p. 4).
    - Explicit-source arms replicate Dassen et al.'s NL baseline (`2610.33841` Table 7) and show asymmetric control (image weaker than text); report both directions separately (`B_beh` as descriptive benchmark, not a ceiling).
-5. **Paraphrase Churn, Binary Saturation & TOST (`2607.27304`, `2609.06704`, `2307.13702`):**
+5. **Paraphrase Churn, Binary Saturation & TOST (`2607.27304`, `2609.06704`, `2307.13702`, `2606.22862`, Smith 2026):**
    - Long (~400-token) Math CoTs amplify surface noise far beyond CoT-Mediate's `1.7–3.3%` short-answer floor (`15–23%` any-change churn on dev).
-   - **No paper in the 18-source base uses TOST or a pre-registered 5.0% churn gate**—both are original `[Design decision]` rules.
+   - **No source tests TOST equivalence or a `≤ 5.0%` paraphrase-churn gate on generative VLM source choice under conflict** — both `ε = 5.0 pp` and `5.0%` remain `[Design decision]` rules. (`2606.22862` p. 4 checks a post-hoc `±5 pp` band without calling it TOST; Smith 2026 tests equivalence at `±0.05` on external CoT monitor disclosure over fixed traces, yet still finds `20/95` = `21.1%` item-level shifts above margin.)
    - Keep the fixed `5.0%` `image ↔ text` churn gate + `±10.0 pp` `neither` bound (plus reporting `any-change` churn) and the `para_flip − para` co-primary contrast (**D2**). A `6–8%` non-binding wording floor blocks `H0` equivalence in that arm, not a large positive `H1` shift.
 6. **Directional Asymmetry (`2602.14518`, `2503.02199`, `2504.08974`):**
    - Keep `text→image` and `image→text` descriptive in v5; donor verdicts heavily skew toward typed text, underpowering directional tests.

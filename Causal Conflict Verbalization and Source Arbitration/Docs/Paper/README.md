@@ -1,11 +1,11 @@
 # Docs/Paper — Primary Sources & Literature Audits
 
-Downloaded primary papers (14 local PDFs) and audited literature syntheses grounding the pre-registration [../PREREGISTRATION_VERDICT_TRANSPLANT.md](../PREREGISTRATION_VERDICT_TRANSPLANT.md).
+Downloaded primary papers (**20 local PDFs**: 19 core sources + 1 Ch. 2 lead; 0 missing core PDFs) and audited literature syntheses grounding the pre-registration [../PREREGISTRATION_VERDICT_TRANSPLANT.md](../PREREGISTRATION_VERDICT_TRANSPLANT.md).
 
 **Trust level:** PDFs are **primary sources** (highest trust for literature claims). All `.md` reports here are AI-prepared from primary PDFs and AlphaXiv reads; always verify any verbatim quote against the PDF before putting it in the dissertation.
 **Moved:** This folder was `Archive/Paper/` until commit `7fd3219`. Older files (`Docs/Decision_Audits/Idea.md`, the 2026-11-10 dossier) may still say `Archive/Paper/…` — read that as `Docs/Paper/…`.
 
-> **Token tip for agents:** Don't open raw PDFs (1–23 MB each) unless verifying a specific quote. Start at [THESIS_LITERATURE_KNOWLEDGE_BASE.md](THESIS_LITERATURE_KNOWLEDGE_BASE.md) for all 18 core papers + CMC-Bench.
+> **Token tip for agents:** Don't open raw PDFs (0.7–23 MB each) unless verifying a specific quote. Start at [THESIS_LITERATURE_KNOWLEDGE_BASE.md](THESIS_LITERATURE_KNOWLEDGE_BASE.md) for all 18 core papers + CMC-Bench + Ch. 2 leads, and [post-v5-pdf-audit.md](post-v5-pdf-audit/post-v5-pdf-audit.md) for cropped table PNGs and #15–#19 / Ch. 2 lead autopsies.
 
 ---
 
@@ -15,9 +15,10 @@ Downloaded primary papers (14 local PDFs) and audited literature syntheses groun
 Docs/Paper/
 ├── README.md                              This file
 ├── THESIS_LITERATURE_KNOWLEDGE_BASE.md    ★ Complete 18-paper + CMC-Bench dossier (start here)
+├── post-v5-pdf-audit/                     Direct PDF audit of #15–#19 + Ch. 2 leads (2026-11-14) + 10 PNG crops
 ├── lit-dossier-verdict-transplant/        Original 10+4 dossier (2026-11-10) + 4 PNG figure crops
 ├── prereg-freeze-audit/                   Pre-registration freeze audit (2026-11-10) + 3 PNG figure crops
-├── <14 local arXiv PDFs>                  Present locally (see §1)
+├── <20 local arXiv / Anthology PDFs>      All 19 core sources + 2606.22862.pdf (see §1)
 └── Archive/                               Old-topic papers and peer theses — NOT cited by v5
 ```
 
@@ -27,13 +28,14 @@ Docs/Paper/
 
 | File | Date | What it is | Key sections |
 |---|---|---|---|
-| [THESIS_LITERATURE_KNOWLEDGE_BASE.md](THESIS_LITERATURE_KNOWLEDGE_BASE.md) | 2026-11-14 | **Complete 18-paper + CMC-Bench report.** Merges local PDF audits + AlphaXiv Passes 1 & 2, fixes cross-pass errors, and reconciles design rules against D1–D5. | §0 PDF inventory & missing downloads · §1 verification fixes · §2 19-source matrix · §3 full spec sheets · §4 design rules · §5 pre-freeze checklist |
+| [THESIS_LITERATURE_KNOWLEDGE_BASE.md](THESIS_LITERATURE_KNOWLEDGE_BASE.md) | 2026-11-14 | **Complete 18-paper + CMC-Bench report.** Merges local PDF audits + AlphaXiv Passes 1 & 2 + post-v5 direct PDF verification, fixes cross-pass errors, and reconciles design rules against D1–D5. | §0 PDF inventory · §1 verification fixes · §2 19-source matrix · §3 full spec sheets + Ch. 2 leads · §4 design rules · §5 pre-freeze checklist |
+| [post-v5-pdf-audit.md](post-v5-pdf-audit/post-v5-pdf-audit.md) | 2026-11-14 | **Post-v5 direct PDF audit (#15–#19 + 2 Ch. 2 leads).** Verifies downloaded PDFs #15–#19 + `2606.22862`, audits gated NeurIPS 2026 abstract (`uul4iRQSJ2`, `[PDF Not Available]`), resolves TOST/novelty checks, and stores 10 PNG table crops in `figures/`. | §0 integrity table · §1 #15–#19 autopsies · §2 Ch. 2 leads & 3 design Qs · §3 repo sync |
 | [lit-dossier-verdict-transplant.md](lit-dossier-verdict-transplant/lit-dossier-verdict-transplant.md) | 2026-11-10 | Initial evidence base (10 core + 4 discovered). Superseded as primary index by the Knowledge Base above, but retains verbatim quotes and 4 PNG crops. | §0 scope & corrections · §1 matrix · §2 mechanistic deep dive · §3 countermeasures · §4 novelty boundary · §5 reviewer objections |
 | [prereg-freeze-audit.md](prereg-freeze-audit/prereg-freeze-audit.md) | 2026-11-10 | Freeze-readiness audit of the initial pre-registration draft. Autopsies of `2610.33841`, `2610.19407`, `2609.06704`, `2608.17205`, R1–R8 resolutions, and 3 PNG crops. | §1 paper autopsies · §2 dev data · §4 missing templates · §5 replacement novelty claim |
 
 ---
 
-## 1. The 14 Primary Sources Locally Present (`Docs/Paper/*.pdf`)
+## 1. The 20 Primary Sources Locally Present (`Docs/Paper/*.pdf`)
 
 | File | Short name | Why it matters to the thesis | Audit coverage |
 |---|---|---|---|
@@ -51,20 +53,19 @@ Docs/Paper/
 | [2602.14518.pdf](2602.14518.pdf) | *Diagnosing Knowledge Conflict* (Tang et al., 2026) | Truth-anchor directional steering asymmetry | Dossier + AlphaXiv Pass 2 |
 | [2606.28273.pdf](2606.28273.pdf) | *Vision-Default, Prior-Override* (Lietzow et al., 2026) | Perception vs. parametric memory sparse prior-head ablation | Dossier + AlphaXiv Pass 2 |
 | [2505.23945.pdf](2505.23945.pdf) | *Bias & CoT Faithfulness of L(V)LMs* (Balasubramanian et al., 2025) | Visual bias under-articulation & abrupt CoT flips | Dossier + AlphaXiv Pass 2 |
+| [2603.01437.pdf](2603.01437.pdf) | *Post-Hoc Reasoning in Chain of Thought* (Cox, Kianersi & Garriga-Alonso, ICML 2026 Wkshp) | Explains pre-CoT probe AUC drop when CoT computes answer (supports D1) | AlphaXiv Pass 2 + **Post-v5 PDF audit §1.1** |
+| [2510.27484.pdf](2510.27484.pdf) | *Thought Branches: Interpreting LLM Reasoning Requires Resampling* (Macar et al., ICLR 2026) | Off-policy resilience & resampling vs. greedy single-rollout limitation | AlphaXiv Pass 2 + **Post-v5 PDF audit §1.2** |
+| [2307.13702.pdf](2307.13702.pdf) | *Measuring Faithfulness in Chain-of-Thought Reasoning* (Lanham et al., 2023) | Classic CoT interventions, inverse scaling, Footnote 3 prefix-edit rationale | AlphaXiv Pass 2 + **Post-v5 PDF audit §1.3** |
+| [2609.25366.pdf](2609.25366.pdf) | *From Decorative to Load-Bearing* (Jia & Mu, TMLR 2026) | Task-difficulty CoT sensitivity, `T=0` greedy continuation, `κ = 1.000` human validation | AlphaXiv Pass 2 + **Post-v5 PDF audit §1.4** |
+| [2026.magmar-main.3.pdf](2026.magmar-main.3.pdf) | *CMC-Bench: When Image and Text Disagree in Multimodal RAG* (Catapang, MAGMaR 2026) | Multimodal RAG ChartQA/MMMU conflict benchmark (for Ch. 2 Related Work & §1.1 novelty boundary) | AlphaXiv Pass 2 + **Post-v5 PDF audit §1.5** |
+| [2606.22862.pdf](2606.22862.pdf) | *Chains That See, Answers That Don't* (Fan, Li & Zhuang, EvalMG @ SIGIR 2026) | Ch. 2 lead: prompt-forced CoT vs. prefix-forcing, strict/permissive regex coercion, post-hoc `±5 pp` | **Post-v5 PDF audit §2.1** |
 
 ---
 
-## 2. Core Papers Audited via AlphaXiv — PDFs to Download Later into `Docs/Paper/`
+## 2. Gated Ch. 2 Related-Work Lead (`[PDF Not Available]`)
 
-These 5 papers are fully extracted in [THESIS_LITERATURE_KNOWLEDGE_BASE.md](THESIS_LITERATURE_KNOWLEDGE_BASE.md), but their PDFs are **not yet stored locally**:
-
-1. **`2603.01437.pdf`** — Cox, Kianersi & Garriga-Alonso (2026), *Post-Hoc Reasoning in Chain of Thought* ([PDF](https://arxiv.org/pdf/2603.01437)) — explains pre-CoT probe failure when CoT computes the answer (supports D1).
-2. **`2510.27484.pdf`** — Macar et al. (ICLR 2026), *Thought Branches* ([PDF](https://arxiv.org/pdf/2510.27484)) — off-policy resilience & resampling vs. greedy single-rollout limitation.
-3. **`2307.13702.pdf`** — Lanham et al. (2023), *Measuring Faithfulness in Chain-of-Thought Reasoning* ([PDF](https://arxiv.org/pdf/2307.13702)) — classic CoT interventions & paraphrase baseline.
-4. **`2609.25366.pdf`** — Jia & Mu (TMLR 2026), *From Decorative to Load-Bearing* ([PDF](https://arxiv.org/pdf/2609.25366)) — task-difficulty CoT sensitivity & greedy continuation precedent.
-5. **`2026.magmar-main.3.pdf`** — Catapang (MAGMaR 2026), *CMC-Bench* ([PDF](https://aclanthology.org/2026.magmar-main.3.pdf)) — multimodal RAG ChartQA/MMMU conflict benchmark (for Ch. 2 Related Work & §1.1 novelty boundary).
-
-Optional Ch. 2 related-work leads (not yet read): `2606.22862.pdf` ([PDF](https://arxiv.org/pdf/2606.22862)) and *Testing Linguistic Invariance in Chain-of-Thought Monitoring* (2026).
+- *Same Reasoning, Different Words: Testing Linguistic Invariance in Chain-of-Thought Monitoring* (Joe Smith, TAE @ NeurIPS 2026, OpenReview `uul4iRQSJ2`, `HTTP 403` blocked) — audited strictly from the official NeurIPS workshop abstract and author CV in [post-v5-pdf-audit.md](post-v5-pdf-audit/post-v5-pdf-audit.md) §2.2.
+- **Core PDFs still missing:** **0** (`19/19` core sources + `2606.22862.pdf` downloaded and verified).
 
 ---
 

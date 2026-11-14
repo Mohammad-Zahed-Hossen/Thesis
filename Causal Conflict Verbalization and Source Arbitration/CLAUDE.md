@@ -10,7 +10,7 @@ The earlier title, *Causal Conflict Verbalization and Source Arbitration in Visi
 
 The thesis tests multimodal chain-of-thought faithfulness. When an image and a typed text support different answers, we prefix-force a reliability verdict into the model's own response ("I consider the image / the typed text more reliable"). The question is whether that verdict causally changes which source's answer the model then gives. Instruction, evidence order and wording are held fixed. The test is run with and without a binding instruction that tells the model to act on its verdict.
 
-The full design is in `Docs/PREREGISTRATION_VERDICT_TRANSPLANT.md`. The evidence behind it is in `Docs/Paper/THESIS_LITERATURE_KNOWLEDGE_BASE.md` (18 core papers + CMC-Bench; 14 local PDFs + 5 missing PDFs listed in `Docs/Paper/README.md`), alongside `Docs/Paper/lit-dossier-verdict-transplant/lit-dossier-verdict-transplant.md`.
+The full design is in `Docs/PREREGISTRATION_VERDICT_TRANSPLANT.md`. The evidence behind it is in `Docs/Paper/THESIS_LITERATURE_KNOWLEDGE_BASE.md` (18 core papers + CMC-Bench; 20 local PDFs: all 19 core + `2606.22862.pdf`; 0 core missing, listed in `Docs/Paper/README.md`), alongside `Docs/Paper/post-v5-pdf-audit/post-v5-pdf-audit.md` and `Docs/Paper/lit-dossier-verdict-transplant/lit-dossier-verdict-transplant.md`.
 
 ## Current Phase
 

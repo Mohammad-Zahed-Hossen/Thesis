@@ -13,10 +13,11 @@ To freeze it, commit this file, tag the commit `prereg-v5`, and record the tag h
 
 **Sources:**
 
-- `Docs/Paper/THESIS_LITERATURE_KNOWLEDGE_BASE.md` (complete 18-paper + CMC-Bench knowledge base, 2026-11-14)
+- `Docs/Paper/THESIS_LITERATURE_KNOWLEDGE_BASE.md` (complete 18-paper + CMC-Bench knowledge base + 2 Ch. 2 leads, 2026-11-14)
+- `Docs/Paper/post-v5-pdf-audit/post-v5-pdf-audit.md` (direct PDF verification of #15–#19 and Ch. 2 leads, 2026-11-14)
 - `Docs/Paper/lit-dossier-verdict-transplant/lit-dossier-verdict-transplant.md` (the initial dossier, 2026-11-10)
 - `Docs/Paper/prereg-freeze-audit/prereg-freeze-audit.md` (the freeze audit, 2026-11-10)
-- the PDFs in `Docs/Paper/` (14 local; 5 remaining PDFs listed in `Docs/Paper/README.md`)
+- the PDFs in `Docs/Paper/` (20 local PDFs: all 19 core sources + `2606.22862.pdf`; 0 core missing; *Same Reasoning, Different Words* audited via official NeurIPS abstract & author CV as `[PDF Not Available]`; see `Docs/Paper/README.md`)
 - `Experiment/*_v5.py`
 
 Anything not stated in those sources is marked **[Design decision]**: it is a choice made here, not a value taken from the literature.
@@ -62,9 +63,9 @@ where *T* is the source the flipped verdict names (§2.3, §7.3). It is a contro
 
 This replaces dossier §4.1 and updates freeze audit §5 after the 18-paper + CMC-Bench audit (`Docs/Paper/THESIS_LITERATURE_KNOWLEDGE_BASE.md`):
 
-> Within the eighteen primary sources and CMC-Bench examined, no study intervenes on a vision-language model's own stated source-reliability verdict, by prefix-forcing a minimally edited version of it (alongside a matched-template control), and measures whether the answer follows under image–text conflict with evidence order counterbalanced. Nor does any test whether an instruction that binds the answer to that verdict changes its effect. Prior work steers modality reliance with an external request and evaluates it by editing the evidence (Dassen et al., arXiv:2610.33841); predicts preference from evidence strength with no verbalization (Barua et al., arXiv:2610.19407); tests whether explanations mention edited visual evidence (Menzat et al., arXiv:2609.06704); edits clinical content in a model's reasoning with no modality conflict (Bhowal et al., arXiv:2607.27304); or benchmarks image–text evidence conflict in multimodal RAG over ChartQA/MMMU without CoT faithfulness or verdict forcing (CMC-Bench; Catapang, MAGMaR 2026). We do not claim that prompt-based modality steering or image–text conflict benchmarking is new: our explicit-source arms replicate the natural-language instruction baseline of Dassen et al. and serve only as a benchmark.
+> Within the eighteen primary sources, CMC-Bench, and the two Chapter 2 leads examined, no study intervenes on a vision-language model's own stated source-reliability verdict, by prefix-forcing a minimally edited version of it (alongside a matched-template control), and measures whether the answer follows under image–text conflict with evidence order counterbalanced. Nor does any test whether an instruction that binds the answer to that verdict changes its effect. Prior work steers modality reliance with an external request and evaluates it by editing the evidence (Dassen et al., arXiv:2610.33841); predicts preference from evidence strength with no verbalization (Barua et al., arXiv:2610.19407); tests whether explanations mention edited visual evidence (Menzat et al., arXiv:2609.06704); edits clinical content in a model's reasoning with no modality conflict (Bhowal et al., arXiv:2607.27304); benchmarks image–text evidence conflict in multimodal RAG over ChartQA/MMMU without CoT faithfulness or verdict forcing (CMC-Bench; Catapang, MAGMaR 2026); or evaluates prompt-instructed multi-step "forced CoT" on single-video MCQs without assistant-turn prefix injection or modality conflict (Fan, Li & Zhuang, arXiv:2606.22862). To avoid conflating prompt-elicited CoT with prefix injection, this study specifies *assistant-turn verdict prefix-forcing* rather than bare "forced CoT". We do not claim that prompt-based modality steering or image–text conflict benchmarking is new: our explicit-source arms replicate the natural-language instruction baseline of Dassen et al. and serve only as a benchmark.
 
-Related-work check note (2026-11-14): two additional 2026 search leads on forced-CoT evaluation (`arXiv:2606.22862`) and linguistic invariance TOST monitoring (*Testing Linguistic Invariance in Chain-of-Thought Monitoring*) remain unread and should be checked before writing Chapter 2.
+Related-work check resolved (2026-11-14): both 2026 Chapter 2 leads (`arXiv:2606.22862.pdf`, full local PDF audit; and *Same Reasoning, Different Words: Testing Linguistic Invariance in Chain-of-Thought Monitoring*, Joe Smith, TAE @ NeurIPS 2026, OpenReview `uul4iRQSJ2`, audited via official NeurIPS abstract as `[PDF Not Available]`) are documented in `Docs/Paper/post-v5-pdf-audit/post-v5-pdf-audit.md` and leave the novelty boundary above intact.
 
 ---
 
@@ -455,7 +456,7 @@ Orientation: $s_i$ is set per item **and order**, because a donor's own verdict 
   - 90% CI wholly inside (−0.25, 0.25): equivalent to no effect.
   - Otherwise: inconclusive.
 - **Behavioural:** TOST on $\Delta=P(Y{=}T\mid m_{flip})-P(Y{=}T\mid m_{own})$, where $T$ is the source the flipped verdict names, with **ε = 5.0 pp**. Both terms use the same target, so an ignored verdict gives Δ = 0. An answer matching neither source counts as not following. This replaces 7.3 pp. Equivalence requires the 90% item-bootstrap CI (10,000 resamples) to lie inside (−ε, ε). In GSM8K/SVAMP the behavioural Δ is the primary outcome and is read against ε directly (§2.3); $\rho_{beh} = \Delta / B_{beh}$ is descriptive only.
-- **Reasons [Design decision]:** no paper read uses an equivalence test. CoT-Mediate reports a 4.9-point gap as a real effect and has paraphrase floors of 0.5–3.3% (arXiv:2607.27304, p. 6), so 5.0 pp sits just above those floors.
+- **Reasons [Design decision]:** no paper read uses an equivalence test on generative VLM source choice under conflict (Smith, TAE @ NeurIPS 2026 tests equivalence at ±0.05 on external CoT monitor disclosure over fixed traces, and Fan et al., arXiv:2606.22862, p. 4 examine a post-hoc ±5 pp sensitivity margin without calling it TOST). CoT-Mediate reports a 4.9-point gap as a real effect and has paraphrase floors of 0.5–3.3% (arXiv:2607.27304, p. 6), so 5.0 pp sits just above those floors.
 - **Combined claim:** "saying is not choosing" is claimed only if both criteria give equivalence under binding.
 
 ### 7.4 Model-based estimates (not confirmatory)
@@ -583,7 +584,7 @@ parser) for GSM8K/SVAMP, and an answer-only decode (16 new tokens) for ChartQA-C
 The 16-token decode is not used for GSM8K/SVAMP. Changes §6 and §7.
 *(Superseded for GSM8K/SVAMP by pre-freeze D1, 2026-11-13: behaviour is primary there and Δℓ secondary. See §2, §2.3 and §11.)*
 
-**R4. Margins.** [Design decision] No paper read for this project uses an equivalence test.
+**R4. Margins.** [Design decision] No paper read for this project uses an equivalence test on generative VLM source choice under conflict (Smith, TAE @ NeurIPS 2026 tests equivalence on external CoT monitor disclosure; arXiv:2606.22862 checks a post-hoc ±5 pp margin without calling it TOST).
 
 - Graded: ρ_b = CDE_ℓ,b / Ceil_ℓ, with a 90% item-bootstrap CI (10,000 resamples).
   CI wholly above 0.25: the verdict is decision-relevant.
@@ -706,3 +707,4 @@ three models alike. See §3.2, §7.2 and §11.)*
   - §2.3: the Math decision rule reads Δ itself against ε = 5.0 pp. The explicit-arm quantity is renamed from ceiling ($\mathrm{Ceil}_{beh}$) to benchmark ($B_{beh}$) because the dev effect exceeded it; $\rho_{beh}$ is descriptive only. Image- and text-direction benchmarks and directional effects are reported.
   - §2.2 and §2.3: inconclusive is an allowed outcome, labelled with the TOST power where that is below 0.80. Row 6 of §2.2 ("mixed") is now an inconclusive reading.
   - Dev readings recomputed: Math binding and non-binding readings are unchanged in kind (decision-relevant for 3B and 7B; below R5's minimum, so `NOT A READING`); the non-binding wording floor now fails for both models.
+- **2026-11-14, post-v5 direct PDF verification (`Docs/Paper/post-v5-pdf-audit/post-v5-pdf-audit.md`):** downloaded and verified the 5 remaining core PDFs (`2603.01437.pdf`, `2510.27484.pdf`, `2307.13702.pdf`, `2609.25366.pdf`, `2026.magmar-main.3.pdf`) plus `2606.22862.pdf` (`20` local PDFs; `0` core missing) and audited *Same Reasoning, Different Words* (Smith, TAE @ NeurIPS 2026, OpenReview `uul4iRQSJ2`, `[PDF Not Available]`) via official workshop abstract. Updated §Sources, §1.1 (disambiguating prompt-elicited "forced CoT" in `2606.22862` from assistant-turn verdict prefix-forcing), and §7.3 / §10 R4 (qualifying the no-equivalence-test note while keeping `ε = 5.0 pp` and `5.0%` churn as `[Design decision]`). No §4 templates or numeric thresholds changed.
