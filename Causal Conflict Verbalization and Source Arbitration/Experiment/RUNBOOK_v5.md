@@ -1,8 +1,8 @@
 # v5 Runbook: verdict transplant
 
-These are the exact commands for the v5 dev pass, which the pre-registration requires before it can be frozen (`../Docs/PREREGISTRATION_VERDICT_TRANSPLANT.md`, §10 R8). "Local" means the Ryzen machine, which has no CUDA. "GPU" means a session on the pre-registered GPU class (§3.4): CUDA compute capability ≥ 8 and at least 24 GB, for example an NVIDIA L4 or A100 on Colab Pro, or an RTX 3090/4090. **Do not use a T4 or V100.** On those the loader falls back to `float16`, and `harness_v5.HFBackend` stops with an error; the 7B model would not fit anyway.
+These are the exact commands for the v5 dev pass, which the pre-registration requires before it can be frozen (`../Docs/PREREGISTRATION_VERDICT_TRANSPLANT.md`, §10 R8). "Local" means the Ryzen machine, which has no CUDA. "GPU" means a session on the pre-registered GPU class (§3.4): CUDA compute capability ≥ 8 and at least 22 GiB usable VRAM, for example an NVIDIA L4 (23,034 MiB) or A100 on Colab Pro, or an RTX 3090/4090. **Do not use a T4 or V100.** On those the loader falls back to `float16`, and `harness_v5.HFBackend` stops with an error; the 7B model would not fit anyway.
 
-Three models are run, all confirmatory: `Qwen/Qwen2-VL-2B-Instruct`, `Qwen/Qwen2.5-VL-3B-Instruct` and `Qwen/Qwen2.5-VL-7B-Instruct`. Run every stage of one model × regime on the same GPU model.
+Three models are run: two confirmatory (`Qwen/Qwen2.5-VL-3B-Instruct` and `Qwen/Qwen2.5-VL-7B-Instruct`) and one diagnostic-only (`Qwen/Qwen2-VL-2B-Instruct`, per pre-freeze D3). Math (`conflict`) is confirmatory; ChartQA-Conflict (`chartqa`) is exploratory (D4). Run every stage of one model × regime on the same GPU model.
 
 The dev pass uses **items that are already spent**: the 200 GSM8K/SVAMP dev items and the 30 ChartQA dev items. Nothing here produces confirmatory data.
 
@@ -114,7 +114,7 @@ Notes:
 
 ### ChartQA `max_pixels` (R8.4)
 
-The default is `--max_pixels 200704` (256·28·28), the same as GSM8K/SVAMP. Charts carry small text. If the ChartQA `base_image` yield in block 3 is low, rerun **only the ChartQA blocks (3, 4 and 6)** under new tags with `--max_pixels 401408` (512·28·28). Keep whichever value the pre-registration records before the freeze. Do not change it afterwards.
+The default is `--max_pixels 200704` (256·28·28), the same as GSM8K/SVAMP. Charts carry small text. In the 2026-11-12 dev pass, ChartQA ran at `200704` with low `base_image` / gate yield; either rerun **only the ChartQA blocks (3, 4 and 6)** under new tags with `--max_pixels 401408` (512·28·28) or formally record keeping `200704` in the pre-registration before freezing (still open in `PREREGISTRATION_VERDICT_TRANSPLANT.md` §3.4). Do not change it afterwards.
 
 ## 5. What to bring back
 
@@ -126,7 +126,7 @@ Copy `results_v5/` to the local machine. For each block, record these into the p
 | Competency yield                                    | `gates.json`: `competent` out of `items`                                                                                                               |
 | Edit-gate pass rate                                 | `gates.json`: `passed` out of `competent`, plus `fail_reasons_by_order`                                                                                |
 | ChartQA answer-only decodes matching *a_I* or *a_T* | `beh` rows, scored with `score_v5.behavioural_source`                                                                                                  |
-| Dev wording floor                                   | `beh` rows, `para` vs `own`, per binding level: the signed mean (limit ±5.0 pp) and the churn rate (limit 5.0%). The gate fails if either is exceeded |
+| Dev wording floor | `beh` rows (`structured` parser), `para` vs `own`, per binding level: signed mean (limit ±5.0 pp), attributable `image <-> text` churn (limit 5.0%), and neither shift (limit ±10 pp). Fixed limits (revised 2026-11-14); `any_change_rate` and `replay` flips are reported as diagnostics |
 | Boundary mismatches                                 | Share of `dl` rows with `boundary_mismatch: true` (gate: ≤ 1%)                                                                                        |
 | Whitespace token                                    | `ws_skipped` in `dl` rows: 2 means a separate space token was skipped for both candidates, 0 means the tokenizer has none                              |
 | Manipulation check                                  | `free_binding` vs `donor` rows of the donor file: share of answers that follow the stated verdict                                                      |

@@ -58,7 +58,7 @@ Explain how every defect in the pilots was systematically eliminated in the v5 d
 | Positional recency bias (~15 pp) | **Counterbalanced evidence ordering**: exactly 50% `[Image][Text]` and 50% `[Text][Image]`. |
 | Uncalibrated prompt steerability | **Single-source explicit ceilings** (`explicit_image` / `explicit_text`) to bound the maximum achievable movement. |
 | Incompetence noise | **Competency filtering**: evaluate only items where the model solves both sources in isolation. |
-| Messy string extraction & truncation | **Direct log-likelihood margin ($\Delta\ell$)** evaluated at the `####` token boundary. |
+| Messy string extraction & truncation | **Regime-split deterministic outcomes:** behavioural choice shift $\Delta P(Y{=}T)$ (`structured` Math parser + 512-token solving, with `para_flip - para` co-primary) in confirmatory GSM8K/SVAMP (pre-freeze D1–D3), and direct log-likelihood margin ($\Delta\ell$) at the `####` token boundary in exploratory ChartQA (D4) and secondary Math. |
 
 ---
 
@@ -81,16 +81,16 @@ Explain how every defect in the pilots was systematically eliminated in the v5 d
 
 When presenting the models evaluated in the thesis:
 
-1. **The Three Models:**
-   - `Qwen/Qwen2-VL-2B-Instruct` (2.2B — compact / previous generation baseline)
-   - `Qwen/Qwen2.5-VL-3B-Instruct` (3.7B — compact / current generation workhorse)
-   - `Qwen/Qwen2.5-VL-7B-Instruct` (7.6B — flagship open standard, directly matching *Which Source Wins?*)
+1. **The Three Models (Updated per Pre-freeze D3):**
+   - `Qwen/Qwen2-VL-2B-Instruct` (2.2B — **diagnostic-only** baseline / earlier generation; failed `####` format eligibility 0/200 in Math dev)
+   - `Qwen/Qwen2.5-VL-3B-Instruct` (3.75B — **confirmatory** compact / current generation workhorse)
+   - `Qwen/Qwen2.5-VL-7B-Instruct` (8.29B — **confirmatory** flagship open standard, directly matching *Which Source Wins?*)
 
 2. **The Strategic Defense Value:**
-   - **Eliminates the "Tiny Model" Objection:** Demonstrates that findings are not quirks of compact models under 4B parameters.
+   - **Eliminates the "Tiny Model" Objection:** Confirmatory claims rest on `3B` and `7B` in Math (*source following*, with ChartQA exploratory per D4), demonstrating that findings are not quirks of compact models under 4B parameters.
    - **Direct Literature Parity:** Anchors baseline modality preferences against published numbers from *Which Source Wins?* on identical conflict stimuli.
-   - **Clean Within-Generation Size Comparison:** Directly isolates the effect of parameter scale between `Qwen2.5-VL-3B` and `Qwen2.5-VL-7B` on the intersection of competent items, testing whether increased capacity alters verdict faithfulness.
-   - **Disciplined Claim Boundaries:** Claims are reported per-model, avoiding overgeneralized "universal scaling laws" while providing a robust, multi-scale empirical foundation.
+   - **Clean Within-Generation Size Comparison:** Directly isolates the effect of parameter scale between `Qwen2.5-VL-3B` and `Qwen2.5-VL-7B` on the intersection of competent and gated items, testing whether increased capacity alters verdict faithfulness.
+   - **Disciplined Claim Boundaries:** Confirmatory claims are reported per-model in GSM8K/SVAMP (*source following* only, not reliability judgement), avoiding overgeneralized "universal scaling laws" while providing a robust empirical foundation.
 
 ---
 

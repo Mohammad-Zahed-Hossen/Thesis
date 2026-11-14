@@ -2,8 +2,8 @@
 
 Writing guides, conceptual FAQs, execution runbooks, compute evaluations, and v5 dev-pass audits for the BSc CSE thesis (*Does the Verdict Decide? Testing Whether Stated Source Reliability Steers Vision-Language Models under Image–Text Conflict*).
 
-**Last updated:** 2026-11-14
-**Status:** The v5 dev pass has run on all three models (39 files in [../Experiment/results_v5/](../Experiment/results_v5/)) and `analyze_v5.py` has been run after pre-freeze decisions D1–D5 ([../Experiment/results_v5/analysis_dev/](../Experiment/results_v5/analysis_dev/)). The 18-paper + CMC-Bench literature base is consolidated in [../Docs/Paper/THESIS_LITERATURE_KNOWLEDGE_BASE.md](../Docs/Paper/THESIS_LITERATURE_KNOWLEDGE_BASE.md). The pre-registration is **not frozen**, and **no confirmatory data exists**. No dissertation chapters have been drafted here yet.
+**Last updated:** 2026-11-15
+**Status:** The v5 dev pass has run on all three models (39 files in [../Experiment/results_v5/](../Experiment/results_v5/)) and `analyze_v5.py` has been run after pre-freeze decisions D1–D5 and the 2026-11-14 gate updates ([../Experiment/results_v5/analysis_dev/](../Experiment/results_v5/analysis_dev/)). All 240 unit tests pass (`Experiment/tests/`). The 18-paper + CMC-Bench literature base is consolidated in [../Docs/Paper/THESIS_LITERATURE_KNOWLEDGE_BASE.md](../Docs/Paper/THESIS_LITERATURE_KNOWLEDGE_BASE.md). The pre-registration is **not frozen**, and **no confirmatory data exists**. No dissertation chapters have been drafted here yet.
 **Ground truth:** Active code and raw outputs live in [../Experiment/](../Experiment/) (start at [../Experiment/README.md](../Experiment/README.md)). The pre-registration draft is [../Docs/PREREGISTRATION_VERDICT_TRANSPLANT.md](../Docs/PREREGISTRATION_VERDICT_TRANSPLANT.md).
 
 > [!NOTE]
@@ -29,6 +29,7 @@ Folder indexes elsewhere: [../Docs/README.md](../Docs/README.md) · [../Docs/Con
 Thesis/
 ├── README.md                                  This file
 ├── THESIS_NARRATIVE_AND_FRAMING_GUIDE.md      Chapter-by-chapter framing & defense phrasing guide
+├── dev v1_v5.md                               2026-11-13 visual/narrative snapshot of v1–v5 (historical; pre-dates 2026-11-14 updates)
 └── docs/
     ├── Understanding/
     │   ├── Thesis Understanding FAQ (Opus 4.6).md
@@ -55,7 +56,8 @@ Thesis/
 
 ### Top-Level Writing Guide
 
-- **[THESIS_NARRATIVE_AND_FRAMING_GUIDE.md](THESIS_NARRATIVE_AND_FRAMING_GUIDE.md)** — Permanent writing and defense guide for framing the methodological arc from exploratory v1/v3 pilots to the v5 prefix-forcing design, covering chapter roles (Introduction, Methodological Critique, Prefix-Forcing Paradigm), claim boundaries, and the three-model scope (`Qwen2-VL-2B-Instruct`, `Qwen2.5-VL-3B-Instruct`, `Qwen2.5-VL-7B-Instruct`).
+- **[THESIS_NARRATIVE_AND_FRAMING_GUIDE.md](THESIS_NARRATIVE_AND_FRAMING_GUIDE.md)** — Permanent writing and defense guide for framing the methodological arc from exploratory v1/v3 pilots to the v5 prefix-forcing design, covering chapter roles (Introduction, Methodological Critique, Prefix-Forcing Paradigm), claim boundaries, and the three-model scope (`Qwen2-VL-2B-Instruct` diagnostic-only per D3; `Qwen2.5-VL-3B-Instruct` and `Qwen2.5-VL-7B-Instruct` confirmatory).
+- **[dev v1_v5.md](<dev v1_v5.md>)** — Plain-English narrative walkthrough of the v1–v5 evolution and the five v5 dev-pass findings as of `2026-11-13` (prior to the 2026-11-14 `02eeca9`/`157c694` gate and literature updates; some links point to pre-reorganization paths).
 
 ### `docs/Understanding/` — Conceptual & Defense References
 
@@ -67,11 +69,11 @@ Two harmonized Q&A guides (AI-generated and audited on 2026-11-11 against code, 
 ### `docs/RUNBOOK/` — Thesis-Side Execution Guides
 
 - **[RUNBOOK_V4.md](docs/RUNBOOK/RUNBOOK_V4.md)** — End-to-end local and GPU execution guide for v4 (mirrors/extends [../Experiment/RUNBOOK_v4.md](../Experiment/RUNBOOK_v4.md)).
-- **[RUNBOOK_V5.md](docs/RUNBOOK/RUNBOOK_V5.md)** — Colab Pro guide for the v5 dev pass. **Note:** Audits in `docs/Archive/` flag discrepancies between this file and [../Experiment/RUNBOOK_v5.md](../Experiment/RUNBOOK_v5.md) (for example, missing ChartQA render checks and omitted `--base` / `--donor` flags in the local `analyze_v5.py` command); defer to the `Experiment/` runbook.
+- **[RUNBOOK_V5.md](docs/RUNBOOK/RUNBOOK_V5.md)** — Colab Pro guide for the v5 dev pass. **Note:** Audits in `docs/Archive/dev v5/` flag discrepancies between this file and [../Experiment/RUNBOOK_v5.md](../Experiment/RUNBOOK_v5.md) (for example, missing ChartQA render checks and omitted `--base` / `--donor` flags in the local `analyze_v5.py` command); defer to the `Experiment/` runbook.
 
 ### `docs/Compute/` — GPU Infrastructure Evaluations
 
-- **[Compute_Platform_Evaluation_2026-11-11.md](docs/Compute/Compute_Platform_Evaluation_2026-11-11.md)** — Current evaluation on a \$10–15/month budget recommending Colab Pro / PAYG (L4 pinned) with RunPod Community Cloud as backup, and flagging the L4's ~22.5 GB VRAM vs. the pre-registration's "24 GB" wording. Replaces the earlier report below.
+- **[Compute_Platform_Evaluation_2026-11-11.md](docs/Compute/Compute_Platform_Evaluation_2026-11-11.md)** — Current evaluation on a \$10–15/month budget recommending Colab Pro / PAYG (L4 pinned) with RunPod Community Cloud as backup, and flagging the L4's ~22.5 GB VRAM vs. the pre-registration's earlier "24 GB" wording (subsequently updated to `≥ 22 GiB` / `L4 [23,034 MiB]` in `PREREGISTRATION_VERDICT_TRANSPLANT.md` §3.4). Replaces the earlier report below.
 - **[Thesis Cloude Compute Evaluation.md](docs/Compute/Thesis%20Cloude%20Compute%20Evaluation.md)** — Earlier compute evaluation (superseded; assumed a \$50/month budget).
 
 ### `docs/Archive/dev v5/` — v5 Dev-Pass Logs & Audits (Dev Only)

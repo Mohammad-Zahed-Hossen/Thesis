@@ -15,7 +15,7 @@
 - **Research Focus:** Multimodal chain-of-thought faithfulness. Under image–text conflict, does a prefix-forced reliability verdict causally steer which source's answer the model gives?
   - Held fixed: instruction, counterbalanced evidence order, and wording template.
   - Varied: with vs. without a binding instruction.
-- **Models:** `Qwen/Qwen2.5-VL-3B-Instruct` and `Qwen/Qwen2.5-VL-7B-Instruct` (confirmatory), plus `Qwen/Qwen2-VL-2B-Instruct` (**diagnostic-only**, pre-freeze D3). v5 runs in `bfloat16` on one 24 GB+ GPU class (L4, A100, RTX 3090/4090); revisions are pinned in `Experiment/harness_v4.py` (`MODEL_PINS`). Claims are per model.
+- **Models:** `Qwen/Qwen2.5-VL-3B-Instruct` and `Qwen/Qwen2.5-VL-7B-Instruct` (confirmatory), plus `Qwen/Qwen2-VL-2B-Instruct` (**diagnostic-only**, pre-freeze D3). v5 runs in `bfloat16` on one ≥ 22 GiB GPU class (NVIDIA L4 [23,034 MiB], A100, RTX 3090/4090); revisions are pinned in `Experiment/harness_v4.py` (`MODEL_PINS`). Claims are per model.
 - **Stimuli:**
   - Task-selection conflict (confirmatory Math): `vlm-modality-research/modality-conflict-arbitration-v2` (GSM8K/SVAMP).
   - Evidence conflict (exploratory/secondary, D4): `vlm-modality-research/chartqa-evidence-conflict-v2` (229 analysed items; the 230-row release minus `conflict_id` 45).
@@ -70,7 +70,7 @@
 | Environment | Specs | Rules |
 |:-----------|:------|:------|
 | **Local** | AMD Ryzen 5 5600G, 8 GB RAM, no CUDA | Code editing, docs, git, analysis only. No model loading. |
-| **GPU session** | NVIDIA L4 / A100 (Colab Pro) or RTX 3090/4090, ≥ 24 GB, `bfloat16` | Primary compute for v5. T4/V100 are not used: they load `float16`, which the v5 harness refuses. |
+| **GPU session** | NVIDIA L4 (23,034 MiB) / A100 (Colab Pro) or RTX 3090/4090, ≥ 22 GiB, `bfloat16` | Primary compute for v5. T4/V100 are not used: they load `float16`, which the v5 harness refuses. |
 | **Model** | Qwen2-VL-2B (2.2B), Qwen2.5-VL-3B (3.75B), Qwen2.5-VL-7B (8.29B) | Inference-first. No quantization. No full pretraining. |
 
 ---
@@ -93,7 +93,7 @@
 │   ├── Context/         ← Historical context
 │   ├── Decision_Audits/ ← Topic selection audits
 │   └── Parked_Proposals/← Deprecated proposals
-├── Thesis/              ← Thesis chapters (writing in progress)
+├── Thesis/              ← Writing guides, FAQs, runbooks, compute evals, v5 dev audits (chapters not yet drafted)
 ├── Archive/             ← Parked exploration domains
 ├── CLAUDE.md            ← Claude-specific directives
 └── .agents/             ← Antigravity agent config

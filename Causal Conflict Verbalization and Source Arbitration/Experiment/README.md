@@ -2,8 +2,8 @@
 
 Start here. This folder holds all experiment code and data for the thesis. **It is ground truth** (AGENTS.md §2): code + raw rows outrank every `.md` report, including this one.
 
-**Last updated:** 2026-11-14
-**Stage:** The v5 **dev pass has run** on an L4 in `bfloat16` for all three models (29,880 rows in [results_v5/](results_v5/)). It has been audited ([../Thesis/docs/Archive/dev v5/](<../Thesis/docs/Archive/dev v5/>)), and `analyze_v5.py` has been run on it ([results_v5/analysis_dev/](results_v5/analysis_dev/)). The pre-freeze decisions D1–D5 are made and written into the pre-registration: behaviour is the primary outcome in Math, ChartQA is exploratory, Qwen2-VL-2B is diagnostic only. On 2026-11-14 three gates were tightened after an audit of the post-v5 plan ([claude_v4_vs_v5_plan_audit.md](<../Thesis/docs/Archive/dev v5/claude_v4_vs_v5_plan_audit.md>)): a fixed wording-floor limit, a Math decision rule on Δ itself, and an explicit inconclusive reading. The pre-registration is **not frozen**. **No confirmatory data exists.**
+**Last updated:** 2026-11-15
+**Stage:** The v5 **dev pass has run** on an L4 in `bfloat16` for all three models (29,880 rows in [results_v5/](results_v5/)). It has been audited ([../Thesis/docs/Archive/dev v5/](<../Thesis/docs/Archive/dev v5/>)), and `analyze_v5.py` has been run on it ([results_v5/analysis_dev/](results_v5/analysis_dev/)). All **240** CPU unit tests pass. The pre-freeze decisions D1–D5 are made and written into the pre-registration: behaviour is the primary outcome in Math, ChartQA is exploratory, Qwen2-VL-2B is diagnostic only. On 2026-11-14 three gates were tightened after an audit of the post-v5 plan ([claude_v4_vs_v5_plan_audit.md](<../Thesis/docs/Archive/dev v5/claude_v4_vs_v5_plan_audit.md>)): a fixed wording-floor limit, a Math decision rule on Δ itself, and an explicit inconclusive reading. The pre-registration is **not frozen**. **No confirmatory data exists.**
 **Design spec:** [../Docs/PREREGISTRATION_VERDICT_TRANSPLANT.md](../Docs/PREREGISTRATION_VERDICT_TRANSPLANT.md) (draft; freeze conditions in §10, R8).
 **Next action:** Finish the open pre-freeze items listed in the pre-registration (§3.4 and the R8 note): human coding of verdict labels ([coding_v5/](coding_v5/)), the ChartQA `max_pixels` decision and render check, a short GPU check of the new `verdict_nll` span, and the researcher's decision on the thesis scope and title (source following vs. reliability). Then freeze (tag `prereg-v5`).
 
@@ -21,24 +21,24 @@ Counts come from `results_v5/*.gates.json`. The interpretation is from the [inde
 | Qwen2.5-VL-3B (`qwen25`) | 80 → 80 | 13 → 6 |
 | Qwen2.5-VL-7B (`qwen25_7b`) | 124 → 115 | 13 → 2 |
 
-Blocking issues the audit verified (details and the decisions they need are in §10):
-1. **Δℓ validity in Math:** the sign of Δℓ at `####` agrees with the actual answer source in only 51.6% (3B) and 56.6% (7B) of rows, and it follows evidence order more than the explicit instruction.
-2. **7B flip contrast:** mostly driven by deleting the model's own verdict, not by the reversed verdict. `flip` vs. `none` adds 0.10 [−0.09, 0.29] out of a CDE of 1.62.
-3. **Replay churn:** replaying the model's own verdict unchanged already shifts the answer source in 6–8% of cells, above the pre-registered 5% churn limit. The behavioural wording floor fails in Math (20–28% churn).
-4. **ChartQA attrition:** 6 / 2 / 0 items retained. The §8 "≥ 60% pass edit gates" rule fails and is not implemented in code. The render gate, the `max_pixels` decision (R8.4) and human coding are still open.
-5. **Provenance:** manifests describe only the last invocation, and `resolved_model_commit` is null.
+Blocking issues the audits verified and their current pre-freeze disposition:
+1. **Δℓ validity in Math (addressed by D1):** the sign of Δℓ at `####` agrees with the actual answer source in only 51.6% (3B) and 56.6% (7B) of rows, and follows evidence order more than the explicit instruction. **D1** promotes behavioural choice shift $\Delta P(Y{=}T)$ at $k=1$ (`structured` parser) to primary in Math, keeping Δℓ secondary/diagnostic.
+2. **7B flip contrast (addressed by D2):** mostly driven by deleting the model's own verdict (`flip` vs. `none` adds 0.10 [−0.09, 0.29] out of a CDE of 1.62). **D2** elevates the matched paraphrase pair (`para_flip - para`) to co-primary alongside `flip - own` and reports the `none` decomposition.
+3. **Replay & wording-floor churn (partially open):** replaying the model's own verdict unchanged shifts the answer source in 6.4% (3B) and 8.2% (7B) of cells (`strict`), and non-binding attributable `image <-> text` churn fails the fixed 5.0% gate in Math dev (7.6% on 3B, 6.6% on 7B; binding passes at 3.2% and 0.0%). Per the 2026-11-14 gate revision, a failing wording floor makes H₀ uninterpretable without blocking H₁.
+4. **ChartQA attrition & open checks (D4 + open R8.4):** 6 / 2 / 0 items retained. **D4** designates ChartQA exploratory/secondary; the Sentence-1 answer-leakage gate is now implemented in `transplant_v5.py`. The ChartQA `max_pixels` comparison (R8.4), ChartQA `--print_example` render gate, `verdict_nll` span GPU check, and double human coding (`coding_v5/`) remain open.
+5. **Provenance:** manifests describe only the last invocation, and `resolved_model_commit` is null (`harness_v4.py` now records resolved commits when available).
 
 ---
 
 ## What v5 adds over v4
 
-Files: `harness_v5.py`, `transplant_v5.py`, `score_v5.py`, `analyze_v5.py`. The v4 files are unchanged.
+Files: `harness_v5.py`, `transplant_v5.py`, `score_v5.py`, `analyze_v5.py`, `sample_v5_for_coding.py` (with post-dev fixes also applied to `score_v4.py` and `harness_v4.py`).
 1. **Order counterbalancing without letters.** `build_content(..., order)` makes `[instruction, source 1, <image> or text, source 2, format]` with modality headers ("Image:", "Typed text:", "Chart:", "Report:"). Only the sources swap.
 2. **Literal K = 4 templates** for the non-binding, binding and explicit arms, in both regimes. A test checks each string against the pre-registration text.
-3. **Minimal-edit verdicts:** `own`, `flip`, `none`, `para`, `para_flip`, with the gates of pre-registration §5.3 and a per-run `gates.json`.
-4. **Primary outcome Δℓ.** The length-normalized log-likelihood margin at `####`, image minus text, with an exact token-boundary check. Behavioural decodes are secondary: 512-token solving for GSM8K/SVAMP, 16-token answer-only for ChartQA.
-5. **Ceilings** use the `none` prefill. Explicit arms run only with `none`.
-6. **Three models** (2B, 3B, 7B), pinned in `MODEL_PINS` (`harness_v4.py`), all run in `bfloat16`. The harness refuses any other dtype. ChartQA defaults to `--dev_size 30`.
+3. **Minimal-edit verdicts:** `own`, `flip`, `none`, `para`, `para_flip`, with the gates of pre-registration §5.3 (including Sentence-1 answer-leakage check) and a per-run `gates.json`.
+4. **Regime-split primary outcomes (D1).** Behavioural choice shift $\Delta P(Y{=}T)$ at $k=1$ (`structured` parser; `para_flip - para` co-primary with `flip - own` per D2) in GSM8K/SVAMP (Math), and length-normalized log-likelihood margin Δℓ at `####` (image minus text, with exact token-boundary check) in exploratory ChartQA (D4) and secondary Math. Decoding budgets: 512-token solving for Math, 16-token answer-only for ChartQA. Exact `verdict_nll` span scoring added post-dev.
+5. **Benchmarks / ceilings** use the `none` prefill. Explicit arms run only with `none`.
+6. **Three models** (2B diagnostic-only per D3; 3B and 7B confirmatory), pinned in `MODEL_PINS` (`harness_v4.py`), all run in `bfloat16`. The harness refuses any other dtype. ChartQA defaults to `--dev_size 30`.
 
 ---
 
@@ -55,6 +55,7 @@ Experiment/
 ├── score_v5.py             v5 parser extensions and margin math
 ├── analyze_v5.py           v5 confirmatory tests (T1, ρ, TOST, floors), readings, lme4 export (local)
 ├── tests/test_v5.py        v5 harness/scorer tests; no GPU needed
+├── tests/test_v5_fixes.py  Regression tests for D1–D5, leakage/split fixes, and coding sampler
 ├── tests/test_analyze_v5.py  analyze_v5 tests on synthetic rows
 │
 ├── score_v4.py             v4 scorer; also imported by v5
@@ -63,13 +64,14 @@ Experiment/
 ├── analyze_v4.py           v4 gates, contrasts, penalty effects (local)
 ├── reanalyze_v3.py         Re-scores stored v3 outputs (local)
 ├── statistical_analysis.py Paired statistics for v3; shared helpers (local)
-├── sample_for_coding.py    Human-coding sheets and scorer validation (local)
+├── sample_for_coding.py    v3 human-coding sheets and scorer validation (local)
+├── sample_v5_for_coding.py v5 stratified human-coding sampler & κ evaluator (local)
 ├── tests/test_v4.py        v4 test suite; no GPU needed
 │
-├── results_v5/             v5 dev pass: 16 JSONL + 16 manifests + 6 gates + pip_freeze.txt (see its README)
+├── results_v5/             v5 dev pass: 16 JSONL + 16 manifests + 6 gates + pip_freeze.txt + analysis_dev/ (see its README)
 ├── results_v4/             v4 smoke, dev2 runs, analysis_dev2/, superseded/ (see its README)
 ├── results_v3/             Stored v3 pilot, N = 1,619, plus re-analysis (see its README)
-├── coding_v5/              v5 human-coding sheets (CODEBOOK_v5.md, coder_A/B verdicts & flips), not yet coded
+├── coding_v5/              v5 human-coding sheets (CODEBOOK_v5.md, HUMAN_CODING_INSTRUCTIONS_v5.md, coder_A/B verdicts & flips), not yet coded
 ├── coding_v3/              Human-coding sheets (CODEBOOK, coder_A/B; KEY_do_not_open.csv), not yet coded
 └── archive/                Superseded v3 harness and v1/v2 pilots (see its README)
 ```
@@ -100,13 +102,13 @@ Experiment/
 | Literature knowledge base (18 papers + CMC-Bench) | Done (`20` local PDFs: all 19 core + `2606.22862.pdf`; 0 core missing; post-v5 PDF audit done) | [../Docs/Paper/THESIS_LITERATURE_KNOWLEDGE_BASE.md](../Docs/Paper/THESIS_LITERATURE_KNOWLEDGE_BASE.md), [../Docs/Paper/post-v5-pdf-audit/post-v5-pdf-audit.md](../Docs/Paper/post-v5-pdf-audit/post-v5-pdf-audit.md) |
 | Freeze audit (2026-11-10) | Received; red light. Its fixes were applied to the pre-registration. | [../Docs/Paper/prereg-freeze-audit/](../Docs/Paper/prereg-freeze-audit/) |
 | Pre-registration | Drafted, **not frozen** | [../Docs/PREREGISTRATION_VERDICT_TRANSPLANT.md](../Docs/PREREGISTRATION_VERDICT_TRANSPLANT.md) |
-| v5 harness (order, templates, minimal edits, margin) | Written; CPU tests pass; **ran on an L4 (bf16)** | `harness_v5.py`, `transplant_v5.py`, `score_v5.py`, `tests/test_v5.py` |
+| v5 harness (order, templates, minimal edits, margin) | Written; **240** CPU tests pass (`unittest`); **ran on an L4 (bf16)** | `harness_v5.py`, `transplant_v5.py`, `score_v5.py`, `tests/` |
 | v5 dev pass (2B, 3B, 7B; 200 + 30 items) | **Done.** 29,880 rows, internally consistent. No 2B transplant (0 eligible items). | `results_v5/` |
-| v5 dev & plan audits | Done: inventory, evidence audit, independent deep audit, v4 vs. post-v5 audit | [../Thesis/docs/Archive/](../Thesis/docs/Archive/) |
+| v5 dev & plan audits | Done: inventory, evidence audit, independent deep audit, forensic audit, v4 vs. post-v5 audit | [../Thesis/docs/Archive/dev v5/](<../Thesis/docs/Archive/dev v5/>) |
 | `analyze_v5.py` on dev rows | **Done** (`results_v5/analysis_dev/`) after D1–D5 & gate updates | `analyze_v5.py`, `results_v5/analysis_dev/` |
 | Pre-freeze decisions (D1–D5 & fixed churn/inconclusive rules) | **Applied** in pre-registration & `analyze_v5.py`; ChartQA `max_pixels` (R8.4) & title/scope alignment open | `PREREGISTRATION_VERDICT_TRANSPLANT.md` §11 |
 | ChartQA render gate & `verdict_nll` span GPU check | Open | [RUNBOOK_v5.md](RUNBOOK_v5.md) |
-| Human coding of verdict & flip labels | Sheets generated (`1,087` verdicts + `150` flips), not yet coded | `coding_v5/`, `coding_v3/` |
+| Human coding of verdict & flip labels | Sheets generated (`200` verdicts + `150` flips; instructions ready), not yet coded | `coding_v5/`, `coding_v3/` |
 | Confirmatory run | After the pre-registration freeze | GPU (L4/A100), `--phase confirm` |
 | Mechanistic probe | Not planned for the thesis core | — |
 
@@ -120,14 +122,14 @@ Experiment/
 - **v5 invariants are mandatory:** counterbalanced order, binding and ceiling arms, minimal-edit verdicts, and competency-filtered primary results. See [../AGENTS.md](../AGENTS.md) §1 and `../CLAUDE.md`.
 - **Pre-freeze changes must be logged deviations.** The pre-registration says dev numbers may not change R4/R6. Any change to the competency rule, the ρ definition or the gates needs an explicit, recorded ruling.
 - **Keep v3 data read-only.** Prompts in `harness_v4.py` named `*_v3` must stay verbatim; a test enforces this.
-- **Model code runs on the GPU session only** (Colab Pro L4/A100 or RunPod; ≥ 24 GB, `bfloat16`; not T4/V100).
+- **Model code runs on the GPU session only** (Colab Pro L4/A100 or RunPod; ≥ 22 GiB usable VRAM [L4 23,034 MiB], `bfloat16`; not T4/V100).
   - v5: upload `harness_v4.py`, `score_v4.py`, `harness_v5.py`, `score_v5.py`, `transplant_v5.py`.
   - v4: upload `harness_v4.py`, `transplant_v4.py`, `score_v4.py`.
   - Everything else runs locally. No model loading on the local machine.
 - **After changing code, run the tests:**
 
 ```bash
-python -m unittest discover tests
+python -B -m unittest discover -s tests
 ```
 
 ---

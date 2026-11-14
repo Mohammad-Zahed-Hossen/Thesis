@@ -4,8 +4,8 @@ v5 dev pass outputs across all three models (`Qwen2-VL-2B-Instruct`, `Qwen2.5-VL
 
 **Status:** **Dev data only — do not cite as confirmatory findings.**
 - Total stored artifacts: 39 files (16 `.jsonl`, 16 `.manifest.json`, 6 `.gates.json`, plus `pip_freeze.txt`), **29,880 rows**.
-- Audited twice in [../../Thesis/docs/Archive/](../../Thesis/docs/Archive/) (`v5_dev_evidence_audit.md` and `claude_v5_independent_deep_audit.md`).
-- `analysis_dev/` holds the output of `analyze_v5.py` on these files (`analysis_v5.md`, `analysis_v5.json`, `long_v5.csv`, `analyze_v5_lme4.R`). To regenerate it, follow the analysis step in [../RUNBOOK_v5.md](../RUNBOOK_v5.md).
+- Audited in [../../Thesis/docs/Archive/dev v5/](<../../Thesis/docs/Archive/dev v5/>) (`v5_dev_evidence_audit.md`, `claude_v5_independent_deep_audit.md`, `claude_v5_forensic_code_and_construct_audit.md`, and `claude_v4_vs_v5_plan_audit.md`).
+- `analysis_dev/` holds the current output of `analyze_v5.py` on these files (`analysis_v5.md`, `analysis_v5.json`, `long_v5.csv`, `analyze_v5_lme4.R`), reflecting pre-freeze decisions D1–D5 and the 2026-11-14 gate updates. To regenerate it, follow the analysis step in [../RUNBOOK_v5.md](../RUNBOOK_v5.md).
 - The `*.gates.json` and transplant rows were produced by the code at commit `09216b0`. The scorers have changed since (verdict labelling, verbalization splitting, an answer-in-prefix gate), so re-running `transplant_v5.py --gates_only` today gives different gate counts. The stored files record what was run.
 
 > **Token tip for agents:** Never `cat` the `.jsonl` files (the `*_tp_*` files are 10–16 MB). Read the `*.gates.json` / `*.manifest.json` files or the audit reports instead.
@@ -49,8 +49,10 @@ v5 dev pass outputs across all three models (`Qwen2-VL-2B-Instruct`, `Qwen2.5-VL
 
 ## Key audit takeaways (dev only)
 
-From [claude_v5_independent_deep_audit.md](../../Thesis/docs/Archive/claude_v5_independent_deep_audit.md) §1 and §10:
+From [claude_v5_independent_deep_audit.md](<../../Thesis/docs/Archive/dev v5/claude_v5_independent_deep_audit.md>) §1 and §10, and [claude_v5_forensic_code_and_construct_audit.md](<../../Thesis/docs/Archive/dev v5/claude_v5_forensic_code_and_construct_audit.md>):
 1. **Integrity:** All 29,880 rows are internally consistent, with zero `boundary_mismatch` across all 20,868 scored rows.
-2. **Provenance gap:** Manifests record only the last invocation, `resolved_model_commit` is null, and unrecorded sessions ran some batches.
-3. **Pre-freeze blockers:** 2B `####` format eligibility (0/200 in Math), ChartQA attrition (6/2/0 retained), Math Δℓ–behaviour sign agreement (51.6% on 3B, 56.6% on 7B), 7B flip contrast driven mostly by removing the own verdict, and replay/wording churn above the 5% limit.
+2. **Provenance gap:** Stored dev manifests record only the last invocation, `resolved_model_commit` is null, and unrecorded sessions ran some batches (`harness_v4.py` now records resolved commits when available).
+3. **Pre-freeze dispositions:**
+   - **Addressed in pre-registration & code (D1–D5, 2026-11-13/14):** Math primary outcome shifted to behavioural choice (`structured` parser; `para_flip - para` co-primary); `Qwen2-VL-2B` set to diagnostic-only; ChartQA set to exploratory/secondary; Sentence-1 answer-leakage gate and exact `verdict_nll` span scoring implemented; wording-floor gate fixed at `±5.0 pp` signed mean / `≤ 5.0%` attributable `image <-> text` churn / `±10 pp` neither shift (non-binding Math still fails on dev, making H₀ uninterpretable there without blocking H₁).
+   - **Still open before freeze:** Double human coding ([../coding_v5/](../coding_v5/)), ChartQA `max_pixels` (R8.4), ChartQA `--print_example` render gate, GPU check of the new `verdict_nll` span, and final title/scope alignment.
 

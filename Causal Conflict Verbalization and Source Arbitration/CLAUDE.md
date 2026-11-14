@@ -45,7 +45,7 @@ When in doubt, read the code, data and papers, not the narrative documents.
 - **Task-selection conflict (confirmatory Math):** `vlm-modality-research/modality-conflict-arbitration-v2`. GSM8K/SVAMP rendered image of problem *i* paired with typed problem *i+1*; equal-answer pairs excluded. Neither source is wrong here.
 - **Evidence conflict (exploratory/secondary, D4):** `vlm-modality-research/chartqa-evidence-conflict-v2`. 229 analysed items (230 rows; `conflict_id` 45 is excluded, as in the paper's artifact): a real chart and a counterfactual report on the same question.
 - **Stimuli source:** Ghosh et al., *Which Source Wins?* (arXiv:2608.17205). Cite it.
-- **Execution (v5):** `bfloat16`, SDPA, no quantization, on one GPU class with compute capability ≥ 8 and at least 24 GB (L4, A100, RTX 3090/4090). `harness_v5.HFBackend` refuses any other dtype. T4/V100 are not used for v5: they fall back to `float16`, and the 7B does not fit. v4 dev ran `float16` on a T4.
+- **Execution (v5):** `bfloat16`, SDPA, no quantization, on one GPU class with compute capability ≥ 8 and at least 22 GiB usable VRAM (NVIDIA L4 [23,034 MiB], A100, RTX 3090/4090). `harness_v5.HFBackend` refuses any other dtype. T4/V100 are not used for v5: they fall back to `float16`, and the 7B does not fit. v4 dev ran `float16` on a T4.
 - **Local machine:** AMD Ryzen 5 5600G, 8 GB RAM, no CUDA. Code editing, tests and analysis only.
 
 ## Mandatory Methodological Invariants
@@ -111,7 +111,7 @@ Recomputed from `Experiment/results_v4/dev2_*.jsonl` with `score_v4.py`, or read
 │   ├── Context/         ← Historical context tracking
 │   ├── Decision_Audits/ ← Topic selection audit trail; Idea.md is current
 │   └── Parked_Proposals/← Deprecated proposal specs
-├── Thesis/              ← WHERE THESIS CHAPTERS WILL GO; docs/ holds Understanding FAQs, Compute evals, RUNBOOKs, and Archive/ (v5 dev audits)
+├── Thesis/              ← WHERE THESIS CHAPTERS WILL GO; docs/ holds Understanding FAQs, Compute evals, RUNBOOKs, and Archive/dev v5/ (v5 dev audits); dev v1_v5.md is a 2026-11-13 snapshot
 ├── Archive/             ← Parked exploration domains (inactive)
 └── .agents/             ← Antigravity agent config
 ```
