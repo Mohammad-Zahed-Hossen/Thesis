@@ -15,11 +15,11 @@ When an image and a typed text support different answers, does a prefix-forced s
 
 ## Evidence so far
 
-**Exploratory and dev-only.** Details and caveats are in [Experiment/results_v3/README.md](Experiment/results_v3/README.md), [Experiment/results_v4/README.md](Experiment/results_v4/README.md), [Experiment/results_v5/README.md](Experiment/results_v5/README.md), and [Thesis/docs/Archive/claude_v5_independent_deep_audit.md](Thesis/docs/Archive/claude_v5_independent_deep_audit.md).
+**Exploratory and dev-only.** Details and caveats are in [Experiment/results_v3/README.md](Experiment/results_v3/README.md), [Experiment/results_v4/README.md](Experiment/results_v4/README.md), [Experiment/results_v5/README.md](Experiment/results_v5/README.md), and [claude_v5_independent_deep_audit.md](<Thesis/docs/Archive/dev v5/claude_v5_independent_deep_audit.md>).
 
 - **The v3 instruction contrast is large, but doesn't test verbalization.** Answers matching the image problem fall from 35.7% to 11.8%, and answers matching the text problem rise from 4.2% to 36.1% (N = 1,600 with distinct answers). That compared two *instructions*, not two verbalizations.
 - **v4 dev (`dev2`):** On the 110 items solvable from both sources, reversing an authored verdict moved image answers by +20.9 pp under the neutral instruction and −1.8 pp under the conflict instruction.
-- **v5 dev pass:** 29,880 rows across all three models ran on an L4 in `bfloat16` (`Experiment/results_v5/`). Audits flagged pre-freeze blockers (2B `####` format eligibility, ChartQA attrition, Math Δℓ–behaviour agreement, and replay/wording churn) that must be settled before freezing [Docs/PREREGISTRATION_VERDICT_TRANSPLANT.md](Docs/PREREGISTRATION_VERDICT_TRANSPLANT.md).
+- **v5 dev pass:** 29,880 rows across all three models ran on an L4 in `bfloat16` (`Experiment/results_v5/`). Audits flagged pre-freeze blockers that led to pre-freeze decisions D1–D5 (Math behavioural primary, `Qwen2-VL-2B` diagnostic-only, ChartQA exploratory, fixed 5% churn gate) and an 18-paper + CMC-Bench literature synthesis ([Docs/Paper/THESIS_LITERATURE_KNOWLEDGE_BASE.md](Docs/Paper/THESIS_LITERATURE_KNOWLEDGE_BASE.md)) before freezing [Docs/PREREGISTRATION_VERDICT_TRANSPLANT.md](Docs/PREREGISTRATION_VERDICT_TRANSPLANT.md).
 
 ## Repository
 
@@ -29,7 +29,7 @@ When an image and a typed text support different answers, does a prefix-forced s
 │   ├── results_v4/ v4 dev runs and analysis; see its README
 │   └── results_v3/ v3 pilot, N = 1,619; see its README
 ├── Thesis/         Writing guides, FAQs, runbooks, compute evaluations, and v5 dev audits (chapters not yet drafted)
-├── Docs/           Pre-registration draft, primary PDFs/literature audits (Docs/Paper/), and historical decision records
+├── Docs/           Pre-registration draft, 18-paper + CMC-Bench knowledge base / PDFs (Docs/Paper/), and historical decision records
 ├── Archive/        Parked explorations (Bengali VLM, medical imaging, multimodal agents, etc.)
 ├── CLAUDE.md       Claude directives
 ├── AGENTS.md       Instructions for other agents

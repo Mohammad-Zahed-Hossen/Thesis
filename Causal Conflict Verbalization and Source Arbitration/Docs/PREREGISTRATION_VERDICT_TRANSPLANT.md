@@ -13,9 +13,10 @@ To freeze it, commit this file, tag the commit `prereg-v5`, and record the tag h
 
 **Sources:**
 
-- `Docs/Paper/lit-dossier-verdict-transplant/lit-dossier-verdict-transplant.md` (the dossier)
+- `Docs/Paper/THESIS_LITERATURE_KNOWLEDGE_BASE.md` (complete 18-paper + CMC-Bench knowledge base, 2026-11-14)
+- `Docs/Paper/lit-dossier-verdict-transplant/lit-dossier-verdict-transplant.md` (the initial dossier, 2026-11-10)
 - `Docs/Paper/prereg-freeze-audit/prereg-freeze-audit.md` (the freeze audit, 2026-11-10)
-- the PDFs in `Docs/Paper/`
+- the PDFs in `Docs/Paper/` (14 local; 5 remaining PDFs listed in `Docs/Paper/README.md`)
 - `Experiment/*_v5.py`
 
 Anything not stated in those sources is marked **[Design decision]**: it is a choice made here, not a value taken from the literature.
@@ -59,11 +60,11 @@ where *T* is the source the flipped verdict names (§2.3, §7.3). It is a contro
 
 ### 1.1 Novelty boundary
 
-This replaces dossier §4.1 and is taken verbatim from freeze audit §5:
+This replaces dossier §4.1 and updates freeze audit §5 after the 18-paper + CMC-Bench audit (`Docs/Paper/THESIS_LITERATURE_KNOWLEDGE_BASE.md`):
 
-> Within the fourteen sources read, no study intervenes on a vision-language model's own stated source-reliability verdict, by prefix-forcing a minimally edited version of it, and measures whether the answer follows under image–text conflict with evidence order counterbalanced. Nor does any test whether an instruction that binds the answer to that verdict changes its effect. Prior work steers modality reliance with an external request and evaluates it by editing the evidence (Dassen et al., arXiv:2610.33841); predicts preference from evidence strength with no verbalization (Barua et al., arXiv:2610.19407); tests whether explanations mention edited visual evidence (Menzat et al., arXiv:2609.06704); or edits clinical content in a model's reasoning with no modality conflict (Bhowal et al., arXiv:2607.27304). We do not claim that prompt-based modality steering is new: our explicit-source arms replicate the natural-language instruction baseline of Dassen et al. and serve only as a ceiling.
+> Within the eighteen primary sources and CMC-Bench examined, no study intervenes on a vision-language model's own stated source-reliability verdict, by prefix-forcing a minimally edited version of it (alongside a matched-template control), and measures whether the answer follows under image–text conflict with evidence order counterbalanced. Nor does any test whether an instruction that binds the answer to that verdict changes its effect. Prior work steers modality reliance with an external request and evaluates it by editing the evidence (Dassen et al., arXiv:2610.33841); predicts preference from evidence strength with no verbalization (Barua et al., arXiv:2610.19407); tests whether explanations mention edited visual evidence (Menzat et al., arXiv:2609.06704); edits clinical content in a model's reasoning with no modality conflict (Bhowal et al., arXiv:2607.27304); or benchmarks image–text evidence conflict in multimodal RAG over ChartQA/MMMU without CoT faithfulness or verdict forcing (CMC-Bench; Catapang, MAGMaR 2026). We do not claim that prompt-based modality steering or image–text conflict benchmarking is new: our explicit-source arms replicate the natural-language instruction baseline of Dassen et al. and serve only as a benchmark.
 
-CMC-Bench (Catapang 2026, MAGMaR) is unread and must be read before the related-work chapter is written.
+Related-work check note (2026-11-14): two additional 2026 search leads on forced-CoT evaluation (`arXiv:2606.22862`) and linguistic invariance TOST monitoring (*Testing Linguistic Invariance in Chain-of-Thought Monitoring*) remain unread and should be checked before writing Chapter 2.
 
 ---
 
@@ -682,7 +683,7 @@ three models alike. See §3.2, §7.2 and §11.)*
 - §3.2 and §7.2 (2026-11-11): the "Qwen2-VL-2B on ChartQA-Conflict is secondary regardless" exception is removed. The ≥ 100-item entry rule now decides for every model.
 - §3.4 (2026-11-11): precision and hardware are fixed at `bfloat16` on one GPU class with compute capability ≥ 8 and at least 24 GB. This replaces "FP16 on T4/V100". The harness enforces the dtype.
 - §3.2, ChartQA `conflict_id` 45 is excluded, following the *Which Source Wins?* artifact. The release has 230 rows; 229 are analysed.
-- **2026-11-13 Pre-freeze Decisions (D1–D5) & Forensic Audit Fixes** (resolving `Thesis/docs/Archive/claude_v5_forensic_code_and_construct_audit.md` prior to confirm freeze):
+- **2026-11-13 Pre-freeze Decisions (D1–D5) & Forensic Audit Fixes** (resolving `Thesis/docs/Archive/dev v5/claude_v5_forensic_code_and_construct_audit.md` prior to confirm freeze):
   - **D1:** Behavioural shift $\Delta P(Y{=}T)$ at $k=1$ is designated primary for GSM8K/SVAMP (Math), with $\Delta\ell$ retained as secondary/diagnostic because Math `####` margins, scored before any working, tracked the solved answers poorly (sign agreement 51.6% / 56.6% for 3B / 7B, below the majority-class baseline; within-order AUC 0.53–0.56 for 3B and 0.68–0.76 for 7B). $\Delta\ell$ remains primary for ChartQA.
   - **D2:** Report the full $m_\varnothing$ decomposition (`none - own`, `flip - none`, `para_flip - none`) and elevate the clean matched-template pair (`para_flip - para`) as **co-primary** alongside `flip - own`.
   - **D3:** Adopt the `structured` Math parser (`####`, else explicit final-answer statement / `\boxed{X}`) as headline parser for competency and behavioural scoring (retaining `strict` and `lenient` side by side), and designate `Qwen/Qwen2-VL-2B-Instruct` as **diagnostic-only** rather than confirmatory.
@@ -699,7 +700,8 @@ three models alike. See §3.2, §7.2 and §11.)*
   - §3.4, status block, R8: ChartQA `max_pixels` marked open instead of fixed.
   - §6.2, §6.3: references to functions and fields that do not exist replaced with the real names.
   - R3, R8: the departure from R8's "no dev number changes R3" recorded.
-- **2026-11-14, gate revisions after an audit of the post-v5 plan** (`Thesis/docs/Archive/claude_v4_vs_v5_plan_audit.md`). All three tighten or clarify the rules; none loosens one. Changes:
+- **2026-11-14, literature base update (§Sources, §1.1):** merged 18 core papers + CMC-Bench (Catapang, MAGMaR 2026) into `Docs/Paper/THESIS_LITERATURE_KNOWLEDGE_BASE.md`; updated §1.1 novelty boundary accordingly and noted two 2026 search leads (`arXiv:2606.22862`, *Testing Linguistic Invariance in CoT Monitoring*) for Chapter 2.
+- **2026-11-14, gate revisions after an audit of the post-v5 plan** (`Thesis/docs/Archive/dev v5/claude_v4_vs_v5_plan_audit.md`). All three tighten or clarify the rules; none loosens one. Changes:
   - §7.6 and §8: the wording-floor limit is fixed at 5.0%. D5's replay clause (`replay_flip_rate + 5.0 pp`) is removed: on dev it changed only one outcome (3B non-binding), which now fails. A third part, the neither shift within ±10 pp, is added, and any-change churn is always reported.
   - §2.3: the Math decision rule reads Δ itself against ε = 5.0 pp. The explicit-arm quantity is renamed from ceiling ($\mathrm{Ceil}_{beh}$) to benchmark ($B_{beh}$) because the dev effect exceeded it; $\rho_{beh}$ is descriptive only. Image- and text-direction benchmarks and directional effects are reported.
   - §2.2 and §2.3: inconclusive is an allowed outcome, labelled with the TOST power where that is below 0.80. Row 6 of §2.2 ("mixed") is now an inconclusive reading.

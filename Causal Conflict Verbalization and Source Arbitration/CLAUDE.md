@@ -10,14 +10,14 @@ The earlier title, *Causal Conflict Verbalization and Source Arbitration in Visi
 
 The thesis tests multimodal chain-of-thought faithfulness. When an image and a typed text support different answers, we prefix-force a reliability verdict into the model's own response ("I consider the image / the typed text more reliable"). The question is whether that verdict causally changes which source's answer the model then gives. Instruction, evidence order and wording are held fixed. The test is run with and without a binding instruction that tells the model to act on its verdict.
 
-The full design is in `Docs/PREREGISTRATION_VERDICT_TRANSPLANT.md`. The evidence behind it is in `Docs/Paper/lit-dossier-verdict-transplant/lit-dossier-verdict-transplant.md`.
+The full design is in `Docs/PREREGISTRATION_VERDICT_TRANSPLANT.md`. The evidence behind it is in `Docs/Paper/THESIS_LITERATURE_KNOWLEDGE_BASE.md` (18 core papers + CMC-Bench; 14 local PDFs + 5 missing PDFs listed in `Docs/Paper/README.md`), alongside `Docs/Paper/lit-dossier-verdict-transplant/lit-dossier-verdict-transplant.md`.
 
 ## Current Phase
 
 - **Done:** v3 pilot (N = 1,619) and v4 dev runs, both exploratory.
-- **Done:** literature audit and pre-registration freeze audit (`Docs/Paper/prereg-freeze-audit/`). The original novelty claim does not hold; the current claim is in the freeze audit §5 (replacing dossier §4.1).
-- **Done:** v5 dev pass across all three models on an L4 in `bfloat16` (29,880 rows in `Experiment/results_v5/`), audited twice in `Thesis/docs/Archive/`.
-- **Now:** resolve the pre-freeze decisions in `Thesis/docs/Archive/claude_v5_independent_deep_audit.md` §10, run `Experiment/analyze_v5.py` on `results_v5/`, complete human coding of verdict labels (`Experiment/coding_v3/`), and freeze the pre-registration.
+- **Done:** 18-paper + CMC-Bench literature audit (`Docs/Paper/THESIS_LITERATURE_KNOWLEDGE_BASE.md`) and pre-registration freeze audit (`Docs/Paper/prereg-freeze-audit/`).
+- **Done:** v5 dev pass across all three models on an L4 in `bfloat16` (29,880 rows in `Experiment/results_v5/`), audited in `Thesis/docs/Archive/`, `analyze_v5.py` run on dev (`Experiment/results_v5/analysis_dev/`), and pre-freeze decisions D1–D5 + gate revisions applied to the draft.
+- **Now:** complete double human coding (`Experiment/coding_v5/`), close ChartQA `max_pixels` (R8.4) + GPU render/`verdict_nll` span checks, finalize title/scope alignment, and tag `prereg-v5`.
 - **No confirmatory data exists yet.**
 
 For current status and next steps, read `Experiment/README.md` first.
@@ -37,13 +37,13 @@ When in doubt, read the code, data and papers, not the narrative documents.
 
 ## Research Setup
 
-- **Models (three, all confirmatory; decided 2026-11-11):**
-  - `Qwen/Qwen2-VL-2B-Instruct`, pinned to `895c3a49bc3fa70a340399125c650a463535e71c`
-  - `Qwen/Qwen2.5-VL-3B-Instruct`, pinned to `66285546d2b821cf421d4f5eb2576359d3770cd3`
-  - `Qwen/Qwen2.5-VL-7B-Instruct`, pinned to `cc594898137f460bfe9f0759e9844b3ce807cfb5`
-  - Pins are in `harness_v4.py` (`MODEL_PINS`). Claims are made per model; a cross-model statement needs all confirmatory models to agree. 3B vs. 7B is a descriptive within-generation size comparison, not a scaling law.
-- **Task-selection conflict:** `vlm-modality-research/modality-conflict-arbitration-v2`. GSM8K/SVAMP rendered image of problem *i* paired with typed problem *i+1*; equal-answer pairs excluded. Neither source is wrong here.
-- **Evidence conflict:** `vlm-modality-research/chartqa-evidence-conflict-v2`. 229 analysed items (230 rows; `conflict_id` 45 is excluded, as in the paper's artifact): a real chart and a counterfactual report on the same question.
+- **Models (two confirmatory + one diagnostic-only; updated pre-freeze D3, 2026-11-13):**
+  - `Qwen/Qwen2-VL-2B-Instruct`, pinned to `895c3a49bc3fa70a340399125c650a463535e71c` (**diagnostic-only**, D3)
+  - `Qwen/Qwen2.5-VL-3B-Instruct`, pinned to `66285546d2b821cf421d4f5eb2576359d3770cd3` (confirmatory)
+  - `Qwen/Qwen2.5-VL-7B-Instruct`, pinned to `cc594898137f460bfe9f0759e9844b3ce807cfb5` (confirmatory)
+  - Pins are in `harness_v4.py` (`MODEL_PINS`). Claims are made per model; a cross-model statement needs both confirmatory models to agree. 3B vs. 7B is a descriptive within-generation size comparison, not a scaling law.
+- **Task-selection conflict (confirmatory Math):** `vlm-modality-research/modality-conflict-arbitration-v2`. GSM8K/SVAMP rendered image of problem *i* paired with typed problem *i+1*; equal-answer pairs excluded. Neither source is wrong here.
+- **Evidence conflict (exploratory/secondary, D4):** `vlm-modality-research/chartqa-evidence-conflict-v2`. 229 analysed items (230 rows; `conflict_id` 45 is excluded, as in the paper's artifact): a real chart and a counterfactual report on the same question.
 - **Stimuli source:** Ghosh et al., *Which Source Wins?* (arXiv:2608.17205). Cite it.
 - **Execution (v5):** `bfloat16`, SDPA, no quantization, on one GPU class with compute capability ≥ 8 and at least 24 GB (L4, A100, RTX 3090/4090). `harness_v5.HFBackend` refuses any other dtype. T4/V100 are not used for v5: they fall back to `float16`, and the 7B does not fit. v4 dev ran `float16` on a T4.
 - **Local machine:** AMD Ryzen 5 5600G, 8 GB RAM, no CUDA. Code editing, tests and analysis only.
@@ -61,14 +61,14 @@ Every v5 run and analysis must satisfy all of these. Details are in the pre-regi
    - Why: without binding, a null verdict effect can't be told apart from the instruction dominating.
 3. **Minimal-edit verdicts.** Flipped verdicts swap only the source noun phrase in the reliability clause of the model's own `conflict_full` verbalization. Gates: exactly one clause changed; the flip actually reverses `stated_reliable_source`; token Jaccard ≥ 0.85 and at most two swapped noun phrases. Authored sentences (`rel_image` / `rel_text`) are not run in v5; the matched `para` / `para_flip` pair is the robustness check.
 4. **Competency conditioning.** Primary results use only items where `base_image` solves the item's image problem and `base_text` solves its text problem, under the same decoding. Items that fail the filter are never transplanted. Cross-model comparisons use the intersection of these sets.
-5. **One primary outcome: Δℓ.** This is the length-normalized log-likelihood margin at `####`, image minus text, teacher-forced right after the verdict. Behavioural decodes are secondary: 512-token solving for GSM8K/SVAMP and a 16-token answer-only decode for ChartQA. Ceilings use the no-verdict prefill. No source letters.
+5. **Regime-split primary outcomes (pre-freeze D1 & D2).** In GSM8K/SVAMP (Math), the primary outcome is behavioural choice shift $\Delta P(Y{=}T)$ at template $k=1$ (`structured` parser; `para_flip - para` co-primary with `flip - own`), and $\Delta\ell$ at `####` is secondary/diagnostic. In ChartQA-Conflict (exploratory, D4), $\Delta\ell$ (image minus text) remains primary. Explicit single-source arms use the no-verdict prefill ($m_\varnothing$). No source letters.
 6. **Repetition penalty 1.0, greedy decoding, pinned revisions.** Use a new `--run_tag` for any prompt or setting change.
 
 ## Claim Boundaries
 
 - Prefix-forcing identifies a **controlled direct effect** of the verdict at a fixed instruction. Never call it "mediation" or a "natural indirect effect".
-- Don't claim "first" or "novel" beyond the sources listed in the dossier, §4.1. Read 2610.33841 (*Grounding on Request*) and 2610.19407 in full before claiming novelty for the binding arm.
-- In GSM8K/SVAMP, "reliability" is ill-posed because both problems are valid. Reliability claims belong to ChartQA-Conflict.
+- Don't claim "first" or "novel" beyond `Docs/PREREGISTRATION_VERDICT_TRANSPLANT.md` §1.1 and `Docs/Paper/THESIS_LITERATURE_KNOWLEDGE_BASE.md` (18 papers + CMC-Bench).
+- In GSM8K/SVAMP, "reliability" is ill-posed because both problems are valid; confirmatory claims are about **source following**. Reliability judgement belongs to ChartQA-Conflict (now exploratory per D4).
 - Dev numbers are for tuning, never findings. v3 numbers compare two instructions, not verbalizations. See `Experiment/results_v3/README.md`.
 
 ## Verified Constants (audit of 2026-11-11)
@@ -101,7 +101,8 @@ Recomputed from `Experiment/results_v4/dev2_*.jsonl` with `score_v4.py`, or read
 │   ├── results_v5/      ← v5 dev pass outputs (29,880 rows)
 │   ├── results_v4/      ← v4 runs and dev analysis
 │   ├── results_v3/      ← v3 pilot outputs and re-analysis (read-only)
-│   ├── coding_v3/       ← Human-coding sheets
+│   ├── coding_v5/       ← v5 human-coding sheets (verdicts + flips)
+│   ├── coding_v3/       ← v3 human-coding sheets
 │   └── archive/         ← v3 harness and early pilots
 ├── Docs/                ← AI-GENERATED TRACKING (reference only)
 │   ├── PREREGISTRATION_VERDICT_TRANSPLANT.md ← Design spec (draft, not frozen)

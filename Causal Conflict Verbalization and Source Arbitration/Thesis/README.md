@@ -2,8 +2,8 @@
 
 Writing guides, conceptual FAQs, execution runbooks, compute evaluations, and v5 dev-pass audits for the BSc CSE thesis (*Does the Verdict Decide? Testing Whether Stated Source Reliability Steers Vision-Language Models under Image–Text Conflict*).
 
-**Last updated:** 2026-11-13
-**Status:** The v5 dev pass has run on all three models (39 files in [../Experiment/results_v5/](../Experiment/results_v5/)) and has been audited twice (`docs/Archive/`). The pre-registration is **not frozen**, and **no confirmatory data exists**. No dissertation chapters have been drafted here yet.
+**Last updated:** 2026-11-14
+**Status:** The v5 dev pass has run on all three models (39 files in [../Experiment/results_v5/](../Experiment/results_v5/)) and `analyze_v5.py` has been run after pre-freeze decisions D1–D5 ([../Experiment/results_v5/analysis_dev/](../Experiment/results_v5/analysis_dev/)). The 18-paper + CMC-Bench literature base is consolidated in [../Docs/Paper/THESIS_LITERATURE_KNOWLEDGE_BASE.md](../Docs/Paper/THESIS_LITERATURE_KNOWLEDGE_BASE.md). The pre-registration is **not frozen**, and **no confirmatory data exists**. No dissertation chapters have been drafted here yet.
 **Ground truth:** Active code and raw outputs live in [../Experiment/](../Experiment/) (start at [../Experiment/README.md](../Experiment/README.md)). The pre-registration draft is [../Docs/PREREGISTRATION_VERDICT_TRANSPLANT.md](../Docs/PREREGISTRATION_VERDICT_TRANSPLANT.md).
 
 > [!NOTE]
@@ -14,9 +14,9 @@ Writing guides, conceptual FAQs, execution runbooks, compute evaluations, and v5
 ## Quick start for AI agents (read in this order, stop when you have enough)
 
 1. **This file**: what is in `Thesis/`.
-2. [docs/Archive/claude_v5_independent_deep_audit.md](docs/Archive/claude_v5_independent_deep_audit.md) §1 and §10: the current evidence boundary and the blockers before freezing.
+2. [docs/Archive/dev v5/claude_v5_independent_deep_audit.md](<docs/Archive/dev v5/claude_v5_independent_deep_audit.md>) §1 and §10: the current evidence boundary and the blockers before freezing.
 3. [../Docs/PREREGISTRATION_VERDICT_TRANSPLANT.md](../Docs/PREREGISTRATION_VERDICT_TRANSPLANT.md): the design spec (freeze conditions §10, R8).
-4. [../Docs/Paper/README.md](../Docs/Paper/README.md): the 14 primary sources, the literature dossier and the freeze audit.
+4. [../Docs/Paper/README.md](../Docs/Paper/README.md): the complete 18-paper + CMC-Bench knowledge base ([THESIS_LITERATURE_KNOWLEDGE_BASE.md](../Docs/Paper/THESIS_LITERATURE_KNOWLEDGE_BASE.md)), 14 local PDFs (+ 5 missing PDFs), initial dossier, and freeze audit.
 5. [THESIS_NARRATIVE_AND_FRAMING_GUIDE.md](THESIS_NARRATIVE_AND_FRAMING_GUIDE.md): only when you are drafting thesis prose.
 
 Folder indexes elsewhere: [../Docs/README.md](../Docs/README.md) · [../Docs/Context/README.md](../Docs/Context/README.md) · [../Archive/README.md](../Archive/README.md) · [../Experiment/README.md](../Experiment/README.md).
@@ -40,10 +40,13 @@ Thesis/
     │   ├── Compute_Platform_Evaluation_2026-11-11.md
     │   └── Thesis Cloude Compute Evaluation.md
     └── Archive/
-        ├── v5_dev_output.md
-        ├── v5_antigravity_analysis.md
-        ├── v5_dev_evidence_audit.md
-        └── claude_v5_independent_deep_audit.md
+        └── dev v5/
+            ├── v5_dev_output.md
+            ├── v5_antigravity_analysis.md
+            ├── v5_dev_evidence_audit.md
+            ├── claude_v5_independent_deep_audit.md
+            ├── claude_v5_forensic_code_and_construct_audit.md
+            └── claude_v4_vs_v5_plan_audit.md
 ```
 
 ---
@@ -71,14 +74,16 @@ Two harmonized Q&A guides (AI-generated and audited on 2026-11-11 against code, 
 - **[Compute_Platform_Evaluation_2026-11-11.md](docs/Compute/Compute_Platform_Evaluation_2026-11-11.md)** — Current evaluation on a \$10–15/month budget recommending Colab Pro / PAYG (L4 pinned) with RunPod Community Cloud as backup, and flagging the L4's ~22.5 GB VRAM vs. the pre-registration's "24 GB" wording. Replaces the earlier report below.
 - **[Thesis Cloude Compute Evaluation.md](docs/Compute/Thesis%20Cloude%20Compute%20Evaluation.md)** — Earlier compute evaluation (superseded; assumed a \$50/month budget).
 
-### `docs/Archive/` — v5 Dev-Pass Logs & Audits (Dev Only)
+### `docs/Archive/dev v5/` — v5 Dev-Pass Logs & Audits (Dev Only)
 
 Records and independent AI audits of the v5 development run stored in [../Experiment/results_v5/](../Experiment/results_v5/) (39 artifacts, 29,880 rows). **Every number in these files comes from spent dev items; none are confirmatory findings.**
 
-- **[v5_dev_output.md](docs/Archive/v5_dev_output.md)** — Raw Colab notebook command/output transcript from the v5 dev run.
-- **[v5_antigravity_analysis.md](docs/Archive/v5_antigravity_analysis.md)** — File-by-file inventory and analysis of `results_v5/` and environment versions.
-- **[v5_dev_evidence_audit.md](docs/Archive/v5_dev_evidence_audit.md)** — Evidence audit checking row integrity, provenance gaps, runbook discrepancies, and dev-only interpretation boundaries.
-- **[claude_v5_independent_deep_audit.md](docs/Archive/claude_v5_independent_deep_audit.md)** — Second-pass independent forensic audit (2026-11-13) cross-checking `results_v5/`, active v5 code, ChartQA Hub gold answers, `Δℓ` vs. behavior coupling, own-verdict replay stability, and pre-freeze feasibility blockers (2B `####` format failure, ChartQA retention, and behavioral churn).
+- **[v5_dev_output.md](<docs/Archive/dev v5/v5_dev_output.md>)** — Raw Colab notebook command/output transcript from the v5 dev run.
+- **[v5_antigravity_analysis.md](<docs/Archive/dev v5/v5_antigravity_analysis.md>)** — File-by-file inventory and analysis of `results_v5/` and environment versions.
+- **[v5_dev_evidence_audit.md](<docs/Archive/dev v5/v5_dev_evidence_audit.md>)** — Evidence audit checking row integrity, provenance gaps, runbook discrepancies, and dev-only interpretation boundaries.
+- **[claude_v5_independent_deep_audit.md](<docs/Archive/dev v5/claude_v5_independent_deep_audit.md>)** — Second-pass independent forensic audit (2026-11-13) cross-checking `results_v5/`, active v5 code, ChartQA Hub gold answers, `Δℓ` vs. behavior coupling, own-verdict replay stability, and pre-freeze feasibility blockers (2B `####` format failure, ChartQA retention, and behavioral churn).
+- **[claude_v5_forensic_code_and_construct_audit.md](<docs/Archive/dev v5/claude_v5_forensic_code_and_construct_audit.md>)** — Forensic code & construct audit motivating pre-freeze decisions D1–D5 (2026-11-13).
+- **[claude_v4_vs_v5_plan_audit.md](<docs/Archive/dev v5/claude_v4_vs_v5_plan_audit.md>)** — Objective comparison of the v4 dev plan vs. the post-v5 plan grounded in primary papers (2026-11-14), leading to the fixed 5% churn limit, `B_beh` benchmark renaming, and explicit inconclusive readings.
 
 ---
 

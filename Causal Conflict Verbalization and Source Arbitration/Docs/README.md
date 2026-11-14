@@ -31,7 +31,7 @@ Docs/
 | File | Status | What it is |
 |---|---|---|
 | [PREREGISTRATION_VERDICT_TRANSPLANT.md](PREREGISTRATION_VERDICT_TRANSPLANT.md) | **Draft, not frozen** (44 KB) | Pre-registration for *Does the Verdict Decide?*. Models, stimuli, factorial arms (non-binding / binding / explicit ceilings), minimal-edit verdicts (`own`, `flip`, `none`, `para`, `para_flip`), primary outcome Δℓ, competency conditioning, equivalence margins, novelty claim. Freeze conditions are in **§10, R8** (literal templates, v5 harness with tests, one v5 dev pass on all three models in `bfloat16`). The [freeze audit](Paper/prereg-freeze-audit/prereg-freeze-audit.md) gave it a **red light** on 2026-11-10; v5 dev results now exist in [../Experiment/results_v5/](../Experiment/results_v5/) and are audited in [../Thesis/docs/Archive/](../Thesis/docs/Archive/). |
-| [Paper/](Paper/README.md) | Current | 14 arXiv PDFs ("the fourteen sources read"), the literature dossier, and the pre-registration freeze audit. See its README. |
+| [Paper/](Paper/README.md) | Current | Complete 18-paper + CMC-Bench knowledge base ([THESIS_LITERATURE_KNOWLEDGE_BASE.md](Paper/THESIS_LITERATURE_KNOWLEDGE_BASE.md)), 14 local arXiv PDFs (+ 5 missing PDFs listed in its README), the 2026-11-10 dossier, and the pre-registration freeze audit. |
 
 ---
 

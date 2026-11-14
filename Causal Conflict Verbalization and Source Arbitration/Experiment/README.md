@@ -3,7 +3,7 @@
 Start here. This folder holds all experiment code and data for the thesis. **It is ground truth** (AGENTS.md §2): code + raw rows outrank every `.md` report, including this one.
 
 **Last updated:** 2026-11-14
-**Stage:** The v5 **dev pass has run** on an L4 in `bfloat16` for all three models (29,880 rows in [results_v5/](results_v5/)). It has been audited ([../Thesis/docs/Archive/](../Thesis/docs/Archive/)), and `analyze_v5.py` has been run on it ([results_v5/analysis_dev/](results_v5/analysis_dev/)). The pre-freeze decisions D1–D5 are made and written into the pre-registration: behaviour is the primary outcome in Math, ChartQA is exploratory, Qwen2-VL-2B is diagnostic only. On 2026-11-14 three gates were tightened after an audit of the post-v5 plan ([../Thesis/docs/Archive/claude_v4_vs_v5_plan_audit.md](../Thesis/docs/Archive/claude_v4_vs_v5_plan_audit.md)): a fixed wording-floor limit, a Math decision rule on Δ itself, and an explicit inconclusive reading. The pre-registration is **not frozen**. **No confirmatory data exists.**
+**Stage:** The v5 **dev pass has run** on an L4 in `bfloat16` for all three models (29,880 rows in [results_v5/](results_v5/)). It has been audited ([../Thesis/docs/Archive/dev v5/](<../Thesis/docs/Archive/dev v5/>)), and `analyze_v5.py` has been run on it ([results_v5/analysis_dev/](results_v5/analysis_dev/)). The pre-freeze decisions D1–D5 are made and written into the pre-registration: behaviour is the primary outcome in Math, ChartQA is exploratory, Qwen2-VL-2B is diagnostic only. On 2026-11-14 three gates were tightened after an audit of the post-v5 plan ([claude_v4_vs_v5_plan_audit.md](<../Thesis/docs/Archive/dev v5/claude_v4_vs_v5_plan_audit.md>)): a fixed wording-floor limit, a Math decision rule on Δ itself, and an explicit inconclusive reading. The pre-registration is **not frozen**. **No confirmatory data exists.**
 **Design spec:** [../Docs/PREREGISTRATION_VERDICT_TRANSPLANT.md](../Docs/PREREGISTRATION_VERDICT_TRANSPLANT.md) (draft; freeze conditions in §10, R8).
 **Next action:** Finish the open pre-freeze items listed in the pre-registration (§3.4 and the R8 note): human coding of verdict labels ([coding_v5/](coding_v5/)), the ChartQA `max_pixels` decision and render check, a short GPU check of the new `verdict_nll` span, and the researcher's decision on the thesis scope and title (source following vs. reliability). Then freeze (tag `prereg-v5`).
 
@@ -13,7 +13,7 @@ Start here. This folder holds all experiment code and data for the thesis. **It 
 
 ## v5 dev pass at a glance (dev only, not findings)
 
-Counts come from `results_v5/*.gates.json`. The interpretation is from the [independent deep audit](../Thesis/docs/Archive/claude_v5_independent_deep_audit.md) (2026-11-13).
+Counts come from `results_v5/*.gates.json`. The interpretation is from the [independent deep audit](<../Thesis/docs/Archive/dev v5/claude_v5_independent_deep_audit.md>) (2026-11-13).
 
 | Model | Math (GSM8K/SVAMP), 200 items: competent → passed gates | ChartQA, 30 items: competent → passed gates |
 |---|---|---|
@@ -69,6 +69,7 @@ Experiment/
 ├── results_v5/             v5 dev pass: 16 JSONL + 16 manifests + 6 gates + pip_freeze.txt (see its README)
 ├── results_v4/             v4 smoke, dev2 runs, analysis_dev2/, superseded/ (see its README)
 ├── results_v3/             Stored v3 pilot, N = 1,619, plus re-analysis (see its README)
+├── coding_v5/              v5 human-coding sheets (CODEBOOK_v5.md, coder_A/B verdicts & flips), not yet coded
 ├── coding_v3/              Human-coding sheets (CODEBOOK, coder_A/B; KEY_do_not_open.csv), not yet coded
 └── archive/                Superseded v3 harness and v1/v2 pilots (see its README)
 ```
@@ -96,16 +97,16 @@ Experiment/
 | v4 penalty check (dev2) | Complete (600 rows, rp = 1.05) | `results_v4/dev2_qwen25_rp105.jsonl` |
 | v4 dev transplant (dev2) | Complete and valid (2,800 rows, fidelity > 95%) | `results_v4/dev2_transplant_qwen25.jsonl` |
 | v4 dev analysis (dev2) | Done. The verdict moves answers under the neutral instruction but not under the conflict instruction. Dev only, not a finding. | `results_v4/analysis_dev2/`, dossier §2.2 |
-| Literature dossier | Done | [../Docs/Paper/lit-dossier-verdict-transplant/](../Docs/Paper/lit-dossier-verdict-transplant/) |
+| Literature knowledge base (18 papers + CMC-Bench) | Done (14 local PDFs + 5 missing PDFs listed) | [../Docs/Paper/THESIS_LITERATURE_KNOWLEDGE_BASE.md](../Docs/Paper/THESIS_LITERATURE_KNOWLEDGE_BASE.md) |
 | Freeze audit (2026-11-10) | Received; red light. Its fixes were applied to the pre-registration. | [../Docs/Paper/prereg-freeze-audit/](../Docs/Paper/prereg-freeze-audit/) |
 | Pre-registration | Drafted, **not frozen** | [../Docs/PREREGISTRATION_VERDICT_TRANSPLANT.md](../Docs/PREREGISTRATION_VERDICT_TRANSPLANT.md) |
 | v5 harness (order, templates, minimal edits, margin) | Written; CPU tests pass; **ran on an L4 (bf16)** | `harness_v5.py`, `transplant_v5.py`, `score_v5.py`, `tests/test_v5.py` |
 | v5 dev pass (2B, 3B, 7B; 200 + 30 items) | **Done.** 29,880 rows, internally consistent. No 2B transplant (0 eligible items). | `results_v5/` |
-| v5 dev audits | Done: inventory, evidence audit, independent deep audit | [../Thesis/docs/Archive/](../Thesis/docs/Archive/) |
-| `analyze_v5.py` on dev rows | **Not run yet.** Tested only on synthetic rows. | `analyze_v5.py`, `tests/test_analyze_v5.py` |
-| Pre-freeze decisions (2B format rule, Δℓ validity in Math, churn limit, ChartQA gates and `max_pixels`, ρ ceiling) | **Next.** Needs the researcher's rulings, logged as deviations. | deep audit §10 |
-| ChartQA render gate | Not recorded | [RUNBOOK_v5.md](RUNBOOK_v5.md) |
-| Human coding of verdict labels | Sheets generated, not yet coded. Needed before any claim based on verdict labels. One mislabel already found. | `coding_v3/` |
+| v5 dev & plan audits | Done: inventory, evidence audit, independent deep audit, v4 vs. post-v5 audit | [../Thesis/docs/Archive/](../Thesis/docs/Archive/) |
+| `analyze_v5.py` on dev rows | **Done** (`results_v5/analysis_dev/`) after D1–D5 & gate updates | `analyze_v5.py`, `results_v5/analysis_dev/` |
+| Pre-freeze decisions (D1–D5 & fixed churn/inconclusive rules) | **Applied** in pre-registration & `analyze_v5.py`; ChartQA `max_pixels` (R8.4) & title/scope alignment open | `PREREGISTRATION_VERDICT_TRANSPLANT.md` §11 |
+| ChartQA render gate & `verdict_nll` span GPU check | Open | [RUNBOOK_v5.md](RUNBOOK_v5.md) |
+| Human coding of verdict & flip labels | Sheets generated (`1,087` verdicts + `150` flips), not yet coded | `coding_v5/`, `coding_v3/` |
 | Confirmatory run | After the pre-registration freeze | GPU (L4/A100), `--phase confirm` |
 | Mechanistic probe | Not planned for the thesis core | — |
 
@@ -115,7 +116,7 @@ Experiment/
 
 - **Dev data is for tuning only.** Don't cite dev numbers (v4 `dev2` or `results_v5/v5dev_*`) as findings.
 - **Use a new `--run_tag` after changing prompts or settings.** Reusing a tag resumes the run and skips rows it already has.
-- **Primary outcome.** For v4 runs, exact-answer match. For v5 runs, the log-likelihood margin Δℓ after a forced `####` only. Generated answers are secondary (pre-registration §6). Attempt, refusal and verdict labels stay heuristic until human coding validates them.
+- **Primary outcome (regime-split per pre-freeze D1 & D2).** For v4 runs, exact-answer match. For v5 Math (GSM8K/SVAMP), behavioural choice shift $\Delta P(Y{=}T)$ at template $k=1$ (`structured` parser; `para_flip - para` co-primary with `flip - own`), with the log-likelihood margin $\Delta\ell$ at `####` secondary/diagnostic. For ChartQA-Conflict (exploratory per D4), $\Delta\ell$ remains primary. Attempt, refusal, and verdict labels stay heuristic until `coding_v5/` human coding validates them.
 - **v5 invariants are mandatory:** counterbalanced order, binding and ceiling arms, minimal-edit verdicts, and competency-filtered primary results. See [../AGENTS.md](../AGENTS.md) §1 and `../CLAUDE.md`.
 - **Pre-freeze changes must be logged deviations.** The pre-registration says dev numbers may not change R4/R6. Any change to the competency rule, the ρ definition or the gates needs an explicit, recorded ruling.
 - **Keep v3 data read-only.** Prompts in `harness_v4.py` named `*_v3` must stay verbatim; a test enforces this.

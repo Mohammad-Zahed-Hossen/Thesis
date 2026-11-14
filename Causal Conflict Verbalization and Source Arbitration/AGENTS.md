@@ -15,13 +15,13 @@
 - **Research Focus:** Multimodal chain-of-thought faithfulness. Under image–text conflict, does a prefix-forced reliability verdict causally steer which source's answer the model gives?
   - Held fixed: instruction, counterbalanced evidence order, and wording template.
   - Varied: with vs. without a binding instruction.
-- **Models:** `Qwen/Qwen2-VL-2B-Instruct`, `Qwen/Qwen2.5-VL-3B-Instruct` and `Qwen/Qwen2.5-VL-7B-Instruct`, all confirmatory. v5 runs in `bfloat16` on one 24 GB+ GPU class (L4, A100, RTX 3090/4090); revisions are pinned in `Experiment/harness_v4.py` (`MODEL_PINS`). Claims are per model.
+- **Models:** `Qwen/Qwen2.5-VL-3B-Instruct` and `Qwen/Qwen2.5-VL-7B-Instruct` (confirmatory), plus `Qwen/Qwen2-VL-2B-Instruct` (**diagnostic-only**, pre-freeze D3). v5 runs in `bfloat16` on one 24 GB+ GPU class (L4, A100, RTX 3090/4090); revisions are pinned in `Experiment/harness_v4.py` (`MODEL_PINS`). Claims are per model.
 - **Stimuli:**
-  - Task-selection conflict: `vlm-modality-research/modality-conflict-arbitration-v2` (GSM8K/SVAMP).
-  - Evidence conflict: `vlm-modality-research/chartqa-evidence-conflict-v2` (229 analysed items; the 230-row release minus `conflict_id` 45).
+  - Task-selection conflict (confirmatory Math): `vlm-modality-research/modality-conflict-arbitration-v2` (GSM8K/SVAMP).
+  - Evidence conflict (exploratory/secondary, D4): `vlm-modality-research/chartqa-evidence-conflict-v2` (229 analysed items; the 230-row release minus `conflict_id` 45).
   - Both come from *Which Source Wins?* (arXiv:2608.17205).
-- **Design Spec:** `Docs/PREREGISTRATION_VERDICT_TRANSPLANT.md` (draft, not yet frozen). Evidence base: `Docs/Paper/lit-dossier-verdict-transplant/lit-dossier-verdict-transplant.md`.
-- **Current Phase:** v3 pilot and v4 dev runs are done (exploratory only), and the literature audit is done. The v5 dev pass has run on an L4 in `bfloat16` for all three models (29,880 rows in `Experiment/results_v5/`) and has been audited twice (`Thesis/docs/Archive/`). Next: resolve the pre-freeze decisions in `Thesis/docs/Archive/claude_v5_independent_deep_audit.md` §10, run `Experiment/analyze_v5.py` on `results_v5/`, and freeze the pre-registration. **No confirmatory data exists.**
+- **Design Spec:** `Docs/PREREGISTRATION_VERDICT_TRANSPLANT.md` (draft, not yet frozen). Evidence base: `Docs/Paper/THESIS_LITERATURE_KNOWLEDGE_BASE.md` (18 papers + CMC-Bench; 14 local PDFs + 5 missing PDFs listed in `Docs/Paper/README.md`) alongside `Docs/Paper/lit-dossier-verdict-transplant/lit-dossier-verdict-transplant.md`.
+- **Current Phase:** v3 pilot and v4 dev runs are done (exploratory only), and the 18-paper + CMC-Bench literature audit is done. The v5 dev pass has run on an L4 in `bfloat16` for all three models (29,880 rows in `Experiment/results_v5/`), has been audited (`Thesis/docs/Archive/`), `Experiment/analyze_v5.py` has been run on dev (`Experiment/results_v5/analysis_dev/`), and pre-freeze decisions D1–D5 + gate revisions are written into the pre-registration. Next: complete double human coding (`Experiment/coding_v5/`), close ChartQA `max_pixels` (R8.4) + GPU render/`verdict_nll` span checks, finalize title/scope alignment, and freeze `prereg-v5`. **No confirmatory data exists.**
 
 ### What the Pilot Does and Does Not Show
 - The pipeline works on `Qwen/Qwen2.5-VL-3B-Instruct` on a T4 [Verified].
@@ -33,8 +33,8 @@
 2. **Binding arm plus explicit single-source ceilings.** Binding: "solve only the problem from the source you named as more reliable". Ceilings: `explicit_image` / `explicit_text`. These remove prompt ambiguity and bound the binding effect.
 3. **Minimal-edit verdicts.** Swap only the source noun in the model's own generated reliability clause. Gates: one clause changed; the stated source actually flips; token Jaccard ≥ 0.85 and at most two swapped noun phrases. Foreign authored verdicts are not run in v5; the matched `para` / `para_flip` pair is the robustness check.
 4. **Competency conditioning.** Primary results use only items where `base_image` and `base_text` both solve their problems in isolation.
-5. **One primary outcome: Δℓ.** The log-likelihood margin at `####`, image minus text. Behavioural decodes are secondary. Ceilings use the no-verdict prefill. No source letters.
-6. **Claim boundary.** Prefix-forcing identifies a controlled direct effect, not mediation. No "first" claims beyond the dossier's §4.1 boundary.
+5. **Regime-split primary outcomes (pre-freeze D1 & D2).** In GSM8K/SVAMP (Math), the primary outcome is behavioural choice shift $\Delta P(Y{=}T)$ at template $k=1$ (`structured` parser; `para_flip - para` co-primary with `flip - own`), and $\Delta\ell$ at `####` is secondary/diagnostic. In ChartQA-Conflict (exploratory, D4), $\Delta\ell$ (image minus text) remains primary. Explicit single-source arms use the no-verdict prefill ($m_\varnothing$) as a benchmark (`B_beh` / `Ceil_ℓ`). No source letters.
+6. **Claim boundary.** Prefix-forcing identifies a controlled direct effect, not mediation. Confirmatory claims cover Math *source following* only (not reliability judgement). No "first" claims beyond `Docs/PREREGISTRATION_VERDICT_TRANSPLANT.md` §1.1 / `Docs/Paper/THESIS_LITERATURE_KNOWLEDGE_BASE.md`.
 
 ---
 
@@ -84,7 +84,8 @@
 │   ├── results_v5/      ← v5 dev pass outputs (29,880 rows)
 │   ├── results_v4/      ← v4 runs and dev analysis
 │   ├── results_v3/      ← v3 pilot outputs and re-analysis
-│   ├── coding_v3/       ← Human-coding sheets
+│   ├── coding_v5/       ← v5 human-coding sheets (verdicts + flips)
+│   ├── coding_v3/       ← v3 human-coding sheets
 │   └── archive/         ← v3 harness and early pilots
 ├── Docs/                ← AI-generated tracking (reference only)
 │   ├── PREREGISTRATION_VERDICT_TRANSPLANT.md ← Design spec (draft)
