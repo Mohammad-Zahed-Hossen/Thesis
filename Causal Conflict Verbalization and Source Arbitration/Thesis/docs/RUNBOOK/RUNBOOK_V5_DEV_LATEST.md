@@ -1,0 +1,357 @@
+# Google Colab Pro End-to-End Execution Guide: `v5dev_latest` (Option 3 Full Fresh Pass)
+
+This step-by-step runbook executes a full fresh v5 dev pass (`Option 3: v5dev_latest`) end to end on Google Colab Pro after the pre-freeze parser (`score_v5.py`), blinding-hygiene (`.gitignore` + `preflight_v5.py`), and duplicate-run (`analyze_v5.py`) patches, and closes the remaining GPU pre-freeze checks (`F1` and `F4 / R8.4`).
+
+- **Canonical short reference:** [`Experiment/RUNBOOK_v5.md`](../../../Experiment/RUNBOOK_v5.md)
+- **Pre-registration design spec:** [`Docs/PREREGISTRATION_VERDICT_TRANSPLANT.md`](../../../Docs/PREREGISTRATION_VERDICT_TRANSPLANT.md)
+- **Hardware & precision rules:** Use an **NVIDIA L4 (23,034 MiB / 24 GB)** or **NVIDIA A100 (40/80 GB)** GPU (`Compute Capability >= 8.0`, `>= 22 GiB` usable VRAM, `bfloat16` precision). **Never use a T4 or V100** — `harness_v5.py` refuses `float16`.
+- **Dev scope reminder:** Dev runs execute on the spent dev pools (`200` GSM8K/SVAMP Math items and `30` ChartQA-Conflict items). Nothing in this runbook produces confirmatory data.
+
+---
+
+## Step 0: Local Pre-Launch Commit & Blinding Hygiene (Before Uploading to Drive)
+
+> [!CAUTION]
+> **Make the GitHub repository Private before sharing any coding sheets.**
+> Untracking the `KEY_*` sheets via `git rm --cached` removes them from future commits only; historical commits (`5b57529` and earlier) still contain those files. Before giving `Experiment/coding_v5/` sheets to Coder A and Coder B, toggle `Mohammad-Zahed-Hossen/Thesis` to **Private** on GitHub (`Settings -> General -> Danger Zone -> Change repository visibility -> Make private`).
+
+Before uploading scripts to Google Drive, confirm your working tree has no uncommitted edits to `Experiment/` or `Docs/PREREGISTRATION_VERDICT_TRANSPLANT.md` (and no tracked `KEY_*` files) so every `.manifest.json` records clean, committed script SHA-256 hashes (established at commit `328c8af`+). Run in PowerShell from `d:\Thesis\Important\Causal Conflict Verbalization and Source Arbitration`:
+
+```powershell
+cd "d:\Thesis\Important\Causal Conflict Verbalization and Source Arbitration"
+git status -sb
+python -B Experiment/preflight_v5.py
+```
+
+If you have local changes to commit (such as this runbook), stage only project files, verify `git status -sb` shows no `KEY_*` files and no sibling-folder changes outside this directory, then commit and push:
+
+```powershell
+git add .
+git status -sb
+git commit -m "Add end-to-end v5dev_latest Colab execution runbook"
+git push github main
+git push origin main
+```
+
+---
+
+## Step 1: Google Drive Staging (`MyDrive/Thesis_v5/`)
+
+1. Open Google Drive and navigate to `MyDrive/Thesis_v5/` (create it if missing).
+2. **Isolate prior dev outputs cleanly:**
+   - **Option 3 (Full Fresh Pass — recommended):** If `MyDrive/Thesis_v5/results_v5/` already exists, rename it to `results_v5_prev_backup`, then create a fresh empty `MyDrive/Thesis_v5/results_v5/` folder.
+   - *(Optional Option 2 — Smart Refresh only: keep existing `v5dev_*_base_*.jsonl` and `v5dev_*_donor_*.jsonl` in `results_v5/` and move only `v5dev_*_tp_*` to `results_v5_prev_backup/`.)*
+3. Upload the **committed versions** of all **8 core Python scripts** from [`Experiment/`](../../../Experiment/) into `MyDrive/Thesis_v5/`:
+   - `harness_v4.py`
+   - `score_v4.py`
+   - `harness_v5.py`
+   - `score_v5.py`
+   - `transplant_v5.py`
+   - `sample_v5_for_coding.py`
+   - `analyze_v5.py`
+   - `preflight_v5.py`
+4. Upload [`Docs/PREREGISTRATION_VERDICT_TRANSPLANT.md`](../../../Docs/PREREGISTRATION_VERDICT_TRANSPLANT.md) to `MyDrive/Thesis_v5/PREREGISTRATION_VERDICT_TRANSPLANT.md`.
+5. Upload [`Experiment/results_v5/pip_freeze.txt`](../../../Experiment/results_v5/pip_freeze.txt) to `MyDrive/Thesis_v5/results_v5/pip_freeze.txt` so `preflight_v5.py --check_gpu` verifies exact package versions in flat Drive mode.
+
+---
+
+## Step 2: Colab Notebook Setup & Pre-Flight Cells (Cells 1–3)
+
+Open a new Colab Pro notebook with an **L4 GPU** or **A100 GPU** runtime.
+
+### Cell 1 — Mount Drive & Verify Staged Files
+
+```python
+from google.colab import drive
+import os
+
+drive.mount('/content/drive')
+
+WORK_DIR = '/content/drive/MyDrive/Thesis_v5'
+os.makedirs(os.path.join(WORK_DIR, 'results_v5'), exist_ok=True)
+os.chdir(WORK_DIR)
+
+print("Current Working Directory:", os.getcwd())
+!ls -la
+!ls -la results_v5
+```
+
+*(Confirm all 8 `.py` scripts, `PREREGISTRATION_VERDICT_TRANSPLANT.md`, and `results_v5/pip_freeze.txt` are present.)*
+
+### Cell 2 — Install Exact Pinned Dependencies & Run `preflight_v5.py --check_gpu`
+
+```bash
+!pip install -q torch==2.14.1+cu130 transformers==5.22.1 accelerate==1.15.0 datasets==4.8.5 pillow==11.3.0 qwen-vl-utils==0.0.14
+!nvidia-smi
+!python -B preflight_v5.py --check_gpu
+```
+
+*(Pass criterion: exits `0` and prints `[preflight_v5] OK`, `Scripts verified: 8/8`, and `GPU: ...` with Compute Capability `>= 8.0` and `>= 22 GiB` VRAM.)*
+
+### Cell 3 — Render Gate (`--print_example`) on Both `conflict` and `chartqa` (`F1 Part A`)
+
+```bash
+# Math conflict render check (all 3 models)
+!python -B harness_v5.py --print_example --split conflict --phase dev --run_tag render_check --model_id Qwen/Qwen2.5-VL-3B-Instruct
+!python -B harness_v5.py --print_example --split conflict --phase dev --run_tag render_check --model_id Qwen/Qwen2-VL-2B-Instruct
+!python -B harness_v5.py --print_example --split conflict --phase dev --run_tag render_check --model_id Qwen/Qwen2.5-VL-7B-Instruct
+
+# ChartQA conflict render check (all 3 models)
+!python -B harness_v5.py --print_example --split chartqa --phase dev --run_tag render_check --model_id Qwen/Qwen2.5-VL-3B-Instruct
+!python -B harness_v5.py --print_example --split chartqa --phase dev --run_tag render_check --model_id Qwen/Qwen2-VL-2B-Instruct
+!python -B harness_v5.py --print_example --split chartqa --phase dev --run_tag render_check --model_id Qwen/Qwen2.5-VL-7B-Instruct
+```
+
+*(Pass criterion: inspect every printout for `image.size`, `<|vision_start|><|image_pad|><|vision_end|>` immediately after `Image: ` / `Chart: `, both `image_first` and `text_first` orders with no `Source A/B`, and the assistant prefill ending in `The verdict.\n\n####`.)*
+
+---
+
+## Step 3: Run the 6 Dev Blocks at Default `max_pixels=200704` (Cells 4–9)
+
+> [!TIP]
+> - **Batch sizes:** On **L4 (24 GB)**, keep `--batch_size 8` for `3B`/`2B` and `--batch_size 2` for `7B`. On **A100 (40/80 GB)**, `--batch_size 8` works for all three models.
+> - **Option 2 note:** Only if reusing prior `base` and `donor` files, skip `# 1. Base` and `# 2. Donor` and run `# 3. Verdict Transplant` only. For Option 3, run every line below.
+
+### Cell 4 — Block 1: `Qwen2.5-VL-3B` on Math Conflict (`200` Dev Items, `BS=8`)
+
+Expected under updated `structured` parser on prior dev data: `95 -> 95` (`competent -> passed`).
+
+```bash
+# 1. Base single-source solving
+!python -B harness_v5.py --stage base --split conflict --phase dev --model_id Qwen/Qwen2.5-VL-3B-Instruct --batch_size 8 --run_tag v5dev_conflict_base_qwen25
+
+# 2. Donor natural verdict generation
+!python -B harness_v5.py --stage donor --split conflict --phase dev --model_id Qwen/Qwen2.5-VL-3B-Instruct --batch_size 8 --run_tag v5dev_conflict_donor_qwen25
+
+# 3. Verdict transplant & scoring
+!python -B transplant_v5.py --split conflict --phase dev --model_id Qwen/Qwen2.5-VL-3B-Instruct --batch_size 8 \
+  --base_file results_v5/v5dev_conflict_base_qwen25.jsonl \
+  --donor_file results_v5/v5dev_conflict_donor_qwen25.jsonl \
+  --run_tag v5dev_conflict_tp_qwen25
+```
+
+### Cell 5 — Block 2: `Qwen2-VL-2B` on Math Conflict (`200` Dev Items, Diagnostic-Only D3, `BS=8`)
+
+`Qwen/Qwen2-VL-2B-Instruct` is diagnostic-only (D3; `0/200` Math competency under `structured`), so run `--gates_only` on transplant to write `gates.json` cleanly in `< 5 s`.
+
+```bash
+# 1. Base single-source solving
+!python -B harness_v5.py --stage base --split conflict --phase dev --model_id Qwen/Qwen2-VL-2B-Instruct --batch_size 8 --run_tag v5dev_conflict_base_qwen2
+
+# 2. Donor natural verdict generation
+!python -B harness_v5.py --stage donor --split conflict --phase dev --model_id Qwen/Qwen2-VL-2B-Instruct --batch_size 8 --run_tag v5dev_conflict_donor_qwen2
+
+# 3. Gate check only (< 5 s; writes gates.json and exits)
+!python -B transplant_v5.py --gates_only --split conflict --phase dev --model_id Qwen/Qwen2-VL-2B-Instruct --batch_size 8 \
+  --base_file results_v5/v5dev_conflict_base_qwen2.jsonl \
+  --donor_file results_v5/v5dev_conflict_donor_qwen2.jsonl \
+  --run_tag v5dev_conflict_tp_qwen2
+```
+
+### Cell 6 — Block 3: `Qwen2.5-VL-3B` on ChartQA Conflict (`30` Dev Items, `BS=8`)
+
+Expected at `max_pixels=200704`: `13 -> 5` (`competent -> passed` after answer-leakage gate).
+
+```bash
+# 1. Base single-source solving
+!python -B harness_v5.py --stage base --split chartqa --phase dev --model_id Qwen/Qwen2.5-VL-3B-Instruct --batch_size 8 --run_tag v5dev_chartqa_base_qwen25
+
+# 2. Donor natural verdict generation
+!python -B harness_v5.py --stage donor --split chartqa --phase dev --model_id Qwen/Qwen2.5-VL-3B-Instruct --batch_size 8 --run_tag v5dev_chartqa_donor_qwen25
+
+# 3. Verdict transplant & scoring
+!python -B transplant_v5.py --split chartqa --phase dev --model_id Qwen/Qwen2.5-VL-3B-Instruct --batch_size 8 \
+  --base_file results_v5/v5dev_chartqa_base_qwen25.jsonl \
+  --donor_file results_v5/v5dev_chartqa_donor_qwen25.jsonl \
+  --run_tag v5dev_chartqa_tp_qwen25
+```
+
+### Cell 7 — Block 4: `Qwen2-VL-2B` on ChartQA Conflict (`30` Dev Items, Diagnostic-Only D3, `BS=8`)
+
+Expected under current gates: `0` passed items; run `--gates_only` to record `gates.json`.
+
+```bash
+# 1. Base single-source solving
+!python -B harness_v5.py --stage base --split chartqa --phase dev --model_id Qwen/Qwen2-VL-2B-Instruct --batch_size 8 --run_tag v5dev_chartqa_base_qwen2
+
+# 2. Donor natural verdict generation
+!python -B harness_v5.py --stage donor --split chartqa --phase dev --model_id Qwen/Qwen2-VL-2B-Instruct --batch_size 8 --run_tag v5dev_chartqa_donor_qwen2
+
+# 3. Gate check only (< 5 s; writes gates.json and exits)
+!python -B transplant_v5.py --gates_only --split chartqa --phase dev --model_id Qwen/Qwen2-VL-2B-Instruct --batch_size 8 \
+  --base_file results_v5/v5dev_chartqa_base_qwen2.jsonl \
+  --donor_file results_v5/v5dev_chartqa_donor_qwen2.jsonl \
+  --run_tag v5dev_chartqa_tp_qwen2
+```
+
+### Cell 8 — Block 5: `Qwen2.5-VL-7B` on Math Conflict (`200` Dev Items, `BS=2` on L4)
+
+Expected under updated `structured` parser: `154 -> 140` (`competent -> passed`). Check `peak_vram_gb` in the first 7B manifest.
+
+```bash
+# 1. Base single-source solving
+!python -B harness_v5.py --stage base --split conflict --phase dev --model_id Qwen/Qwen2.5-VL-7B-Instruct --batch_size 2 --run_tag v5dev_conflict_base_qwen25_7b
+
+# 2. Donor natural verdict generation
+!python -B harness_v5.py --stage donor --split conflict --phase dev --model_id Qwen/Qwen2.5-VL-7B-Instruct --batch_size 2 --run_tag v5dev_conflict_donor_qwen25_7b
+
+# 3. Verdict transplant & scoring
+!python -B transplant_v5.py --split conflict --phase dev --model_id Qwen/Qwen2.5-VL-7B-Instruct --batch_size 2 \
+  --base_file results_v5/v5dev_conflict_base_qwen25_7b.jsonl \
+  --donor_file results_v5/v5dev_conflict_donor_qwen25_7b.jsonl \
+  --run_tag v5dev_conflict_tp_qwen25_7b
+```
+
+### Cell 9 — Block 6: `Qwen2.5-VL-7B` on ChartQA Conflict (`30` Dev Items, `BS=2` on L4)
+
+Expected at `max_pixels=200704`: `13 -> 0` (`competent -> passed` under answer-leakage and swap gates).
+
+```bash
+# 1. Base single-source solving
+!python -B harness_v5.py --stage base --split chartqa --phase dev --model_id Qwen/Qwen2.5-VL-7B-Instruct --batch_size 2 --run_tag v5dev_chartqa_base_qwen25_7b
+
+# 2. Donor natural verdict generation
+!python -B harness_v5.py --stage donor --split chartqa --phase dev --model_id Qwen/Qwen2.5-VL-7B-Instruct --batch_size 2 --run_tag v5dev_chartqa_donor_qwen25_7b
+
+# 3. Verdict transplant & scoring
+!python -B transplant_v5.py --split chartqa --phase dev --model_id Qwen/Qwen2.5-VL-7B-Instruct --batch_size 2 \
+  --base_file results_v5/v5dev_chartqa_base_qwen25_7b.jsonl \
+  --donor_file results_v5/v5dev_chartqa_donor_qwen25_7b.jsonl \
+  --run_tag v5dev_chartqa_tp_qwen25_7b
+```
+
+---
+
+## Step 4: Close `F4 / R8.4` — ChartQA `--max_pixels 501760` Comparison (Cell 10)
+
+Compare native-scale ChartQA (`800x557` px -> `--max_pixels 501760`) against default `200704` on the `30` spent ChartQA dev items for both confirmatory models (`3B` and `7B`). Use distinct `v5dev_chartqa_px501k_*` tags so these runs stay isolated from default dev files.
+
+> *(Note: `RUNBOOK_v5.md` also allows passing `--gates_only` on the transplant command below if you only need gate survival counts; running full `transplant_v5.py` without `--gates_only` takes only a few extra minutes and also records margin/behavioural outputs for `501760`.)*
+
+### Cell 10 — Run `3B` and `7B` ChartQA at `--max_pixels 501760`
+
+```bash
+# 3B ChartQA at max_pixels=501760 (BS=8)
+!python -B harness_v5.py --stage base --split chartqa --phase dev --max_pixels 501760 \
+  --model_id Qwen/Qwen2.5-VL-3B-Instruct --batch_size 8 \
+  --run_tag v5dev_chartqa_px501k_base_qwen25
+
+!python -B harness_v5.py --stage donor --split chartqa --phase dev --max_pixels 501760 \
+  --model_id Qwen/Qwen2.5-VL-3B-Instruct --batch_size 8 \
+  --run_tag v5dev_chartqa_px501k_donor_qwen25
+
+!python -B transplant_v5.py --split chartqa --phase dev --max_pixels 501760 \
+  --model_id Qwen/Qwen2.5-VL-3B-Instruct --batch_size 8 \
+  --base_file results_v5/v5dev_chartqa_px501k_base_qwen25.jsonl \
+  --donor_file results_v5/v5dev_chartqa_px501k_donor_qwen25.jsonl \
+  --run_tag v5dev_chartqa_px501k_tp_qwen25
+
+# 7B ChartQA at max_pixels=501760 (BS=2 on L4)
+!python -B harness_v5.py --stage base --split chartqa --phase dev --max_pixels 501760 \
+  --model_id Qwen/Qwen2.5-VL-7B-Instruct --batch_size 2 \
+  --run_tag v5dev_chartqa_px501k_base_qwen25_7b
+
+!python -B harness_v5.py --stage donor --split chartqa --phase dev --max_pixels 501760 \
+  --model_id Qwen/Qwen2.5-VL-7B-Instruct --batch_size 2 \
+  --run_tag v5dev_chartqa_px501k_donor_qwen25_7b
+
+!python -B transplant_v5.py --split chartqa --phase dev --max_pixels 501760 \
+  --model_id Qwen/Qwen2.5-VL-7B-Instruct --batch_size 2 \
+  --base_file results_v5/v5dev_chartqa_px501k_base_qwen25_7b.jsonl \
+  --donor_file results_v5/v5dev_chartqa_px501k_donor_qwen25_7b.jsonl \
+  --run_tag v5dev_chartqa_px501k_tp_qwen25_7b
+```
+
+---
+
+## Step 5: Verify `F1`, Compare `R8.4` (`200704` vs `501760`), and Run Analysis + `lme4` (Cells 11–12)
+
+### Cell 11 — Verify `F1` (`verdict_nll` Spans), Manifest Provenance, and `R8.4` Gates
+
+Confirm `verdict_nll_tokens > 0`, `verdict_span_exact == True` on verdict rows, `verdict_nll is None` on `none` rows, `boundary_mismatch <= 1%`, `resolved_model_commit`, and compare ChartQA `200704` vs `501760` gate counts:
+
+```python
+import glob, json, os
+
+print("=== F1 & F2 Verification on Transplant Files ===")
+for path in sorted(glob.glob("results_v5/v5dev_*_tp_*.jsonl")):
+    rows = [json.loads(line) for line in open(path, encoding="utf-8") if line.strip()]
+    mpath = path.replace(".jsonl", ".manifest.json")
+    m = json.load(open(mpath, encoding="utf-8")) if os.path.exists(mpath) else {}
+    dl_rows = [r for r in rows if r.get("outcome") == "dl"]
+    verdict_dl = [r for r in dl_rows if r.get("verdict") in ("own", "flip", "para", "para_flip")]
+    none_dl = [r for r in dl_rows if r.get("verdict") == "none"]
+    n_tok = sum(1 for r in verdict_dl if (r.get("verdict_nll_tokens") or 0) > 0 and r.get("verdict_nll") is not None)
+    n_exact = sum(1 for r in verdict_dl if r.get("verdict_span_exact") is True)
+    n_none = sum(1 for r in none_dl if r.get("verdict_nll") is None and r.get("verdict_nll_tokens") is None)
+    bm = sum(1 for r in dl_rows if r.get("boundary_mismatch")) / max(1, len(dl_rows))
+    print(
+        f"{path}: rows={len(rows)} | tok>0={n_tok}/{len(verdict_dl)} | "
+        f"exact={n_exact}/{len(verdict_dl)} | none_null={n_none}/{len(none_dl)} | "
+        f"bm={bm:.2%} | commit={m.get('resolved_model_commit')}"
+    )
+
+print("\n=== R8.4 ChartQA max_pixels Comparison (200704 vs 501760) ===")
+for tag in (
+    "v5dev_chartqa_tp_qwen25",
+    "v5dev_chartqa_px501k_tp_qwen25",
+    "v5dev_chartqa_tp_qwen25_7b",
+    "v5dev_chartqa_px501k_tp_qwen25_7b",
+):
+    gpath = f"results_v5/{tag}.gates.json"
+    if os.path.exists(gpath):
+        g = json.load(open(gpath, encoding="utf-8"))
+        print(f"{tag}: items={g['items']} -> competent={g['competent']} -> passed={g['passed']} | fails={g.get('fail_reasons')}")
+```
+
+### Cell 12 — Run Full `analyze_v5.py` and `lme4` Mixed-Effects Models
+
+Pass the explicit `v5dev_conflict_*` and `v5dev_chartqa_{tp,base,donor}_*` globs below so `v5dev_chartqa_px501k_*` files are excluded (otherwise `analyze_v5.py`'s duplicate-row guard refuses with exit code `2` because both ChartQA runs cover the same dev items):
+
+```bash
+!python -B analyze_v5.py \
+  --runs results_v5/v5dev_conflict_tp_*.jsonl results_v5/v5dev_chartqa_tp_*.jsonl \
+  --gates results_v5/v5dev_conflict_tp_*.gates.json results_v5/v5dev_chartqa_tp_*.gates.json \
+  --base results_v5/v5dev_conflict_base_*.jsonl results_v5/v5dev_chartqa_base_*.jsonl \
+  --donor results_v5/v5dev_conflict_donor_*.jsonl results_v5/v5dev_chartqa_donor_*.jsonl \
+  --output_dir results_v5/analysis_dev
+
+# Install R + lme4 on Colab and fit the mixed-effects models
+!apt-get update -qq && apt-get install -y -qq r-base
+!Rscript -e 'install.packages("lme4", repos="https://cloud.r-project.org")'
+!Rscript results_v5/analysis_dev/analyze_v5_lme4.R results_v5/analysis_dev/long_v5.csv results_v5/analysis_dev/lme4_out.txt
+!cat results_v5/analysis_dev/lme4_out.txt
+```
+
+---
+
+## Step 6: Disconnect Recovery & Post-Run Local Handoff
+
+### If Colab Disconnects Mid-Run
+1. Reconnect to an **L4** or **A100** runtime.
+2. Re-run **Cell 1** and **Cell 2**.
+3. Re-run the exact interrupted command with the **same `--run_tag`**. `harness_v5.py` and `transplant_v5.py` automatically skip completed request keys and repair any half-written trailing line in `.jsonl`.
+
+### Bring Outputs Back & Check Donor Drift Locally
+1. Before copying new Colab results into [`Experiment/results_v5/`](../../../Experiment/results_v5/), move your previous local `v5dev_*` files into a temporary backup folder (e.g., `Experiment/results_v5_prev_backup/`, outside `results_v5/`) so old and new dev files are never pooled.
+2. Download the contents of `MyDrive/Thesis_v5/results_v5/` into [`Experiment/results_v5/`](../../../Experiment/results_v5/).
+3. Diff old vs. new `donor` generations (`v5dev_*_donor_*.jsonl`) locally before deciding whether [`Experiment/sample_v5_for_coding.py`](../../../Experiment/sample_v5_for_coding.py) needs to regenerate `Experiment/coding_v5/` sheets for Coder A and Coder B:
+
+```python
+import glob, json, os
+
+old_dir = "Experiment/results_v5_prev_backup"
+new_dir = "Experiment/results_v5"
+for new_path in sorted(glob.glob(os.path.join(new_dir, "v5dev_*_donor_*.jsonl"))):
+    old_path = os.path.join(old_dir, os.path.basename(new_path))
+    if not os.path.exists(old_path):
+        print(os.path.basename(new_path), "-> no prior donor file")
+        continue
+    key_fn = lambda r: (r["item_id"], r["order"], r.get("arm"))
+    old_rows = {key_fn(json.loads(l)): json.loads(l).get("raw_text") for l in open(old_path, encoding="utf-8") if l.strip()}
+    new_rows = {key_fn(json.loads(l)): json.loads(l).get("raw_text") for l in open(new_path, encoding="utf-8") if l.strip()}
+    diffs = sum(1 for k in set(old_rows) | set(new_rows) if old_rows.get(k) != new_rows.get(k))
+    print(f"{os.path.basename(new_path)}: diffs={diffs}/{len(new_rows)}")
+```
+
+4. Using Cell 11's `200704` vs `501760` comparison, lock `CONFIRM_MAX_PIXELS["chartqa"]` in code and `Docs/PREREGISTRATION_VERDICT_TRANSPLANT.md` §3.4 together, re-run `python -B Experiment/preflight_v5.py` and `unittest`, and commit + tag `prereg-v5` only after double human coding (`κ >= 0.80`) is complete.
