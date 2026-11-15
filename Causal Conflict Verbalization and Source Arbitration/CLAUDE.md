@@ -10,14 +10,14 @@ The earlier title, *Causal Conflict Verbalization and Source Arbitration in Visi
 
 The thesis tests multimodal chain-of-thought faithfulness. When an image and a typed text support different answers, we prefix-force a reliability verdict into the model's own response ("I consider the image / the typed text more reliable"). The question is whether that verdict causally changes which source's answer the model then gives. Instruction, evidence order and wording are held fixed. The test is run with and without a binding instruction that tells the model to act on its verdict.
 
-The full design is in `Docs/PREREGISTRATION_VERDICT_TRANSPLANT.md`. The evidence behind it is in `Docs/Paper/THESIS_LITERATURE_KNOWLEDGE_BASE.md` (18 core papers + CMC-Bench; 20 local PDFs: all 19 core + `2606.22862.pdf`; 0 core missing, listed in `Docs/Paper/README.md`), alongside `Docs/Paper/post-v5-pdf-audit/post-v5-pdf-audit.md` and `Docs/Paper/lit-dossier-verdict-transplant/lit-dossier-verdict-transplant.md`.
+The full design is in `Docs/PREREGISTRATION_VERDICT_TRANSPLANT.md`, with a quick onboarding brief in `Docs/RESEARCH_OBJECTIVE.md`. The evidence behind it is in `Docs/Paper/THESIS_LITERATURE_KNOWLEDGE_BASE.md` (18 core papers + CMC-Bench; 26 local PDFs: 20 core/lead + 6 audit A-papers, 0 core missing, listed in `Docs/Paper/README.md`), alongside `Docs/Paper/lit-audit-2026-11-15/lit-audit-2026-11-15.md`, `Docs/Paper/post-v5-pdf-audit/post-v5-pdf-audit.md`, and `Docs/Paper/lit-dossier-verdict-transplant/lit-dossier-verdict-transplant.md`.
 
 ## Current Phase
 
 - **Done:** v3 pilot (N = 1,619) and v4 dev runs, both exploratory.
-- **Done:** 18-paper + CMC-Bench literature audit (`Docs/Paper/THESIS_LITERATURE_KNOWLEDGE_BASE.md`) and pre-registration freeze audit (`Docs/Paper/prereg-freeze-audit/`).
+- **Done:** 18-paper + CMC-Bench literature audit (`Docs/Paper/THESIS_LITERATURE_KNOWLEDGE_BASE.md`), pre-registration freeze audit (`Docs/Paper/prereg-freeze-audit/`), and pre-freeze literature audit (`Docs/Paper/lit-audit-2026-11-15/lit-audit-2026-11-15.md`, `Docs/RESEARCH_OBJECTIVE.md`).
 - **Done:** v5 dev pass across all three models on an L4 in `bfloat16` (29,880 rows in `Experiment/results_v5/`), audited in `Thesis/docs/Archive/`, `analyze_v5.py` run on dev (`Experiment/results_v5/analysis_dev/`), and pre-freeze decisions D1–D5 + gate revisions applied to the draft.
-- **Now:** complete double human coding (`Experiment/coding_v5/`), close ChartQA `max_pixels` (R8.4) + GPU render/`verdict_nll` span checks, finalize title/scope alignment, and tag `prereg-v5`.
+- **Now:** complete double human coding (`Experiment/coding_v5/`), close ChartQA `max_pixels` (R8.4) + GPU render/`verdict_nll` span checks, sync the pre-freeze literature audit §1.3/§4 updates + title/scope alignment into the prereg draft, and tag `prereg-v5`.
 - **No confirmatory data exists yet.**
 
 For current status and next steps, read `Experiment/README.md` first.
@@ -105,8 +105,9 @@ Recomputed from `Experiment/results_v4/dev2_*.jsonl` with `score_v4.py`, or read
 │   ├── coding_v3/       ← v3 human-coding sheets
 │   └── archive/         ← v3 harness and early pilots
 ├── Docs/                ← AI-GENERATED TRACKING (reference only)
+│   ├── RESEARCH_OBJECTIVE.md                 ← Onboarding brief: RQ, estimand, narrowed novelty, reading order
 │   ├── PREREGISTRATION_VERDICT_TRANSPLANT.md ← Design spec (draft, not frozen)
-│   ├── Paper/           ← Primary PDFs, literature dossier, and freeze audit
+│   ├── Paper/           ← 26 primary PDFs, literature KB, pre-freeze lit-audit-2026-11-15, dossier, freeze audit
 │   ├── *.md             ← Older topic spec, master report, roadmap (stale)
 │   ├── Context/         ← Historical context tracking
 │   ├── Decision_Audits/ ← Topic selection audit trail; Idea.md is current

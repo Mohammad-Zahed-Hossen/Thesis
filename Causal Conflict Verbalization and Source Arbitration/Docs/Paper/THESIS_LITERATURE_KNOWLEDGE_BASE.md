@@ -227,7 +227,7 @@
    - Teacher-forced $\Delta\ell$ at `#### ` works for direct extraction (ChartQA-Conflict), where text states the answer and no intermediate arithmetic is required.
    - In multi-step Math (GSM8K/SVAMP), pre-CoT $\Delta\ell$ measures zero-shot direct-answer preference (`2608.17205` p. 5) before computation happens (`2603.01437` Table 3: `Qwen2.5-3B` pre-CoT AUC drops to `0.690` on Logical Deduction). Thus **D1** (behavioural choice primary in Math, $\Delta\ell$ primary in exploratory ChartQA) is construct-mandatory.
 2. **Prefix-Forcing vs. Re-Prompting vs. Steering (`2607.27304`, `2510.27484`, `2610.38296`, `2602.14518`):**
-   - Prefix-forcing into the assistant turn eliminates self-attribution discounting and external-authority sycophancy (`2607.27304`).
+   - Prefix-forcing raised adoption over re-prompting (+39.8 / +4.9 pp); sycophancy and provenance effects were model-specific (MedGemma +9.0 pp under the deference instruction) (`2607.27304`, pp. 2, 7–9).
    - Because forced edits are off-policy (subject to resilience/ignoring in `2510.27484`), the estimand is strictly a **Controlled Direct Effect (CDE)**, never natural indirect mediation.
    - Binding vs. Non-binding separation: **binding** partly measures conditional instruction compliance, whereas **non-binding** carries the purer test of unprompted verdict faithfulness.
 3. **Greedy `k=1` vs. Sampled Rollouts (`2510.27484`, `2307.13702`, `2609.25366`):**
@@ -248,25 +248,23 @@
 
 ## 5. Pre-Freeze Checklist Before Tagging `prereg-v5`
 
-1. **Human Coding (`Experiment/coding_v5/`):** Double-code `1,087` verdict rows + `150` flip rows and verify Cohen's $\kappa \ge 0.80$.
+1. **Human Coding (`Experiment/coding_v5/`):** Double-code `200` verdict rows (`V0001`–`V0200`; `1,088` raw text lines due to multi-line `full_text` cells) + `150` flip rows (`F0001`–`F0150`) and verify Cohen's $\kappa \ge 0.80$.
 2. **ChartQA `max_pixels` & GPU Checks (`Experiment/README.md`):** Close R8.4 (`200704` vs `401408`), run `--print_example` render check on GPU, and verify the new `verdict_nll` span.
-3. **Sync Pre-Registration & Docs:** Update `PREREGISTRATION_VERDICT_TRANSPLANT.md` §1.1 (add `CMC-Bench`), §11 deviation log, and title/scope framing (Math *source following*, `[Design decision]` tags for `ε=5.0 pp`/churn).
+3. **Sync Pre-Registration Before Freeze:** Update `PREREGISTRATION_VERDICT_TRANSPLANT.md` §1.1 (`CMC-Bench` + `lit-audit-2026-11-15.md` §1.3 narrowed wording), §4 audit additions (`2609.29278` for D1, per-order sign check, prefill-resistance / `verdict_nll` caveat on H₀, competency-population scope, rendered-text Math channel note), §11 deviation log, and title/scope framing (Math *source following*, `[Design decision]` tags for `ε=5.0 pp`/churn).
 4. **Commit, tag `prereg-v5`, and run `--phase confirm`.**
 
 ---
 
 ## 6. Pre-Freeze Literature Audit (2026-11-15) — pointer
 
-**Full report:** [lit-audit-2026-11-15/lit-audit-2026-11-15.md](lit-audit-2026-11-15/lit-audit-2026-11-15.md). **Data:** `papers.csv` (1,260 screened records), `search_log.csv` (108 queries + 5 retrieval steps), `references.bib` (39 entries). **Brief for new agents:** [../RESEARCH_OBJECTIVE.md](../RESEARCH_OBJECTIVE.md).
+**Full report:** [lit-audit-2026-11-15/lit-audit-2026-11-15.md](lit-audit-2026-11-15/lit-audit-2026-11-15.md). **Data:** `papers.csv` (1,260 screened records), `search_log.csv` (112 rows: 108 queries + 4 lookup/snowball retrieval steps), `references.bib` (39 entries). **Brief for new agents:** [../RESEARCH_OBJECTIVE.md](../RESEARCH_OBJECTIVE.md).
 
 - **Novelty verdict:** intact, but needs narrowing. No screened paper fully overlaps any of the prereg §1.1 components.
   - *When Reasoning Traces Conflict with Evidence* (arXiv:2610.20805, text-only) is a formal threat under the audit rule: it is partial on component (a), own-turn trace under conflict, and on component (c), an instruction contrast.
   - Manalu et al. (arXiv:2610.30953) is a partial precedent for the minimal-edit-plus-paraphrase design.
   - A rewording of §1.1 is proposed in audit §1.3.
-- **New A papers:** 2609.00550, 2610.30953, 2610.20805, 2609.29278, 2606.12747, 2610.37070. PDFs are in `Docs/Paper/`.
-- **Correction to §4.2 of this file:** "Prefix-forcing … eliminates self-attribution discounting and external-authority sycophancy" overstates 2607.27304.
-  - Sycophancy was model-specific: MedGemma +9.0 pp under the deference instruction (p. 2), and an authority gradient of −3.6 pp (p. 7).
-  - Audit §5 gives the replacement wording. It has not yet been applied here.
+- **New A papers:** 2609.00550, 2610.30953, 2610.20805, 2609.29278, 2606.12747, 2610.37070. PDFs are in `Docs/Paper/` (bringing local PDFs to 26: 20 core/lead + 6 audit A-papers).
+- **Correction to §4.2 of this file (applied above):** Replaced the overstatement that prefix-forcing "eliminates self-attribution discounting and external-authority sycophancy" (`2607.27304`) with the PDF-verified wording from audit §5 (sycophancy was model-specific: MedGemma +9.0 pp under the deference instruction, p. 2, and an authority gradient of −3.6 pp, p. 7).
 - **Design implications (audit §4):**
   - keep order counterbalancing and add a per-order sign rule;
   - cite 2609.29278 for D1;

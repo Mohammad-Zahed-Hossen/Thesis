@@ -99,7 +99,7 @@ Experiment/
 | v4 penalty check (dev2) | Complete (600 rows, rp = 1.05) | `results_v4/dev2_qwen25_rp105.jsonl` |
 | v4 dev transplant (dev2) | Complete and valid (2,800 rows, fidelity > 95%) | `results_v4/dev2_transplant_qwen25.jsonl` |
 | v4 dev analysis (dev2) | Done. The verdict moves answers under the neutral instruction but not under the conflict instruction. Dev only, not a finding. | `results_v4/analysis_dev2/`, dossier §2.2 |
-| Literature knowledge base (18 papers + CMC-Bench) | Done (`20` local PDFs: all 19 core + `2606.22862.pdf`; 0 core missing; post-v5 PDF audit done) | [../Docs/Paper/THESIS_LITERATURE_KNOWLEDGE_BASE.md](../Docs/Paper/THESIS_LITERATURE_KNOWLEDGE_BASE.md), [../Docs/Paper/post-v5-pdf-audit/post-v5-pdf-audit.md](../Docs/Paper/post-v5-pdf-audit/post-v5-pdf-audit.md) |
+| Literature knowledge base & pre-freeze audit | Done (`26` local PDFs: 20 core/lead + 6 audit A-papers; 0 core missing; 2026-11-15 audit + brief added) | [../Docs/Paper/THESIS_LITERATURE_KNOWLEDGE_BASE.md](../Docs/Paper/THESIS_LITERATURE_KNOWLEDGE_BASE.md), [../Docs/Paper/lit-audit-2026-11-15/lit-audit-2026-11-15.md](../Docs/Paper/lit-audit-2026-11-15/lit-audit-2026-11-15.md), [../Docs/RESEARCH_OBJECTIVE.md](../Docs/RESEARCH_OBJECTIVE.md) |
 | Freeze audit (2026-11-10) | Received; red light. Its fixes were applied to the pre-registration. | [../Docs/Paper/prereg-freeze-audit/](../Docs/Paper/prereg-freeze-audit/) |
 | Pre-registration | Drafted, **not frozen** | [../Docs/PREREGISTRATION_VERDICT_TRANSPLANT.md](../Docs/PREREGISTRATION_VERDICT_TRANSPLANT.md) |
 | v5 harness (order, templates, minimal edits, margin) | Written; **240** CPU tests pass (`unittest`); **ran on an L4 (bf16)** | `harness_v5.py`, `transplant_v5.py`, `score_v5.py`, `tests/` |

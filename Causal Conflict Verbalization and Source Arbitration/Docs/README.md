@@ -5,7 +5,7 @@ Everything about the thesis that is **not code or data**: the pre-registration d
 **Trust level (per [../AGENTS.md](../AGENTS.md) §2):** All `.md` files here are AI-generated tracking documents, **not ground truth**. Exceptions in practice: the pre-registration is the *design spec* (check it against `Experiment/*.py`), and the PDFs in `Paper/` are primary sources.
 **Ground truth** lives in [../Experiment/](../Experiment/) (code + raw results).
 
-> **Token tip for agents:** For almost any current task you need only two things here: [PREREGISTRATION_VERDICT_TRANSPLANT.md](PREREGISTRATION_VERDICT_TRANSPLANT.md) and [Paper/README.md](Paper/README.md). Everything else is September-2026 history under the old topic framing.
+> **Token tip for agents:** For almost any current task you need only three things here: [RESEARCH_OBJECTIVE.md](RESEARCH_OBJECTIVE.md) (quick brief), [PREREGISTRATION_VERDICT_TRANSPLANT.md](PREREGISTRATION_VERDICT_TRANSPLANT.md), and [Paper/README.md](Paper/README.md). Everything else is September-2026 history under the old topic framing.
 
 ---
 
@@ -14,8 +14,9 @@ Everything about the thesis that is **not code or data**: the pre-registration d
 ```
 Docs/
 ├── README.md                                     This file
+├── RESEARCH_OBJECTIVE.md                         ★ CURRENT onboarding brief (RQ, estimand, narrowed novelty, reading order)
 ├── PREREGISTRATION_VERDICT_TRANSPLANT.md         ★ CURRENT design spec (draft, not frozen)
-├── Paper/                                        ★ CURRENT primary PDFs + lit dossier + freeze audit  → Paper/README.md
+├── Paper/                                        ★ CURRENT 26 PDFs + lit KB + lit-audit-2026-11-15 + dossier + freeze audit → Paper/README.md
 ├── Context/                                      Historical project context (Sept 2026)               → Context/README.md
 ├── Decision_Audits/                              Topic-selection audits (Sept 2026; Idea.md is Nov)  → Decision_Audits/README.md
 ├── Parked_Proposals/                             Full proposals for parked alternatives               → Parked_Proposals/README.md
@@ -30,8 +31,9 @@ Docs/
 
 | File | Status | What it is |
 |---|---|---|
-| [PREREGISTRATION_VERDICT_TRANSPLANT.md](PREREGISTRATION_VERDICT_TRANSPLANT.md) | **Draft, not frozen** (44 KB) | Pre-registration for *Does the Verdict Decide?*. Models, stimuli, factorial arms (non-binding / binding / explicit ceilings), minimal-edit verdicts (`own`, `flip`, `none`, `para`, `para_flip`), regime-split primary outcomes (behavioural in Math per D1, Δℓ in exploratory ChartQA per D4), competency conditioning, equivalence margins, novelty claim. Freeze conditions are in **§10, R8** (with pre-freeze decisions D1–D5 and 2026-11-14 gate updates in §11). The [freeze audit](Paper/prereg-freeze-audit/prereg-freeze-audit.md) gave it a **red light** on 2026-11-10; v5 dev results now exist in [../Experiment/results_v5/](../Experiment/results_v5/) and are audited in [../Thesis/docs/Archive/dev v5/](<../Thesis/docs/Archive/dev v5/>). |
-| [Paper/](Paper/README.md) | Current | Complete 18-paper + CMC-Bench knowledge base ([THESIS_LITERATURE_KNOWLEDGE_BASE.md](Paper/THESIS_LITERATURE_KNOWLEDGE_BASE.md)), post-v5 direct PDF audit ([post-v5-pdf-audit.md](Paper/post-v5-pdf-audit/post-v5-pdf-audit.md)), **20 local PDFs** (all 19 core + `2606.22862.pdf`; 0 core missing), the 2026-11-10 dossier, and the pre-registration freeze audit. |
+| [RESEARCH_OBJECTIVE.md](RESEARCH_OBJECTIVE.md) | **Current** (post-2026-11-15 audit) | Concise brief for future agents: RQ, CDE estimand, pre-registered hypotheses, narrowed novelty claim, claim boundaries, prioritized 13-paper reading order, and open pre-freeze questions. |
+| [PREREGISTRATION_VERDICT_TRANSPLANT.md](PREREGISTRATION_VERDICT_TRANSPLANT.md) | **Draft, not frozen** (44 KB) | Pre-registration for *Does the Verdict Decide?*. Models, stimuli, factorial arms (non-binding / binding / explicit ceilings), minimal-edit verdicts (`own`, `flip`, `none`, `para`, `para_flip`), regime-split primary outcomes (behavioural in Math per D1, Δℓ in exploratory ChartQA per D4), competency conditioning, equivalence margins, novelty claim. Freeze conditions are in **§10, R8** (with pre-freeze decisions D1–D5 and 2026-11-14 gate updates in §11; pending 2026-11-15 audit §1.3/§4 sync). The [freeze audit](Paper/prereg-freeze-audit/prereg-freeze-audit.md) gave it a **red light** on 2026-11-10; v5 dev results now exist in [../Experiment/results_v5/](../Experiment/results_v5/) and are audited in [../Thesis/docs/Archive/dev v5/](<../Thesis/docs/Archive/dev v5/>). |
+| [Paper/](Paper/README.md) | Current | Complete 18-paper + CMC-Bench knowledge base ([THESIS_LITERATURE_KNOWLEDGE_BASE.md](Paper/THESIS_LITERATURE_KNOWLEDGE_BASE.md)), pre-freeze literature audit ([lit-audit-2026-11-15/](Paper/lit-audit-2026-11-15/lit-audit-2026-11-15.md)), post-v5 direct PDF audit ([post-v5-pdf-audit.md](Paper/post-v5-pdf-audit/post-v5-pdf-audit.md)), **26 local PDFs** (20 core/lead + 6 audit A-papers; 0 core missing), the 2026-11-10 dossier, and the pre-registration freeze audit. |
 
 ---
 
