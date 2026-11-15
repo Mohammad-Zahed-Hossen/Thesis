@@ -1,6 +1,6 @@
 # Docs/Paper — Primary Sources & Literature Audits
 
-Downloaded primary papers (**26 local PDFs**: 19 core sources + 1 Ch. 2 lead + 6 A-graded papers from the 2026-11-15 audit; 0 missing core PDFs) and audited literature syntheses grounding the pre-registration [../PREREGISTRATION_VERDICT_TRANSPLANT.md](../PREREGISTRATION_VERDICT_TRANSPLANT.md).
+Downloaded primary papers (**29 local PDFs**: 19 core sources + 1 Ch. 2 lead + 6 A-graded papers + 3 cited B-graded methodology papers from the 2026-11-15 audit; 0 missing core PDFs) and audited literature syntheses grounding the pre-registration [../PREREGISTRATION_VERDICT_TRANSPLANT.md](../PREREGISTRATION_VERDICT_TRANSPLANT.md).
 
 **Trust level:** PDFs are **primary sources** (highest trust for literature claims). All `.md` reports here are AI-prepared from primary PDFs and AlphaXiv reads; always verify any verbatim quote against the PDF before putting it in the dissertation.
 **Moved:** This folder was `Archive/Paper/` until commit `7fd3219`. Older files (`Docs/Decision_Audits/Idea.md`, the 2026-11-10 dossier) may still say `Archive/Paper/…` — read that as `Docs/Paper/…`.
@@ -21,8 +21,8 @@ Docs/Paper/
 ├── lit-audit-2026-11-15/                  Pre-freeze exhaustive literature audit: report, papers.csv, search_log.csv, references.bib
 ├── fable52-prefreeze-audit-2026-11-15.md    Fable 5.2 pre-freeze forensic audit (commit `03274b3`, F1–F13 + Upgrades 1–5)
 ├── fable52_audit_scripts/                 5 helper forensic scripts preserved from Fable 5.2 audit
-├── related_repos/                         Source-only commit-pinned snapshots of 11 related-work GitHub repos
-├── <26 local arXiv / Anthology PDFs>      19 core sources + 2606.22862.pdf (see §1) + 6 audit A papers (see §1b)
+├── related_repos/                         Source-only commit-pinned snapshots of 16 related-work GitHub repos (+ 3 read-only comparisons)
+├── <29 local arXiv / Anthology PDFs>      19 core sources + 2606.22862.pdf (see §1) + 6 audit A + 3 audit B papers (see §1b–§1c)
 └── Archive/                               Old-topic papers and peer theses — NOT cited by v5
 ```
 
@@ -32,7 +32,7 @@ Docs/Paper/
 
 | File | Date | What it is | Key sections |
 |---|---|---|---|
-| [fable52-prefreeze-audit-2026-11-15.md](fable52-prefreeze-audit-2026-11-15.md) | 2026-11-15 | **Fable 5.2 pre-freeze forensic audit (commit `03274b3`).** Audits code vs. dev pass, provenance, human coding, R8.4 pixel cap, edit gates, wording floor, and 6 related-work GitHub repos (subsequently expanded to 11 snapshots across all 26 PDFs); companion scripts in [fable52_audit_scripts/](fable52_audit_scripts/) and repo snapshots in [related_repos/](related_repos/README.md). | §1 verdict · §2 F1–F13 · §4 repos · §5–7 execution & patch plan |
+| [fable52-prefreeze-audit-2026-11-15.md](fable52-prefreeze-audit-2026-11-15.md) | 2026-11-15 | **Fable 5.2 pre-freeze forensic audit (commit `03274b3`).** Audits code vs. dev pass, provenance, human coding, R8.4 pixel cap, edit gates, wording floor, and 6 related-work GitHub repos (subsequently expanded to 16 snapshots + 3 read-only reviews across 29 PDFs); companion scripts in [fable52_audit_scripts/](fable52_audit_scripts/) and repo snapshots in [related_repos/](related_repos/README.md). | §1 verdict · §2 F1–F13 · §4 repos · §5–7 execution & patch plan |
 | [lit-audit-2026-11-15.md](lit-audit-2026-11-15/lit-audit-2026-11-15.md) | 2026-11-15 | **Pre-freeze exhaustive literature audit.** 108 queries (alphaXiv, OpenAlex, PubMed) + citation snowball; 1,260 records screened; 6 A + 33 B new papers; novelty verdict *intact, needs narrowing*; proposed §1.1 rewording; KB corrections. Research brief at [../RESEARCH_OBJECTIVE.md](../RESEARCH_OBJECTIVE.md). | §0 summary · §1 threats + §1.1 rewording · §2 A spec sheets · §3 B table · §4 design implications · §5 KB corrections · §6 coverage |
 | [THESIS_LITERATURE_KNOWLEDGE_BASE.md](THESIS_LITERATURE_KNOWLEDGE_BASE.md) | 2026-11-14 | **Complete 18-paper + CMC-Bench report.** Merges local PDF audits + AlphaXiv Passes 1 & 2 + post-v5 direct PDF verification, fixes cross-pass errors, and reconciles design rules against D1–D5. | §0 PDF inventory · §1 verification fixes · §2 19-source matrix · §3 full spec sheets + Ch. 2 leads · §4 design rules · §5 pre-freeze checklist |
 | [post-v5-pdf-audit.md](post-v5-pdf-audit/post-v5-pdf-audit.md) | 2026-11-14 | **Post-v5 direct PDF audit (#15–#19 + 2 Ch. 2 leads).** Verifies downloaded PDFs #15–#19 + `2606.22862`, audits gated NeurIPS 2026 abstract (`uul4iRQSJ2`, `[PDF Not Available]`), resolves TOST/novelty checks, and stores 10 PNG table crops in `figures/`. | §0 integrity table · §1 #15–#19 autopsies · §2 Ch. 2 leads & 3 design Qs · §3 repo sync |
@@ -76,6 +76,14 @@ Docs/Paper/
 | [2609.29278.pdf](2609.29278.pdf) | *Reasoning Instructions Can Break Answer Decoding in VLMs* (Li, Qiu & Xu, 2026) | CoT-prefix scoring failure in Qwen2.5-VL-3B/7B; supports D1 | Full text |
 | [2606.12747.pdf](2606.12747.pdf) | *Prefill Awareness in LLMs* (Wang et al., 2026) | Models revert from off-preference prefills; H₀ limitation | Abstract, §1, results summary |
 | [2610.37070.pdf](2610.37070.pdf) | *Correctness Conditioning as Selection in CoT Faithfulness Evaluation* (Pan & Pan, 2026) | Selection changes the estimand population; competency-conditioning limitation | Abstract, §1–2 |
+
+### 1c. Cited B-graded methodology PDFs downloaded post-audit (`Docs/Paper/*.pdf`)
+
+| File | Short name | Why it matters | Verification status |
+|---|---|---|---|
+| [2603.20172.pdf](2603.20172.pdf) | *Measuring Faithfulness Depends on How You Measure* (Young, 2026) | Classifier/parser choice changes faithfulness estimates (§6.2 three-parser & `_MATH_FINAL_ANSWER` rationale) | Downloaded; first page verified + repo inspected (`ricyoung/cot-faithfulness-open-models`) |
+| [2610.23700.pdf](2610.23700.pdf) | *Equivalence testing and run-count design for stochastic ML experiments* (Knopov & Shvai, 2026) | General ML TOST CI-inside-margin precedent (§7.3) | Downloaded; first page verified |
+| [2610.00054.pdf](2610.00054.pdf) | *The First Token Is Not the Verdict* (Villuri et al., 2026) | Likelihood readout vs. full generation mismatch supporting D1 | Downloaded; first page verified |
 
 ---
 

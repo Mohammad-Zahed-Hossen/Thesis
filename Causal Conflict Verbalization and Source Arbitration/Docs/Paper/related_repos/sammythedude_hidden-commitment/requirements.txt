@@ -1,0 +1,7 @@
+# Dependency source of truth: pyproject.toml + uv.lock
+#
+# NVIDIA workstation:
+#   uv sync --extra cu126
+#
+# CPU-only development:
+#   uv sync --extra cpu

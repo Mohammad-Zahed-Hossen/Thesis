@@ -200,7 +200,7 @@ def answer_source_v5(answer: Optional[str], y_image: str, y_text: str) -> str:
 
 
 _MATH_FINAL_ANSWER = re.compile(
-    r"(?:the\s+(?:final\s+)?(?:answer|number|result|total)\s+(?:is|=|:)|\\boxed\s*\{)\s*\$?\s*([+-]?\d[\d,]*(?:\.\d+)?)",
+    r"(?:(?:the\s+)?final\s+answer(?:\s+is\s*[:=]?|\s*[:=])|the\s+(?:answer(?:\s+is\s*[:=]?|\s*[:=])|(?:final\s+)?(?:number|result|total)\s+(?:is|=|:))|\\boxed\s*\{)[\s*]*\$?[\s*]*([+-]?\d[\d,]*(?:\.\d+)?)",
     re.I,
 )
 

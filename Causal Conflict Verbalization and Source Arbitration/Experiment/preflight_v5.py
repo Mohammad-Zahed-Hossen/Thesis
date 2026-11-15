@@ -226,6 +226,22 @@ def check_git_tag(require_tag: Optional[str] = None, repo_dir: str = REPO_ROOT) 
             errors.append(f"Unable to resolve git HEAD commit in {repo_dir}")
         return prov, errors
 
+    try:
+        tracked_keys = subprocess.check_output(
+            ["git", "ls-files", "--", "*KEY_*", "*/KEY_*"],
+            cwd=repo_dir,
+            text=True,
+            stderr=subprocess.DEVNULL,
+        ).strip()
+    except (OSError, subprocess.SubprocessError):
+        tracked_keys = ""
+    if tracked_keys:
+        key_list = [line.strip() for line in tracked_keys.splitlines() if line.strip()]
+        if key_list:
+            errors.append(
+                f"Answer-key file(s) tracked in git ({', '.join(key_list)}); run 'git rm --cached' so coder blinding is preserved."
+            )
+
     if require_tag:
         if prov.get("git_dirty"):
             errors.append("Git working tree has uncommitted changes; commit and tag before confirm runs.")

@@ -1786,6 +1786,7 @@ def main() -> int:
     parser.add_argument("--seed", type=int, default=SEED)
     parser.add_argument("--allow_dry_run", action="store_true", help="Accept rows from the fake 'echo' model (pipeline tests only)")
     parser.add_argument("--allow_mixed_phases", action="store_true", help="Allow pooling rows from different phases (e.g., dev + confirm)")
+    parser.add_argument("--allow_duplicate_rows", action="store_true", help="Allow duplicate (model, regime, id, family, verdict, k, order, outcome) rows")
     args = parser.parse_args()
 
     fake = fake_backend_runs(list(args.runs) + list(args.base) + list(args.donor))
@@ -1805,6 +1806,13 @@ def main() -> int:
     if len(phases) > 1 and not args.allow_mixed_phases:
         print(
             f"Refusing to pool multiple phases in one analysis: {phases}. Pass --allow_mixed_phases only for exploratory diagnostics.",
+            file=sys.stderr,
+        )
+        return 2
+    provenance = provenance_check(args.runs, rows)
+    if provenance["duplicate_rows"] > 0 and not args.allow_duplicate_rows:
+        print(
+            f"Refusing to analyse {provenance['duplicate_rows']} duplicate row keys across --runs. Pass --allow_duplicate_rows only if intentional.",
             file=sys.stderr,
         )
         return 2
@@ -1831,7 +1839,6 @@ def main() -> int:
             size_comparisons.append(analyze_size_comparison(g3, g7, args.reps, args.seed))
 
     intersections = three_way_intersections(groups)
-    provenance = provenance_check(args.runs, rows)
 
     os.makedirs(args.output_dir, exist_ok=True)
     with open(os.path.join(args.output_dir, "analysis_v5.json"), "w", encoding="utf-8") as f:

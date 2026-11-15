@@ -10,7 +10,7 @@ The earlier title, *Causal Conflict Verbalization and Source Arbitration in Visi
 
 The thesis tests multimodal chain-of-thought faithfulness. When an image and a typed text support different answers, we prefix-force a reliability verdict into the model's own response ("I consider the image / the typed text more reliable"). The question is whether that verdict causally changes which source's answer the model then gives. Instruction, evidence order and wording are held fixed. The test is run with and without a binding instruction that tells the model to act on its verdict.
 
-The full design is in `Docs/PREREGISTRATION_VERDICT_TRANSPLANT.md`, with a quick onboarding brief in `Docs/RESEARCH_OBJECTIVE.md`. The evidence behind it is in `Docs/Paper/THESIS_LITERATURE_KNOWLEDGE_BASE.md` (18 core papers + CMC-Bench; 26 local PDFs: 20 core/lead + 6 audit A-papers, 0 core missing, listed in `Docs/Paper/README.md`), alongside `Docs/Paper/lit-audit-2026-11-15/lit-audit-2026-11-15.md`, `Docs/Paper/fable52-prefreeze-audit-2026-11-15.md` (with 11 repo snapshots in `Docs/Paper/related_repos/`), `Docs/Paper/post-v5-pdf-audit/post-v5-pdf-audit.md`, and `Docs/Paper/lit-dossier-verdict-transplant/lit-dossier-verdict-transplant.md`.
+The full design is in `Docs/PREREGISTRATION_VERDICT_TRANSPLANT.md`, with a quick onboarding brief in `Docs/RESEARCH_OBJECTIVE.md`. The evidence behind it is in `Docs/Paper/THESIS_LITERATURE_KNOWLEDGE_BASE.md` (18 core papers + CMC-Bench; 29 local PDFs: 20 core/lead + 6 audit A-papers + 3 cited B-papers, 0 core missing, listed in `Docs/Paper/README.md`), alongside `Docs/Paper/lit-audit-2026-11-15/lit-audit-2026-11-15.md`, `Docs/Paper/fable52-prefreeze-audit-2026-11-15.md` (with 16 repo snapshots in `Docs/Paper/related_repos/`), `Docs/Paper/post-v5-pdf-audit/post-v5-pdf-audit.md`, and `Docs/Paper/lit-dossier-verdict-transplant/lit-dossier-verdict-transplant.md`.
 
 ## Current Phase
 
@@ -107,7 +107,7 @@ Recomputed from `Experiment/results_v4/dev2_*.jsonl` with `score_v4.py`, or read
 ├── Docs/                ← AI-GENERATED TRACKING (reference only)
 │   ├── RESEARCH_OBJECTIVE.md                 ← Onboarding brief: RQ, estimand, narrowed novelty, reading order
 │   ├── PREREGISTRATION_VERDICT_TRANSPLANT.md ← Design spec (draft, not frozen)
-│   ├── Paper/           ← 26 primary PDFs, 11 related_repos/ snapshots, lit KB, pre-freeze & Fable 5.2 audits, dossier, freeze audit
+│   ├── Paper/           ← 29 primary PDFs, 16 related_repos/ snapshots, lit KB, pre-freeze & Fable 5.2 audits, dossier, freeze audit
 │   ├── *.md             ← Older topic spec, master report, roadmap (stale)
 │   ├── Context/         ← Historical context tracking
 │   ├── Decision_Audits/ ← Topic selection audit trail; Idea.md is current

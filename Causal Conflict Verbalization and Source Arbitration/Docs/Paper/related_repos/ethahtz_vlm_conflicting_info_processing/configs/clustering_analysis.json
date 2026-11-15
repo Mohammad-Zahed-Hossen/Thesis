@@ -1,0 +1,8 @@
+{
+    "model_name": "Qwen/Qwen2.5-VL-7B-Instruct",
+    "dataset": "Pascal",
+    "version": 0,
+    "seed": 42,
+    "is_explicit_helper": 0,
+    "representation_version": 0
+}

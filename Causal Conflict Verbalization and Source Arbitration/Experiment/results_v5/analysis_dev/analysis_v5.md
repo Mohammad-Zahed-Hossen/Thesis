@@ -95,21 +95,21 @@ Verdict-NLL resistance tertiles (`verdict_nll(flip) − verdict_nll(own)` under 
 - Items: 80; analysed: 80; meets R5 minimum: False
 - Boundary mismatches: 0 rows (0.000; gate ≤ 0.01)
 - **PRIMARY (D1) — ΔP(follow reversed verdict) at k=1 (`structured`):**
-  - T1_beh (flip−own DiD, bind−nonbind) = 0.113 (95% CI [0.019, 0.206]), p = 0.0155, Holm p = 0.0155
+  - T1_beh (flip−own DiD, bind−nonbind) = 0.119 (95% CI [0.025, 0.212]), p = 0.0106, Holm p = 0.0106
   - Co-primary T1_beh matched-pair (para_flip−para DiD) = 0.231 (95% CI [0.150, 0.312]), p = 0.0001
-  - Explicit-instruction benchmark B_beh = 0.484 (95% CI [0.422, 0.547]); image direction 0.463 (95% CI [0.388, 0.537]), text direction 0.506 (95% CI [0.425, 0.588]). A benchmark, not a ceiling.
-  - **T2_beh**: Δ = 0.494 (90% CI [0.425, 0.562]) vs ε = 0.05; reading: **decision-relevant**; Holm p = 0.0008; TOST power 0.00; ρ_beh (descriptive) = 1.019
-  - **T2_beh_pair**: Δ = 0.637 (90% CI [0.575, 0.700]) vs ε = 0.05; reading: **decision-relevant**; Holm p = 0.0008; TOST power 0.00; ρ_beh (descriptive) = 1.316
-  - **T3_beh**: Δ = 0.381 (90% CI [0.306, 0.450]) vs ε = 0.05; reading: **decision-relevant**; Holm p = 0.0008; TOST power 0.00; ρ_beh (descriptive) = 0.787
-  - Directional (descriptive) binding_toward_image: Δ = 0.456 (95% CI [0.361, 0.544], n = 79); benchmark 0.463; ρ_beh 0.985
+  - Explicit-instruction benchmark B_beh = 0.487 (95% CI [0.425, 0.550]); image direction 0.469 (95% CI [0.394, 0.544]), text direction 0.506 (95% CI [0.425, 0.588]). A benchmark, not a ceiling.
+  - **T2_beh**: Δ = 0.500 (90% CI [0.431, 0.569]) vs ε = 0.05; reading: **decision-relevant**; Holm p = 0.0008; TOST power 0.00; ρ_beh (descriptive) = 1.026
+  - **T2_beh_pair**: Δ = 0.637 (90% CI [0.575, 0.700]) vs ε = 0.05; reading: **decision-relevant**; Holm p = 0.0008; TOST power 0.00; ρ_beh (descriptive) = 1.308
+  - **T3_beh**: Δ = 0.381 (90% CI [0.306, 0.450]) vs ε = 0.05; reading: **decision-relevant**; Holm p = 0.0008; TOST power 0.00; ρ_beh (descriptive) = 0.782
+  - Directional (descriptive) binding_toward_image: Δ = 0.462 (95% CI [0.367, 0.551], n = 79); benchmark 0.469; ρ_beh 0.986
   - Directional (descriptive) binding_toward_text: Δ = 0.609 (95% CI [0.438, 0.766], n = 32); benchmark 0.506; ρ_beh 1.204
-  - Directional (descriptive) nonbinding_toward_image: Δ = 0.392 (95% CI [0.291, 0.487], n = 79); benchmark 0.463; ρ_beh 0.848
+  - Directional (descriptive) nonbinding_toward_image: Δ = 0.392 (95% CI [0.291, 0.487], n = 79); benchmark 0.469; ρ_beh 0.837
   - Directional (descriptive) nonbinding_toward_text: Δ = 0.422 (95% CI [0.234, 0.609], n = 32); benchmark 0.506; ρ_beh 0.833
-  - Per-order binding flip_minus_own: image_first = 0.475 (95% CI [0.362, 0.588], n = 80); text_first = 0.512 (95% CI [0.400, 0.625], n = 80)
+  - Per-order binding flip_minus_own: image_first = 0.475 (95% CI [0.362, 0.588], n = 80); text_first = 0.525 (95% CI [0.412, 0.637], n = 80)
   - Per-order binding matched_pair_para_flip_minus_para: image_first = 0.600 (95% CI [0.487, 0.700], n = 80); text_first = 0.675 (95% CI [0.575, 0.775], n = 80)
   - Per-order nonbinding flip_minus_own: image_first = 0.250 (95% CI [0.125, 0.362], n = 80); text_first = 0.512 (95% CI [0.400, 0.625], n = 80)
   - Per-order nonbinding matched_pair_para_flip_minus_para: image_first = 0.287 (95% CI [0.188, 0.388], n = 80); text_first = 0.525 (95% CI [0.412, 0.637], n = 80)
-  - binding: flip−own = 0.494 (95% CI [0.412, 0.575], p = 0.0001); para_flip−para = 0.637 (95% CI [0.562, 0.713], p = 0.0001); decomp [none−own=0.106, flip−none=0.388, para_flip−none=0.512]
+  - binding: flip−own = 0.500 (95% CI [0.419, 0.581], p = 0.0001); para_flip−para = 0.637 (95% CI [0.562, 0.713], p = 0.0001); decomp [none−own=0.106, flip−none=0.394, para_flip−none=0.512]
   - nonbinding: flip−own = 0.381 (95% CI [0.294, 0.463], p = 0.0001); para_flip−para = 0.406 (95% CI [0.331, 0.487], p = 0.0001); decomp [none−own=0.125, flip−none=0.256, para_flip−none=0.244]
 - **PRIMARY READING under binding: NOT A READING: n = 80 is below the R5 minimum of 150. The decision table alone would say: H1: the verdict decides, and binding strengthens it (flip−own and para_flip−para agree)**
 - **PRIMARY READING under non-binding: NOT A READING: n = 80 is below the R5 minimum of 150. The decision table alone would say: H1: the verdict decides; no evidence that binding strengthens it**
@@ -123,7 +123,7 @@ Verdict-NLL resistance tertiles (`verdict_nll(flip) − verdict_nll(own)` under 
 - **T2** CDE = 0.233 (95% CI [0.182, 0.291]); ρ = 1.529, 90% CI [1.258, 1.865]; reading: **decision-relevant**
 - **T3** CDE = 0.150 (95% CI [0.106, 0.204]); ρ = 0.984, 90% CI [0.736, 1.305]; reading: **decision-relevant**
 - Holm-adjusted p: {"T1": 0.0003, "T2": 0.0004, "T3": 0.0004}
-- Behavioural, binding: Δ = 0.494, 90% CI [0.425, 0.562], TOST: not equivalent; change rate own vs flip 0.772
+- Behavioural, binding: Δ = 0.500, 90% CI [0.431, 0.569], TOST: not equivalent; change rate own vs flip 0.772
   - Wording floor (para vs own): signed mean -0.044 (limit ±0.05), image<->text churn 0.032 (limit 0.05), neither shift 0.062 (limit ±0.1), gate: **pass**; diagnostics: any-change churn 0.231, replay flips 0.032; TOST power at this noise 0.00
 - Behavioural, nonbinding: Δ = 0.381, 90% CI [0.306, 0.450], TOST: not equivalent; change rate own vs flip 0.676
   - Wording floor (para vs own): signed mean 0.000 (limit ±0.05), image<->text churn 0.076 (limit 0.05), neither shift 0.037 (limit ±0.1), gate: **FAIL**; diagnostics: any-change churn 0.287, replay flips 0.032; TOST power at this noise 0.00
@@ -135,7 +135,7 @@ Behavioural numbers by answer parser (the lines above use `structured` per pre-f
 | Parser | Neither | Δ bind [90% CI] | Δ non-bind | Matched pair bind | Floor signed mean bind | Any-change churn bind / non-bind | image↔text flips bind (of attributable pairs) | flips non-bind |
 |---|---:|---|---:|---:|---:|---|---|---|
 | strict | 0.449 | 0.456 [0.388, 0.525] | 0.356 | 0.613 | -0.056 | 0.256 / 0.281 | 0.036 (n = 84) | 0.090 (n = 67) |
-| structured | 0.394 | 0.494 [0.425, 0.562] | 0.381 | 0.637 | -0.044 | 0.231 / 0.287 | 0.032 (n = 94) | 0.076 (n = 79) |
+| structured | 0.392 | 0.500 [0.431, 0.569] | 0.381 | 0.637 | -0.044 | 0.231 / 0.287 | 0.032 (n = 94) | 0.076 (n = 79) |
 | lenient | 0.307 | 0.581 [0.512, 0.644] | 0.438 | 0.694 | -0.081 | 0.206 / 0.200 | 0.029 (n = 105) | 0.076 (n = 105) |
 
 Does Δℓ track the answer? (behavioural rows with an attributable answer, same cell and template):
@@ -143,7 +143,7 @@ Does Δℓ track the answer? (behavioural rows with an attributable answer, same
 | Parser | Attributable rows | Sign agreement | Majority-class baseline | AUC image-first | AUC text-first |
 |---|---:|---:|---:|---:|---:|
 | strict | 1057/1920 | 0.516 | 0.552 | 0.531 | 0.561 |
-| structured | 1164/1920 | 0.506 | 0.566 | 0.532 | 0.558 |
+| structured | 1167/1920 | 0.506 | 0.566 | 0.532 | 0.559 |
 | lenient | 1331/1920 | 0.503 | 0.553 | 0.549 | 0.557 |
 
 Secondary:
@@ -152,7 +152,7 @@ Verdict-NLL resistance tertiles (`verdict_nll(flip) − verdict_nll(own)` under 
 
 | Tertile | N | Mean ΔNLL | Δℓ CDE [95% CI] | Behavioural Δ [95% CI] |
 |---|---:|---:|---|---|
-| tertile1_low_resistance | 26 | 0.075 | 0.258 [0.175, 0.348] | 0.327 [0.192, 0.481] |
+| tertile1_low_resistance | 26 | 0.075 | 0.258 [0.175, 0.348] | 0.346 [0.212, 0.481] |
 | tertile2_mid_resistance | 26 | 0.119 | 0.207 [0.129, 0.291] | 0.654 [0.519, 0.788] |
 | tertile3_high_resistance | 28 | 0.181 | 0.233 [0.134, 0.356] | 0.500 [0.375, 0.625] |
 
@@ -170,12 +170,12 @@ Verdict-NLL resistance tertiles (`verdict_nll(flip) − verdict_nll(own)` under 
 - cde_binding_baseline_abs_dl_tertile1: {"n": 26, "mean": 0.1782, "ci95": [0.09104116668663502, 0.2964924260866862]}
 - cde_binding_baseline_abs_dl_tertile2: {"n": 26, "mean": 0.2119, "ci95": [0.12177587418401416, 0.3139458294877673]}
 - cde_binding_baseline_abs_dl_tertile3: {"n": 28, "mean": 0.3033, "ci95": [0.22878996137662314, 0.3811104771838082]}
-- behaviour_neither_rate_headline: 0.394
+- behaviour_neither_rate_headline: 0.392
 - behaviour_neither_rate: 0.307
 - behaviour_neither_rate_strict: 0.449
 - seconds_per_item: 60.321
 - verdict_nll_mean_by_verdict: {"flip": 0.7368, "none": 0.8466, "own": 0.6023, "para": 0.7507, "para_flip": 0.8547}
-- manipulation_check: {"donor": {"rows": 400, "with_stated_verdict": 400, "attributable_answers": 282, "answer_follows_stated_verdict": 0.7695035460992907, "answer_follows_stated_verdict_ci95": [0.7198581560283688, 0.8191489361702128]}, "free_binding": {"rows": 400, "with_stated_verdict": 315, "attributable_answers": 213, "answer_follows_stated_verdict": 0.9436619718309859, "answer_follows_stated_verdict_ci95": [0.9107981220657277, 0.971830985915493]}}
+- manipulation_check: {"donor": {"rows": 400, "with_stated_verdict": 400, "attributable_answers": 281, "answer_follows_stated_verdict": 0.7686832740213523, "answer_follows_stated_verdict_ci95": [0.7188612099644128, 0.8185053380782918]}, "free_binding": {"rows": 400, "with_stated_verdict": 315, "attributable_answers": 213, "answer_follows_stated_verdict": 0.9436619718309859, "answer_follows_stated_verdict_ci95": [0.9107981220657277, 0.971830985915493]}}
 - relative_uncertainty_binding: {"n": 80, "balance_point": 0.1093, "slope": 0.9473, "inside": {"n": 33, "cde_mean": 0.23215054235517546, "cde_ci95": [0.15820310993461384, 0.3105592483857757]}, "outside": {"n": 47, "cde_mean": 0.23354215069735054, "cde_ci95": [0.16286582695647772, 0.3148638338825301]}}
 
 ## Qwen/Qwen2.5-VL-7B-Instruct | chartqa | dev
@@ -258,27 +258,27 @@ Secondary:
 - Items: 115; analysed: 115; meets R5 minimum: False
 - Boundary mismatches: 0 rows (0.000; gate ≤ 0.01)
 - **PRIMARY (D1) — ΔP(follow reversed verdict) at k=1 (`structured`):**
-  - T1_beh (flip−own DiD, bind−nonbind) = 0.122 (95% CI [0.065, 0.178]), p = 0.0001, Holm p = 0.0004
-  - Co-primary T1_beh matched-pair (para_flip−para DiD) = 0.409 (95% CI [0.339, 0.478]), p = 0.0001
-  - Explicit-instruction benchmark B_beh = 0.687 (95% CI [0.643, 0.728]); image direction 0.617 (95% CI [0.557, 0.678]), text direction 0.757 (95% CI [0.700, 0.813]). A benchmark, not a ceiling.
-  - **T2_beh**: Δ = 0.439 (90% CI [0.391, 0.487]) vs ε = 0.05; reading: **decision-relevant**; Holm p = 0.0006; TOST power 0.03; ρ_beh (descriptive) = 0.639
-  - **T2_beh_pair**: Δ = 0.643 (90% CI [0.591, 0.691]) vs ε = 0.05; reading: **decision-relevant**; Holm p = 0.0006; TOST power 0.00; ρ_beh (descriptive) = 0.937
-  - **T3_beh**: Δ = 0.317 (90% CI [0.265, 0.370]) vs ε = 0.05; reading: **decision-relevant**; Holm p = 0.0006; TOST power 0.00; ρ_beh (descriptive) = 0.462
-  - Directional (descriptive) binding_toward_image: Δ = 0.348 (95% CI [0.274, 0.426], n = 115); benchmark 0.617; ρ_beh 0.563
-  - Directional (descriptive) binding_toward_text: Δ = 0.592 (95% CI [0.479, 0.704], n = 71); benchmark 0.757; ρ_beh 0.782
-  - Directional (descriptive) nonbinding_toward_image: Δ = 0.265 (95% CI [0.196, 0.335], n = 115); benchmark 0.617; ρ_beh 0.430
-  - Directional (descriptive) nonbinding_toward_text: Δ = 0.366 (95% CI [0.254, 0.479], n = 71); benchmark 0.757; ρ_beh 0.484
-  - Per-order binding flip_minus_own: image_first = 0.635 (95% CI [0.548, 0.722], n = 115); text_first = 0.243 (95% CI [0.165, 0.322], n = 115)
-  - Per-order binding matched_pair_para_flip_minus_para: image_first = 0.739 (95% CI [0.661, 0.817], n = 115); text_first = 0.548 (95% CI [0.452, 0.635], n = 115)
+  - T1_beh (flip−own DiD, bind−nonbind) = 0.152 (95% CI [0.096, 0.213]), p = 0.0001, Holm p = 0.0004
+  - Co-primary T1_beh matched-pair (para_flip−para DiD) = 0.435 (95% CI [0.365, 0.504]), p = 0.0001
+  - Explicit-instruction benchmark B_beh = 0.807 (95% CI [0.765, 0.846]); image direction 0.796 (95% CI [0.743, 0.843]), text direction 0.817 (95% CI [0.761, 0.870]). A benchmark, not a ceiling.
+  - **T2_beh**: Δ = 0.470 (90% CI [0.422, 0.517]) vs ε = 0.05; reading: **decision-relevant**; Holm p = 0.0006; TOST power 0.03; ρ_beh (descriptive) = 0.582
+  - **T2_beh_pair**: Δ = 0.678 (90% CI [0.626, 0.726]) vs ε = 0.05; reading: **decision-relevant**; Holm p = 0.0006; TOST power 0.00; ρ_beh (descriptive) = 0.841
+  - **T3_beh**: Δ = 0.317 (90% CI [0.265, 0.370]) vs ε = 0.05; reading: **decision-relevant**; Holm p = 0.0006; TOST power 0.00; ρ_beh (descriptive) = 0.394
+  - Directional (descriptive) binding_toward_image: Δ = 0.378 (95% CI [0.304, 0.452], n = 115); benchmark 0.796; ρ_beh 0.475
+  - Directional (descriptive) binding_toward_text: Δ = 0.606 (95% CI [0.493, 0.718], n = 71); benchmark 0.817; ρ_beh 0.741
+  - Directional (descriptive) nonbinding_toward_image: Δ = 0.265 (95% CI [0.196, 0.335], n = 115); benchmark 0.796; ρ_beh 0.333
+  - Directional (descriptive) nonbinding_toward_text: Δ = 0.366 (95% CI [0.254, 0.479], n = 71); benchmark 0.817; ρ_beh 0.448
+  - Per-order binding flip_minus_own: image_first = 0.678 (95% CI [0.591, 0.765], n = 115); text_first = 0.261 (95% CI [0.183, 0.339], n = 115)
+  - Per-order binding matched_pair_para_flip_minus_para: image_first = 0.765 (95% CI [0.687, 0.843], n = 115); text_first = 0.591 (95% CI [0.504, 0.678], n = 115)
   - Per-order nonbinding flip_minus_own: image_first = 0.470 (95% CI [0.374, 0.565], n = 115); text_first = 0.165 (95% CI [0.096, 0.235], n = 115)
-  - Per-order nonbinding matched_pair_para_flip_minus_para: image_first = 0.261 (95% CI [0.174, 0.348], n = 115); text_first = 0.209 (95% CI [0.139, 0.287], n = 115)
-  - binding: flip−own = 0.439 (95% CI [0.383, 0.496], p = 0.0001); para_flip−para = 0.643 (95% CI [0.578, 0.704], p = 0.0001); decomp [none−own=0.209, flip−none=0.230, para_flip−none=0.435]
-  - nonbinding: flip−own = 0.317 (95% CI [0.257, 0.378], p = 0.0001); para_flip−para = 0.235 (95% CI [0.174, 0.296], p = 0.0001); decomp [none−own=0.191, flip−none=0.126, para_flip−none=0.078]
+  - Per-order nonbinding matched_pair_para_flip_minus_para: image_first = 0.261 (95% CI [0.174, 0.348], n = 115); text_first = 0.226 (95% CI [0.148, 0.304], n = 115)
+  - binding: flip−own = 0.470 (95% CI [0.413, 0.530], p = 0.0001); para_flip−para = 0.678 (95% CI [0.617, 0.735], p = 0.0001); decomp [none−own=0.235, flip−none=0.235, para_flip−none=0.443]
+  - nonbinding: flip−own = 0.317 (95% CI [0.257, 0.378], p = 0.0001); para_flip−para = 0.243 (95% CI [0.183, 0.304], p = 0.0001); decomp [none−own=0.204, flip−none=0.113, para_flip−none=0.074]
 - **PRIMARY READING under binding: NOT A READING: n = 115 is below the R5 minimum of 150. The decision table alone would say: H1: the verdict decides, and binding strengthens it (flip−own and para_flip−para agree)**
 - **PRIMARY READING under non-binding: NOT A READING: n = 115 is below the R5 minimum of 150. The decision table alone would say: H1: the verdict decides; no evidence that binding strengthens it**
 - Wording-floor gate deciding the readings: fixed (signed mean, image<->text churn, neither shift) (prereg §7.6)
 - The Δℓ lines below are secondary/diagnostic in this regime (D1).
-- Replay noise (donor vs nonbinding own): attributable flips = 0.011 (n = 186); any-change = 0.087; (diagnostic only; it does not move the wording-floor limit)
+- Replay noise (donor vs nonbinding own): attributable flips = 0.010 (n = 193); any-change = 0.065; (diagnostic only; it does not move the wording-floor limit)
 - Ceil_ℓ: 1.423, 95% CI [1.214, 1.633]
   - image direction vs non-binding: 0.670, 95% CI [0.559, 0.790]
   - text direction vs non-binding: 0.753, 95% CI [0.609, 0.903]
@@ -286,10 +286,10 @@ Secondary:
 - **T2** CDE = 1.619 (95% CI [1.337, 1.919]); ρ = 1.138, 90% CI [1.022, 1.254]; reading: **decision-relevant**
 - **T3** CDE = 1.342 (95% CI [1.082, 1.626]); ρ = 0.943, 90% CI [0.835, 1.052]; reading: **decision-relevant**
 - Holm-adjusted p: {"T1": 0.0003, "T2": 0.0004, "T3": 0.0004}
-- Behavioural, binding: Δ = 0.439, 90% CI [0.391, 0.487], TOST: not equivalent; change rate own vs flip 0.506
-  - Wording floor (para vs own): signed mean -0.030 (limit ±0.05), image<->text churn 0.000 (limit 0.05), neither shift 0.030 (limit ±0.1), gate: **pass**; diagnostics: any-change churn 0.152, replay flips 0.011; TOST power at this noise 0.24
+- Behavioural, binding: Δ = 0.470, 90% CI [0.422, 0.517], TOST: not equivalent; change rate own vs flip 0.536
+  - Wording floor (para vs own): signed mean -0.026 (limit ±0.05), image<->text churn 0.000 (limit 0.05), neither shift 0.026 (limit ±0.1), gate: **pass**; diagnostics: any-change churn 0.139, replay flips 0.010; TOST power at this noise 0.30
 - Behavioural, nonbinding: Δ = 0.317, 90% CI [0.265, 0.370], TOST: not equivalent; change rate own vs flip 0.369
-  - Wording floor (para vs own): signed mean -0.057 (limit ±0.05), image<->text churn 0.066 (limit 0.05), neither shift 0.022 (limit ±0.1), gate: **FAIL**; diagnostics: any-change churn 0.161, replay flips 0.011; TOST power at this noise 0.26
+  - Wording floor (para vs own): signed mean -0.065 (limit ±0.05), image<->text churn 0.064 (limit 0.05), neither shift 0.030 (limit ±0.1), gate: **FAIL**; diagnostics: any-change churn 0.143, replay flips 0.010; TOST power at this noise 0.42
 - Δℓ decision table (§2.2), binding: NOT A READING: n = 115 is below the R5 minimum of 150. The decision table alone would say: H1: the verdict decides, and binding strengthens it
 - Δℓ decision table (§2.2), non-binding: NOT A READING: n = 115 is below the R5 minimum of 150. The decision table alone would say: H1: the verdict decides; no evidence that binding strengthens it
 
@@ -298,7 +298,7 @@ Behavioural numbers by answer parser (the lines above use `structured` per pre-f
 | Parser | Neither | Δ bind [90% CI] | Δ non-bind | Matched pair bind | Floor signed mean bind | Any-change churn bind / non-bind | image↔text flips bind (of attributable pairs) | flips non-bind |
 |---|---:|---|---:|---:|---:|---|---|---|
 | strict | 0.627 | 0.183 [0.143, 0.226] | 0.161 | 0.330 | -0.030 | 0.204 / 0.204 | 0.000 (n = 54) | 0.019 (n = 54) |
-| structured | 0.222 | 0.439 [0.391, 0.487] | 0.317 | 0.643 | -0.030 | 0.152 / 0.161 | 0.000 (n = 160) | 0.066 (n = 182) |
+| structured | 0.169 | 0.470 [0.422, 0.517] | 0.317 | 0.678 | -0.026 | 0.139 / 0.143 | 0.000 (n = 171) | 0.064 (n = 187) |
 | lenient | 0.108 | 0.496 [0.448, 0.543] | 0.326 | 0.722 | 0.000 | 0.070 / 0.122 | 0.000 (n = 197) | 0.065 (n = 200) |
 
 Does Δℓ track the answer? (behavioural rows with an attributable answer, same cell and template):
@@ -306,7 +306,7 @@ Does Δℓ track the answer? (behavioural rows with an attributable answer, same
 | Parser | Attributable rows | Sign agreement | Majority-class baseline | AUC image-first | AUC text-first |
 |---|---:|---:|---:|---:|---:|
 | strict | 1030/2760 | 0.566 | 0.759 | 0.699 | 0.684 |
-| structured | 2148/2760 | 0.574 | 0.614 | 0.764 | 0.690 |
+| structured | 2294/2760 | 0.575 | 0.596 | 0.756 | 0.688 |
 | lenient | 2461/2760 | 0.574 | 0.585 | 0.753 | 0.693 |
 
 Secondary:
@@ -316,8 +316,8 @@ Verdict-NLL resistance tertiles (`verdict_nll(flip) − verdict_nll(own)` under 
 | Tertile | N | Mean ΔNLL | Δℓ CDE [95% CI] | Behavioural Δ [95% CI] |
 |---|---:|---:|---|---|
 | tertile1_low_resistance | 38 | 0.065 | 1.714 [1.266, 2.197] | 0.500 [0.408, 0.592] |
-| tertile2_mid_resistance | 38 | 0.105 | 1.689 [1.213, 2.206] | 0.408 [0.303, 0.513] |
-| tertile3_high_resistance | 39 | 0.179 | 1.457 [0.957, 2.082] | 0.410 [0.308, 0.513] |
+| tertile2_mid_resistance | 38 | 0.105 | 1.689 [1.213, 2.206] | 0.461 [0.342, 0.566] |
+| tertile3_high_resistance | 39 | 0.179 | 1.457 [0.957, 2.082] | 0.449 [0.359, 0.538] |
 
 - matched_pair_binding: {"n": 115, "mean": 2.375, "ci95": [2.033441955420586, 2.732546330532927]}
 - cde_binding_image_first: {"n": 115, "mean": 1.7509, "ci95": [1.3841809242581669, 2.137204451333219]}
@@ -333,7 +333,7 @@ Verdict-NLL resistance tertiles (`verdict_nll(flip) − verdict_nll(own)` under 
 - cde_binding_baseline_abs_dl_tertile1: {"n": 38, "mean": 1.0615, "ci95": [0.74146720712344, 1.4254775938956694]}
 - cde_binding_baseline_abs_dl_tertile2: {"n": 38, "mean": 1.3457, "ci95": [0.9252314767614614, 1.7869844095511094]}
 - cde_binding_baseline_abs_dl_tertile3: {"n": 39, "mean": 2.4279, "ci95": [1.8542790312672128, 3.0594069707712284]}
-- behaviour_neither_rate_headline: 0.222
+- behaviour_neither_rate_headline: 0.169
 - behaviour_neither_rate: 0.108
 - behaviour_neither_rate_strict: 0.627
 - seconds_per_item: 177.010
@@ -354,17 +354,17 @@ Verdict-NLL resistance tertiles (`verdict_nll(flip) − verdict_nll(own)` under 
 - ρ_bind (3B) on intersection: 1.369
 - ρ_bind (7B) on intersection: 1.056
 - Δρ (7B minus 3B): -0.314 (95% CI [-0.784, 0.050])
-- Behavioural Δ_bind (flip−own) 3B vs 7B on intersection (N = 50): 0.530 vs 0.460, Δ_bind(7B−3B) = -0.070 (95% CI [-0.190, 0.060])
-- Behavioural Δ_bind matched-pair (para_flip−para) 3B vs 7B (N = 50): 0.650 vs 0.630, Δ_bind_pair(7B−3B) = -0.020 (95% CI [-0.140, 0.100])
+- Behavioural Δ_bind (flip−own) 3B vs 7B on intersection (N = 50): 0.540 vs 0.480, Δ_bind(7B−3B) = -0.060 (95% CI [-0.180, 0.060])
+- Behavioural Δ_bind matched-pair (para_flip−para) 3B vs 7B (N = 50): 0.650 vs 0.680, Δ_bind_pair(7B−3B) = 0.030 (95% CI [-0.090, 0.160])
 
 ## Gate reports
 
-- v5dev_chartqa_tp_qwen2.gates.json: {"items": 30, "competent": 10, "taken": 10, "no_donor": 0, "passed": 0, "jaccard_multiset_flip_min": null, "jaccard_multiset_flip_mean": null, "swaps_per_flip": {}, "own_source_by_order": {}, "fail_reasons_by_order": {"own_absent": 18, "own_undetermined": 2}}
-- v5dev_chartqa_tp_qwen25.gates.json: {"items": 30, "competent": 13, "taken": 13, "no_donor": 0, "passed": 6, "jaccard_multiset_flip_min": 0.8667, "jaccard_multiset_flip_mean": 0.8936, "swaps_per_flip": {"1": 10, "2": 2}, "own_source_by_order": {"image_first:report": 6, "text_first:report": 6}, "fail_reasons_by_order": {"own_absent": 11}}
-- v5dev_chartqa_tp_qwen25_7b.gates.json: {"items": 30, "competent": 13, "taken": 13, "no_donor": 0, "passed": 2, "jaccard_multiset_flip_min": 0.9481, "jaccard_multiset_flip_mean": 0.9774, "swaps_per_flip": {"1": 1, "2": 3}, "own_source_by_order": {"image_first:report": 2, "text_first:report": 2}, "fail_reasons_by_order": {"gate3_too_many_swaps": 8, "own_absent": 3, "own_wrong_regime": 1}}
 - v5dev_conflict_tp_qwen2.gates.json: {"items": 200, "competent": 0, "taken": 0, "no_donor": 0, "passed": 0, "jaccard_multiset_flip_min": null, "jaccard_multiset_flip_mean": null, "swaps_per_flip": {}, "own_source_by_order": {}, "fail_reasons_by_order": {}}
 - v5dev_conflict_tp_qwen25.gates.json: {"items": 200, "competent": 80, "taken": 80, "no_donor": 0, "passed": 80, "jaccard_multiset_flip_min": 0.88, "jaccard_multiset_flip_mean": 0.9455, "swaps_per_flip": {"1": 119, "2": 41}, "own_source_by_order": {"image_first:image": 32, "text_first:text": 79, "image_first:text": 48, "text_first:image": 1}, "fail_reasons_by_order": {}}
 - v5dev_conflict_tp_qwen25_7b.gates.json: {"items": 200, "competent": 124, "taken": 124, "no_donor": 0, "passed": 115, "jaccard_multiset_flip_min": 0.875, "jaccard_multiset_flip_mean": 0.9549, "swaps_per_flip": {"1": 175, "2": 55}, "own_source_by_order": {"image_first:image": 71, "text_first:text": 115, "image_first:text": 44}, "fail_reasons_by_order": {"gate3_too_many_swaps": 8, "own_undetermined": 1}}
+- v5dev_chartqa_tp_qwen2.gates.json: {"items": 30, "competent": 10, "taken": 10, "no_donor": 0, "passed": 0, "jaccard_multiset_flip_min": null, "jaccard_multiset_flip_mean": null, "swaps_per_flip": {}, "own_source_by_order": {}, "fail_reasons_by_order": {"own_absent": 18, "own_undetermined": 2}}
+- v5dev_chartqa_tp_qwen25.gates.json: {"items": 30, "competent": 13, "taken": 13, "no_donor": 0, "passed": 6, "jaccard_multiset_flip_min": 0.8667, "jaccard_multiset_flip_mean": 0.8936, "swaps_per_flip": {"1": 10, "2": 2}, "own_source_by_order": {"image_first:report": 6, "text_first:report": 6}, "fail_reasons_by_order": {"own_absent": 11}}
+- v5dev_chartqa_tp_qwen25_7b.gates.json: {"items": 30, "competent": 13, "taken": 13, "no_donor": 0, "passed": 2, "jaccard_multiset_flip_min": 0.9481, "jaccard_multiset_flip_mean": 0.9774, "swaps_per_flip": {"1": 1, "2": 3}, "own_source_by_order": {"image_first:report": 2, "text_first:report": 2}, "fail_reasons_by_order": {"gate3_too_many_swaps": 8, "own_absent": 3, "own_wrong_regime": 1}}
 
 ## Multi-model item intersections
 
@@ -374,7 +374,7 @@ Verdict-NLL resistance tertiles (`verdict_nll(flip) − verdict_nll(own)` under 
 ## Provenance
 
 - Duplicate rows: 0
-- v5dev_chartqa_tp_qwen25.manifest.json: {"resolved_model_commit": null, "peak_vram_gb": 6.993551731109619, "written_at": "2026-11-12T09:18:04", "n_items": 6}
-- v5dev_chartqa_tp_qwen25_7b.manifest.json: {"resolved_model_commit": null, "peak_vram_gb": 15.696582794189453, "written_at": "2026-11-12T15:52:36", "n_items": 2}
 - v5dev_conflict_tp_qwen25.manifest.json: {"resolved_model_commit": null, "peak_vram_gb": 6.993551731109619, "written_at": "2026-11-12T09:16:27", "n_items": 80}
 - v5dev_conflict_tp_qwen25_7b.manifest.json: {"resolved_model_commit": null, "peak_vram_gb": 15.687393188476562, "written_at": "2026-11-12T15:42:37", "n_items": 115}
+- v5dev_chartqa_tp_qwen25.manifest.json: {"resolved_model_commit": null, "peak_vram_gb": 6.993551731109619, "written_at": "2026-11-12T09:18:04", "n_items": 6}
+- v5dev_chartqa_tp_qwen25_7b.manifest.json: {"resolved_model_commit": null, "peak_vram_gb": 15.696582794189453, "written_at": "2026-11-12T15:52:36", "n_items": 2}

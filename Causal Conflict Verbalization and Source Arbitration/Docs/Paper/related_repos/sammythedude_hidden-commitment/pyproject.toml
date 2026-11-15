@@ -1,0 +1,89 @@
+[project]
+name = "hidden-commitment"
+version = "0.1.0"
+description = "Reusable mechanistic-interpretability helpers for studying hidden source commitment in language models."
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.11"
+authors = [
+  { name = "Samuel Dawit Assefa" },
+  { name = "Jae Won Cho" },
+]
+dependencies = [
+  "accelerate>=1.2",
+  "datasets>=3.2",
+  "numpy>=1.26",
+  "scikit-learn>=1.8",
+  "tqdm>=4.67",
+  "transformers>=4.57",
+]
+
+[project.optional-dependencies]
+cpu = ["torch>=2.11"]
+cu126 = ["torch>=2.11"]
+judge = ["google-genai>=1.0"]
+plots = ["matplotlib>=3.9", "pandas>=2.2", "scipy>=1.14", "seaborn>=0.13"]
+dev = [
+  "pytest>=8.3",
+  "pytest-cov>=6.0",
+  "ruff>=0.9",
+]
+
+[tool.uv]
+conflicts = [
+  [
+    { extra = "cpu" },
+    { extra = "cu126" },
+  ],
+]
+
+[tool.uv.sources]
+torch = [
+  { index = "pytorch-cpu", extra = "cpu" },
+  { index = "pytorch-cu126", extra = "cu126" },
+]
+
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true
+
+[[tool.uv.index]]
+name = "pytorch-cu126"
+url = "https://download.pytorch.org/whl/cu126"
+explicit = true
+
+[project.scripts]
+hidden-commitment = "hidden_commitment.cli:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/hidden_commitment"]
+
+[tool.hatch.build.targets.sdist]
+include = [
+  "/CITATION.cff",
+  "/LICENSE",
+  "/README.md",
+  "/configs/paper.toml",
+  "/docs/data-contracts.md",
+  "/docs/method.md",
+  "/pyproject.toml",
+  "/src",
+  "/tests",
+  "/uv.lock",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]
+
+[tool.pytest.ini_options]
+addopts = "-q"
+testpaths = ["tests"]

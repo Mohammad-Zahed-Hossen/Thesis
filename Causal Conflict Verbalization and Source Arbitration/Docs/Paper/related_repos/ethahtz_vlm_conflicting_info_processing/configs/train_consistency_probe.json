@@ -1,0 +1,15 @@
+{
+    "path_to_train_data_consistent": "./outputs/precompute_representations_ver000/Qwen/Qwen2.5-VL-7B-Instruct/Pascal/consistent/use_helper_0/reporting_image/train/seed42.pkl",
+    "path_to_test_data_consistent": "./outputs/precompute_representations_ver000/Qwen/Qwen2.5-VL-7B-Instruct/Pascal/consistent/use_helper_0/reporting_image/test/seed42.pkl",
+    "path_to_train_data_inconsistent": "./outputs/precompute_representations_ver000/Qwen/Qwen2.5-VL-7B-Instruct/Pascal/inconsistent/use_helper_0/reporting_image/train/seed42.pkl",
+    "path_to_test_data_inconsistent": "./outputs/precompute_representations_ver000/Qwen/Qwen2.5-VL-7B-Instruct/Pascal/inconsistent/use_helper_0/reporting_image/test/seed42.pkl",
+    "is_image_probe": 1,
+    "repr_layer_idx": -1,
+    "seed": 42,
+    "n_epochs": 500,
+    "batch_size": 256,
+    "lr": 0.001,
+    "eval_interval_epochs": 1,
+    "wandb_dir": "./wandb/",
+    "wandb_project": "multimodal_conflict_proc"
+}

@@ -1,0 +1,38 @@
+[models.qwen]
+model_id = "Qwen/Qwen3.5-0.8B"
+revision = "2fc06364715b967f1860aea9cf38778875588b17"
+dtype = "float16"
+
+[models.gemma]
+model_id = "google/gemma-3-1b-it"
+dtype = "bfloat16"
+
+[generation.doc_choice]
+temperature = 0.0
+max_new_tokens = 96
+top_p = 0.9
+top_k = 50
+
+[generation.surfacing]
+temperature = 0.0
+max_new_tokens = 224
+top_p = 0.9
+top_k = 50
+
+[splits.doc_choice]
+seed = 42
+train_qids = 128
+validation_qids = 32
+test_qids = 340
+
+[steering.doc_choice]
+layer = 13
+prompt_tail_tokens = 32
+decision_start_offset = -4
+decision_end_offset = 2
+deltas = [-3.0, -2.0, 2.0, 3.0]
+
+[steering.surfacing]
+layer = 17
+response_tokens = 12
+deltas = [6.0, 8.0]

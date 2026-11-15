@@ -1,0 +1,155 @@
+# Secrets and local environment
+.env
+.env.*
+!.env.example
+
+# Python/runtime state
+.venv/
+__pycache__/
+.ruff_cache/
+.pytest_cache/
+*.pyc
+*.pyo
+.coverage
+htmlcov/
+dist/
+*.egg-info/
+
+# Generated experiment data and model artifacts
+data/
+results/
+artifacts/
+**/results/
+**/checkpoint-*/
+**/final_adapter/
+**/trainer_state.json
+**/optimizer.pt
+**/scheduler.pt
+**/rng_state*.pth
+**/adapter_model.safetensors
+**/training_args.bin
+
+# Large arrays, checkpoints, and serialized artifacts
+*.npz
+*.npy
+*.pt
+*.pth
+*.bin
+*.safetensors
+*.ckpt
+*.joblib
+*.pkl
+*.parquet
+*.arrow
+
+# Logs and transient outputs
+*.log
+*_stdout.log
+*_stderr.log
+run_log.txt
+run_log*.txt
+step*_*.log
+
+# Archives, installers, and bundled exports
+*.zip
+*.tar
+*.tar.gz
+*.gz
+*.7z
+*.exe
+*.dll
+*.lib
+*_bundle*/
+paper_bundle*/
+blog_export*/
+sidequest_*/
+tmp*/
+_audit_*/
+
+# Vendored benchmark repositories and third-party assets
+external/
+external_benchmarks/
+external_accidental_vulnerability/
+
+# Raw run folders in otherwise useful documentation directories
+faitheval_monitoring/raw/
+faitheval_monitoring/cache/
+steering vector/runs/
+localized_subset_uniqueness/results/
+
+# Notebooks often contain embedded outputs/secrets in this workspace.
+*.ipynb
+.ipynb_checkpoints/
+
+# LaTeX build byproducts
+*.aux
+*.bbl
+*.blg
+*.fdb_latexmk
+*.fls
+*.log
+*.out
+*.synctex.gz
+*.toc
+*.snm
+*.nav
+
+# OS/editor artifacts
+.DS_Store
+__MACOSX/
+nul
+
+# Local reference/generated PDFs at the workspace root.
+/2310.01405v4.pdf
+/2512.01797v2.pdf
+/refusal.pdf
+/fig1_localization_auc.pdf
+/fig1_localization_auc.png
+
+# Manuscripts, historical experiments, and internal workspace material are
+# retained locally but are not part of the public helper-library release.
+/hidden_commitment_paper/
+/workshop_hidden_commitment/
+/paper_update_context_*/
+/paper_appendix_*/
+/paper_drafts/
+/public_artifacts/
+/faitheval_monitoring/
+/localized_subset_uniqueness/
+/steering vector/
+/docs/findings/
+/docs/*.html
+/docs/*.csv
+/docs/*.json
+/docs/poster_*.md
+/docs/presentation_*.md
+/docs/silent_conflict_*.md
+/agent*.py
+/build*.py
+/edge*.py
+/phase*.py
+/step*.py
+/run_step1.py
+/utils.py
+/diagnose.py
+/analyze_dataset.py
+/calibrate_steering_scales.py
+/faitheval_*.py
+/AGENT*.md
+/CETT*.md
+/FAITHEVAL*.md
+/INTERNAL*.md
+/PHASE*.md
+/agents.md
+/nbc_*.html
+/report.tex
+/PUBLISHING_AUDIT.md
+/RESULTS.md
+/progress*.md
+/smi.txt
+/*.pid
+/*_out.txt
+
+# Duplicate/exported paper source copies.
+/hidden_commitment_gemma_revised_source/
+/figure4_bridge_split_pdf_updates/

@@ -14,7 +14,7 @@
 
 ## 0. Local PDF Inventory (`Docs/Paper/`)
 
-> **2026-11-15 audit:** a pre-freeze literature audit screened 1,260 more records and added 6 A-graded and 33 B-graded papers. Those papers are **not** core sources and are not merged into the matrix below. See §6 and [lit-audit-2026-11-15.md](lit-audit-2026-11-15/lit-audit-2026-11-15.md). `Docs/Paper/` now holds 26 PDFs: the 20 listed here plus the 6 A papers.
+> **2026-11-15 audit:** a pre-freeze literature audit screened 1,260 more records and added 6 A-graded and 33 B-graded papers. Those papers are **not** core sources and are not merged into the matrix below. See §6 and [lit-audit-2026-11-15.md](lit-audit-2026-11-15/lit-audit-2026-11-15.md). `Docs/Paper/` now holds 29 PDFs: the 20 listed here plus the 6 A papers and 3 cited B papers (`2603.20172.pdf`, `2610.23700.pdf`, `2610.00054.pdf`).
 
 ### A. 20 PDFs Currently Present in `Docs/Paper/` (19 Core + 1 Ch. 2 Lead; 0 Core Missing)
 | # | Local File | arXiv / Anthology ID | Short Name | Audit Coverage |

@@ -1,0 +1,13 @@
+cff-version: 1.2.0
+message: "If you use this code, please cite the workshop paper."
+title: "Hidden Commitment: When Language Models Silently Pick a Side and How Steering Can Surface It"
+type: conference-paper
+authors:
+  - family-names: Assefa
+    given-names: Samuel Dawit
+  - family-names: Cho
+    given-names: Jae Won
+conference:
+  name: "ICML 2026 AI4GOOD Workshop"
+year: 2026
+url: "https://openreview.net/forum?id=ldaR8qyupo"

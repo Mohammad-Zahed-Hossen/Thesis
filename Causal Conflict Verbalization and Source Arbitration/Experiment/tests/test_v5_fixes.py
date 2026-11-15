@@ -748,6 +748,13 @@ class TestPrefreezeAuditFixes(unittest.TestCase):
             with unittest.mock.patch.object(pf, "HERE", d), unittest.mock.patch.object(pf, "DEFAULT_PREREG", missing_default):
                 self.assertEqual(pf.check_prereg_consistency(prereg_path=missing_default), [])
 
+        with (
+            unittest.mock.patch.object(h4, "git_provenance", return_value={"git_commit": "a" * 40, "git_dirty": False}),
+            unittest.mock.patch.object(pf.subprocess, "check_output", return_value="Experiment/coding_v5/KEY_flips_do_not_open.csv\n"),
+        ):
+            _, key_errs = pf.check_git_tag(require_tag=None)
+            self.assertTrue(any("KEY_" in e for e in key_errs))
+
     def test_f6_truncated_jsonl_resume_and_loaders(self):
         with tempfile.TemporaryDirectory() as d:
             base_path = os.path.join(d, "base.jsonl")
@@ -835,6 +842,12 @@ class TestPrefreezeAuditFixes(unittest.TestCase):
                 rc = an.main()
             self.assertEqual(rc, 2)
 
+            with unittest.mock.patch.object(
+                sys, "argv", ["analyze_v5.py", "--runs", f_dev, f_dev, "--output_dir", out_dir]
+            ):
+                rc_dup = an.main()
+            self.assertEqual(rc_dup, 2)
+
     def test_f8_edit_gates_doubled_noun_foil_and_preface(self):
         v_bad = tp.make_variants(
             "The image problem and the typed text problem differ in their values for the final total here. The written text is more reliable.",
@@ -875,6 +888,11 @@ class TestPrefreezeAuditFixes(unittest.TestCase):
         self.assertEqual(v4.extract_answer("#### \u221218"), ("-18", "hash_direct"))
         self.assertEqual(sc.extract_answer_strict("#### \u221218"), ("-18", "hash"))
         self.assertEqual(sc.extract_math_final_answer("The final answer is \u221218."), "-18")
+        self.assertEqual(sc.extract_math_final_answer("Final answer: 24"), "24")
+        self.assertEqual(sc.extract_math_final_answer("Final answer: $24"), "24")
+        self.assertEqual(sc.extract_math_final_answer("**Final answer:** **24**"), "24")
+        self.assertEqual(sc.extract_math_final_answer("The final answer is: 12."), "12")
+        self.assertIsNone(sc.extract_math_final_answer("the answer is not 5"))
         self.assertEqual(h5.candidate_text("\u221218"), "-18")
 
         it = h5.Item(id="1", source="gsm8k", image=None, image_question="q", text_question="q2", y_image="1", y_text="2")
