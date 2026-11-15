@@ -641,9 +641,14 @@ _RESULT_OUTPUT_PREFIXES = (
 
 def git_provenance(repo_dir: str = HERE) -> Dict[str, Any]:
     """Return git HEAD commit, dirty status (ignoring untracked result outputs), and prereg-v5 tag."""
+    norm_dir = os.path.normpath(os.path.abspath(repo_dir))
+    project_dir = os.path.dirname(norm_dir) if os.path.basename(norm_dir) == "Experiment" else norm_dir
+
     def _git(args: Sequence[str], strip: bool = True) -> Optional[str]:
         try:
-            proc = subprocess.run(["git", "-C", repo_dir, *args], capture_output=True, text=True, timeout=5)
+            proc = subprocess.run(["git", "-C", project_dir, *args], capture_output=True, text=True, timeout=5)
+            if proc.returncode != 0 and "cannot change to" in (getattr(proc, "stderr", None) or ""):
+                proc = subprocess.run(["git", *args], cwd=project_dir, capture_output=True, text=True, timeout=5)
         except (OSError, subprocess.SubprocessError):
             return None
         if proc.returncode != 0:
@@ -651,8 +656,16 @@ def git_provenance(repo_dir: str = HERE) -> Dict[str, Any]:
         return proc.stdout.strip() if strip else proc.stdout
 
     head = _git(["rev-parse", "HEAD"])
-    status_raw = _git(["status", "--porcelain", "--untracked-files=all"], strip=False)
+    prefix_raw = _git(["rev-parse", "--show-prefix"], strip=False)
+    status_raw = _git(["status", "--porcelain", "--untracked-files=all", "--", "."], strip=False)
     tag_commit = _git(["rev-parse", "refs/tags/prereg-v5^{commit}"])
+
+    prefix = (prefix_raw or "").strip().strip('"').replace("\\", "/")
+    if prefix and not prefix.endswith("/"):
+        prefix += "/"
+    if prefix.endswith("Experiment/"):
+        prefix = prefix[:-len("Experiment/")]
+    proj_name_prefix = f"{os.path.basename(project_dir).replace(chr(92), '/')}/"
 
     all_lines: List[str] = []
     output_lines: List[str] = []
@@ -664,6 +677,10 @@ def git_provenance(repo_dir: str = HERE) -> Dict[str, Any]:
             all_lines.append(line)
             code = line[:2]
             rel = line[3:].strip().strip('"').replace("\\", "/")
+            if prefix and rel.startswith(prefix):
+                rel = rel[len(prefix):]
+            elif proj_name_prefix != "/" and rel.startswith(proj_name_prefix):
+                rel = rel[len(proj_name_prefix):]
             if code == "??" and rel.startswith(_RESULT_OUTPUT_PREFIXES):
                 output_lines.append(line)
             else:

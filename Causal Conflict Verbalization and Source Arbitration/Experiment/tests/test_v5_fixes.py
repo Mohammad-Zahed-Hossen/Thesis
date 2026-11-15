@@ -934,6 +934,51 @@ class TestPrefreezeAuditFixes(unittest.TestCase):
             prov_dirty = h4.git_provenance()
             self.assertTrue(prov_dirty["git_dirty"])
 
+        nested_prefix = "Causal Conflict Verbalization and Source Arbitration/"
+
+        def _fake_git_nested(cmd, capture_output=True, text=True, timeout=5):
+            sub = cmd[3:]
+            if sub == ["rev-parse", "--show-prefix"]:
+                return SimpleNamespace(returncode=0, stdout=nested_prefix + "\n")
+            if sub[:1] == ["status"]:
+                self.assertEqual(sub[-2:], ["--", "."])
+                return SimpleNamespace(
+                    returncode=0,
+                    stdout=(
+                        f'?? "{nested_prefix}Experiment/results_v5/conf.jsonl"\n'
+                        f'?? "{nested_prefix}Experiment/results_v4/dev.jsonl"\n'
+                    ),
+                )
+            return _fake_git(cmd)
+
+        with unittest.mock.patch.object(h4.subprocess, "run", side_effect=_fake_git_nested):
+            prov_nested = h4.git_provenance()
+            self.assertFalse(prov_nested["git_dirty"])
+            self.assertTrue(prov_nested["git_dirty_including_outputs"])
+            self.assertEqual(prov_nested["git_untracked_outputs"], 2)
+
+        def _fake_git_nested_untracked(cmd, capture_output=True, text=True, timeout=5):
+            if cmd[3:4] == ["status"]:
+                return SimpleNamespace(
+                    returncode=0,
+                    stdout=f'?? "{nested_prefix}Experiment/preflight_v5.py"\n',
+                )
+            return _fake_git_nested(cmd)
+
+        with unittest.mock.patch.object(h4.subprocess, "run", side_effect=_fake_git_nested_untracked):
+            self.assertTrue(h4.git_provenance()["git_dirty"])
+
+        def _fake_git_nested_modified(cmd, capture_output=True, text=True, timeout=5):
+            if cmd[3:4] == ["status"]:
+                return SimpleNamespace(
+                    returncode=0,
+                    stdout=f' M "{nested_prefix}Experiment/harness_v5.py"\n',
+                )
+            return _fake_git_nested(cmd)
+
+        with unittest.mock.patch.object(h4.subprocess, "run", side_effect=_fake_git_nested_modified):
+            self.assertTrue(h4.git_provenance()["git_dirty"])
+
 
 if __name__ == "__main__":
     unittest.main()
