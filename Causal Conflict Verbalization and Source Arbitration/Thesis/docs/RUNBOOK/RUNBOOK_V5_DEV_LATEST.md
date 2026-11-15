@@ -328,11 +328,13 @@ Pass the explicit `v5dev_conflict_*` and `v5dev_chartqa_{tp,base,donor}_*` globs
 ## Step 6: Disconnect Recovery & Post-Run Local Handoff
 
 ### If Colab Disconnects Mid-Run
+
 1. Reconnect to an **L4** or **A100** runtime.
 2. Re-run **Cell 1** and **Cell 2**.
 3. Re-run the exact interrupted command with the **same `--run_tag`**. `harness_v5.py` and `transplant_v5.py` automatically skip completed request keys and repair any half-written trailing line in `.jsonl`.
 
 ### Bring Outputs Back & Check Donor Drift Locally
+
 1. Before copying new Colab results into [`Experiment/results_v5/`](../../../Experiment/results_v5/), move your previous local `v5dev_*` files into a temporary backup folder (e.g., `Experiment/results_v5_prev_backup/`, outside `results_v5/`) so old and new dev files are never pooled.
 2. Download the contents of `MyDrive/Thesis_v5/results_v5/` into [`Experiment/results_v5/`](../../../Experiment/results_v5/).
 3. Diff old vs. new `donor` generations (`v5dev_*_donor_*.jsonl`) locally before deciding whether [`Experiment/sample_v5_for_coding.py`](../../../Experiment/sample_v5_for_coding.py) needs to regenerate `Experiment/coding_v5/` sheets for Coder A and Coder B:
