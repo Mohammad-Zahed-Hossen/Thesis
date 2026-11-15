@@ -6,6 +6,7 @@ import os
 import sys
 import tempfile
 import unittest
+import unittest.mock
 from types import SimpleNamespace
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -583,6 +584,355 @@ class TestSecondBatchFixes(unittest.TestCase):
             f_eval = sv5.evaluate_flips(ca_f, None, key_f)
             self.assertEqual(f_eval["grammatical_rate"], 1.0)
             self.assertEqual(f_eval["names_intended_source_rate"], 1.0)
+
+
+class TestPrefreezeAuditFixes(unittest.TestCase):
+    def test_f2_manifest_git_append_only_invocations_and_echo_commit(self):
+        self.assertEqual(h5.EchoBackend().info()["resolved_model_commit"], "echo")
+        with tempfile.TemporaryDirectory() as d:
+            p = os.path.join(d, "run.manifest.json")
+            script = os.path.abspath(__file__)
+            cfg = h5.V5Config(run_tag="t", stage="base", model_id="Qwen/Qwen2.5-VL-3B-Instruct")
+            b1 = SimpleNamespace(info=lambda: {"peak_vram_gb": 12.5, "resolved_model_commit": "abc", "gpu": "L4"})
+            h4.write_manifest(p, cfg, b1, 10, [script], force_write=True)
+            b2 = SimpleNamespace(info=lambda: {"peak_vram_gb": 16.0, "resolved_model_commit": "abc", "gpu": "L4"})
+            h4.write_manifest(p, cfg, b2, 20, [script], force_write=True)
+            with open(p, encoding="utf-8") as f:
+                saved = json.load(f)
+            self.assertIn("git", saved)
+            self.assertEqual(len(saved["invocations"]), 2)
+            self.assertEqual(saved["invocations"][0]["environment"]["peak_vram_gb"], 12.5)
+            self.assertEqual(saved["invocations"][1]["environment"]["peak_vram_gb"], 16.0)
+            self.assertEqual(saved["environment"]["max_peak_vram_gb"], 16.0)
+
+    def test_f3_coding_canonical_mapping_kappa_bom_and_quotas(self):
+        import sample_v5_for_coding as sv5
+
+        for lbl in ("undetermined", "absent", "neither", "both", "unclear"):
+            self.assertEqual(sv5.canonical_verdict_label(lbl), "no_verdict")
+        self.assertIsNone(sv5.cohens_kappa(["image"] * 6, ["image"] * 6))
+
+        with tempfile.TemporaryDirectory() as d:
+            bom_csv = os.path.join(d, "bom.csv")
+            with open(bom_csv, "w", encoding="utf-8-sig", newline="") as f:
+                w = csv.DictWriter(f, fieldnames=["sample_id", "coder_stated_source"])
+                w.writeheader()
+                w.writerow({"sample_id": "V0001", "coder_stated_source": "text"})
+            loaded = sv5.read_csv_map(bom_csv)
+            self.assertIn("V0001", loaded)
+
+            key_v = {
+                "V0001": {
+                    "sample_id": "V0001", "model_id": "Qwen/Qwen2.5-VL-3B-Instruct",
+                    "regime": "math", "predicted_stated_source": "undetermined",
+                },
+                "V0002": {
+                    "sample_id": "V0002", "model_id": "Qwen/Qwen2.5-VL-3B-Instruct",
+                    "regime": "math", "predicted_stated_source": "image",
+                },
+                "V0003": {
+                    "sample_id": "V0003", "model_id": "Qwen/Qwen2.5-VL-3B-Instruct",
+                    "regime": "chartqa", "predicted_stated_source": "report",
+                },
+            }
+            ca_v = {
+                "V0001": {"sample_id": "V0001", "coder_stated_source": "neither"},
+                "V0002": {"sample_id": "V0002", "coder_stated_source": "image"},
+                "V0003": {"sample_id": "V0003", "coder_stated_source": "report"},
+            }
+            cb_v = {
+                "V0001": {"sample_id": "V0001", "coder_stated_source": "unclear"},
+                "V0002": {"sample_id": "V0002", "coder_stated_source": "image"},
+                "V0003": {"sample_id": "V0003", "coder_stated_source": "report"},
+            }
+            v_eval = sv5.evaluate_verdicts(ca_v, cb_v, key_v)
+            self.assertEqual(v_eval["parser_accuracy_overall"], 1.0)
+            self.assertTrue(any("confusion" in k for k in v_eval))
+
+            key_f = {
+                "F0001": {
+                    "sample_id": "F0001", "model_id": "Qwen/Qwen2.5-VL-3B-Instruct",
+                    "regime": "math", "flip_source": "text", "intended_flip_source": "text",
+                },
+                "F0002": {
+                    "sample_id": "F0002", "model_id": "Qwen/Qwen2.5-VL-3B-Instruct",
+                    "regime": "math", "flip_source": "image", "intended_flip_source": "image",
+                },
+            }
+            ca_f = {
+                "F0001": {"sample_id": "F0001", "coder_grammatical_coherent": "1", "coder_names_intended_source": "1"},
+                "F0002": {"sample_id": "F0002", "coder_grammatical_coherent": "0", "coder_names_intended_source": "1"},
+            }
+            cb_f = {
+                "F0001": {"sample_id": "F0001", "coder_grammatical_coherent": "1", "coder_names_intended_source": "1"},
+                "F0002": {"sample_id": "F0002", "coder_grammatical_coherent": "1", "coder_names_intended_source": "1"},
+            }
+            f_eval = sv5.evaluate_flips(ca_f, cb_f, key_f)
+            self.assertAlmostEqual(f_eval["grammatical_agreement"], 0.5)
+
+            in_dir = os.path.join(d, "in")
+            out_dir = os.path.join(d, "out")
+            os.makedirs(in_dir)
+            models = (
+                ("Qwen/Qwen2.5-VL-3B-Instruct", "qwen25"),
+                ("Qwen/Qwen2.5-VL-7B-Instruct", "qwen25_7b"),
+                ("Qwen/Qwen2-VL-2B-Instruct", "qwen2"),
+            )
+            for mid, tag in models:
+                for split, regime, s1, txt_own in (
+                    (
+                        "conflict", "math",
+                        "The image and the typed text describe two different math problems with separate solutions.",
+                        "The image is more reliable.",
+                    ),
+                    (
+                        "chartqa", "chartqa",
+                        "The chart and the report state two different values in this figure comparison.",
+                        "The chart is more reliable.",
+                    ),
+                ):
+                    donor_path = os.path.join(in_dir, f"v5dev_{split}_donor_{tag}.jsonl")
+                    with open(donor_path, "w", encoding="utf-8") as fd:
+                        for i in range(80):
+                            iid = f"{split}_{tag}_{i}"
+                            fd.write(json.dumps({
+                                "id": iid, "model_id": mid, "regime": regime, "phase": "dev", "stage": "donor",
+                                "family": "donor", "k": 1, "order": "image_first",
+                                "y_image": "11", "y_text": "22",
+                                "full_text": f"{s1} {txt_own}\n#### 11",
+                            }) + "\n")
+            with unittest.mock.patch.object(
+                sys, "argv", ["sample_v5_for_coding.py", "sample", "--input_dir", in_dir, "--out_dir", out_dir]
+            ):
+                sv5.main()
+            v_rows = list(sv5.read_csv_map(os.path.join(out_dir, "coder_A_verdicts.csv")).values())
+            f_rows = list(sv5.read_csv_map(os.path.join(out_dir, "coder_A_flips.csv")).values())
+            self.assertEqual(len(v_rows), 200)
+            self.assertEqual(len(f_rows), 150)
+            math_3b_7b = sum(
+                1 for r in v_rows
+                if r["regime"] == "math" and r["model_id"] in ("Qwen/Qwen2.5-VL-3B-Instruct", "Qwen/Qwen2.5-VL-7B-Instruct")
+            )
+            chart_3b_7b = sum(
+                1 for r in v_rows
+                if r["regime"] == "chartqa" and r["model_id"] in ("Qwen/Qwen2.5-VL-3B-Instruct", "Qwen/Qwen2.5-VL-7B-Instruct")
+            )
+            diag_2b = sum(1 for r in v_rows if r["model_id"] == "Qwen/Qwen2-VL-2B-Instruct")
+            self.assertEqual((math_3b_7b, chart_3b_7b, diag_2b), (120, 48, 32))
+            flips_3b = sum(1 for r in f_rows if r["model_id"] == "Qwen/Qwen2.5-VL-3B-Instruct")
+            flips_7b = sum(1 for r in f_rows if r["model_id"] == "Qwen/Qwen2.5-VL-7B-Instruct")
+            flips_2b = sum(1 for r in f_rows if r["model_id"] == "Qwen/Qwen2-VL-2B-Instruct")
+            self.assertEqual((flips_3b, flips_7b, flips_2b), (60, 60, 30))
+
+    def test_f5_and_preflight_prereg_consistency(self):
+        import preflight_v5 as pf
+
+        self.assertEqual(pf.check_prereg_consistency(), [])
+        bad_models = dict(h4.MODEL_PINS)
+        bad_models["Qwen/Qwen2.5-VL-3B-Instruct"] = "0" * 40
+        self.assertTrue(any("0" * 40 in e for e in pf.check_prereg_consistency(model_pins=bad_models)))
+        bad_ds = dict(h4.DATASET_PINS)
+        bad_ds[next(iter(bad_ds))] = "1" * 40
+        self.assertTrue(any("1" * 40 in e for e in pf.check_prereg_consistency(dataset_pins=bad_ds)))
+
+        with tempfile.TemporaryDirectory() as d:
+            _, git_errs = pf.check_git_tag(require_tag=None, repo_dir=d)
+            self.assertEqual(git_errs, [])
+            _, req_errs = pf.check_git_tag(require_tag="prereg-v5", repo_dir=d)
+            self.assertTrue(req_errs)
+
+            flat_prereg = os.path.join(d, "PREREGISTRATION_VERDICT_TRANSPLANT.md")
+            with open(pf.DEFAULT_PREREG, "r", encoding="utf-8") as src, open(flat_prereg, "w", encoding="utf-8") as dst:
+                dst.write(src.read())
+            missing_default = os.path.join(d, "missing", "PREREGISTRATION_VERDICT_TRANSPLANT.md")
+            with unittest.mock.patch.object(pf, "HERE", d), unittest.mock.patch.object(pf, "DEFAULT_PREREG", missing_default):
+                self.assertEqual(pf.check_prereg_consistency(prereg_path=missing_default), [])
+
+    def test_f6_truncated_jsonl_resume_and_loaders(self):
+        with tempfile.TemporaryDirectory() as d:
+            base_path = os.path.join(d, "base.jsonl")
+            donor_path = os.path.join(d, "donor.jsonl")
+            with open(base_path, "w", encoding="utf-8") as f:
+                f.write(json.dumps({
+                    "id": "it1", "family": "base_image", "regime": "math", "y_image": "42", "y_text": "99",
+                    "full_text": "working\n#### 42",
+                }) + "\n")
+                f.write(json.dumps({
+                    "id": "it1", "family": "base_text", "regime": "math", "y_image": "42", "y_text": "99",
+                    "full_text": "working\n#### 99",
+                }) + "\n")
+                f.write('{"id": "it2", "family":')
+            h4.ensure_trailing_newline(base_path)
+            with open(base_path, "r", encoding="utf-8") as f:
+                self.assertTrue(f.read().endswith("\n"))
+            self.assertEqual(h5.competent_ids(base_path, parser="structured"), {"it1"})
+
+            with open(donor_path, "w", encoding="utf-8") as f:
+                f.write(json.dumps({
+                    "id": "it1", "model_id": "Qwen/Qwen2.5-VL-3B-Instruct", "family": "donor", "arm": "nonbinding", "k": 1,
+                    "order": "image_first", "full_text": "The image is more reliable. #### 42",
+                }) + "\n")
+                f.write('{"id": "it2", "family":')
+            verbs = tp.load_donor_verbalizations(donor_path, "Qwen/Qwen2.5-VL-3B-Instruct")
+            self.assertIn(("it1", "image_first"), verbs)
+
+    def test_f7_confirm_guards_and_mixed_phase_refusal(self):
+        base_kw = dict(
+            run_tag="conf",
+            stage="base",
+            model_id="Qwen/Qwen2.5-VL-3B-Instruct",
+            model_revision=h4.MODEL_PINS["Qwen/Qwen2.5-VL-3B-Instruct"],
+            dataset_revision=h4.DATASET_PINS[h4.CONFLICT_DATASET],
+            split="conflict",
+            phase="confirm",
+        )
+        ok_args = SimpleNamespace(
+            competency_parser="structured",
+            beh_k=[1],
+            allow_diagnostic_confirm=False,
+            allow_untagged_confirm=True,
+        )
+        h5.validate_confirm_config(h5.V5Config(**base_kw), ok_args)
+
+        with self.assertRaises(SystemExit):
+            h5.validate_confirm_config(h5.V5Config(**{**base_kw, "model_revision": "bad_rev"}), ok_args)
+        with self.assertRaises(SystemExit):
+            h5.validate_confirm_config(h5.V5Config(**{**base_kw, "limit": 10}), ok_args)
+        with self.assertRaises(SystemExit):
+            bad_parser_cfg = h5.V5Config(**{
+                **base_kw,
+                "stage": "transplant",
+                "extra": {"competency_parser": "lenient", "beh_k": [1], "n_competent": 250},
+            })
+            h5.validate_confirm_config(bad_parser_cfg, ok_args)
+        with self.assertRaises(SystemExit):
+            diag_cfg = h5.V5Config(**{
+                **base_kw,
+                "model_id": "Qwen/Qwen2-VL-2B-Instruct",
+                "model_revision": h4.MODEL_PINS["Qwen/Qwen2-VL-2B-Instruct"],
+            })
+            h5.validate_confirm_config(diag_cfg, ok_args)
+        with self.assertRaises(SystemExit):
+            strict_tag_args = SimpleNamespace(**{**vars(ok_args), "allow_untagged_confirm": False})
+            h5.validate_confirm_config(h5.V5Config(**base_kw), strict_tag_args)
+        with self.assertRaises(SystemExit):
+            h5.validate_confirm_config(h5.V5Config(**{**base_kw, "max_pixels": 12345}), ok_args)
+        with self.assertRaises(SystemExit):
+            h5.validate_confirm_config(h5.V5Config(**{**base_kw, "min_pixels": 100}), ok_args)
+
+        with tempfile.TemporaryDirectory() as d:
+            f_dev = os.path.join(d, "dev.jsonl")
+            f_conf = os.path.join(d, "conf.jsonl")
+            out_dir = os.path.join(d, "out")
+            for path, ph in ((f_dev, "dev"), (f_conf, "confirm")):
+                with open(path, "w", encoding="utf-8") as f:
+                    for r in synth(n=2, regime="math", model_id="Qwen/Qwen2.5-VL-3B-Instruct"):
+                        r["phase"] = ph
+                        f.write(json.dumps(r) + "\n")
+            with unittest.mock.patch.object(
+                sys, "argv", ["analyze_v5.py", "--runs", f_dev, f_conf, "--output_dir", out_dir]
+            ):
+                rc = an.main()
+            self.assertEqual(rc, 2)
+
+    def test_f8_edit_gates_doubled_noun_foil_and_preface(self):
+        v_bad = tp.make_variants(
+            "The image problem and the typed text problem differ in their values for the final total here. The written text is more reliable.",
+            "math",
+        )
+        self.assertFalse(v_bad.ok)
+        self.assertEqual(v_bad.reason, "gate4_grammar")
+        self.assertEqual(sc.stated_reliable_source("The typed text, unlike the image, is more reliable.", regime="math"), "undetermined")
+        self.assertEqual(
+            sc.stated_reliable_source("Both the image and the typed text seem useful, and the image and typed text is more reliable.", regime="math"),
+            "undetermined",
+        )
+        self.assertEqual(
+            sc.stated_reliable_source("Given that the chart shows the bars clearly, the chart is more reliable.", regime="chartqa"),
+            "chart",
+        )
+
+    def test_f10_f13_and_upgrade5_analysis_unicode_minus_and_eot(self):
+        rows_3b = synth(n=18, eff_bind=1.2, eff_non=0.3, ceil=2.0, seed=1, model_id="Qwen/Qwen2.5-VL-3B-Instruct")
+        rows_7b = synth(n=18, eff_bind=0.8, eff_non=0.2, ceil=2.0, seed=2, model_id="Qwen/Qwen2.5-VL-7B-Instruct")
+        for r in rows_3b:
+            if r["outcome"] == "dl":
+                idx = int(r["id"][2:])
+                r["verdict_nll"] = (0.1 * (idx + 1)) if r["verdict"] == "flip" else 0.2
+        res = an.analyze_group(rows_3b, reps=100, draws=100)
+        self.assertIn("per_order", res["behaviour_primary"])
+        per_order = res["behaviour_primary"]["per_order"]
+        self.assertIn("binding_flip_minus_own_image_first", per_order)
+        self.assertIn("binding_flip_minus_own_text_first", per_order)
+        self.assertIn("binding_flip_minus_own_order_sign_flip", per_order)
+        self.assertIn("verdict_nll_resistance_tertiles", res["secondary"])
+
+        sz = an.analyze_size_comparison(rows_3b, rows_7b, reps=100)
+        self.assertIn("delta_beh_bind_7b_minus_3b", sz)
+        self.assertIn("delta_beh_bind_pair_7b_minus_3b", sz)
+        self.assertIn("bad_fit", an.R_SCRIPT)
+
+        self.assertEqual(v4.extract_answer("#### \u221218"), ("-18", "hash_direct"))
+        self.assertEqual(sc.extract_answer_strict("#### \u221218"), ("-18", "hash"))
+        self.assertEqual(sc.extract_math_final_answer("The final answer is \u221218."), "-18")
+        self.assertEqual(h5.candidate_text("\u221218"), "-18")
+
+        it = h5.Item(id="1", source="gsm8k", image=None, image_question="q", text_question="q2", y_image="1", y_text="2")
+        req = h5.Req(it, "k", [], "score", "The image is more reliable.\n\n####", 0, {"outcome": "dl"})
+        cfg = h5.V5Config(run_tag="t", stage="transplant", model_id="Qwen/Qwen2.5-VL-3B-Instruct", backend="echo")
+        scored = h5.EchoBackend().score([req], cfg)[0]
+        for col in ("dl_with_eot", "lp_image_eot", "lp_text_eot", "ws_skipped_image", "ws_skipped_text"):
+            self.assertIn(col, scored)
+
+    def test_f2_hf_snapshot_resolution_and_git_provenance(self):
+        sha = "a" * 40
+        sha2 = "b" * 40
+        m1 = SimpleNamespace(config=SimpleNamespace(_commit_hash=sha, _name_or_path="org/m"))
+        self.assertEqual(h4.resolve_hf_snapshot_commit("org/m", "main", model=m1), sha)
+
+        m2 = SimpleNamespace(config=SimpleNamespace(_commit_hash=None, _name_or_path=f"/cache/hub/models--org--m/snapshots/{sha2}"))
+        self.assertEqual(h4.resolve_hf_snapshot_commit("org/m", "main", model=m2), sha2)
+
+        with tempfile.TemporaryDirectory() as d:
+            snaps = os.path.join(d, "models--org--m", "snapshots", sha)
+            refs = os.path.join(d, "models--org--m", "refs")
+            os.makedirs(snaps, exist_ok=True)
+            os.makedirs(refs, exist_ok=True)
+            with open(os.path.join(refs, "main"), "w", encoding="utf-8") as fh:
+                fh.write(sha + "\n")
+            self.assertEqual(h4.resolve_hf_snapshot_commit("org/m", "main", model=None, cache_dir=d), sha)
+            self.assertIsNone(h4.resolve_hf_snapshot_commit("org/missing", "not_a_sha", model=None, cache_dir=d))
+
+        def _fake_git(cmd, capture_output=True, text=True, timeout=5):
+            sub = cmd[3:]
+            if sub == ["rev-parse", "HEAD"]:
+                return SimpleNamespace(returncode=0, stdout=sha + "\n")
+            if sub[:1] == ["status"]:
+                return SimpleNamespace(
+                    returncode=0,
+                    stdout="?? Experiment/results_v5/conf.jsonl\n?? results_v4/dev.jsonl\n",
+                )
+            if sub == ["rev-parse", "refs/tags/prereg-v5^{commit}"]:
+                return SimpleNamespace(returncode=0, stdout=sha + "\n")
+            return SimpleNamespace(returncode=1, stdout="")
+
+        with unittest.mock.patch.object(h4.subprocess, "run", side_effect=_fake_git):
+            prov = h4.git_provenance()
+            self.assertFalse(prov["git_dirty"])
+            self.assertTrue(prov["git_dirty_including_outputs"])
+            self.assertEqual(prov["git_untracked_outputs"], 2)
+
+        def _fake_git_dirty(cmd, capture_output=True, text=True, timeout=5):
+            if cmd[3:4] == ["status"]:
+                return SimpleNamespace(
+                    returncode=0,
+                    stdout="?? Experiment/results_v5/conf.jsonl\n M Experiment/harness_v5.py\n",
+                )
+            return _fake_git(cmd)
+
+        with unittest.mock.patch.object(h4.subprocess, "run", side_effect=_fake_git_dirty):
+            prov_dirty = h4.git_provenance()
+            self.assertTrue(prov_dirty["git_dirty"])
 
 
 if __name__ == "__main__":

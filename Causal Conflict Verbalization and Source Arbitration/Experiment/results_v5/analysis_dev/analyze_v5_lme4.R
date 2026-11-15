@@ -8,17 +8,18 @@ for (g in unique(paste(d$model_id, d$regime))) {
   s <- d[paste(d$model_id, d$regime) == g, ]
   s$K <- factor(s$k); contrasts(s$K) <- contr.sum(4)
   cat("\n=====", g, "=====\n")
+  bad_fit <- function(m) inherits(m, "error") || isSingular(m) || !is.null(m@optinfo$conv$lme4$messages)
   fit_lmm <- function(f) tryCatch(lmer(f, data = subset(s, outcome == "dl")), error = function(e) e)
   m <- fit_lmm(dl ~ D*B + D*O + K + (1 + D | item))
-  if (inherits(m, "error") || isSingular(m)) { cat("lmer: by-item slope dropped\n"); m <- fit_lmm(dl ~ D*B + D*O + K + (1 | item)) }
-  if (inherits(m, "error") || isSingular(m)) cat("lmer: FAILED (singular or error)\n") else print(summary(m))
+  if (bad_fit(m)) { cat("lmer: by-item slope dropped\n"); m <- fit_lmm(dl ~ D*B + D*O + K + (1 | item)) }
+  if (bad_fit(m)) cat("lmer: FAILED (singular, non-convergent, or error)\n") else print(summary(m))
   b <- subset(s, outcome == "beh" & !is.na(y_image))
   if (nrow(b) > 0) {
     ctl <- glmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 2e5))
     fit_glmm <- function(f) tryCatch(glmer(f, data = b, family = binomial, control = ctl), error = function(e) e)
     gm <- fit_glmm(y_image ~ D*B + D*O + (1 + D | item))  # behavioural rows use k = 1 only, so no K term
-    if (inherits(gm, "error") || isSingular(gm)) { cat("glmer: by-item slope dropped\n"); gm <- fit_glmm(y_image ~ D*B + D*O + (1 | item)) }
-    if (inherits(gm, "error") || isSingular(gm)) cat("glmer: FAILED (singular or error)\n") else print(summary(gm))
+    if (bad_fit(gm)) { cat("glmer: by-item slope dropped\n"); gm <- fit_glmm(y_image ~ D*B + D*O + (1 | item)) }
+    if (bad_fit(gm)) cat("glmer: FAILED (singular, non-convergent, or error)\n") else print(summary(gm))
   }
 }
 cat("\n"); print(sessionInfo())

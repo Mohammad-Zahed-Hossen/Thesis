@@ -475,6 +475,76 @@
             "benchmark": 0.08333333333333333
           }
         },
+        "per_order": {
+          "binding_flip_minus_own_image_first": {
+            "n": 6,
+            "mean": 0.0,
+            "ci95": [
+              0.0,
+              0.0
+            ]
+          },
+          "binding_flip_minus_own_text_first": {
+            "n": 6,
+            "mean": 0.16666666666666666,
+            "ci95": [
+              0.0,
+              0.5
+            ]
+          },
+          "binding_flip_minus_own_order_sign_flip": false,
+          "binding_matched_pair_para_flip_minus_para_image_first": {
+            "n": 6,
+            "mean": 0.0,
+            "ci95": [
+              0.0,
+              0.0
+            ]
+          },
+          "binding_matched_pair_para_flip_minus_para_text_first": {
+            "n": 6,
+            "mean": 0.16666666666666666,
+            "ci95": [
+              0.0,
+              0.5
+            ]
+          },
+          "binding_matched_pair_para_flip_minus_para_order_sign_flip": false,
+          "nonbinding_flip_minus_own_image_first": {
+            "n": 6,
+            "mean": 0.0,
+            "ci95": [
+              0.0,
+              0.0
+            ]
+          },
+          "nonbinding_flip_minus_own_text_first": {
+            "n": 6,
+            "mean": 0.16666666666666666,
+            "ci95": [
+              0.0,
+              0.5
+            ]
+          },
+          "nonbinding_flip_minus_own_order_sign_flip": false,
+          "nonbinding_matched_pair_para_flip_minus_para_image_first": {
+            "n": 6,
+            "mean": 0.0,
+            "ci95": [
+              0.0,
+              0.0
+            ]
+          },
+          "nonbinding_matched_pair_para_flip_minus_para_text_first": {
+            "n": 6,
+            "mean": 0.16666666666666666,
+            "ci95": [
+              0.0,
+              0.5
+            ]
+          },
+          "nonbinding_matched_pair_para_flip_minus_para_order_sign_flip": false
+        },
         "holm_adjusted": {
           "T2_beh": 1.0,
           "T2_beh_pair": 1.0,
@@ -564,6 +634,7 @@
             0.5965832654837868
           ]
         },
+        "cde_binding_order_sign_flip": false,
         "matched_pair_nonbinding": {
           "n": 6,
           "mean": 0.47855312519578647,
@@ -588,6 +659,7 @@
             0.4292368842920647
           ]
         },
+        "cde_nonbinding_order_sign_flip": false,
         "cde_decomposition": {
           "binding_none_minus_own": {
             "n": 6,
@@ -805,6 +877,68 @@
           "own": 0.7534666232001849,
           "para": 1.0117413921015819,
           "para_flip": 1.1346675327814773
+        },
+        "verdict_nll_resistance_tertiles": {
+          "tertile1_low_resistance": {
+            "n": 2,
+            "mean_verdict_nll_diff": 0.04562436275473912,
+            "dl_cde_binding": {
+              "n": 2,
+              "mean": 0.3951006622068235,
+              "ci95": [
+                0.3054067668970674,
+                0.4847945575165795
+              ]
+            },
+            "beh_cde_binding": {
+              "n": 2,
+              "mean": 0.0,
+              "ci95": [
+                0.0,
+                0.0
+              ]
+            }
+          },
+          "tertile2_mid_resistance": {
+            "n": 2,
+            "mean_verdict_nll_diff": 0.0847540100895618,
+            "dl_cde_binding": {
+              "n": 2,
+              "mean": 0.34606938145346555,
+              "ci95": [
+                0.2752775215364333,
+                0.41686124137049774
+              ]
+            },
+            "beh_cde_binding": {
+              "n": 2,
+              "mean": 0.25,
+              "ci95": [
+                0.0,
+                0.5
+              ]
+            }
+          },
+          "tertile3_high_resistance": {
+            "n": 2,
+            "mean_verdict_nll_diff": 0.31651997923915387,
+            "dl_cde_binding": {
+              "n": 2,
+              "mean": 0.6413654308368374,
+              "ci95": [
+                0.44679334112637054,
+                0.8359375205473043
+              ]
+            },
+            "beh_cde_binding": {
+              "n": 2,
+              "mean": 0.0,
+              "ci95": [
+                0.0,
+                0.0
+              ]
+            }
+          }
         },
         "manipulation_check": {
           "donor": {
@@ -1314,6 +1448,76 @@
             "rho_beh_descriptive": 0.8333333333333334
           }
         },
+        "per_order": {
+          "binding_flip_minus_own_image_first": {
+            "n": 80,
+            "mean": 0.475,
+            "ci95": [
+              0.3625,
+              0.5875
+            ]
+          },
+          "binding_flip_minus_own_text_first": {
+            "n": 80,
+            "mean": 0.5125,
+            "ci95": [
+              0.4,
+              0.625
+            ]
+          },
+          "binding_flip_minus_own_order_sign_flip": false,
+          "binding_matched_pair_para_flip_minus_para_image_first": {
+            "n": 80,
+            "mean": 0.6,
+            "ci95": [
+              0.4875,
+              0.7
+            ]
+          },
+          "binding_matched_pair_para_flip_minus_para_text_first": {
+            "n": 80,
+            "mean": 0.675,
+            "ci95": [
+              0.575,
+              0.775
+            ]
+          },
+          "binding_matched_pair_para_flip_minus_para_order_sign_flip": false,
+          "nonbinding_flip_minus_own_image_first": {
+            "n": 80,
+            "mean": 0.25,
+            "ci95": [
+              0.125,
+              0.3625
+            ]
+          },
+          "nonbinding_flip_minus_own_text_first": {
+            "n": 80,
+            "mean": 0.5125,
+            "ci95": [
+              0.4,
+              0.625
+            ]
+          },
+          "nonbinding_flip_minus_own_order_sign_flip": false,
+          "nonbinding_matched_pair_para_flip_minus_para_image_first": {
+            "n": 80,
+            "mean": 0.2875,
+            "ci95": [
+              0.1875,
+              0.3875
+            ]
+          },
+          "nonbinding_matched_pair_para_flip_minus_para_text_first": {
+            "n": 80,
+            "mean": 0.525,
+            "ci95": [
+              0.4125,
+              0.6375
+            ]
+          },
+          "nonbinding_matched_pair_para_flip_minus_para_order_sign_flip": false
+        },
         "holm_adjusted": {
           "T2_beh": 0.0007999200079992001,
           "T2_beh_pair": 0.0007999200079992001,
@@ -1474,6 +1678,7 @@
             0.38766000074089235
           ]
         },
+        "cde_binding_order_sign_flip": false,
         "matched_pair_nonbinding": {
           "n": 80,
           "mean": 0.1457696156226666,
@@ -1498,6 +1703,7 @@
             0.2942477153643812
           ]
         },
+        "cde_nonbinding_order_sign_flip": false,
         "cde_decomposition": {
           "binding_none_minus_own": {
             "n": 80,
@@ -1714,6 +1920,68 @@
           "own": 0.6023185941025282,
           "para": 0.7507399961115387,
           "para_flip": 0.8546858427388596
+        },
+        "verdict_nll_resistance_tertiles": {
+          "tertile1_low_resistance": {
+            "n": 26,
+            "mean_verdict_nll_diff": 0.07457666416371286,
+            "dl_cde_binding": {
+              "n": 26,
+              "mean": 0.2579887227648541,
+              "ci95": [
+                0.17527128617143228,
+                0.3480002251450507
+              ]
+            },
+            "beh_cde_binding": {
+              "n": 26,
+              "mean": 0.3269230769230769,
+              "ci95": [
+                0.19230769230769232,
+                0.4807692307692308
+              ]
+            }
+          },
+          "tertile2_mid_resistance": {
+            "n": 26,
+            "mean_verdict_nll_diff": 0.11920855206956509,
+            "dl_cde_binding": {
+              "n": 26,
+              "mean": 0.20742270506583363,
+              "ci95": [
+                0.12921149318927164,
+                0.29105174592770383
+              ]
+            },
+            "beh_cde_binding": {
+              "n": 26,
+              "mean": 0.6538461538461539,
+              "ci95": [
+                0.5192307692307693,
+                0.7884615384615384
+              ]
+            }
+          },
+          "tertile3_high_resistance": {
+            "n": 28,
+            "mean_verdict_nll_diff": 0.18146658812091382,
+            "dl_cde_binding": {
+              "n": 28,
+              "mean": 0.23345542346065656,
+              "ci95": [
+                0.1341149307154064,
+                0.3555737062112893
+              ]
+            },
+            "beh_cde_binding": {
+              "n": 28,
+              "mean": 0.5,
+              "ci95": [
+                0.375,
+                0.625
+              ]
+            }
+          }
         },
         "manipulation_check": {
           "donor": {
@@ -2235,6 +2503,76 @@
             "benchmark": 0.5
           }
         },
+        "per_order": {
+          "binding_flip_minus_own_image_first": {
+            "n": 2,
+            "mean": 0.0,
+            "ci95": [
+              0.0,
+              0.0
+            ]
+          },
+          "binding_flip_minus_own_text_first": {
+            "n": 2,
+            "mean": 0.0,
+            "ci95": [
+              0.0,
+              0.0
+            ]
+          },
+          "binding_flip_minus_own_order_sign_flip": false,
+          "binding_matched_pair_para_flip_minus_para_image_first": {
+            "n": 2,
+            "mean": 0.0,
+            "ci95": [
+              0.0,
+              0.0
+            ]
+          },
+          "binding_matched_pair_para_flip_minus_para_text_first": {
+            "n": 2,
+            "mean": 0.5,
+            "ci95": [
+              0.0,
+              1.0
+            ]
+          },
+          "binding_matched_pair_para_flip_minus_para_order_sign_flip": false,
+          "nonbinding_flip_minus_own_image_first": {
+            "n": 2,
+            "mean": 0.0,
+            "ci95": [
+              0.0,
+              0.0
+            ]
+          },
+          "nonbinding_flip_minus_own_text_first": {
+            "n": 2,
+            "mean": 0.0,
+            "ci95": [
+              0.0,
+              0.0
+            ]
+          },
+          "nonbinding_flip_minus_own_order_sign_flip": false,
+          "nonbinding_matched_pair_para_flip_minus_para_image_first": {
+            "n": 2,
+            "mean": 0.0,
+            "ci95": [
+              0.0,
+              0.0
+            ]
+          },
+          "nonbinding_matched_pair_para_flip_minus_para_text_first": {
+            "n": 2,
+            "mean": 0.0,
+            "ci95": [
+              0.0,
+              0.0
+            ]
+          },
+          "nonbinding_matched_pair_para_flip_minus_para_order_sign_flip": false
+        },
         "holm_adjusted": {
           "T2_beh": 0.0007999200079992001,
           "T3_beh": 0.0007999200079992001,
@@ -2324,6 +2662,7 @@
             0.33077946016728677
           ]
         },
+        "cde_binding_order_sign_flip": false,
         "matched_pair_nonbinding": {
           "n": 2,
           "mean": 0.2496247789008066,
@@ -2348,6 +2687,7 @@
             0.29618444736934174
           ]
         },
+        "cde_nonbinding_order_sign_flip": false,
         "cde_decomposition": {
           "binding_none_minus_own": {
             "n": 2,
@@ -3058,6 +3398,76 @@
             "rho_beh_descriptive": 0.48405374777400034
           }
         },
+        "per_order": {
+          "binding_flip_minus_own_image_first": {
+            "n": 115,
+            "mean": 0.6347826086956522,
+            "ci95": [
+              0.5478260869565217,
+              0.7217391304347827
+            ]
+          },
+          "binding_flip_minus_own_text_first": {
+            "n": 115,
+            "mean": 0.24347826086956523,
+            "ci95": [
+              0.16521739130434782,
+              0.3217391304347826
+            ]
+          },
+          "binding_flip_minus_own_order_sign_flip": false,
+          "binding_matched_pair_para_flip_minus_para_image_first": {
+            "n": 115,
+            "mean": 0.7391304347826086,
+            "ci95": [
+              0.6608695652173913,
+              0.8173913043478261
+            ]
+          },
+          "binding_matched_pair_para_flip_minus_para_text_first": {
+            "n": 115,
+            "mean": 0.5478260869565217,
+            "ci95": [
+              0.45217391304347826,
+              0.6347826086956522
+            ]
+          },
+          "binding_matched_pair_para_flip_minus_para_order_sign_flip": false,
+          "nonbinding_flip_minus_own_image_first": {
+            "n": 115,
+            "mean": 0.46956521739130436,
+            "ci95": [
+              0.3739130434782609,
+              0.5652173913043478
+            ]
+          },
+          "nonbinding_flip_minus_own_text_first": {
+            "n": 115,
+            "mean": 0.16521739130434782,
+            "ci95": [
+              0.09565217391304348,
+              0.23499999999999685
+            ]
+          },
+          "nonbinding_flip_minus_own_order_sign_flip": false,
+          "nonbinding_matched_pair_para_flip_minus_para_image_first": {
+            "n": 115,
+            "mean": 0.2608695652173913,
+            "ci95": [
+              0.17391304347826086,
+              0.34782608695652173
+            ]
+          },
+          "nonbinding_matched_pair_para_flip_minus_para_text_first": {
+            "n": 115,
+            "mean": 0.20869565217391303,
+            "ci95": [
+              0.1391304347826087,
+              0.28695652173913044
+            ]
+          },
+          "nonbinding_matched_pair_para_flip_minus_para_order_sign_flip": false
+        },
         "holm_adjusted": {
           "T1_beh": 0.00039996000399960006,
           "T2_beh": 0.0005999400059994001,
@@ -3218,6 +3628,7 @@
             1.8195071114424304
           ]
         },
+        "cde_binding_order_sign_flip": false,
         "matched_pair_nonbinding": {
           "n": 115,
           "mean": 1.9251344447890386,
@@ -3242,6 +3653,7 @@
             1.642479217586405
           ]
         },
+        "cde_nonbinding_order_sign_flip": false,
         "cde_decomposition": {
           "binding_none_minus_own": {
             "n": 115,
@@ -3459,6 +3871,68 @@
           "para": 0.6769868791579859,
           "para_flip": 0.7342818132642084
         },
+        "verdict_nll_resistance_tertiles": {
+          "tertile1_low_resistance": {
+            "n": 38,
+            "mean_verdict_nll_diff": 0.0653509403247328,
+            "dl_cde_binding": {
+              "n": 38,
+              "mean": 1.7142658645009425,
+              "ci95": [
+                1.2658936241709242,
+                2.1966578722476195
+              ]
+            },
+            "beh_cde_binding": {
+              "n": 38,
+              "mean": 0.5,
+              "ci95": [
+                0.40789473684210525,
+                0.5921052631578947
+              ]
+            }
+          },
+          "tertile2_mid_resistance": {
+            "n": 38,
+            "mean_verdict_nll_diff": 0.10534069294027731,
+            "dl_cde_binding": {
+              "n": 38,
+              "mean": 1.68915857804832,
+              "ci95": [
+                1.2126508988842866,
+                2.2063307563330135
+              ]
+            },
+            "beh_cde_binding": {
+              "n": 38,
+              "mean": 0.40789473684210525,
+              "ci95": [
+                0.3026315789473684,
+                0.5131578947368421
+              ]
+            }
+          },
+          "tertile3_high_resistance": {
+            "n": 39,
+            "mean_verdict_nll_diff": 0.17929946558414522,
+            "dl_cde_binding": {
+              "n": 39,
+              "mean": 1.4571672755790055,
+              "ci95": [
+                0.9571001747105276,
+                2.0816080563523274
+              ]
+            },
+            "beh_cde_binding": {
+              "n": 39,
+              "mean": 0.41025641025641024,
+              "ci95": [
+                0.3076923076923077,
+                0.5128205128205128
+              ]
+            }
+          }
+        },
         "manipulation_check": {
           "donor": {
             "rows": 400,
@@ -3526,6 +4000,22 @@
       "delta_rho_ci95": [
         -0.7840482205483411,
         0.050477387675016964
+      ],
+      "n_beh_intersection": 50,
+      "beh_bind_3b_on_intersection": 0.53,
+      "beh_bind_7b_on_intersection": 0.46,
+      "delta_beh_bind_7b_minus_3b": -0.07,
+      "delta_beh_bind_ci95": [
+        -0.19,
+        0.06
+      ],
+      "n_beh_pair_intersection": 50,
+      "beh_bind_pair_3b_on_intersection": 0.65,
+      "beh_bind_pair_7b_on_intersection": 0.63,
+      "delta_beh_bind_pair_7b_minus_3b": -0.02,
+      "delta_beh_bind_pair_ci95": [
+        -0.14,
+        0.1
       ]
     }
   ],

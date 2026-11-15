@@ -1,0 +1,50 @@
+# dependencies and build output
+node_modules/
+dist/
+.vite/
+
+# local/editor files
+.DS_Store
+.claude/
+.env
+.env.*
+*.log
+
+# private research workspace material
+2-experiment-data/
+3-project-state-and-reviews/
+cot-selection-bias/
+figure_prompts/
+promo-film/
+docs/
+!public/docs/
+!public/docs/**
+!docs/
+docs/*
+!docs/README.md
+!public/promo-film/
+!public/promo-film/**
+arxiv_submission_*.tar.gz
+CCS-CoTFE-paper-source.tar.gz
+
+# superseded local source variants
+*.bak
+src/pages/Home.tsx
+src/pages/Home.css
+src/pages/Framework.css
+src/pages/Results.css
+src/components/GlassCard.tsx
+src/components/GlassCard.css
+src/vendor/
+scripts/pack_arxiv.sh
+
+# retired brand and unused visual variants
+public/paper-causal-selection-logo*.png
+public/paper-ccs*.png
+public/paper-figures/causal-architecture-generated.png
+
+# npm lockfile is kept locally only; pnpm-lock.yaml is canonical
+package-lock.json
+
+# keep Finder metadata out of published asset directories
+public/docs/.DS_Store

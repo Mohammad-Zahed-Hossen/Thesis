@@ -28,8 +28,21 @@ import score_v5 as sc  # noqa: E402
 import transplant_v5 as tp  # noqa: E402
 
 VALID_VERDICT_LABELS = {"image", "text", "chart", "report", "neither", "both", "unclear"}
+NO_VERDICT_LABELS = {"undetermined", "absent", "neither", "both", "unclear"}
+CONFIRMATORY_MODELS = ("Qwen/Qwen2.5-VL-3B-Instruct", "Qwen/Qwen2.5-VL-7B-Instruct")
+DIAGNOSTIC_MODEL = "Qwen/Qwen2-VL-2B-Instruct"
 TRUTHY = {"1", "y", "yes", "true", "pass", "ok"}
 FALSY = {"0", "n", "no", "false", "fail", "bad"}
+
+
+def canonical_verdict_label(lbl: str, regime: Optional[str] = None) -> str:
+    """Map parser and human labels onto {source_1, source_2, 'no_verdict'}."""
+    s = (lbl or "").strip().lower()
+    if not s or s in NO_VERDICT_LABELS:
+        return "no_verdict"
+    if regime in sc.SOURCES and s not in sc.SOURCES[regime]:
+        return "no_verdict"
+    return s
 
 CODEBOOK_MD = """# v5 Human Coding Codebook
 
@@ -104,14 +117,59 @@ def stratified_pick(
     return chosen
 
 
+def _take_by_family(
+    pool: Sequence[Dict[str, Any]],
+    total_n: int,
+    rng: random.Random,
+    donor_frac: float = 2.0 / 3.0,
+) -> List[Dict[str, Any]]:
+    donors = [r for r in pool if r.get("family") == "donor"]
+    free = [r for r in pool if r.get("family") != "donor"]
+    key_fn = lambda r: (r["model_id"], r["regime"], r.get("order", ""), r["family"])
+    if donors and free:
+        n_d = min(len(donors), int(round(total_n * donor_frac)))
+        n_f = min(len(free), total_n - n_d)
+        picked = stratified_pick(donors, key_fn=key_fn, total_n=n_d, rng=rng)
+        picked += stratified_pick(free, key_fn=key_fn, total_n=n_f, rng=rng)
+        if len(picked) < min(total_n, len(pool)):
+            seen = {(r["model_id"], r["regime"], r.get("order", ""), r["family"], r["id"]) for r in picked}
+            rem = [r for r in pool if (r["model_id"], r["regime"], r.get("order", ""), r["family"], r["id"]) not in seen]
+            picked += stratified_pick(rem, key_fn=key_fn, total_n=total_n - len(picked), rng=rng)
+        return picked
+    return stratified_pick(pool, key_fn=key_fn, total_n=total_n, rng=rng)
+
+
 def build_verdict_samples(rows: Sequence[Dict[str, Any]], n_donors: int, seed: int) -> Tuple[List[Dict[str, Any]], List[Dict[str, Any]]]:
     rng = random.Random(seed)
-    picked = stratified_pick(
-        rows,
-        key_fn=lambda r: (r["model_id"], r["regime"], r.get("order", ""), r["family"]),
-        total_n=n_donors,
-        rng=rng,
-    )
+    models = {r["model_id"] for r in rows}
+    regimes = {r["regime"] for r in rows}
+    if any(m in models for m in CONFIRMATORY_MODELS) and DIAGNOSTIC_MODEL in models and len(regimes) >= 2:
+        conf_math = [r for r in rows if r["model_id"] in CONFIRMATORY_MODELS and r["regime"] == "math"]
+        conf_chart = [r for r in rows if r["model_id"] in CONFIRMATORY_MODELS and r["regime"] == "chartqa"]
+        diag = [r for r in rows if r["model_id"] == DIAGNOSTIC_MODEL]
+        n_cm = int(round(0.60 * n_donors))
+        n_cc = int(round(0.24 * n_donors))
+        n_dg = max(0, n_donors - n_cm - n_cc)
+        picked = _take_by_family(conf_math, n_cm, rng) + _take_by_family(conf_chart, n_cc, rng) + stratified_pick(
+            diag, key_fn=lambda r: (r["model_id"], r["regime"], r.get("order", ""), r["family"]), total_n=n_dg, rng=rng
+        )
+        if len(picked) < min(n_donors, len(rows)):
+            seen = {(r["model_id"], r["regime"], r.get("order", ""), r["family"], r["id"]) for r in picked}
+            rem = [r for r in rows if (r["model_id"], r["regime"], r.get("order", ""), r["family"], r["id"]) not in seen]
+            picked += stratified_pick(
+                rem,
+                key_fn=lambda r: (r["model_id"], r["regime"], r.get("order", ""), r["family"]),
+                total_n=n_donors - len(picked),
+                rng=rng,
+            )
+        rng.shuffle(picked)
+    else:
+        picked = stratified_pick(
+            rows,
+            key_fn=lambda r: (r["model_id"], r["regime"], r.get("order", ""), r["family"]),
+            total_n=n_donors,
+            rng=rng,
+        )
     blinded: List[Dict[str, Any]] = []
     key: List[Dict[str, Any]] = []
     for idx, r in enumerate(picked, 1):
@@ -181,12 +239,20 @@ def build_flip_samples(rows: Sequence[Dict[str, Any]], n_per_model: int, seed: i
         )
 
     all_picked: List[Dict[str, Any]] = []
+    if all(m in by_model for m in (*CONFIRMATORY_MODELS, DIAGNOSTIC_MODEL)):
+        total_target = n_per_model * len(by_model)
+        conf_each = int(round(0.40 * total_target))
+        diag_n = max(0, total_target - conf_each * len(CONFIRMATORY_MODELS))
+        quotas = {m: conf_each for m in CONFIRMATORY_MODELS}
+        quotas[DIAGNOSTIC_MODEL] = diag_n
+    else:
+        quotas = {mid: n_per_model for mid in by_model}
     for mid in sorted(by_model):
         all_picked.extend(
             stratified_pick(
                 by_model[mid],
                 key_fn=lambda rec: (rec["regime"], rec["order"]),
-                total_n=n_per_model,
+                total_n=quotas.get(mid, n_per_model),
                 rng=rng,
             )
         )
@@ -224,7 +290,7 @@ def write_csv(path: str, rows: Sequence[Dict[str, Any]], fieldnames: Sequence[st
 
 
 def read_csv_map(path: str) -> Dict[str, Dict[str, str]]:
-    with open(path, newline="", encoding="utf-8") as f:
+    with open(path, newline="", encoding="utf-8-sig") as f:
         return {r["sample_id"]: r for r in csv.DictReader(f)}
 
 
@@ -235,7 +301,7 @@ def cohens_kappa(xs: Sequence[str], ys: Sequence[str]) -> Optional[float]:
     agree = sum(a == b for a, b in zip(xs, ys)) / n
     ca, cb = Counter(xs), Counter(ys)
     pe = sum((ca[k] / n) * (cb[k] / n) for k in set(ca) | set(cb))
-    return (agree - pe) / (1 - pe) if pe < 1 else 1.0
+    return (agree - pe) / (1 - pe) if pe < 1.0 - 1e-12 else None
 
 
 def _norm_bool(val: Optional[str]) -> Optional[int]:
@@ -251,20 +317,28 @@ def _norm_bool(val: Optional[str]) -> Optional[int]:
 
 def evaluate_verdicts(coder_a: Dict[str, Dict[str, str]], coder_b: Optional[Dict[str, Dict[str, str]]], key: Dict[str, Dict[str, str]]) -> Dict[str, Any]:
     paired_a, paired_b = [], []
+    canon_a, canon_b = [], []
     eval_rows = []
+    confusion: Dict[str, Counter] = defaultdict(Counter)
     for sid, krow in sorted(key.items()):
+        regime = krow.get("regime")
         a_lbl = (coder_a.get(sid, {}).get("coder_stated_source") or "").strip().lower()
         b_lbl = (coder_b.get(sid, {}).get("coder_stated_source") or "").strip().lower() if coder_b else ""
         if a_lbl and b_lbl:
             paired_a.append(a_lbl)
             paired_b.append(b_lbl)
+            canon_a.append(canonical_verdict_label(a_lbl, regime))
+            canon_b.append(canonical_verdict_label(b_lbl, regime))
         human = a_lbl or b_lbl
         if human:
             pred = (krow.get("predicted_stated_source") or "").strip().lower()
-            eval_rows.append((krow["model_id"], krow["regime"], pred == human, pred, human))
+            c_human = canonical_verdict_label(human, regime)
+            c_pred = canonical_verdict_label(pred, regime)
+            confusion[c_human][c_pred] += 1
+            eval_rows.append((krow["model_id"], regime, c_pred == c_human, pred == human, c_pred, c_human))
 
     by_group: Dict[str, List[bool]] = defaultdict(list)
-    for mid, reg, match, _, _ in eval_rows:
+    for mid, reg, match, _, _, _ in eval_rows:
         by_group[f"{mid}|{reg}"].append(match)
 
     out: Dict[str, Any] = {
@@ -273,8 +347,12 @@ def evaluate_verdicts(coder_a: Dict[str, Dict[str, str]], coder_b: Optional[Dict
         "n_double_coded": len(paired_a),
         "inter_coder_agreement": sum(x == y for x, y in zip(paired_a, paired_b)) / len(paired_a) if paired_a else None,
         "cohens_kappa": cohens_kappa(paired_a, paired_b),
+        "inter_coder_agreement_canonical": sum(x == y for x, y in zip(canon_a, canon_b)) / len(canon_a) if canon_a else None,
+        "cohens_kappa_canonical": cohens_kappa(canon_a, canon_b),
         "parser_accuracy_overall": sum(x[2] for x in eval_rows) / len(eval_rows) if eval_rows else None,
+        "raw_exact_match_overall": sum(x[3] for x in eval_rows) / len(eval_rows) if eval_rows else None,
         "parser_accuracy_by_model_regime": {k: {"n": len(v), "accuracy": sum(v) / len(v)} for k, v in sorted(by_group.items())},
+        "confusion_matrix": {ch: dict(sorted(preds.items())) for ch, preds in sorted(confusion.items())},
     }
     return out
 
@@ -307,9 +385,11 @@ def evaluate_flips(coder_a: Dict[str, Dict[str, str]], coder_b: Optional[Dict[st
         "n_key": len(key),
         "n_coded_grammatical": len(gram_vals),
         "grammatical_rate": sum(gram_vals) / len(gram_vals) if gram_vals else None,
+        "grammatical_agreement": (sum(a == b for a, b in zip(gram_a, gram_b)) / len(gram_a)) if gram_a else None,
         "grammatical_kappa": cohens_kappa(gram_a, gram_b),
         "n_coded_intended_source": len(src_vals),
         "names_intended_source_rate": sum(src_vals) / len(src_vals) if src_vals else None,
+        "names_intended_agreement": (sum(a == b for a, b in zip(src_a, src_b)) / len(src_a)) if src_a else None,
         "names_intended_kappa": cohens_kappa(src_a, src_b),
         "by_model": {
             m: {

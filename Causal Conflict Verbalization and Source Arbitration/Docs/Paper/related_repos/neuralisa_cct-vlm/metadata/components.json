@@ -1,0 +1,18 @@
+{
+  "mention_judge": {
+    "model_name": "Qwen/Qwen3-4B-Thinking-2507",
+    "revision": "768f209d9ea81521153ed38c47d515654e938aea"
+  },
+  "image_editor": {
+    "model_name": "Qwen/Qwen-Image-Edit",
+    "revision": "ac7f9318f633fc4b5778c59367c8128225f1e3de"
+  },
+  "object_localizer": {
+    "model_name": "IDEA-Research/grounding-dino-tiny",
+    "revision": "a2bb814dd30d776dcf7e30523b00659f4f141c71"
+  },
+  "segmenter": {
+    "checkpoint": "sam_vit_h_4b8939.pth",
+    "sha256": "a7bf3b02f3ebf1267aba913ff637d9a2d5c33d3173bb679e46d9f338c26f262e"
+  }
+}

@@ -1,0 +1,28 @@
+# This repository tracks: Makefile, README.md, src/, and outputs/cmc_bench_instances.jsonl
+/*
+!.gitignore
+!Makefile
+!README.md
+!outputs/
+!/src/
+!src/**
+
+# Secrets (under src/)
+**/.env
+!**/.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+.Python
+.venv/
+venv/
+*.egg-info/
+.pytest_cache/
+
+# Local caches (created by Make; not versioned here)
+data_cache/
+# outputs/: only the instances file is tracked
+outputs/*
+!outputs/cmc_bench_instances.jsonl
+src.zip

@@ -1,0 +1,5 @@
+You are provided with an image and a question.
+Answer the question based on the image.
+
+Question: {question}
+Answer only with {choices} in lowercase.

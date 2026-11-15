@@ -1,0 +1,11 @@
+# CMC-Bench dependencies (Apple Silicon / mlx-vlm)
+mlx>=0.18.0
+mlx-vlm>=0.1.0
+# Some mlx-vlm models (e.g. LFM2.5-VL) use fast image processors that import torchvision
+torchvision>=0.15.0
+datasets>=2.14.0
+Pillow>=9.0.0
+pyyaml>=6.0
+tqdm>=4.66.0
+openai>=1.40.0
+hf_transfer>=0.1.0

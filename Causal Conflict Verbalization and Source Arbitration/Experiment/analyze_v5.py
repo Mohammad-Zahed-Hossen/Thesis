@@ -405,18 +405,27 @@ def reversed_target(row: Dict[str, Any]) -> Optional[str]:
     return "text" if own == "image" else "image"
 
 
-def beh_diff(beh, ids, fam: str, a: str, b: str, target_only: Optional[str] = None) -> Dict[str, float]:
+def beh_diff(
+    beh,
+    ids,
+    fam: str,
+    a: str,
+    b: str,
+    target_only: Optional[str] = None,
+    order_only: Optional[str] = None,
+) -> Dict[str, float]:
     """Per item, mean over orders of [answer follows T | a] − [answer follows T | b].
 
     T is the source that verdict a names (or the reversed source when a == 'none').
     Both terms use the same target, so for a = flip and b = own this is the behavioural
     CDE toward the reversed verdict's source (prereg §7.3), and (none - own) + (flip - none)
-    sums identically to (flip - own).
+    sums identically to (flip - own). Pass order_only to inspect a single presentation order.
     """
+    orders = (order_only,) if order_only else ("image_first", "text_first")
     out = {}
     for i in ids:
         diffs = []
-        for o in ("image_first", "text_first"):
+        for o in orders:
             x, y = beh.get((i, fam, a, o)), beh.get((i, fam, b, o))
             if not (x and y):
                 continue
@@ -771,7 +780,10 @@ def _beh_summary(
 
 
 def behaviour_benchmark(
-    beh: Dict[Tuple, Dict[str, Any]], ids: Sequence[str], direction: Optional[str] = None
+    beh: Dict[Tuple, Dict[str, Any]],
+    ids: Sequence[str],
+    direction: Optional[str] = None,
+    order_only: Optional[str] = None,
 ) -> Dict[str, float]:
     """Per item, the behavioural explicit-instruction benchmark B_beh (prereg §2.3), k = 1, m∅ prefill.
 
@@ -786,10 +798,11 @@ def behaviour_benchmark(
     a benchmark for scale and a manipulation check (its 95% CI must exclude 0); the decision
     rule reads Δ itself (decision_test).
     """
+    orders = (order_only,) if order_only else ("image_first", "text_first")
     out = {}
     for i in ids:
         vals = []
-        for o in ("image_first", "text_first"):
+        for o in orders:
             ei, et = beh.get((i, "explicit_image", "none", o)), beh.get((i, "explicit_text", "none", o))
             if ei and et:
                 img = float(ei["src"] == "image") - float(et["src"] == "image")
@@ -996,6 +1009,26 @@ def analyze_behaviour_primary(
                 entry["rho_beh_descriptive"] = entry["mean"] / bmean
             directional[f"{fam}_toward_{direction}"] = entry
     out["directional_flip_minus_own"] = directional
+    per_order: Dict[str, Any] = {}
+    for fam in ("binding", "nonbinding"):
+        for pair_name, va, vb in (
+            ("flip_minus_own", "flip", "own"),
+            ("matched_pair_para_flip_minus_para", "para_flip", "para"),
+        ):
+            for order in ("image_first", "text_first"):
+                d_ord = beh_diff(beh, common, fam, va, vb, order_only=order)
+                entry_ord: Dict[str, Any] = {"n": len(d_ord)}
+                if len(d_ord) >= 2:
+                    entry_ord.update(summarize_ci(list(d_ord.values()), reps, seed, 0.95))
+                elif d_ord:
+                    entry_ord["mean"] = mean(list(d_ord.values()))
+                per_order[f"{fam}_{pair_name}_{order}"] = entry_ord
+            m_if = per_order[f"{fam}_{pair_name}_image_first"].get("mean")
+            m_tf = per_order[f"{fam}_{pair_name}_text_first"].get("mean")
+            per_order[f"{fam}_{pair_name}_order_sign_flip"] = bool(
+                m_if is not None and m_tf is not None and m_if * m_tf < 0
+            )
+    out["per_order"] = per_order
     pvals = {k: v["p_entered"] for k, v in tests.items() if "p_entered" in v}
     if "T1_beh_did" in out:
         pvals["T1_beh"] = out["T1_beh_did"]["p"]
@@ -1189,6 +1222,10 @@ def analyze_group(
             od = per_item(dl, ids, order_only(cde_fn(dl, fam), order))
             if len(od) > 1:
                 sec[f"cde_{fam}_{order}"] = summarize_ci(list(od.values()), reps, seed, 0.95)
+        m_if = sec.get(f"cde_{fam}_image_first", {}).get("mean")
+        m_tf = sec.get(f"cde_{fam}_text_first", {}).get("mean")
+        if m_if is not None and m_tf is not None:
+            sec[f"cde_{fam}_order_sign_flip"] = bool(m_if * m_tf < 0)
     if decomp:
         sec["cde_decomposition"] = decomp
     per_tpl: Dict[str, Any] = {}
@@ -1228,11 +1265,54 @@ def analyze_group(
         secs[r["id"]] += r.get("wall_s") or 0.0
     sec["seconds_per_item"] = mean(list(secs.values())) if secs else None
     verdict_nll: Dict[str, List[float]] = defaultdict(list)
+    nll_own: Dict[Tuple, float] = {}
+    nll_flip: Dict[Tuple, float] = {}
     for r in rows:
         if r["outcome"] == "dl" and r.get("verdict_nll") is not None:
             verdict_nll[r["verdict"]].append(r["verdict_nll"])
+            if r.get("family") == "binding":
+                key_ko = (r["id"], r["k"], r["order"])
+                if r.get("verdict") == "own":
+                    nll_own[key_ko] = float(r["verdict_nll"])
+                elif r.get("verdict") == "flip":
+                    nll_flip[key_ko] = float(r["verdict_nll"])
     if verdict_nll:
         sec["verdict_nll_mean_by_verdict"] = {k: mean(v) for k, v in sorted(verdict_nll.items())}
+    common_set = set(common)
+    nll_diffs_by_item: Dict[str, List[float]] = defaultdict(list)
+    for (i_nll, k_nll, o_nll), fv in nll_flip.items():
+        if i_nll in common_set and (i_nll, k_nll, o_nll) in nll_own:
+            nll_diffs_by_item[i_nll].append(fv - nll_own[(i_nll, k_nll, o_nll)])
+    nll_item_diff = {i_nll: mean(vs) for i_nll, vs in nll_diffs_by_item.items() if vs}
+    if len(nll_item_diff) >= 6:
+        beh_bind_item = beh_diff(beh, list(nll_item_diff), "binding", "flip", "own")
+        ranked_nll = sorted(nll_item_diff, key=lambda item_id: nll_item_diff[item_id])
+        third_nll = len(ranked_nll) // 3
+        chunks = (
+            ("tertile1_low_resistance", ranked_nll[:third_nll]),
+            ("tertile2_mid_resistance", ranked_nll[third_nll : 2 * third_nll]),
+            ("tertile3_high_resistance", ranked_nll[2 * third_nll :]),
+        )
+        tertiles: Dict[str, Any] = {}
+        for tname, chunk in chunks:
+            dl_vals = [d_bind[item_id] for item_id in chunk if item_id in d_bind]
+            beh_vals = [beh_bind_item[item_id] for item_id in chunk if item_id in beh_bind_item]
+            nll_vals = [nll_item_diff[item_id] for item_id in chunk]
+            tertiles[tname] = {
+                "n": len(chunk),
+                "mean_verdict_nll_diff": mean(nll_vals),
+                "dl_cde_binding": (
+                    summarize_ci(dl_vals, reps, seed, 0.95)
+                    if len(dl_vals) >= 2
+                    else {"n": len(dl_vals), "mean": mean(dl_vals) if dl_vals else None}
+                ),
+                "beh_cde_binding": (
+                    summarize_ci(beh_vals, reps, seed, 0.95)
+                    if len(beh_vals) >= 2
+                    else {"n": len(beh_vals), "mean": mean(beh_vals) if beh_vals else None}
+                ),
+            }
+        sec["verdict_nll_resistance_tertiles"] = tertiles
     if mine(donor_rows):
         sec["manipulation_check"] = manipulation_check(mine(donor_rows), reps=reps, seed=seed)
     dh = relative_uncertainty(mine(base_rows))
@@ -1308,6 +1388,30 @@ def analyze_size_comparison(
     else:
         res["delta_rho_ci95"] = None
 
+    beh_3b = behaviour_table(rows_3b, parser=HEADLINE_PARSER)
+    beh_7b = behaviour_table(rows_7b, parser=HEADLINE_PARSER)
+    for label, va, vb, suffix in (
+        ("beh_bind", "flip", "own", ""),
+        ("beh_bind_pair", "para_flip", "para", "_pair"),
+    ):
+        b3 = beh_diff(beh_3b, common, "binding", va, vb)
+        b7 = beh_diff(beh_7b, common, "binding", va, vb)
+        bcommon = sorted(set(b3) & set(b7))
+        if len(bcommon) >= 2:
+            v3 = [b3[i] for i in bcommon]
+            v7 = [b7[i] for i in bcommon]
+            diff = [x7 - x3 for x3, x7 in zip(v3, v7)]
+            bidx = resample_indices(len(bcommon), reps, seed + 1 if not suffix else seed + 2)
+            lo_b, hi_b, _ = boot_ci(diff, bidx, 0.95)
+            res[f"n_beh{suffix}_intersection"] = len(bcommon)
+            res[f"{label}_3b_on_intersection"] = mean(v3)
+            res[f"{label}_7b_on_intersection"] = mean(v7)
+            res[f"delta_beh_bind{suffix}_7b_minus_3b"] = mean(diff)
+            res[f"delta_beh_bind{suffix}_ci95"] = [lo_b, hi_b]
+        else:
+            res[f"delta_beh_bind{suffix}_7b_minus_3b"] = None
+            res[f"delta_beh_bind{suffix}_ci95"] = None
+
     return res
 
 
@@ -1362,17 +1466,18 @@ for (g in unique(paste(d$model_id, d$regime))) {
   s <- d[paste(d$model_id, d$regime) == g, ]
   s$K <- factor(s$k); contrasts(s$K) <- contr.sum(4)
   cat("\n=====", g, "=====\n")
+  bad_fit <- function(m) inherits(m, "error") || isSingular(m) || !is.null(m@optinfo$conv$lme4$messages)
   fit_lmm <- function(f) tryCatch(lmer(f, data = subset(s, outcome == "dl")), error = function(e) e)
   m <- fit_lmm(dl ~ D*B + D*O + K + (1 + D | item))
-  if (inherits(m, "error") || isSingular(m)) { cat("lmer: by-item slope dropped\n"); m <- fit_lmm(dl ~ D*B + D*O + K + (1 | item)) }
-  if (inherits(m, "error") || isSingular(m)) cat("lmer: FAILED (singular or error)\n") else print(summary(m))
+  if (bad_fit(m)) { cat("lmer: by-item slope dropped\n"); m <- fit_lmm(dl ~ D*B + D*O + K + (1 | item)) }
+  if (bad_fit(m)) cat("lmer: FAILED (singular, non-convergent, or error)\n") else print(summary(m))
   b <- subset(s, outcome == "beh" & !is.na(y_image))
   if (nrow(b) > 0) {
     ctl <- glmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 2e5))
     fit_glmm <- function(f) tryCatch(glmer(f, data = b, family = binomial, control = ctl), error = function(e) e)
     gm <- fit_glmm(y_image ~ D*B + D*O + (1 + D | item))  # behavioural rows use k = 1 only, so no K term
-    if (inherits(gm, "error") || isSingular(gm)) { cat("glmer: by-item slope dropped\n"); gm <- fit_glmm(y_image ~ D*B + D*O + (1 | item)) }
-    if (inherits(gm, "error") || isSingular(gm)) cat("glmer: FAILED (singular or error)\n") else print(summary(gm))
+    if (bad_fit(gm)) { cat("glmer: by-item slope dropped\n"); gm <- fit_glmm(y_image ~ D*B + D*O + (1 | item)) }
+    if (bad_fit(gm)) cat("glmer: FAILED (singular, non-convergent, or error)\n") else print(summary(gm))
   }
 }
 cat("\n"); print(sessionInfo())
@@ -1490,6 +1595,19 @@ def render(
                     f"  - Directional (descriptive) {dkey}: Δ = {fmt(de.get('mean'))} (95% CI {fmt(de.get('ci95'))}, n = {de.get('n')}); "
                     f"benchmark {fmt(de.get('benchmark'))}; ρ_beh {fmt(de.get('rho_beh_descriptive'))}"
                 ]
+            po = bp_prim.get("per_order", {})
+            if po:
+                for fam in ("binding", "nonbinding"):
+                    for pair_name in ("flip_minus_own", "matched_pair_para_flip_minus_para"):
+                        p_if = po.get(f"{fam}_{pair_name}_image_first", {})
+                        p_tf = po.get(f"{fam}_{pair_name}_text_first", {})
+                        sf_flag = po.get(f"{fam}_{pair_name}_order_sign_flip")
+                        caveat = " **[ORDER SIGN FLIP]**" if sf_flag else ""
+                        lines += [
+                            f"  - Per-order {fam} {pair_name}{caveat}: "
+                            f"image_first = {fmt(p_if.get('mean'))} (95% CI {fmt(p_if.get('ci95'))}, n = {p_if.get('n')}); "
+                            f"text_first = {fmt(p_tf.get('mean'))} (95% CI {fmt(p_tf.get('ci95'))}, n = {p_tf.get('n')})"
+                        ]
             for fam in ("binding", "nonbinding"):
                 fe = bp_prim.get(fam, {})
                 fo = fe.get("flip_minus_own")
@@ -1592,7 +1710,26 @@ def render(
                 ]
             lines += [""]
         lines += ["Secondary:", ""]
+        tertiles = r["secondary"].get("verdict_nll_resistance_tertiles")
+        if tertiles:
+            lines += [
+                "Verdict-NLL resistance tertiles (`verdict_nll(flip) − verdict_nll(own)` under binding):",
+                "",
+                "| Tertile | N | Mean ΔNLL | Δℓ CDE [95% CI] | Behavioural Δ [95% CI] |",
+                "|---|---:|---:|---|---|",
+            ]
+            for tname, td in tertiles.items():
+                dl_t = td.get("dl_cde_binding", {})
+                bh_t = td.get("beh_cde_binding", {})
+                lines += [
+                    f"| {tname} | {td.get('n')} | {fmt(td.get('mean_verdict_nll_diff'))} "
+                    f"| {fmt(dl_t.get('mean'))} {fmt(dl_t.get('ci95'))} "
+                    f"| {fmt(bh_t.get('mean'))} {fmt(bh_t.get('ci95'))} |"
+                ]
+            lines += [""]
         for k, v in r["secondary"].items():
+            if k == "verdict_nll_resistance_tertiles":
+                continue
             lines += [f"- {k}: {fmt(v) if not isinstance(v, dict) else json.dumps({a: (round(b, 4) if isinstance(b, float) else b) for a, b in v.items()})}"]
         lines += [""]
     if size_comparisons:
@@ -1607,8 +1744,20 @@ def render(
                 f"- ρ_bind (3B) on intersection: {fmt(sc['rho_3b_on_intersection'])}",
                 f"- ρ_bind (7B) on intersection: {fmt(sc['rho_7b_on_intersection'])}",
                 f"- Δρ (7B minus 3B): {fmt(sc['delta_rho_7b_minus_3b'])} (95% CI {fmt(sc['delta_rho_ci95'])})",
-                "",
             ]
+            if sc.get("delta_beh_bind_7b_minus_3b") is not None:
+                lines += [
+                    f"- Behavioural Δ_bind (flip−own) 3B vs 7B on intersection (N = {sc.get('n_beh_intersection')}): "
+                    f"{fmt(sc.get('beh_bind_3b_on_intersection'))} vs {fmt(sc.get('beh_bind_7b_on_intersection'))}, "
+                    f"Δ_bind(7B−3B) = {fmt(sc.get('delta_beh_bind_7b_minus_3b'))} (95% CI {fmt(sc.get('delta_beh_bind_ci95'))})",
+                ]
+            if sc.get("delta_beh_bind_pair_7b_minus_3b") is not None:
+                lines += [
+                    f"- Behavioural Δ_bind matched-pair (para_flip−para) 3B vs 7B (N = {sc.get('n_beh_pair_intersection')}): "
+                    f"{fmt(sc.get('beh_bind_pair_3b_on_intersection'))} vs {fmt(sc.get('beh_bind_pair_7b_on_intersection'))}, "
+                    f"Δ_bind_pair(7B−3B) = {fmt(sc.get('delta_beh_bind_pair_7b_minus_3b'))} (95% CI {fmt(sc.get('delta_beh_bind_pair_ci95'))})",
+                ]
+            lines += [""]
     if gates:
         lines += ["## Gate reports", ""]
         for name, g in gates.items():
@@ -1636,6 +1785,7 @@ def main() -> int:
     parser.add_argument("--draws", type=int, default=N_PERM)
     parser.add_argument("--seed", type=int, default=SEED)
     parser.add_argument("--allow_dry_run", action="store_true", help="Accept rows from the fake 'echo' model (pipeline tests only)")
+    parser.add_argument("--allow_mixed_phases", action="store_true", help="Allow pooling rows from different phases (e.g., dev + confirm)")
     args = parser.parse_args()
 
     fake = fake_backend_runs(list(args.runs) + list(args.base) + list(args.donor))
@@ -1650,6 +1800,13 @@ def main() -> int:
     rows = load_rows(args.runs)
     if not rows:
         print("No transplant rows found.", file=sys.stderr)
+        return 2
+    phases = sorted({r.get("phase") for r in rows if r.get("phase")})
+    if len(phases) > 1 and not args.allow_mixed_phases:
+        print(
+            f"Refusing to pool multiple phases in one analysis: {phases}. Pass --allow_mixed_phases only for exploratory diagnostics.",
+            file=sys.stderr,
+        )
         return 2
     groups: Dict[Tuple[str, str], List[Dict[str, Any]]] = defaultdict(list)
     for r in rows:

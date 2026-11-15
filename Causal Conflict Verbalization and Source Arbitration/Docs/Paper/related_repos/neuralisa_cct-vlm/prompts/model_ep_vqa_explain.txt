@@ -1,0 +1,8 @@
+You are provided with an image and a question.
+Answer the question based on the image.
+
+Question: {question}
+Answer Options: {choices}
+
+First give an explanation for your answer.
+Only mention objects that are relevant for the decision.

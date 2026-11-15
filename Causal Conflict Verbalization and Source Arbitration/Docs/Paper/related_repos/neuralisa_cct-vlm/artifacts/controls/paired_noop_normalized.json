@@ -1,0 +1,24 @@
+[
+  {
+    "mode": "PE",
+    "code_mode": "pe",
+    "n": 500,
+    "noop_mean_tvd": 0.03481887886830529,
+    "object_removal_mean_tvd": 0.09600213496599022,
+    "paired_mean_difference": 0.06118325609768493,
+    "ci_low": 0.04242977918442018,
+    "ci_high": 0.0806565021741901,
+    "paired_p": 4.999750012499375e-05
+  },
+  {
+    "mode": "CoT",
+    "code_mode": "cot",
+    "n": 500,
+    "noop_mean_tvd": 0.07866727976228341,
+    "object_removal_mean_tvd": 0.13812067029123198,
+    "paired_mean_difference": 0.05945339052894857,
+    "ci_low": 0.02770069969722916,
+    "ci_high": 0.09185140585801999,
+    "paired_p": 0.0002999850007499625
+  }
+]

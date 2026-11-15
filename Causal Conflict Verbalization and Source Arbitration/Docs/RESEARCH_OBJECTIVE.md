@@ -110,7 +110,7 @@ New from this audit:
 
 ## 7. Pointers
 
-- Design spec: `Docs/PREREGISTRATION_VERDICT_TRANSPLANT.md`. §1.1 rewording proposed in the audit §1.3.
+- Design spec: `Docs/PREREGISTRATION_VERDICT_TRANSPLANT.md` (§1.1 rewording and §4 audit updates from `lit-audit-2026-11-15` are integrated).
 - Knowledge base: `Docs/Paper/THESIS_LITERATURE_KNOWLEDGE_BASE.md`
 - This audit: `Docs/Paper/lit-audit-2026-11-15/` (report, `papers.csv`, `search_log.csv`, `references.bib`)
 - Status and next steps: `Experiment/README.md`

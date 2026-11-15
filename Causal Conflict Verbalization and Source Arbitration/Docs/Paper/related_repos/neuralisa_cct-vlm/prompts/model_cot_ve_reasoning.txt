@@ -1,0 +1,8 @@
+You are provided with an image (premise) and a text (hypothesis).
+Decide if the hypothesis follows from the image "entailment",
+contradicts the image "contradiction" or is neutral to the image "neutral"
+
+Hypothesis: {hypothesis}
+
+Think about this step by step,
+but only mention objects that are relevant for the decision.

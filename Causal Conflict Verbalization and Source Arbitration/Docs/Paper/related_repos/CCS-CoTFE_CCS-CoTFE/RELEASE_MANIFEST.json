@@ -1,0 +1,33 @@
+{
+  "project": "CCS-CoTFE",
+  "brand": "CoTsel",
+  "title": "Correctness Conditioning as Selection in Chain-of-Thought Faithfulness Evaluation",
+  "version": "1.0.0",
+  "license": "Apache-2.0",
+  "releaseDate": "2026-10-25",
+  "website": "https://ccs-cotfe.github.io/CCS-CoTFE/",
+  "repository": "https://github.com/CCS-CoTFE/CCS-CoTFE",
+  "paper": "public/docs/arxiv/main_arxiv.pdf",
+  "paperSource": "public/docs/arxiv/CCS-CoTFE-latex-source.zip",
+  "video": "public/promo-film/selected-not-faithful.mp4",
+  "figures": [
+    "public/paper-figures/final/figure-01.png",
+    "public/paper-figures/final/figure-02.png",
+    "public/paper-figures/final/figure-03.png",
+    "public/paper-figures/final/figure-04.png",
+    "public/paper-figures/final/figure-05.png",
+    "public/paper-figures/final/figure-06.png",
+    "public/paper-figures/final/figure-07.png",
+    "public/paper-figures/final/figure-08.png",
+    "public/paper-figures/final/figure-09.png",
+    "public/paper-figures/final/figure-10.png",
+    "public/paper-figures/final/figure-11.png",
+    "public/paper-figures/final/figure-12.png",
+    "public/paper-figures/final/figure-13.png",
+    "public/paper-figures/final/figure-14.png"
+  ],
+  "checks": [
+    "pnpm build",
+    "pnpm verify:site"
+  ]
+}

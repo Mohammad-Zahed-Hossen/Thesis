@@ -31,13 +31,17 @@ _NUM = re.compile(r"(?<![\w.,])(?:(?<![\d)\]]\s)[+-])?\$?\d[\d,]*(?:\.\d+)?(?![\
 _TEMPLATE = re.compile(r"</?answer>|\*\*|\\boxed|[{}$`]|\\\(|\\\)|\\\[|\\\]", re.I)
 
 
+def _normalize_unicode_minus(text: str) -> str:
+    return re.sub(r"[\u2212\u2013](?=\$?(?:\d|\.\d))", "-", str(text))
+
+
 def _clean_number(raw: str) -> str:
-    return raw.replace("$", "").replace(",", "").rstrip(".")
+    return _normalize_unicode_minus(raw).replace("$", "").replace(",", "").rstrip(".")
 
 
 def numbers_in(text: str) -> list:
     """All numbers in reading order, as plain strings."""
-    return [_clean_number(m.group(0)) for m in _NUM.finditer(text)]
+    return [_clean_number(m.group(0)) for m in _NUM.finditer(_normalize_unicode_minus(text))]
 
 
 def extract_answer(text: str) -> Tuple[Optional[str], str]:
@@ -50,6 +54,7 @@ def extract_answer(text: str) -> Tuple[Optional[str], str]:
       fallback_last_number  no usable '####'; last number in the output
       none                  no number anywhere
     """
+    text = _normalize_unicode_minus(text)
     if "####" in text:
         tail = text[text.rfind("####") + 4 :]
         stripped = _TEMPLATE.sub(" ", tail).strip()

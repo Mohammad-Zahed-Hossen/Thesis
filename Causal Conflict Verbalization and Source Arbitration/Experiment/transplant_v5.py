@@ -130,7 +130,12 @@ def _swap_pattern(regime: str):
 _A_BEFORE_VOWEL = re.compile(r"\b([Aa]) (?=image\b)")
 _AN_BEFORE_CONSONANT = re.compile(r"\b([Aa])n (?=(?:typed|text|chart|report|picture|visual|written)\b)", re.I)
 _BAD_GRAMMAR = re.compile(
-    r"\b(?:image|text|chart|report|picture)\s+are\b|\ban\s+(?:typed|text|chart|report|picture|visual|written)\b|\ba\s+image\b", re.I
+    r"\b(?:image|text|chart|report|picture)\s+are\b"
+    r"|\ban\s+(?:typed|text|chart|report|picture|visual|written)\b"
+    r"|\ba\s+image\b"
+    r"|\b(?:image|text|chart|report|picture|visual|written)\s+(?:image|text|chart|report|picture)\b"
+    r"|\btyped\s+image\b",
+    re.I,
 )
 
 
@@ -428,7 +433,13 @@ def load_donor_verbalizations(path: str, model_id: str) -> Dict[Tuple[str, str],
     out: Dict[Tuple[str, str], str] = {}
     with open(path, encoding="utf-8") as f:
         for line in f:
-            row = json.loads(line)
+            line = line.strip()
+            if not line:
+                continue
+            try:
+                row = json.loads(line)
+            except json.JSONDecodeError:
+                continue
             if row.get("family") != "donor":
                 continue
             if row["model_id"] != model_id:

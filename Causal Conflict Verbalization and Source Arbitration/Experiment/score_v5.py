@@ -59,6 +59,11 @@ _REL_NEG_BEFORE = re.compile(r"(?:\b(?:less|no more|not(?:\s+(?:as|very|fully|so
 
 SOURCES = {"math": ("image", "text"), "chartqa": ("chart", "report")}
 _RELIABLE_WORD = re.compile(r"\b(?:un)?reliable\b", re.I)
+_FOIL_BEFORE = re.compile(
+    r"\b(?:unlike|rather than|instead of|as opposed to|compared (?:to|with)|over)\s+(?:the\s+|a\s+|an\s+)?$",
+    re.I,
+)
+_CLAUSE_SPLIT = re.compile(r"[,;:]|\b(?:as|because|since|while|whereas|although|though|but)\b", re.I)
 
 
 def reliability_sentence(text: str) -> Optional[str]:
@@ -85,7 +90,9 @@ def stated_reliable_source(verbalization: str, regime: Optional[str] = None) -> 
     """Return image, text, chart, report, undetermined or absent.
 
     Uses the first sentence that contains "reliable" (or "unreliable"). Inside it,
-    the source noun nearest before "reliable" wins ("the typed text is more reliable").
+    the source noun nearest before "reliable" wins ("the typed text is more reliable"),
+    unless it sits in a foil phrase ("unlike the image") or shares its clause with
+    another distinct source noun ("both the image and the typed text").
     With none before, the first one after it wins ("the more reliable source is the chart").
     When regime is provided, only nouns belonging to SOURCES[regime] are considered.
     """
@@ -96,13 +103,22 @@ def stated_reliable_source(verbalization: str, regime: Optional[str] = None) -> 
     if _REL_NEG.search(s) or _REL_NEG_BEFORE.search(s[:idx]):
         return "undetermined"
     allowed = set(SOURCES[regime]) if regime is not None else None
-    before = [
-        _NOUN_LABEL[x.group(1).lower()]
+    before_matches = [
+        (x, _NOUN_LABEL[x.group(1).lower()])
         for x in _SOURCE_NOUN.finditer(s[:idx])
         if allowed is None or _NOUN_LABEL[x.group(1).lower()] in allowed
     ]
-    if before:
-        return before[-1]
+    if before_matches:
+        last_m, last_lbl = before_matches[-1]
+        prefix = s[: last_m.start()]
+        if _FOIL_BEFORE.search(prefix):
+            return "undetermined"
+        splits = list(_CLAUSE_SPLIT.finditer(prefix))
+        clause_start = splits[-1].end() if splits else 0
+        clause_labels = {lbl for m, lbl in before_matches if m.start() >= clause_start}
+        if len(clause_labels) > 1:
+            return "undetermined"
+        return last_lbl
     after = [
         _NOUN_LABEL[x.group(1).lower()]
         for x in _SOURCE_NOUN.finditer(s[idx:])
@@ -128,7 +144,7 @@ def normalize_answer(raw: Optional[str]) -> Optional[str]:
     """Lower-case, strip markup, edge punctuation, a leading article, '%', '$' and commas."""
     if raw is None:
         return None
-    s = _MARKUP.sub(" ", str(raw)).strip()
+    s = v4._normalize_unicode_minus(_MARKUP.sub(" ", str(raw)).strip())
     s = _EDGE.sub("", s)
     s = _ARTICLE.sub("", s)
     s = s.replace("%", "").replace("$", "").strip()
@@ -191,7 +207,7 @@ _MATH_FINAL_ANSWER = re.compile(
 
 def extract_math_final_answer(text: str) -> Optional[str]:
     """Extract an explicit final-answer declaration when #### is omitted."""
-    matches = _MATH_FINAL_ANSWER.findall(text)
+    matches = _MATH_FINAL_ANSWER.findall(v4._normalize_unicode_minus(text))
     return v4._clean_number(matches[-1]) if matches else None
 
 

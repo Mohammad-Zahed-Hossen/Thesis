@@ -1,0 +1,42 @@
+{
+  "internvl3": {
+    "model_name": "OpenGVLab/InternVL3-38B-hf",
+    "revision": "b2a05c0c325235f7530d8274c313a1d01082e069",
+    "transformers": "5.3.0"
+  },
+  "internvl35": {
+    "model_name": "OpenGVLab/InternVL3_5-38B-hf",
+    "revision": "7c830fc25e874f9a861087e3c70587f2b9b555f3",
+    "transformers": "5.3.0"
+  },
+  "kimi": {
+    "model_name": "moonshotai/Kimi-VL-A3B-Instruct",
+    "revision": "4f50fd8b013ab88366e011f67609f6bfc89e12a9",
+    "transformers": "4.48.2"
+  },
+  "ovis": {
+    "model_name": "AIDC-AI/Ovis2.5-9B",
+    "revision": "2f24c415baa5c32637dfe75780d1507daef463f7",
+    "transformers": "4.51.3"
+  },
+  "qwen25": {
+    "model_name": "Qwen/Qwen2.5-VL-32B-Instruct",
+    "revision": "7cfb30d71a1f4f49a57592323337a4a4727301da",
+    "transformers": "5.3.0"
+  },
+  "qwen3": {
+    "model_name": "Qwen/Qwen3-VL-30B-A3B-Instruct",
+    "revision": "9c4b90e1e4ba969fd3b5378b57d966d725f1b86c",
+    "transformers": "5.3.0"
+  },
+  "r4b": {
+    "model_name": "YannQi/R-4B",
+    "revision": "0fbbf22db6867d9ac260d8181ac655fd915c9415",
+    "transformers": "5.3.0"
+  },
+  "qwen35": {
+    "model_name": "Qwen/Qwen3.5-9B",
+    "revision": "c202236235762e1c871ad0ccb60c8ee5ba337b9a",
+    "transformers": "5.3.0"
+  }
+}

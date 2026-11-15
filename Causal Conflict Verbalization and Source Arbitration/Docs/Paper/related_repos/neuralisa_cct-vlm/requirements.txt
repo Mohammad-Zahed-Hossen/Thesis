@@ -1,0 +1,5 @@
+# Primary Python 3.12 / CUDA environment used for release validation.
+# Ovis2.5 and Kimi-VL require the model-specific Transformers versions listed
+# in REPRODUCIBILITY.md.
+-r requirements-base.txt
+transformers==5.3.0

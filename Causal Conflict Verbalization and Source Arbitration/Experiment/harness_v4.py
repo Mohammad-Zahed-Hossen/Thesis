@@ -31,6 +31,8 @@ import hashlib
 import json
 import os
 import platform
+import re
+import subprocess
 import sys
 import time
 import zlib
@@ -367,6 +369,58 @@ class EchoBackend:
         return out
 
 
+_HEX_SHA_RE = re.compile(r"[0-9a-f]{40}")
+
+
+def resolve_hf_snapshot_commit(
+    model_id: str,
+    revision: Optional[str] = None,
+    model: Any = None,
+    cache_dir: Optional[str] = None,
+) -> Optional[str]:
+    """Resolve the cached Hugging Face 40-char commit SHA without echoing unverified pins."""
+    cfg_obj = getattr(model, "config", None)
+    commit_hash = getattr(cfg_obj, "_commit_hash", None)
+    if isinstance(commit_hash, str) and _HEX_SHA_RE.fullmatch(commit_hash.strip()):
+        return commit_hash.strip()
+
+    name_or_path = getattr(cfg_obj, "_name_or_path", None)
+    if name_or_path:
+        m = re.search(r"[/\\]snapshots[/\\]([0-9a-f]{40})(?:[/\\]|$)", str(name_or_path))
+        if m:
+            return m.group(1)
+
+    hub_root = (
+        cache_dir
+        or os.environ.get("HF_HUB_CACHE")
+        or os.path.join(os.environ.get("HF_HOME", os.path.expanduser("~/.cache/huggingface")), "hub")
+    )
+    if model_id:
+        model_dir = os.path.join(hub_root, f"models--{model_id.replace('/', '--')}")
+        snaps_dir = os.path.join(model_dir, "snapshots")
+        if isinstance(revision, str) and _HEX_SHA_RE.fullmatch(revision.strip()):
+            rev_sha = revision.strip()
+            if os.path.isdir(os.path.join(snaps_dir, rev_sha)):
+                return rev_sha
+        ref_name = (revision or "main").strip()
+        ref_file = os.path.join(model_dir, "refs", ref_name)
+        if os.path.isfile(ref_file):
+            with open(ref_file, "r", encoding="utf-8") as fh:
+                ref_sha = fh.read().strip()
+            if _HEX_SHA_RE.fullmatch(ref_sha) and os.path.isdir(os.path.join(snaps_dir, ref_sha)):
+                return ref_sha
+        if os.path.isdir(snaps_dir):
+            snap_dirs = [
+                d
+                for d in os.listdir(snaps_dir)
+                if _HEX_SHA_RE.fullmatch(d) and os.path.isdir(os.path.join(snaps_dir, d))
+            ]
+            if len(snap_dirs) == 1:
+                return snap_dirs[0]
+
+    return None
+
+
 class HFBackend:
     """Transformers backend. Needs a GPU session; not exercised by the local tests."""
 
@@ -385,7 +439,8 @@ class HFBackend:
 
         self.torch = torch
         self.transformers_version = transformers.__version__
-        self.model_revision = cfg.model_revision
+        self.model_id = cfg.model_id
+        self.model_revision = cfg.model_revision or MODEL_PINS.get(cfg.model_id)
 
         # Same CUDA 13 NVRTC workaround as v3: integer .prod() on CPU.
         original_prod = torch.Tensor.prod
@@ -402,7 +457,7 @@ class HFBackend:
             major, _ = torch.cuda.get_device_capability()
             dtype = torch.bfloat16 if major >= 8 else torch.float16
         self.dtype = str(dtype)
-        kwargs = dict(torch_dtype=dtype, device_map="auto", attn_implementation="sdpa", revision=cfg.model_revision)
+        kwargs = dict(torch_dtype=dtype, device_map="auto", attn_implementation="sdpa", revision=self.model_revision)
         try:
             from transformers import AutoModelForImageTextToText
 
@@ -415,7 +470,7 @@ class HFBackend:
             self.model = cls.from_pretrained(cfg.model_id, **kwargs)
         self.model.eval()
         self.processor = AutoProcessor.from_pretrained(
-            cfg.model_id, min_pixels=cfg.min_pixels, max_pixels=cfg.max_pixels, revision=cfg.model_revision
+            cfg.model_id, min_pixels=cfg.min_pixels, max_pixels=cfg.max_pixels, revision=self.model_revision
         )
         self.processor.tokenizer.padding_side = "left"
         tok = self.processor.tokenizer
@@ -434,7 +489,12 @@ class HFBackend:
             "cuda": t.version.cuda,
             "gpu": t.cuda.get_device_name(0) if t.cuda.is_available() else None,
             "dtype": self.dtype,
-            "resolved_model_commit": getattr(self.model.config, "_commit_hash", None) or getattr(self, "model_revision", None),
+            "requested_model_revision": getattr(self, "model_revision", None),
+            "resolved_model_commit": resolve_hf_snapshot_commit(
+                getattr(self, "model_id", ""),
+                getattr(self, "model_revision", None),
+                getattr(self, "model", None),
+            ),
             "generation_config": self.model.generation_config.to_dict(),
             "eos_ids": sorted(self.eos_ids),
             "peak_vram_gb": t.cuda.max_memory_allocated() / 2**30 if t.cuda.is_available() else None,
@@ -561,6 +621,64 @@ def make_row(req: Request, gen: Generation, cfg: RunConfig, wall_s: float) -> Di
     }
 
 
+def ensure_trailing_newline(path: str) -> None:
+    """Ensure a non-empty JSONL file ends with '\\n' so resume never glues onto a partial line."""
+    if not path or not os.path.exists(path) or os.path.getsize(path) == 0:
+        return
+    with open(path, "rb+") as f:
+        f.seek(-1, os.SEEK_END)
+        if f.read(1) != b"\n":
+            f.write(b"\n")
+
+
+_RESULT_OUTPUT_PREFIXES = (
+    "Experiment/results_v5/",
+    "results_v5/",
+    "Experiment/results_v4/",
+    "results_v4/",
+)
+
+
+def git_provenance(repo_dir: str = HERE) -> Dict[str, Any]:
+    """Return git HEAD commit, dirty status (ignoring untracked result outputs), and prereg-v5 tag."""
+    def _git(args: Sequence[str], strip: bool = True) -> Optional[str]:
+        try:
+            proc = subprocess.run(["git", "-C", repo_dir, *args], capture_output=True, text=True, timeout=5)
+        except (OSError, subprocess.SubprocessError):
+            return None
+        if proc.returncode != 0:
+            return None
+        return proc.stdout.strip() if strip else proc.stdout
+
+    head = _git(["rev-parse", "HEAD"])
+    status_raw = _git(["status", "--porcelain", "--untracked-files=all"], strip=False)
+    tag_commit = _git(["rev-parse", "refs/tags/prereg-v5^{commit}"])
+
+    all_lines: List[str] = []
+    output_lines: List[str] = []
+    non_output_lines: List[str] = []
+    if status_raw is not None:
+        for line in status_raw.splitlines():
+            if not line.strip():
+                continue
+            all_lines.append(line)
+            code = line[:2]
+            rel = line[3:].strip().strip('"').replace("\\", "/")
+            if code == "??" and rel.startswith(_RESULT_OUTPUT_PREFIXES):
+                output_lines.append(line)
+            else:
+                non_output_lines.append(line)
+
+    return {
+        "git_commit": head,
+        "git_dirty": bool(non_output_lines) if status_raw is not None else None,
+        "git_dirty_including_outputs": bool(all_lines) if status_raw is not None else None,
+        "git_untracked_outputs": len(output_lines) if status_raw is not None else None,
+        "prereg_tag": "prereg-v5" if tag_commit is not None else None,
+        "prereg_tag_commit": tag_commit,
+    }
+
+
 def run_requests(requests: Sequence[Request], backend, cfg: RunConfig, out_path: str, log=print) -> int:
     """Generate every request not already in out_path. Returns the number written."""
     done = load_done(out_path)
@@ -570,6 +688,7 @@ def run_requests(requests: Sequence[Request], backend, cfg: RunConfig, out_path:
             by_arm.setdefault(r.arm, []).append(r)
     written = 0
     start = time.time()
+    ensure_trailing_newline(out_path)
     with open(out_path, "a", encoding="utf-8") as f:
         for arm, pending in by_arm.items():
             capped = 0
@@ -615,6 +734,7 @@ def write_manifest(
         with open(p, "rb") as f:
             scripts[os.path.basename(p)] = hashlib.sha256(f.read()).hexdigest()
     existed = os.path.exists(path)
+    previous: Dict[str, Any] = {}
     if existed:
         with open(path, encoding="utf-8") as f:
             previous = json.load(f)
@@ -626,13 +746,51 @@ def write_manifest(
             print(f"Warning: {changed} changed since this run tag started. Earlier rows came from the old code.", file=sys.stderr)
     if existed and not force_write:
         return
+    git_info = git_provenance()
+    env_info = dict(backend.info())
+    written_at = time.strftime("%Y-%m-%dT%H:%M:%S")
+    invocations: List[Dict[str, Any]] = []
+    if existed:
+        if isinstance(previous.get("invocations"), list):
+            invocations = list(previous["invocations"])
+        elif "written_at" in previous:
+            invocations = [
+                {
+                    "written_at": previous.get("written_at"),
+                    "n_items": previous.get("n_items"),
+                    "limit": None,
+                    "scripts_sha256": previous.get("scripts_sha256"),
+                    "git": previous.get("git"),
+                    "environment": previous.get("environment"),
+                }
+            ]
+        prev_env = previous.get("environment") or {}
+        prev_vram = prev_env.get("peak_vram_gb")
+        cur_vram = env_info.get("peak_vram_gb")
+        if isinstance(prev_vram, (int, float)):
+            prev_max = prev_env.get("max_peak_vram_gb") if isinstance(prev_env.get("max_peak_vram_gb"), (int, float)) else prev_vram
+            env_info["max_peak_vram_gb"] = max(prev_max, cur_vram) if isinstance(cur_vram, (int, float)) else prev_max
+            if cur_vram is None:
+                env_info["peak_vram_gb"] = prev_vram
+    invocations.append(
+        {
+            "written_at": written_at,
+            "n_items": n_items,
+            "limit": getattr(cfg, "limit", None),
+            "scripts_sha256": scripts,
+            "git": git_info,
+            "environment": dict(backend.info()),
+        }
+    )
     manifest = {
         "config": config,
         "n_items": n_items,
         "scripts_sha256": scripts,
         "python": platform.python_version(),
-        "written_at": time.strftime("%Y-%m-%dT%H:%M:%S"),
-        "environment": backend.info(),
+        "written_at": written_at,
+        "git": git_info,
+        "environment": env_info,
+        "invocations": invocations,
     }
     with open(path, "w", encoding="utf-8") as f:
         json.dump(manifest, f, indent=2, default=str)

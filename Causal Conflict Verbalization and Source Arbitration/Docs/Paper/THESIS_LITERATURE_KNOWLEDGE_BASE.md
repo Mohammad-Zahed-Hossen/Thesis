@@ -248,9 +248,9 @@
 
 ## 5. Pre-Freeze Checklist Before Tagging `prereg-v5`
 
-1. **Human Coding (`Experiment/coding_v5/`):** Double-code `200` verdict rows (`V0001`–`V0200`; `1,088` raw text lines due to multi-line `full_text` cells) + `150` flip rows (`F0001`–`F0150`) and verify Cohen's $\kappa \ge 0.80$.
-2. **ChartQA `max_pixels` & GPU Checks (`Experiment/README.md`):** Close R8.4 (`200704` vs `401408`), run `--print_example` render check on GPU, and verify the new `verdict_nll` span.
-3. **Sync Pre-Registration Before Freeze:** Update `PREREGISTRATION_VERDICT_TRANSPLANT.md` §1.1 (`CMC-Bench` + `lit-audit-2026-11-15.md` §1.3 narrowed wording), §4 audit additions (`2609.29278` for D1, per-order sign check, prefill-resistance / `verdict_nll` caveat on H₀, competency-population scope, rendered-text Math channel note), §11 deviation log, and title/scope framing (Math *source following*, `[Design decision]` tags for `ε=5.0 pp`/churn).
+1. **Human Coding (`Experiment/coding_v5/`):** Double-code `200` verdict rows (`V0001`–`V0200`; `1,640` raw text lines post-F3 confirmatory-weighted resampling due to multi-line `full_text` cells) + `150` flip rows (`F0001`–`F0150`, `151` raw lines) and verify Cohen's $\kappa \ge 0.80$ / raw agreement.
+2. **ChartQA `max_pixels` & GPU Checks (`Experiment/README.md`):** Close R8.4 (`200704` vs `501760`), run `--print_example` render check on GPU, and verify `verdict_nll_tokens > 0` / `verdict_span_exact` / `boundary_mismatch` in a `--limit 20` smoke run.
+3. **Sync Pre-Registration Before Freeze:** §1.1, §4 citations (`2609.29278`/`2603.01437`, `2603.20172`, `2610.29318`, `2610.20805`, per-order sign check, prefill-resistance / `verdict_nll` caveat on H₀, competency-population scope, rendered-text Math channel), §11, Fable 5.2 audit fixes (`F2`, `F3`, `F5`–`F13`, `Upgrades 1–5`), and title/scope alignment are integrated into `PREREGISTRATION_VERDICT_TRANSPLANT.md`; complete final verification before freezing.
 4. **Commit, tag `prereg-v5`, and run `--phase confirm`.**
 
 ---

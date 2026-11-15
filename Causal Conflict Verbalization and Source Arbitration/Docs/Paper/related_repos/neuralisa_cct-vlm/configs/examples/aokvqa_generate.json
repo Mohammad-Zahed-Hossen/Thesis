@@ -1,0 +1,23 @@
+{
+  "output_dir": "outputs/aokvqa-generation-example",
+  "override": false,
+  "run_generator": true,
+  "generator": "QwenImageEdit",
+  "model": "Perfect Mock",
+  "evaluator": "Mock",
+  "generator_kwargs": {
+    "dataset_name": "AOKVQA",
+    "split": "train",
+    "n_examples": 10,
+    "image_size": [1024, 1024],
+    "seed": 42,
+    "device": "cuda",
+    "model_revision": "ac7f9318f633fc4b5778c59367c8128225f1e3de",
+    "dino_revision": "a2bb814dd30d776dcf7e30523b00659f4f141c71"
+  },
+  "model_kwargs": {},
+  "evaluator_kwargs": {},
+  "visualizer_kwargs": {
+    "skip": true
+  }
+}

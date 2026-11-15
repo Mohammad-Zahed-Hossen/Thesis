@@ -3,7 +3,7 @@
 *(Folder name unchanged: `Causal Conflict Verbalization and Source Arbitration`)*
 
 > **Researcher:** Mohammad Zahed Hossen (Final-Year BSc CSE, Bangladesh)
-> **Status:** v3 pilot and v4 dev done; v5 dev pass done, audited, and analysed (`analysis_dev/`); 240 unit tests pass; pre-registration not yet frozen (**no confirmatory data**)
+> **Status:** v3 pilot and v4 dev done; v5 dev pass done, audited, and analysed (`analysis_dev/`); 248 CPU unit tests pass; pre-registration not yet frozen (**no confirmatory data**)
 > **Models:** `Qwen/Qwen2-VL-2B-Instruct` (diagnostic-only, D3), `Qwen/Qwen2.5-VL-3B-Instruct` & `Qwen/Qwen2.5-VL-7B-Instruct` (confirmatory)
 > **Datasets:** `vlm-modality-research/modality-conflict-arbitration-v2` (GSM8K/SVAMP) and `vlm-modality-research/chartqa-evidence-conflict-v2` (exploratory, D4)
 
@@ -19,7 +19,7 @@ When an image and a typed text support different answers, does a prefix-forced s
 
 - **The v3 instruction contrast is large, but doesn't test verbalization.** Answers matching the image problem fall from 35.7% to 11.8%, and answers matching the text problem rise from 4.2% to 36.1% (N = 1,600 with distinct answers). That compared two *instructions*, not two verbalizations.
 - **v4 dev (`dev2`):** On the 110 items solvable from both sources, reversing an authored verdict moved image answers by +20.9 pp under the neutral instruction and −1.8 pp under the conflict instruction.
-- **v5 dev pass:** 29,880 rows across all three models ran on an L4 in `bfloat16` (`Experiment/results_v5/`). Audits flagged pre-freeze blockers that led to pre-freeze decisions D1–D5 (Math behavioural primary, `Qwen2-VL-2B` diagnostic-only, ChartQA exploratory, fixed 5% churn gate), `analyze_v5.py` dev outputs (`Experiment/results_v5/analysis_dev/`), blind coding sheets (`Experiment/coding_v5/`, 200 verdicts + 150 flips), an 18-paper + CMC-Bench literature synthesis ([Docs/Paper/THESIS_LITERATURE_KNOWLEDGE_BASE.md](Docs/Paper/THESIS_LITERATURE_KNOWLEDGE_BASE.md)), and the 2026-11-15 pre-freeze literature audit ([Docs/Paper/lit-audit-2026-11-15/lit-audit-2026-11-15.md](Docs/Paper/lit-audit-2026-11-15/lit-audit-2026-11-15.md); brief in [Docs/RESEARCH_OBJECTIVE.md](Docs/RESEARCH_OBJECTIVE.md)) before freezing [Docs/PREREGISTRATION_VERDICT_TRANSPLANT.md](Docs/PREREGISTRATION_VERDICT_TRANSPLANT.md).
+- **v5 dev pass:** 29,880 rows across all three models ran on an L4 in `bfloat16` (`Experiment/results_v5/`). Audits ([fable52-prefreeze-audit-2026-11-15.md](Docs/Paper/fable52-prefreeze-audit-2026-11-15.md), [claude_v5_independent_deep_audit.md](<Thesis/docs/Archive/dev v5/claude_v5_independent_deep_audit.md>)) and fixes (`F2`, `F3`, `F5`–`F13`, `Upgrades 1–5`, `preflight_v5.py`) led to pre-freeze decisions D1–D5 (Math behavioural primary, `Qwen2-VL-2B` diagnostic-only, ChartQA exploratory, fixed 5% churn gate), updated `analyze_v5.py` dev outputs (`Experiment/results_v5/analysis_dev/`), blind coding sheets (`Experiment/coding_v5/`, 200 verdicts + 150 flips), an 18-paper + CMC-Bench literature synthesis ([Docs/Paper/THESIS_LITERATURE_KNOWLEDGE_BASE.md](Docs/Paper/THESIS_LITERATURE_KNOWLEDGE_BASE.md)), the 2026-11-15 pre-freeze literature audit ([Docs/Paper/lit-audit-2026-11-15/lit-audit-2026-11-15.md](Docs/Paper/lit-audit-2026-11-15/lit-audit-2026-11-15.md); brief in [Docs/RESEARCH_OBJECTIVE.md](Docs/RESEARCH_OBJECTIVE.md)), and 11 related-work GitHub repo snapshots ([Docs/Paper/related_repos/](Docs/Paper/related_repos/README.md)) before freezing [Docs/PREREGISTRATION_VERDICT_TRANSPLANT.md](Docs/PREREGISTRATION_VERDICT_TRANSPLANT.md).
 
 ## Repository
 
@@ -30,7 +30,7 @@ When an image and a typed text support different answers, does a prefix-forced s
 │   ├── results_v3/ v3 pilot, N = 1,619; see its README
 │   └── coding_v5/  v5 double human-coding sheets (200 verdicts, 150 flips)
 ├── Thesis/         Writing guides, FAQs, runbooks, compute evaluations, and v5 dev audits (chapters not yet drafted)
-├── Docs/           Onboarding brief (RESEARCH_OBJECTIVE.md), pre-registration draft, 18-paper + CMC-Bench knowledge base / 26 local PDFs + 2026-11-15 pre-freeze audit (Docs/Paper/), and historical decision records
+├── Docs/           Onboarding brief (RESEARCH_OBJECTIVE.md), pre-registration draft, 18-paper + CMC-Bench knowledge base / 26 local PDFs + 11 repo snapshots + 2026-11-15 audits (Docs/Paper/), and historical decision records
 ├── Archive/        Parked explorations (Bengali VLM, medical imaging, multimodal agents, etc.)
 ├── CLAUDE.md       Claude directives
 ├── AGENTS.md       Instructions for other agents

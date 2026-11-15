@@ -19,6 +19,9 @@ Docs/Paper/
 ├── lit-dossier-verdict-transplant/        Original 10+4 dossier (2026-11-10) + 4 PNG figure crops
 ├── prereg-freeze-audit/                   Pre-registration freeze audit (2026-11-10) + 3 PNG figure crops
 ├── lit-audit-2026-11-15/                  Pre-freeze exhaustive literature audit: report, papers.csv, search_log.csv, references.bib
+├── fable52-prefreeze-audit-2026-11-15.md    Fable 5.2 pre-freeze forensic audit (commit `03274b3`, F1–F13 + Upgrades 1–5)
+├── fable52_audit_scripts/                 5 helper forensic scripts preserved from Fable 5.2 audit
+├── related_repos/                         Source-only commit-pinned snapshots of 11 related-work GitHub repos
 ├── <26 local arXiv / Anthology PDFs>      19 core sources + 2606.22862.pdf (see §1) + 6 audit A papers (see §1b)
 └── Archive/                               Old-topic papers and peer theses — NOT cited by v5
 ```
@@ -29,6 +32,7 @@ Docs/Paper/
 
 | File | Date | What it is | Key sections |
 |---|---|---|---|
+| [fable52-prefreeze-audit-2026-11-15.md](fable52-prefreeze-audit-2026-11-15.md) | 2026-11-15 | **Fable 5.2 pre-freeze forensic audit (commit `03274b3`).** Audits code vs. dev pass, provenance, human coding, R8.4 pixel cap, edit gates, wording floor, and 6 related-work GitHub repos (subsequently expanded to 11 snapshots across all 26 PDFs); companion scripts in [fable52_audit_scripts/](fable52_audit_scripts/) and repo snapshots in [related_repos/](related_repos/README.md). | §1 verdict · §2 F1–F13 · §4 repos · §5–7 execution & patch plan |
 | [lit-audit-2026-11-15.md](lit-audit-2026-11-15/lit-audit-2026-11-15.md) | 2026-11-15 | **Pre-freeze exhaustive literature audit.** 108 queries (alphaXiv, OpenAlex, PubMed) + citation snowball; 1,260 records screened; 6 A + 33 B new papers; novelty verdict *intact, needs narrowing*; proposed §1.1 rewording; KB corrections. Research brief at [../RESEARCH_OBJECTIVE.md](../RESEARCH_OBJECTIVE.md). | §0 summary · §1 threats + §1.1 rewording · §2 A spec sheets · §3 B table · §4 design implications · §5 KB corrections · §6 coverage |
 | [THESIS_LITERATURE_KNOWLEDGE_BASE.md](THESIS_LITERATURE_KNOWLEDGE_BASE.md) | 2026-11-14 | **Complete 18-paper + CMC-Bench report.** Merges local PDF audits + AlphaXiv Passes 1 & 2 + post-v5 direct PDF verification, fixes cross-pass errors, and reconciles design rules against D1–D5. | §0 PDF inventory · §1 verification fixes · §2 19-source matrix · §3 full spec sheets + Ch. 2 leads · §4 design rules · §5 pre-freeze checklist |
 | [post-v5-pdf-audit.md](post-v5-pdf-audit/post-v5-pdf-audit.md) | 2026-11-14 | **Post-v5 direct PDF audit (#15–#19 + 2 Ch. 2 leads).** Verifies downloaded PDFs #15–#19 + `2606.22862`, audits gated NeurIPS 2026 abstract (`uul4iRQSJ2`, `[PDF Not Available]`), resolves TOST/novelty checks, and stores 10 PNG table crops in `figures/`. | §0 integrity table · §1 #15–#19 autopsies · §2 Ch. 2 leads & 3 design Qs · §3 repo sync |

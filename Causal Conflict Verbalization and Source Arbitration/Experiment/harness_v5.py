@@ -45,6 +45,11 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 
 MODEL_PINS = h4.MODEL_PINS
 DATASET_PINS = h4.DATASET_PINS
+MIN_PIXELS_PIN = 128 * 28 * 28  # 100352 (prereg §3.4)
+CONFIRM_MAX_PIXELS: Dict[str, int] = {
+    "conflict": 256 * 28 * 28,  # 200704 (prereg §3.4)
+    "chartqa": 256 * 28 * 28,   # 200704 provisional; update if R8.4 locks 501760 before prereg-v5
+}
 REGIME = {"conflict": "math", "chartqa": "chartqa"}
 ORDERS = ("image_first", "text_first")
 ORDER_CODE = {"image_first": -0.5, "text_first": 0.5}  # prereg §4.1
@@ -286,7 +291,7 @@ def fake_qwen_chat_template(messages, tokenize=False, add_generation_prompt=Fals
 
 def candidate_text(y: str) -> str:
     """How a gold answer is written as a continuation: '18.0' -> '18', '2.50' -> '2.5'."""
-    s = str(y).strip()
+    s = sc.v4._normalize_unicode_minus(str(y).strip())
     try:
         d = Decimal(s.replace(",", ""))
     except InvalidOperation:
@@ -392,7 +397,11 @@ class EchoBackend:
     apply_chat_template = staticmethod(fake_qwen_chat_template)
 
     def info(self) -> Dict[str, Any]:
-        return {"backend": self.name, "warning": "fake outputs; not experimental data"}
+        return {
+            "backend": self.name,
+            "resolved_model_commit": "echo",
+            "warning": "fake outputs; not experimental data",
+        }
 
     def generate(self, reqs: Sequence[Req], cfg: V5Config) -> List[Dict[str, Any]]:
         out = []
@@ -423,12 +432,21 @@ class EchoBackend:
             for side, y in (("image", r.item.y_image), ("text", r.item.y_text)):
                 hsh = zlib.crc32((side + r.key + r.item.id + (r.prefill or "")).encode())
                 n = max(1, len(candidate_text(y)) // 2)
-                res[f"lp_{side}"] = -(hsh % 1000) / 100.0
+                lp = -(hsh % 1000) / 100.0
+                res[f"lp_{side}"] = lp
                 res[f"n_{side}"] = n
+                res[f"lp_{side}_eot"] = round(lp / n, 4)
+                res[f"ws_skipped_{side}"] = 0
             res["boundary_mismatch"] = False
             res["verdict_nll"] = None
             res["ws_skipped"] = 0
             res["dl"] = sc.margin(res["lp_image"], res["n_image"], res["lp_text"], res["n_text"])
+            res["dl_with_eot"] = sc.margin(
+                res["lp_image"] + res["lp_image_eot"],
+                res["n_image"] + 1,
+                res["lp_text"] + res["lp_text_eot"],
+                res["n_text"] + 1,
+            )
             out.append(res)
         return out
 
@@ -523,8 +541,10 @@ class HFBackend(h4.HFBackend):
         skip = sc.leading_ws_skip([tokenizer.decode([i]) for i in ids[len(prefix_ids) :]]) if not mismatch else 0
         cont = total(len(prefix_ids) + skip, len(ids))
         extra = total(extra_span[0], extra_span[1]) if extra_span is not None and 0 < extra_span[0] < extra_span[1] else None
+        eos_ids = [eid for eid in (getattr(self, "eos_ids", None) or [tokenizer.eos_token_id]) if eid is not None]
+        eot_lp = max((float(lp[len(ids) - 1 - offset, eid].item()) for eid in eos_ids), default=0.0)
         del enc, logits, lp
-        return cont, extra, mismatch, skip
+        return (cont[0], cont[1], eot_lp), extra, mismatch, skip
 
     def score(self, reqs: Sequence[Req], cfg: V5Config) -> List[Dict[str, Any]]:
         """Teacher-forced margin at '####' (prereg §6.1). One request at a time."""
@@ -563,8 +583,12 @@ class HFBackend(h4.HFBackend):
             try:
                 for side, y in (("image", r.item.y_image), ("text", r.item.y_text)):
                     full = prefix + " " + candidate_text(y)
-                    (lp, n), extra, mismatch, skip = self._continuation(full, prefix_ids, images, extra_span if side == "image" else None)
+                    (lp, n, eot_lp), extra, mismatch, skip = self._continuation(
+                        full, prefix_ids, images, extra_span if side == "image" else None
+                    )
                     res[f"lp_{side}"], res[f"n_{side}"] = lp, n
+                    res[f"lp_{side}_eot"] = eot_lp
+                    res[f"ws_skipped_{side}"] = skip
                     res["boundary_mismatch"] |= mismatch
                     res["ws_skipped"] += skip
                     if extra is not None and extra[1] > 0:
@@ -574,6 +598,12 @@ class HFBackend(h4.HFBackend):
                 t.cuda.empty_cache()
                 raise h4.BackendOutOfMemory() from exc
             res["dl"] = sc.margin(res["lp_image"], res["n_image"], res["lp_text"], res["n_text"])
+            res["dl_with_eot"] = sc.margin(
+                res["lp_image"] + res["lp_image_eot"],
+                res["n_image"] + 1,
+                res["lp_text"] + res["lp_text_eot"],
+                res["n_text"] + 1,
+            )
             out.append(res)
             t.cuda.empty_cache()
         return out
@@ -600,6 +630,7 @@ def run(reqs: Sequence[Req], backend, cfg: V5Config, out_path: str, log=print) -
         if row_id(r.item.id, r.key) not in done:
             groups.setdefault((r.mode, r.uses_image, r.max_new_tokens), []).append(r)
     written, start = 0, time.time()
+    h4.ensure_trailing_newline(out_path)
     with open(out_path, "a", encoding="utf-8") as f:
         for (mode, _, _), pending in groups.items():
             fn = backend.generate if mode == "generate" else backend.score
@@ -691,7 +722,13 @@ def competent_ids(base_path: str, parser: str = "structured") -> Set[str]:
     ok: Dict[str, Set[str]] = {}
     with open(base_path, encoding="utf-8") as f:
         for line in f:
-            row = json.loads(line)
+            line = line.strip()
+            if not line:
+                continue
+            try:
+                row = json.loads(line)
+            except json.JSONDecodeError:
+                continue
             if base_correct(row, parser=parser):
                 ok.setdefault(row["id"], set()).add(row["family"])
     return {i for i, s in ok.items() if s == {"base_image", "base_text"}}
@@ -715,6 +752,84 @@ def add_common_args(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("--output_dir", default="results_v5")
     parser.add_argument("--dry_run", action="store_true", help="Fake model; stored v3 questions (conflict only)")
     parser.add_argument("--v3_results", default=os.path.join(HERE, "results_v3", "full_experiment_results v3.0.json"))
+    parser.add_argument(
+        "--allow_diagnostic_confirm",
+        action="store_true",
+        help="Allow confirmatory split on diagnostic-only Qwen2-VL-2B Math (D3).",
+    )
+    parser.add_argument(
+        "--allow_untagged_confirm",
+        action="store_true",
+        help="Bypass the clean prereg-v5 git tag check in confirm mode (not for real runs).",
+    )
+
+
+def validate_confirm_config(cfg: V5Config, args: Optional[argparse.Namespace] = None) -> None:
+    """Enforce pinned revisions, full splits, confirmatory models, and prereg-v5 tag."""
+    if cfg.phase != "confirm":
+        return
+    if args is not None and getattr(args, "dry_run", False):
+        return
+    expected_model_rev = MODEL_PINS.get(cfg.model_id)
+    if expected_model_rev is None or cfg.model_revision != expected_model_rev:
+        raise SystemExit(
+            f"Confirm phase refuses non-pinned model_revision={cfg.model_revision!r} "
+            f"for {cfg.model_id} (expected {expected_model_rev!r})."
+        )
+    dataset = h4.CHARTQA_DATASET if cfg.split == "chartqa" else h4.CONFLICT_DATASET
+    expected_ds_rev = DATASET_PINS.get(dataset)
+    if expected_ds_rev is None or cfg.dataset_revision != expected_ds_rev:
+        raise SystemExit(
+            f"Confirm phase refuses non-pinned dataset_revision={cfg.dataset_revision!r} "
+            f"for {dataset} (expected {expected_ds_rev!r})."
+        )
+    if cfg.limit is not None:
+        raise SystemExit(f"Confirm phase refuses --limit={cfg.limit!r}; use the full confirm split.")
+    expected_dev = 30 if cfg.split == "chartqa" else 200
+    if cfg.dev_size != expected_dev:
+        raise SystemExit(f"Confirm phase refuses --dev_size={cfg.dev_size} for {cfg.split} (expected {expected_dev}).")
+    if cfg.min_pixels != MIN_PIXELS_PIN:
+        raise SystemExit(f"Confirm phase refuses min_pixels={cfg.min_pixels} (expected {MIN_PIXELS_PIN}).")
+    expected_max_px = CONFIRM_MAX_PIXELS.get(cfg.split, 256 * 28 * 28)
+    if cfg.max_pixels != expected_max_px:
+        raise SystemExit(
+            f"Confirm phase refuses --max_pixels={cfg.max_pixels} for {cfg.split} (expected {expected_max_px})."
+        )
+    if (
+        cfg.split == "conflict"
+        and cfg.model_id == "Qwen/Qwen2-VL-2B-Instruct"
+        and not (args is not None and getattr(args, "allow_diagnostic_confirm", False))
+    ):
+        raise SystemExit(
+            "Confirm phase refuses diagnostic-only Qwen/Qwen2-VL-2B-Instruct on Math "
+            "(pre-freeze D3; 0/200 competent under structured). Pass --allow_diagnostic_confirm only for diagnostics."
+        )
+    if cfg.stage == "transplant":
+        if cfg.extra.get("beh_k", [1]) != [1]:
+            raise SystemExit(f"Confirm phase requires --beh_k 1; got {cfg.extra.get('beh_k')!r}.")
+        if cfg.extra.get("competency_parser", "structured") != "structured":
+            raise SystemExit(
+                f"Confirm phase requires --competency_parser structured; got {cfg.extra.get('competency_parser')!r}."
+            )
+        if cfg.split == "conflict" and cfg.extra.get("n_competent", 250) != 250:
+            raise SystemExit(
+                f"Confirm phase requires --n_competent 250 on Math; got {cfg.extra.get('n_competent')!r}."
+            )
+    gates_only = bool(args is not None and getattr(args, "gates_only", False))
+    allow_untagged = bool(args is not None and getattr(args, "allow_untagged_confirm", False))
+    if not gates_only and not allow_untagged:
+        git_info = h4.git_provenance()
+        if (
+            git_info.get("prereg_tag") != "prereg-v5"
+            or not git_info.get("git_commit")
+            or git_info.get("prereg_tag_commit") != git_info.get("git_commit")
+            or git_info.get("git_dirty") is not False
+        ):
+            raise SystemExit(
+                "Confirm phase requires a clean git HEAD tagged 'prereg-v5' "
+                f"(tag_commit={git_info.get('prereg_tag_commit')}, head={git_info.get('git_commit')}, "
+                f"dirty={git_info.get('git_dirty')})."
+            )
 
 
 def config_from_args(args: argparse.Namespace, stage: str, **extra: Any) -> V5Config:
@@ -741,6 +856,7 @@ def config_from_args(args: argparse.Namespace, stage: str, **extra: Any) -> V5Co
         cfg.model_revision = MODEL_PINS.get(cfg.model_id)
     if cfg.dataset_revision is None:
         cfg.dataset_revision = DATASET_PINS.get(h4.CHARTQA_DATASET if cfg.split == "chartqa" else h4.CONFLICT_DATASET)
+    validate_confirm_config(cfg, args)
     return cfg
 
 
@@ -764,6 +880,9 @@ def print_example(args: argparse.Namespace, cfg: V5Config, items: Sequence[Item]
 
         template = AutoProcessor.from_pretrained(cfg.model_id, revision=cfg.model_revision).apply_chat_template
     it = items[0]
+    if it.image is not None and hasattr(it.image, "size"):
+        w, h = it.image.size
+        print(f"===== image.size: {w}x{h} ({w * h} px; min_pixels={cfg.min_pixels}, max_pixels={cfg.max_pixels}) =====")
     for order in ORDERS:
         instr = instruction(cfg.regime, "binding", 1, it.image_only_question)
         print(f"===== {order} (binding, k=1) =====")

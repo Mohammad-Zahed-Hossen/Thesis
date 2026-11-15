@@ -10,22 +10,23 @@ The dev pass uses **items that are already spent**: the 200 GSM8K/SVAMP dev item
 
 ```bash
 cd Experiment
+python preflight_v5.py
 python -B -m unittest discover -s tests
 python harness_v5.py --dry_run --print_example --run_tag x
 python harness_v5.py --dry_run --print_example --model_id Qwen/Qwen2.5-VL-7B-Instruct --run_tag test_7b_render
 ```
 
-The second command prints the prompt layout using the fake template. It should show the instruction first, then the two sources (image first, then typed text, then the reverse), then the format line, and no "Source A/B". The dry run uses the same fake template for every model, so the third command only confirms that the 7B model id is accepted. The real 7B template is checked in step 3.
+The first command verifies code–preregistration pin/template/lexicon consistency and script hashes; the third prints the prompt layout using the fake template. It should show the instruction first, then the two sources (image first, then typed text, then the reverse), then the format line, and no "Source A/B". The dry run uses the same fake template for every model, so the fourth command only confirms that the 7B model id is accepted. The real 7B template is checked in step 3.
 
 ## 2. GPU session setup
 
-Upload these files into one folder: `harness_v4.py`, `score_v4.py`, `harness_v5.py`, `score_v5.py`, `transplant_v5.py`. Then:
+For **dev-phase** checks (`--phase dev`) in a standalone Colab/RunPod folder without git, upload: `harness_v4.py`, `score_v4.py`, `harness_v5.py`, `score_v5.py`, `transplant_v5.py`, `sample_v5_for_coding.py`, `analyze_v5.py`, `preflight_v5.py`, and a copy of `../Docs/PREREGISTRATION_VERDICT_TRANSPLANT.md`. For **confirmatory runs** (`--phase confirm`), clone the tagged repository and check out `prereg-v5` inside `Experiment/` (flat non-git folders are refused in confirm mode). Then install the exact package versions pinned in `results_v5/pip_freeze.txt` (with PyTorch `2.14.1+cu130`):
 
 ```bash
-pip install transformers accelerate datasets pillow qwen-vl-utils
+pip install torch==2.14.1+cu130 transformers==5.22.1 accelerate==1.15.0 datasets==4.8.5 pillow==11.3.0 qwen-vl-utils==0.0.14
 ```
 
-Use the transformers version recorded in the v4 manifests if you can (5.22.2), and the same versions for all three models. Check the GPU first: `nvidia-smi` should show an L4, A100 or RTX 3090/4090. Run `pip freeze > results_v5/pip_freeze.txt` once, before step 3.
+Use these exact pinned versions (`transformers==5.22.1`, matching `results_v5/pip_freeze.txt` and the v5 dev manifests) for every model and stage. Check the GPU and package pins first: `nvidia-smi` should show an L4, A100 or RTX 3090/4090, and `python preflight_v5.py --check_gpu` must exit `0` before running any stage. Run `pip freeze > results_v5/pip_freeze.txt` once if bootstrapping a fresh machine.
 
 ## 3. Render gate (prereg §8): real chat template, both orders
 
@@ -42,6 +43,7 @@ Each command prints both orders (`image_first`, then `text_first`). `--print_exa
 
 Check every printout:
 
+- `image.size` header (`<W>x<H>` px vs `min_pixels` / `max_pixels`, verifying native resolution on both Math and ChartQA).
 - `<|vision_start|><|image_pad|><|vision_end|>` sits right after `Image: ` (or `Chart: `).
 - The typed text or report block is on the other side of the image in each order.
 - The instruction comes before both sources and the format line after them.
@@ -112,9 +114,12 @@ Notes:
 - To see the gate counts without decoding anything, add `--gates_only` to the transplant command. It writes `results_v5/<run_tag>.gates.json`.
 - `--batch_size` applies to generation only. Margin scoring runs one request at a time; each request is two teacher-forced forward passes.
 
-### ChartQA `max_pixels` (R8.4)
+### ChartQA `max_pixels` (R8.4) and pre-freeze tokenizer smoke checks
 
-The default is `--max_pixels 200704` (256·28·28), the same as GSM8K/SVAMP. Charts carry small text. In the 2026-11-12 dev pass, ChartQA ran at `200704` with low `base_image` / gate yield; either rerun **only the ChartQA blocks (3, 4 and 6)** under new tags with `--max_pixels 401408` (512·28·28) or formally record keeping `200704` in the pre-registration before freezing (still open in `PREREGISTRATION_VERDICT_TRANSPLANT.md` §3.4). Do not change it afterwards.
+The default is `--max_pixels 200704` (`256·28·28`), the same as GSM8K/SVAMP. ChartQA-Conflict source charts are `800×557` px, so `200704` scales them down to ~67% linear size (`401408` scales to ~95%), whereas the *Which Source Wins?* artifact loads the Qwen processor without pixel caps. Before tagging `prereg-v5`:
+
+1. Compare `--max_pixels 200704` vs `--max_pixels 501760` (`812×560 = 454,720` px rounded to `28×28` patches) on the 30 spent ChartQA dev items (base + donor + `--gates_only` for `Qwen/Qwen2.5-VL-3B-Instruct` and `Qwen/Qwen2.5-VL-7B-Instruct`) under new dev tags and lock the chosen ChartQA value in `PREREGISTRATION_VERDICT_TRANSPLANT.md` §3.4. Do not change it after freezing.
+2. Run a real-tokenizer smoke check (`--phase dev --limit 20`) of `transplant_v5.py` for both confirmatory models (`3B` and `7B`) and verify `verdict_nll_tokens > 0`, `verdict_span_exact`, and `boundary_mismatch <= 1%`.
 
 ## 5. What to bring back
 
@@ -163,7 +168,13 @@ Dev numbers go into the freeze record. They are not findings, and they don't cha
 
 ## 6. After the freeze (not yet)
 
-1. Tag `prereg-v5`.
-2. For each of the three models, on the same GPU class and with the batch size used in the dev pass: run the base stage with `--phase confirm` over the whole confirm pool.
-3. Run the donor stage.
-4. Run `transplant_v5.py --phase confirm --n_competent 250`. Record the tag hash in each manifest.
+1. Clone the repository on the GPU machine, check out the clean commit tagged `prereg-v5` (`git checkout prereg-v5`), and verify before every GPU command:
+   ```bash
+   cd Experiment
+   python preflight_v5.py --phase confirm --require_tag prereg-v5 --check_gpu
+   ```
+   (Untracked new confirm files written under `Experiment/results_v5/` or `Experiment/results_v4/` are ignored by `git_provenance()`, so Stage 2 and Stage 3 remain unblocked while Stage 1 outputs sit on disk; you can also direct `--output_dir` to mounted Drive for persistence.)
+2. Confirmatory Math (`conflict`) runs execute on the two confirmatory models (`Qwen/Qwen2.5-VL-3B-Instruct` and `Qwen/Qwen2.5-VL-7B-Instruct`), on the same GPU class and with the batch size used in the dev pass. `Qwen/Qwen2-VL-2B-Instruct` is **diagnostic-only** (D3; 0/200 Math dev competency under `structured`) and is refused by `--phase confirm` unless `--allow_diagnostic_confirm` is explicitly passed; ChartQA-Conflict (`chartqa`) is exploratory (D4). Pixel bounds (`MIN_PIXELS_PIN` and `CONFIRM_MAX_PIXELS`) are enforced automatically in `--phase confirm`.
+3. For each confirmatory model, run the base stage with `--phase confirm` over the whole confirm pool.
+4. Run the donor stage (`--phase confirm`).
+5. Run `transplant_v5.py --phase confirm --n_competent 250`. Every confirmatory manifest automatically records `git` commit/tag provenance, append-only `invocations[]`, `requested_model_revision`, and `resolved_model_commit` (resolved from model config or local HF cache `snapshots/`/`refs/`), and refuses non-pinned settings (revisions, pixel caps, limits, parser) unless explicitly overridden.
