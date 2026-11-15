@@ -14,6 +14,8 @@
 
 ## 0. Local PDF Inventory (`Docs/Paper/`)
 
+> **2026-11-15 audit:** a pre-freeze literature audit screened 1,260 more records and added 6 A-graded and 33 B-graded papers. Those papers are **not** core sources and are not merged into the matrix below. See §6 and [lit-audit-2026-11-15.md](lit-audit-2026-11-15/lit-audit-2026-11-15.md). `Docs/Paper/` now holds 26 PDFs: the 20 listed here plus the 6 A papers.
+
 ### A. 20 PDFs Currently Present in `Docs/Paper/` (19 Core + 1 Ch. 2 Lead; 0 Core Missing)
 | # | Local File | arXiv / Anthology ID | Short Name | Audit Coverage |
 |---|---|---|---|---|
@@ -250,3 +252,25 @@
 2. **ChartQA `max_pixels` & GPU Checks (`Experiment/README.md`):** Close R8.4 (`200704` vs `401408`), run `--print_example` render check on GPU, and verify the new `verdict_nll` span.
 3. **Sync Pre-Registration & Docs:** Update `PREREGISTRATION_VERDICT_TRANSPLANT.md` §1.1 (add `CMC-Bench`), §11 deviation log, and title/scope framing (Math *source following*, `[Design decision]` tags for `ε=5.0 pp`/churn).
 4. **Commit, tag `prereg-v5`, and run `--phase confirm`.**
+
+---
+
+## 6. Pre-Freeze Literature Audit (2026-11-15) — pointer
+
+**Full report:** [lit-audit-2026-11-15/lit-audit-2026-11-15.md](lit-audit-2026-11-15/lit-audit-2026-11-15.md). **Data:** `papers.csv` (1,260 screened records), `search_log.csv` (108 queries + 5 retrieval steps), `references.bib` (39 entries). **Brief for new agents:** [../RESEARCH_OBJECTIVE.md](../RESEARCH_OBJECTIVE.md).
+
+- **Novelty verdict:** intact, but needs narrowing. No screened paper fully overlaps any of the prereg §1.1 components.
+  - *When Reasoning Traces Conflict with Evidence* (arXiv:2610.20805, text-only) is a formal threat under the audit rule: it is partial on component (a), own-turn trace under conflict, and on component (c), an instruction contrast.
+  - Manalu et al. (arXiv:2610.30953) is a partial precedent for the minimal-edit-plus-paraphrase design.
+  - A rewording of §1.1 is proposed in audit §1.3.
+- **New A papers:** 2609.00550, 2610.30953, 2610.20805, 2609.29278, 2606.12747, 2610.37070. PDFs are in `Docs/Paper/`.
+- **Correction to §4.2 of this file:** "Prefix-forcing … eliminates self-attribution discounting and external-authority sycophancy" overstates 2607.27304.
+  - Sycophancy was model-specific: MedGemma +9.0 pp under the deference instruction (p. 2), and an authority gradient of −3.6 pp (p. 7).
+  - Audit §5 gives the replacement wording. It has not yet been applied here.
+- **Design implications (audit §4):**
+  - keep order counterbalancing and add a per-order sign rule;
+  - cite 2609.29278 for D1;
+  - add a prefill-resistance limitation to the H₀ reading, with a descriptive `verdict_nll` stratification;
+  - add a competency-population limitation;
+  - state that the Math "image" channel is rendered text.
+

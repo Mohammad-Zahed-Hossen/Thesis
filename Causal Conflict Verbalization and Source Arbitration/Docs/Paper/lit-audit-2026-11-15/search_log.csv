@@ -1,0 +1,113 @@
+date,tool,axis,query,filters,hits,screened,kept_A,kept_B
+2026-11-15,alphaXiv embedding (semantic),A,intervening on a vision-language model's own verbalized reasoning by prefilling the assistant turn to test whether the answer follows,--published-after 2026-05-01 --prioritize recency,15,15,1,3
+2026-11-15,alphaXiv embedding (semantic),A,editing chain-of-thought of multimodal models to test causal faithfulness of reasoning,--published-after 2022-01-01,15,15,0,1
+2026-11-15,alphaXiv keyword (full-text BM25),A,prefill attack vision-language model reasoning,--published-after 2022-01-01,15,15,1,0
+2026-11-15,alphaXiv embedding (semantic),A,does a model act on its stated judgment of which source is more reliable,--published-after 2022-01-01,15,15,0,0
+2026-11-15,alphaXiv embedding (semantic),A,verbalized modality preference versus actual modality reliance in vision-language models,--published-after 2022-01-01,15,15,0,2
+2026-11-15,alphaXiv keyword (full-text BM25),A,explanation-action consistency multimodal,--published-after 2022-01-01,15,15,0,0
+2026-11-15,alphaXiv embedding (semantic),A,forcing a model's stated decision in its response and checking whether the final answer follows it,--published-after 2026-05-01 --prioritize recency,15,15,0,1
+2026-11-15,alphaXiv keyword (full-text BM25),A,counterfactual rationale intervention VLM,--published-after 2022-01-01,15,15,0,0
+2026-11-15,OpenAlex search,A,chain-of-thought faithfulness vision-language models intervention,--published-after 2022-01-01,15,15,0,0
+2026-11-15,OpenAlex search,A,prefix forcing assistant response language model faithfulness,--published-after 2022-01-01,15,15,0,0
+2026-11-15,alphaXiv embedding (semantic),A,commit then answer prompting: model states a choice first then must act on it,--published-after 2022-01-01,15,15,0,1
+2026-11-15,alphaXiv embedding (semantic),A,self-reported confidence or stated beliefs steering subsequent answers in language models causal test,--published-after 2022-01-01,15,15,0,0
+2026-11-15,alphaXiv embedding (semantic),B,image text conflict which modality do vision-language models follow,--published-after 2026-05-01 --prioritize recency,15,15,0,1
+2026-11-15,alphaXiv keyword (full-text BM25),B,modality conflict MLLM,--published-after 2026-05-01 --prioritize recency,15,15,0,1
+2026-11-15,alphaXiv keyword (full-text BM25),B,blind faith in text,--published-after 2022-01-01,15,15,0,0
+2026-11-15,alphaXiv embedding (semantic),B,rendered text in image versus typed text prompt conflict multimodal model,--published-after 2022-01-01,15,15,1,3
+2026-11-15,alphaXiv embedding (semantic),B,cross-modal knowledge conflict benchmark vision language,--published-after 2026-05-01 --prioritize recency,15,15,1,2
+2026-11-15,OpenAlex search,B,cross-modal inconsistency vision-language models text bias,--published-after 2022-01-01,15,15,0,0
+2026-11-15,alphaXiv keyword (full-text BM25),B,text dominance vision-language models conflicting,--published-after 2026-05-01 --prioritize recency,15,15,0,0
+2026-11-15,alphaXiv embedding (semantic),B,source arbitration between visual and textual evidence in multimodal models,--published-after 2022-01-01,15,15,0,3
+2026-11-15,alphaXiv keyword (full-text BM25),B,typographic attack text in image versus prompt,--published-after 2022-01-01,15,15,0,0
+2026-11-15,alphaXiv embedding (semantic),C,chain-of-thought faithfulness causal intervention adding mistakes early answering paraphrase,--published-after 2022-01-01,15,15,1,0
+2026-11-15,alphaXiv keyword (full-text BM25),C,unfaithful chain-of-thought,--published-after 2026-05-01 --prioritize recency,15,15,1,0
+2026-11-15,alphaXiv embedding (semantic),C,post-hoc rationalization in chain-of-thought reasoning models,--published-after 2026-05-01 --prioritize recency,15,15,0,1
+2026-11-15,alphaXiv keyword (full-text BM25),C,thought anchors,--published-after 2022-01-01,15,15,0,1
+2026-11-15,alphaXiv embedding (semantic),C,counterfactual simulatability of explanations,--published-after 2022-01-01,15,15,0,0
+2026-11-15,OpenAlex search,C,faithfulness chain of thought reasoning large language models,--published-after 2022-01-01,15,15,0,0
+2026-11-15,alphaXiv embedding (semantic),C,causal mediation analysis of chain-of-thought reasoning steps,--published-after 2022-01-01,15,15,0,1
+2026-11-15,alphaXiv embedding (semantic),C,CoT monitoring reasoning trace intervention reveals model ignores its stated reasoning,--published-after 2026-05-01 --prioritize recency,15,15,1,0
+2026-11-15,alphaXiv embedding (semantic),D,order of image and text in prompt changes multimodal model answer position bias,--published-after 2022-01-01,15,15,0,2
+2026-11-15,alphaXiv keyword (full-text BM25),D,position bias multimodal large language models,--published-after 2026-05-01 --prioritize recency,15,15,0,0
+2026-11-15,alphaXiv embedding (semantic),D,recency bias evidence order vision-language model conflicting evidence,--published-after 2022-01-01,15,15,1,1
+2026-11-15,OpenAlex search,D,order effects multimodal prompt image text position,--published-after 2022-01-01,15,15,0,0
+2026-11-15,alphaXiv keyword (full-text BM25),F,Qwen2.5-VL attention heads modality,--published-after 2022-01-01,15,15,0,1
+2026-11-15,alphaXiv embedding (semantic),F,activation patching modality arbitration vision-language model conflict,--published-after 2022-01-01,15,15,1,2
+2026-11-15,alphaXiv embedding (semantic),F,steering vector controls reliance on image versus text in multimodal model,--published-after 2022-01-01,15,15,0,1
+2026-11-15,alphaXiv keyword (full-text BM25),F,logit lens vision-language conflict,--published-after 2022-01-01,15,15,0,1
+2026-11-15,OpenAlex search,F,mechanistic interpretability vision language model conflicting modalities,--published-after 2022-01-01,15,15,0,0
+2026-11-15,alphaXiv embedding (semantic),A,model states which modality it relies on but its answer follows the other modality,--published-after 2022-01-01,15,15,0,1
+2026-11-15,alphaXiv embedding (semantic),A,say versus do gap: vision-language model stated reasoning contradicts its behavior under conflicting image and text,--published-after 2026-05-01 --prioritize recency,15,15,0,0
+2026-11-15,alphaXiv keyword (full-text BM25),A,prefilled reasoning vision-language,--published-after 2022-01-01,15,15,0,1
+2026-11-15,alphaXiv keyword (full-text BM25),A,assistant prefill multimodal faithfulness,--published-after 2022-01-01,15,15,1,0
+2026-11-15,alphaXiv embedding (semantic),A,inserting an edited rationale into the model's own response and measuring answer change in multimodal models,--published-after 2022-01-01,15,15,0,1
+2026-11-15,alphaXiv embedding (semantic),A,introspection vision-language models about which input modality drove their answer,--published-after 2026-05-01 --prioritize recency,15,15,0,1
+2026-11-15,OpenAlex search,A,verbalized reasoning causal effect on answer multimodal large language model,--published-after 2026-05-01 --prioritize recency,15,15,0,0
+2026-11-15,alphaXiv keyword (full-text BM25),A,reasoning-answer consistency VLM,--published-after 2026-05-01 --prioritize recency,15,15,0,0
+2026-11-15,alphaXiv embedding (semantic),A,declaring a plan or decision then acting on it: do language models follow their own stated commitments,--published-after 2026-05-01 --prioritize recency,15,15,0,1
+2026-11-15,alphaXiv keyword (full-text BM25),A,self-attribution prefix LLM own text,--published-after 2022-01-01,15,15,0,0
+2026-11-15,alphaXiv embedding (semantic),A,instruction to follow your own judgment of source reliability changes model behaviour,--published-after 2022-01-01,15,15,0,0
+2026-11-15,OpenAlex search,A,modality reliance stated versus actual vision language models explanation,--published-after 2022-01-01,15,15,0,0
+2026-11-15,alphaXiv embedding (semantic),B,conflicting math problems in image and text which problem does the multimodal model solve,--published-after 2022-01-01,15,15,1,0
+2026-11-15,alphaXiv keyword (full-text BM25),B,text image conflict reasoning trace,--published-after 2026-05-01 --prioritize recency,15,15,1,0
+2026-11-15,OpenAlex search,B,knowledge conflict multimodal large language models image text contradiction,--published-after 2022-01-01,15,15,0,0
+2026-11-15,alphaXiv keyword (full-text BM25),B,modality preference,--published-after 2026-05-01 --prioritize recency,15,15,0,1
+2026-11-15,alphaXiv keyword (full-text BM25),C,early answering adding mistakes paraphrasing,--published-after 2022-01-01,15,15,0,0
+2026-11-15,alphaXiv embedding (semantic),C,paraphrased chain-of-thought wording noise floor answer change,--published-after 2022-01-01,15,15,0,0
+2026-11-15,OpenAlex search,C,unfaithful explanations chain-of-thought biasing features,--published-after 2022-01-01,15,15,0,0
+2026-11-15,alphaXiv keyword (full-text BM25),C,CoT faithfulness counterfactual intervention,--published-after 2026-05-01 --prioritize recency,15,15,1,0
+2026-11-15,alphaXiv embedding (semantic),D,instruction placement before or after image changes vision-language model behaviour,--published-after 2022-01-01,15,15,0,1
+2026-11-15,alphaXiv keyword (full-text BM25),D,order effect image text,--published-after 2026-05-01 --prioritize recency,15,15,0,0
+2026-11-15,alphaXiv embedding (semantic),F,internal representation of which modality a vision-language model will follow under conflict probing,--published-after 2022-01-01,15,15,0,1
+2026-11-15,OpenAlex search,F,Qwen2-VL attention modality conflict interpretability,--published-after 2022-01-01,15,15,0,0
+2026-11-15,alphaXiv keyword (full-text BM25),Snowball-forward (anchor title keyword),"""Which Source Wins"" task-dependent reliance",--published-after 2026-05-01,15,15,0,0
+2026-11-15,alphaXiv keyword (full-text BM25),Snowball-forward (anchor title keyword),"""Grounding on Request"" modality control",--published-after 2026-05-01,15,15,0,2
+2026-11-15,alphaXiv keyword (full-text BM25),Snowball-forward (anchor title keyword),"""evidence noncommutative"" OR noncommutativity vision speech text",--published-after 2026-05-01,15,15,0,0
+2026-11-15,alphaXiv keyword (full-text BM25),Snowball-forward (anchor title keyword),"""Position, Not Provenance"" reasoning mediation sycophancy",--published-after 2026-05-01,15,15,0,0
+2026-11-15,alphaXiv keyword (full-text BM25),Snowball-forward (anchor title keyword),"""Biased Bayesian Observers""",--published-after 2026-05-01,15,15,0,0
+2026-11-15,alphaXiv keyword (full-text BM25),Snowball-forward (anchor title keyword),"""Hidden Commitment"" silently pick a side",--published-after 2026-05-01,ERROR (decode failure),0,0,0
+2026-11-15,alphaXiv keyword (full-text BM25),Snowball-forward (anchor title keyword),"""Limits of Monitoring Modality Reliance""",--published-after 2026-05-01,15,15,0,1
+2026-11-15,alphaXiv keyword (full-text BM25),Snowball-forward (anchor title keyword),"""Counterfactual Tests for Measuring Chain-of-Thought Faithfulness""",--published-after 2026-05-01,15,15,1,1
+2026-11-15,alphaXiv keyword (full-text BM25),Snowball-forward (anchor title keyword),CoT-Mediate prefix-forced continuation,--published-after 2026-05-01,15,15,1,0
+2026-11-15,alphaXiv keyword (full-text BM25),Snowball-forward (anchor title keyword),answer inertia vision-language,--published-after 2026-05-01,15,15,1,0
+2026-11-15,alphaXiv embedding (semantic),E,teacher-forced log-likelihood of candidate answers as a measure of model preference versus generated answers,--published-after 2022-01-01,15,15,0,0
+2026-11-15,alphaXiv keyword (full-text BM25),E,TOST equivalence test language model evaluation,--published-after 2022-01-01,15,15,0,1
+2026-11-15,alphaXiv embedding (semantic),E,equivalence testing to claim no effect in machine learning experiments,--published-after 2022-01-01,15,15,0,1
+2026-11-15,alphaXiv embedding (semantic),E,paired permutation sign-flip test for comparing language model conditions,--published-after 2022-01-01,15,15,0,0
+2026-11-15,alphaXiv embedding (semantic),E,prompt wording sensitivity noise floor for evaluating language model interventions,--published-after 2022-01-01,15,15,0,0
+2026-11-15,OpenAlex search,E,equivalence testing two one-sided tests machine learning evaluation,--published-after 2022-01-01,15,15,0,0
+2026-11-15,alphaXiv embedding (semantic),G,multimodal retrieval augmented generation conflicting image and text evidence,--published-after 2022-01-01,15,15,1,1
+2026-11-15,alphaXiv embedding (semantic),G,sycophancy in vision-language models user text contradicts image,--published-after 2022-01-01,15,15,1,1
+2026-11-15,alphaXiv embedding (semantic),G,medical vision-language model chain-of-thought faithfulness conflicting clinical text,--published-after 2026-05-01,15,15,0,0
+2026-11-15,alphaXiv embedding (semantic),G,chart question answering with counterfactual or misleading text report,--published-after 2022-01-01,15,15,0,1
+2026-11-15,alphaXiv embedding (semantic),G,model treats its own prior text differently from user-provided text self-attribution,--published-after 2022-01-01,15,15,0,0
+2026-11-15,PubMed E-utilities,H,cue integration reliability weighting visual verbal conflict,--published-after 2000-01-01,0,0,0,0
+2026-11-15,PubMed E-utilities,H,choice blindness confabulation reasons for decisions,--published-after 2000-01-01,1,1,0,0
+2026-11-15,OpenAlex search,H,Bayesian cue combination reliability weighting multisensory,--published-after 1995-01-01 --prioritize popular,15,15,0,0
+2026-11-15,OpenAlex search,H,choice blindness introspective report decision,--published-after 2000-01-01 --prioritize popular,15,15,0,1
+2026-11-15,PubMed E-utilities,H,source credibility weighting conflicting information human judgment,--published-after 2000-01-01,2,2,0,0
+2026-11-15,OpenAlex search,H,telling more than we can know verbal reports mental processes,--published-before 1990-01-01 --prioritize popular,15,15,0,1
+2026-11-15,alphaXiv keyword (full-text BM25),A,prefix-forcing,--published-after 2022-01-01,15,15,0,0
+2026-11-15,alphaXiv keyword (full-text BM25),A,prefix forcing chain-of-thought,--published-after 2022-01-01,15,15,0,0
+2026-11-15,alphaXiv keyword (full-text BM25),A,verdict transplant,--published-after 2022-01-01,15,15,0,0
+2026-11-15,alphaXiv keyword (full-text BM25),A,forced verdict answer follows,--published-after 2022-01-01,15,15,0,1
+2026-11-15,alphaXiv embedding (semantic),A,swap one phrase in the model's own reasoning to the opposite option and continue generation from the edited prefix,--published-after 2022-01-01,15,15,0,1
+2026-11-15,alphaXiv embedding (semantic),A,matched paraphrase control for edits to model reasoning traces,--published-after 2022-01-01,15,15,1,1
+2026-11-15,alphaXiv embedding (semantic),A,does the vision-language model follow the source it says is more reliable,--published-after 2022-01-01,15,15,0,0
+2026-11-15,alphaXiv keyword (full-text BM25),A,more reliable source image text model states,--published-after 2026-05-01,15,15,0,0
+2026-11-15,alphaXiv embedding (semantic),A,instructing the model to act only on the option it selected in its reasoning binding commitment,--published-after 2022-01-01,15,15,0,1
+2026-11-15,OpenAlex search,A,stated preference versus revealed choice language models,--published-after 2022-01-01,15,15,0,0
+2026-11-15,alphaXiv embedding (semantic),A,continuation of the model's own thinking versus separate answer call evidence following,--published-after 2022-01-01,15,15,1,0
+2026-11-15,alphaXiv keyword (full-text BM25),A,self-generated rationale edited continuation VLM,--published-after 2026-05-01,15,15,0,0
+2026-11-15,alphaXiv embedding (semantic),B,text rendered as an image versus the same text typed in the prompt multimodal model behaviour,--published-after 2022-01-01,15,15,1,1
+2026-11-15,alphaXiv keyword (full-text BM25),B,visualized text pure text VLM,--published-after 2022-01-01,15,15,0,2
+2026-11-15,alphaXiv embedding (semantic),B,vision-language models choose between two different questions presented in image and text,--published-after 2022-01-01,15,15,0,0
+2026-11-15,alphaXiv embedding (semantic),D,order sensitivity multimodal large language models image text order,--published-after 2022-01-01,15,15,1,4
+2026-11-15,alphaXiv keyword (full-text BM25),D,order matters multimodal,--published-after 2022-01-01,15,15,0,0
+2026-11-15,OpenAlex search,H,humans integrate visual and haptic information in a statistically optimal fashion,--published-before 2005-01-01 --prioritize popular,15,15,0,1
+2026-11-15,OpenAlex search,H,source reliability weighting advice taking conflicting sources,--published-after 1995-01-01 --prioritize popular,15,15,0,0
+2026-11-15,orx paper (alphaXiv report/full text),Known gaps,resolve 2609.00550 2507.01790 2604.09364 2510.11196 2605.27773 2305.04388 2511.19199,id lookup,7,7,1,4
+2026-11-15,OpenAlex API works/{doi},Snowball-backward,referenced_works of 8 anchors (W7171977092 W7203754652 W7223797229 W7222116393 W7211996385 W7214155163 W7224966819 W7154733047),select=referenced_works,81,81,1,4
+2026-11-15,OpenAlex API works?filter=cites:,Snowball-forward,cites:<anchor W-id> for the 8 anchors,per-page=50,5,5,0,1
+2026-11-15,Reference list of 2609.07596 (full text),Snowball hop-2,Nemitz et al. 2026 -> arXiv 2604.06422,manual,1,1,0,1

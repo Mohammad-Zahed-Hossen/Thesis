@@ -1,6 +1,6 @@
 # Docs/Paper — Primary Sources & Literature Audits
 
-Downloaded primary papers (**20 local PDFs**: 19 core sources + 1 Ch. 2 lead; 0 missing core PDFs) and audited literature syntheses grounding the pre-registration [../PREREGISTRATION_VERDICT_TRANSPLANT.md](../PREREGISTRATION_VERDICT_TRANSPLANT.md).
+Downloaded primary papers (**26 local PDFs**: 19 core sources + 1 Ch. 2 lead + 6 A-graded papers from the 2026-11-15 audit; 0 missing core PDFs) and audited literature syntheses grounding the pre-registration [../PREREGISTRATION_VERDICT_TRANSPLANT.md](../PREREGISTRATION_VERDICT_TRANSPLANT.md).
 
 **Trust level:** PDFs are **primary sources** (highest trust for literature claims). All `.md` reports here are AI-prepared from primary PDFs and AlphaXiv reads; always verify any verbatim quote against the PDF before putting it in the dissertation.
 **Moved:** This folder was `Archive/Paper/` until commit `7fd3219`. Older files (`Docs/Decision_Audits/Idea.md`, the 2026-11-10 dossier) may still say `Archive/Paper/…` — read that as `Docs/Paper/…`.
@@ -18,7 +18,8 @@ Docs/Paper/
 ├── post-v5-pdf-audit/                     Direct PDF audit of #15–#19 + Ch. 2 leads (2026-11-14) + 10 PNG crops
 ├── lit-dossier-verdict-transplant/        Original 10+4 dossier (2026-11-10) + 4 PNG figure crops
 ├── prereg-freeze-audit/                   Pre-registration freeze audit (2026-11-10) + 3 PNG figure crops
-├── <20 local arXiv / Anthology PDFs>      All 19 core sources + 2606.22862.pdf (see §1)
+├── lit-audit-2026-11-15/                  Pre-freeze exhaustive literature audit: report, papers.csv, search_log.csv, references.bib
+├── <26 local arXiv / Anthology PDFs>      19 core sources + 2606.22862.pdf (see §1) + 6 audit A papers (see §1b)
 └── Archive/                               Old-topic papers and peer theses — NOT cited by v5
 ```
 
@@ -28,6 +29,7 @@ Docs/Paper/
 
 | File | Date | What it is | Key sections |
 |---|---|---|---|
+| [lit-audit-2026-11-15.md](lit-audit-2026-11-15/lit-audit-2026-11-15.md) | 2026-11-15 | **Pre-freeze exhaustive literature audit.** 108 queries (alphaXiv, OpenAlex, PubMed) + citation snowball; 1,260 records screened; 6 A + 33 B new papers; novelty verdict *intact, needs narrowing*; proposed §1.1 rewording; KB corrections. Research brief at [../RESEARCH_OBJECTIVE.md](../RESEARCH_OBJECTIVE.md). | §0 summary · §1 threats + §1.1 rewording · §2 A spec sheets · §3 B table · §4 design implications · §5 KB corrections · §6 coverage |
 | [THESIS_LITERATURE_KNOWLEDGE_BASE.md](THESIS_LITERATURE_KNOWLEDGE_BASE.md) | 2026-11-14 | **Complete 18-paper + CMC-Bench report.** Merges local PDF audits + AlphaXiv Passes 1 & 2 + post-v5 direct PDF verification, fixes cross-pass errors, and reconciles design rules against D1–D5. | §0 PDF inventory · §1 verification fixes · §2 19-source matrix · §3 full spec sheets + Ch. 2 leads · §4 design rules · §5 pre-freeze checklist |
 | [post-v5-pdf-audit.md](post-v5-pdf-audit/post-v5-pdf-audit.md) | 2026-11-14 | **Post-v5 direct PDF audit (#15–#19 + 2 Ch. 2 leads).** Verifies downloaded PDFs #15–#19 + `2606.22862`, audits gated NeurIPS 2026 abstract (`uul4iRQSJ2`, `[PDF Not Available]`), resolves TOST/novelty checks, and stores 10 PNG table crops in `figures/`. | §0 integrity table · §1 #15–#19 autopsies · §2 Ch. 2 leads & 3 design Qs · §3 repo sync |
 | [lit-dossier-verdict-transplant.md](lit-dossier-verdict-transplant/lit-dossier-verdict-transplant.md) | 2026-11-10 | Initial evidence base (10 core + 4 discovered). Superseded as primary index by the Knowledge Base above, but retains verbatim quotes and 4 PNG crops. | §0 scope & corrections · §1 matrix · §2 mechanistic deep dive · §3 countermeasures · §4 novelty boundary · §5 reviewer objections |
@@ -59,6 +61,17 @@ Docs/Paper/
 | [2609.25366.pdf](2609.25366.pdf) | *From Decorative to Load-Bearing* (Jia & Mu, TMLR 2026) | Task-difficulty CoT sensitivity, `T=0` greedy continuation, `κ = 1.000` human validation | AlphaXiv Pass 2 + **Post-v5 PDF audit §1.4** |
 | [2026.magmar-main.3.pdf](2026.magmar-main.3.pdf) | *CMC-Bench: When Image and Text Disagree in Multimodal RAG* (Catapang, MAGMaR 2026) | Multimodal RAG ChartQA/MMMU conflict benchmark (for Ch. 2 Related Work & §1.1 novelty boundary) | AlphaXiv Pass 2 + **Post-v5 PDF audit §1.5** |
 | [2606.22862.pdf](2606.22862.pdf) | *Chains That See, Answers That Don't* (Fan, Li & Zhuang, EvalMG @ SIGIR 2026) | Ch. 2 lead: prompt-forced CoT vs. prefix-forcing, strict/permissive regex coercion, post-hoc `±5 pp` | **Post-v5 PDF audit §2.1** |
+
+### 1b. A-graded papers added by the 2026-11-15 audit (not core; see [lit-audit-2026-11-15.md](lit-audit-2026-11-15/lit-audit-2026-11-15.md) §2)
+
+| File | Short name | Why it matters | Audit coverage |
+|---|---|---|---|
+| [2609.00550.pdf](2609.00550.pdf) | *Same Semantics, Different Outcome* (Lee, Yoon & Kim, Findings EMNLP 2026) | Rendered-passage image vs typed text; order flips the winning modality in Qwen2.5-VL-7B | Full text, §3–4, Table 1 |
+| [2610.30953.pdf](2610.30953.pdf) | *Reasoning–Action Coupling in Driving VLAs* (Manalu et al., 2026) | Own-reasoning edits with paraphrase-subtracted contrast + re-injection check; partial precedent for component (a) | Full text, §1, §3, Table 1 |
+| [2610.20805.pdf](2610.20805.pdf) | *When Reasoning Traces Conflict with Evidence* (Li, Shi & Li, 2026) | Own-thinking-block trace dominates evidence; verify instruction fails; formal novelty threat (partial a + c) | Full text, §1–3, §5 |
+| [2609.29278.pdf](2609.29278.pdf) | *Reasoning Instructions Can Break Answer Decoding in VLMs* (Li, Qiu & Xu, 2026) | CoT-prefix scoring failure in Qwen2.5-VL-3B/7B; supports D1 | Full text |
+| [2606.12747.pdf](2606.12747.pdf) | *Prefill Awareness in LLMs* (Wang et al., 2026) | Models revert from off-preference prefills; H₀ limitation | Abstract, §1, results summary |
+| [2610.37070.pdf](2610.37070.pdf) | *Correctness Conditioning as Selection in CoT Faithfulness Evaluation* (Pan & Pan, 2026) | Selection changes the estimand population; competency-conditioning limitation | Abstract, §1–2 |
 
 ---
 
