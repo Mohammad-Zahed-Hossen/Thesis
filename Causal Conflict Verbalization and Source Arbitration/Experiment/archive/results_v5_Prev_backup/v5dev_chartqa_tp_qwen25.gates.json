@@ -1,0 +1,28 @@
+{
+  "items": 30,
+  "competent": 13,
+  "taken": 13,
+  "no_donor": 0,
+  "passed": 6,
+  "jaccard_multiset_flip_min": 0.8667,
+  "jaccard_multiset_flip_mean": 0.8936,
+  "swaps_per_flip": {
+    "1": 10,
+    "2": 2
+  },
+  "own_source_by_order": {
+    "image_first:report": 6,
+    "text_first:report": 6
+  },
+  "fail_reasons_by_order": {
+    "own_absent": 11
+  },
+  "passed_ids": [
+    "18",
+    "14",
+    "19",
+    "9",
+    "28",
+    "8"
+  ]
+}

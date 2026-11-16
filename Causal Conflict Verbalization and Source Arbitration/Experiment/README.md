@@ -2,10 +2,10 @@
 
 Start here. This folder holds all experiment code and data for the thesis. **It is ground truth** (AGENTS.md §2): code + raw rows outrank every `.md` report, including this one.
 
-**Last updated:** 2026-11-15
-**Stage:** The v5 **dev pass has run** on an L4 in `bfloat16` for all three models (29,880 rows in [results_v5/](results_v5/)). It has been audited ([../Thesis/docs/Archive/dev v5/](<../Thesis/docs/Archive/dev v5/>); [fable52-prefreeze-audit-2026-11-15.md](../Docs/Paper/fable52-prefreeze-audit-2026-11-15.md)), and `analyze_v5.py` has been run on it ([results_v5/analysis_dev/](results_v5/analysis_dev/)). All **248** CPU unit tests pass (`unittest`) and `preflight_v5.py` passes locally (`8/8` scripts verified). The pre-freeze decisions D1–D5, 2026-11-14 gate tightenings, Fable 5.2 forensic fixes (`F2`, `F3`, `F5`–`F13`, `Upgrades 1–5`), and 2026-11-15 `lit-audit` §1.3/§4 + title/scope updates are integrated into the pre-registration. The pre-registration is **not frozen**. **No confirmatory data exists.**
+**Last updated:** 2026-11-16
+**Stage:** The initial v5 dev pass (`2026-11-12/13`, 29,880 rows + `analysis_dev/`) has been archived in [archive/results_v5_Prev_backup/](archive/results_v5_Prev_backup/), and a post-fix v5 dev rerun (`2026-11-15/16`) is in [results_v5/](results_v5/) (**31,352 rows** across 13 `.jsonl` files on an NVIDIA L4 in `bfloat16`; **7B is not yet complete**: Math transplant has `14,072 / 16,800` rows and 7B ChartQA has not run yet). The initial pass was audited ([../Thesis/docs/Archive/dev v5/](<../Thesis/docs/Archive/dev v5/>); [fable52-prefreeze-audit-2026-11-15.md](../Docs/Paper/fable52-prefreeze-audit-2026-11-15.md)) and analysed (`archive/results_v5_Prev_backup/analysis_dev/`). All **248** CPU unit tests pass (`unittest`) and `preflight_v5.py` passes locally (`8/8` scripts verified). Pre-freeze decisions D1–D5, 2026-11-14 gate tightenings, Fable 5.2 forensic fixes (`F2`, `F3`, `F5`–`F13`, `Upgrades 1–5`), and 2026-11-15 `lit-audit` §1.3/§4 + title/scope updates are integrated into the pre-registration. The pre-registration is **not frozen**. **No confirmatory data exists.**
 **Design spec:** [../Docs/PREREGISTRATION_VERDICT_TRANSPLANT.md](../Docs/PREREGISTRATION_VERDICT_TRANSPLANT.md) (draft; freeze conditions in §10, R8).
-**Next action:** Complete double human coding ([coding_v5/](coding_v5/)), run GPU pre-freeze checks (`preflight_v5.py --check_gpu`, ChartQA `--print_example` render check, `--limit 20` transplant smoke check for `verdict_nll_tokens > 0` / `verdict_span_exact` / `boundary_mismatch`, and ChartQA `--max_pixels` `200704` vs `501760` on the 30 spent dev items), lock ChartQA `max_pixels` in §3.4, and freeze (commit + tag `prereg-v5`).
+**Next action:** Finish the 7B dev rerun in [results_v5/](results_v5/) (resume `v5dev_conflict_tp_qwen25_7b` and run 7B ChartQA if needed) and run `analyze_v5.py` on the completed `results_v5/`; complete double human coding ([coding_v5/](coding_v5/)); run GPU pre-freeze checks (`preflight_v5.py --check_gpu`, ChartQA `--print_example` render check, `--limit 20` transplant smoke check, and ChartQA `--max_pixels` `200704` vs `501760` on the 30 spent dev items); lock ChartQA `max_pixels` in §3.4; and freeze (commit + tag `prereg-v5`).
 
 > **Token tip for agents:** Never `cat` the JSONL files. The `*_tp_*` files are 10–16 MB. Read the `*.manifest.json` / `*.gates.json` files, the result-folder READMEs, or summarise rows with a short script.
 
@@ -13,20 +13,20 @@ Start here. This folder holds all experiment code and data for the thesis. **It 
 
 ## v5 dev pass at a glance (dev only, not findings)
 
-Counts come from `results_v5/*.gates.json`. The interpretation is from the [independent deep audit](<../Thesis/docs/Archive/dev v5/claude_v5_independent_deep_audit.md>) (2026-11-13).
+Counts come from the current `results_v5/*.gates.json` (`2026-11-15/16` post-fix rerun under `structured` competency; the prior `2026-11-12/13` pass and its [independent deep audit](<../Thesis/docs/Archive/dev v5/claude_v5_independent_deep_audit.md>) are archived in [archive/results_v5_Prev_backup/](archive/results_v5_Prev_backup/)).
 
 | Model | Math (GSM8K/SVAMP), 200 items: competent → passed gates | ChartQA, 30 items: competent → passed gates |
 |---|---|---|
-| Qwen2-VL-2B (`qwen2`) | **0 → 0.** Writes no `####` in any of its 1,200 generations, so it fails the format rule (eligibility, not accuracy). No transplant JSONL. | 10 → 0 (`own_absent` 18, `own_undetermined` 2). No transplant JSONL. |
-| Qwen2.5-VL-3B (`qwen25`) | 80 → 80 | 13 → 6 |
-| Qwen2.5-VL-7B (`qwen25_7b`) | 124 → 115 | 13 → 2 |
+| Qwen2-VL-2B (`qwen2`) | **0 → 0.** Writes no `####` in any of its 1,200 generations, so it fails the format rule (eligibility, not accuracy). No transplant JSONL. | **10 → 0** (`own_absent` 18, `own_undetermined` 2). No transplant JSONL. |
+| Qwen2.5-VL-3B (`qwen25`) | **95 → 95** (`11,400` transplant rows complete). | **13 → 5** (`600` transplant rows complete; `own_absent` 10, `gate_answer_leakage` 2). |
+| Qwen2.5-VL-7B (`qwen25_7b`) | **154 → 140** (`14,072 / 16,800` transplant rows — **partial**; `gate3_too_many_swaps` 13, `own_undetermined` 1). | **Not yet run** in current `results_v5/` (was `13 → 2` in `archive/results_v5_Prev_backup/`). |
 
-Blocking issues the audits verified and their current pre-freeze disposition:
-1. **Δℓ validity in Math (addressed by D1):** the sign of Δℓ at `####` agrees with the actual answer source in only 51.6% (3B) and 56.6% (7B) of rows, and follows evidence order more than the explicit instruction. **D1** promotes behavioural choice shift $\Delta P(Y{=}T)$ at $k=1$ (`structured` parser) to primary in Math, keeping Δℓ secondary/diagnostic.
-2. **7B flip contrast (addressed by D2):** mostly driven by deleting the model's own verdict (`flip` vs. `none` adds 0.10 [−0.09, 0.29] out of a CDE of 1.62). **D2** elevates the matched paraphrase pair (`para_flip - para`) to co-primary alongside `flip - own` and reports the `none` decomposition.
-3. **Replay & wording-floor churn (partially open):** replaying the model's own verdict unchanged shifts the answer source in 6.4% (3B) and 8.2% (7B) of cells (`strict`), and non-binding attributable `image <-> text` churn fails the fixed 5.0% gate in Math dev (7.6% on 3B, 6.6% on 7B; binding passes at 3.2% and 0.0%). Per the 2026-11-14 gate revision, a failing wording floor makes H₀ uninterpretable without blocking H₁.
-4. **ChartQA attrition & open checks (D4 + open R8.4):** 6 / 2 / 0 items retained. **D4** designates ChartQA exploratory/secondary; the Sentence-1 answer-leakage gate is now implemented in `transplant_v5.py`. The ChartQA `max_pixels` comparison (R8.4), ChartQA `--print_example` render gate, `verdict_nll` span GPU check, and double human coding (`coding_v5/`) remain open.
-5. **Provenance:** Historical dev manifests describe only the last invocation and have `resolved_model_commit: null`; fixed for subsequent runs in `harness_v4.py`, `harness_v5.py`, `transplant_v5.py`, and `preflight_v5.py` (append-only `invocations[]`, git commit/tag tracking, local cache `resolved_model_commit`, and `--phase confirm` tag guards).
+Blocking issues the audits verified on the `2026-11-12/13` pass and their current pre-freeze disposition:
+1. **Δℓ validity in Math (addressed by D1):** in the initial pass, the sign of Δℓ at `####` agreed with the actual answer source in only 51.6% (3B) and 56.6% (7B) of rows, and followed evidence order more than the explicit instruction. **D1** promotes behavioural choice shift $\Delta P(Y{=}T)$ at $k=1$ (`structured` parser) to primary in Math, keeping Δℓ secondary/diagnostic.
+2. **7B flip contrast (addressed by D2):** in the initial pass, mostly driven by deleting the model's own verdict (`flip` vs. `none` adds 0.10 [−0.09, 0.29] out of a CDE of 1.62). **D2** elevates the matched paraphrase pair (`para_flip - para`) to co-primary alongside `flip - own` and reports the `none` decomposition.
+3. **Replay & wording-floor churn (partially open):** on the initial pass, replaying the model's own verdict unchanged shifted the answer source in 6.4% (3B) and 8.2% (7B) of cells (`strict`), and non-binding attributable `image <-> text` churn failed the fixed 5.0% gate in Math dev (7.6% on 3B, 6.6% on 7B; binding passed at 3.2% and 0.0%). Per the 2026-11-14 gate revision, a failing wording floor makes H₀ uninterpretable without blocking H₁.
+4. **ChartQA attrition & open checks (D4 + open R8.4):** 5 / (7B pending) / 0 items retained under the current gates. **D4** designates ChartQA exploratory/secondary; the Sentence-1 answer-leakage gate is implemented in `transplant_v5.py`. Finishing 7B in `results_v5/`, running `analyze_v5.py` on the rerun, ChartQA `max_pixels` comparison (R8.4), ChartQA `--print_example` render gate, `verdict_nll` span verification, and double human coding (`coding_v5/`) remain open.
+5. **Provenance:** Archived `2026-11-12/13` manifests record only the last invocation and have `resolved_model_commit: null`; fixed in `harness_v4.py`, `harness_v5.py`, `transplant_v5.py`, and `preflight_v5.py` (append-only `invocations[]`, git commit/tag tracking, `resolved_model_commit` populated in the current `results_v5/*.manifest.json`, and `--phase confirm` tag guards).
 
 ---
 
@@ -69,12 +69,12 @@ Experiment/
 ├── sample_v5_for_coding.py v5 stratified human-coding sampler & κ evaluator (local)
 ├── tests/test_v4.py        v4 test suite; no GPU needed
 │
-├── results_v5/             v5 dev pass: 16 JSONL + 16 manifests + 6 gates + pip_freeze.txt + analysis_dev/ (see its README)
+├── results_v5/             Current v5 dev rerun (2026-11-15/16): 13 JSONL + 13 manifests + 5 gates + pip_freeze.txt (31,352 rows; 7B partial)
 ├── results_v4/             v4 smoke, dev2 runs, analysis_dev2/, superseded/ (see its README)
 ├── results_v3/             Stored v3 pilot, N = 1,619, plus re-analysis (see its README)
 ├── coding_v5/              v5 human-coding sheets (CODEBOOK_v5.md, HUMAN_CODING_INSTRUCTIONS_v5.md, coder_A/B verdicts & flips), not yet coded
 ├── coding_v3/              Human-coding sheets (CODEBOOK, coder_A/B; KEY_do_not_open.csv), not yet coded
-└── archive/                Superseded v3 harness and v1/v2 pilots (see its README)
+└── archive/                Superseded v3 harness, v1/v2 pilots, and results_v5_Prev_backup/ (2026-11-12/13 dev pass + analysis_dev/)
 ```
 
 ### `results_v5/` naming
@@ -104,9 +104,9 @@ Experiment/
 | Freeze audit (2026-11-10) | Received; red light. Its fixes were applied to the pre-registration. | [../Docs/Paper/prereg-freeze-audit/](../Docs/Paper/prereg-freeze-audit/) |
 | Pre-registration | Drafted, **not frozen** | [../Docs/PREREGISTRATION_VERDICT_TRANSPLANT.md](../Docs/PREREGISTRATION_VERDICT_TRANSPLANT.md) |
 | v5 harness (order, templates, minimal edits, margin, preflight) | Written; **248** CPU tests pass (`unittest`), `preflight_v5.py` `8/8` pass; **ran on an L4 (bf16)** | `harness_v5.py`, `transplant_v5.py`, `score_v5.py`, `preflight_v5.py`, `tests/` |
-| v5 dev pass (2B, 3B, 7B; 200 + 30 items) | **Done.** 29,880 rows, internally consistent. No 2B transplant (0 eligible items). | `results_v5/` |
-| v5 dev & plan audits | Done: inventory, evidence audit, independent deep audit, forensic audits, v4 vs. post-v5 audit | [../Thesis/docs/Archive/dev v5/](<../Thesis/docs/Archive/dev v5/>), [../Docs/Paper/fable52-prefreeze-audit-2026-11-15.md](../Docs/Paper/fable52-prefreeze-audit-2026-11-15.md) |
-| `analyze_v5.py` on dev rows | **Done** (`results_v5/analysis_dev/`) after D1–D5 & gate updates | `analyze_v5.py`, `results_v5/analysis_dev/` |
+| v5 dev pass (2B, 3B, 7B; 200 + 30 items) | **Initial pass archived; rerun in progress.** `2026-11-12/13` pass (`29,880` rows) in `archive/results_v5_Prev_backup/`. `2026-11-15/16` rerun in `results_v5/` (`31,352` rows): 2B/3B done; 7B Math transplant `14,072 / 16,800`, 7B ChartQA not yet run. | `results_v5/`, `archive/results_v5_Prev_backup/` |
+| v5 dev & plan audits | Done on initial pass: inventory, evidence audit, independent deep audit, forensic audits, v4 vs. post-v5 audit | [../Thesis/docs/Archive/dev v5/](<../Thesis/docs/Archive/dev v5/>), [../Docs/Paper/fable52-prefreeze-audit-2026-11-15.md](../Docs/Paper/fable52-prefreeze-audit-2026-11-15.md) |
+| `analyze_v5.py` on dev rows | Done on archived initial pass (`archive/results_v5_Prev_backup/analysis_dev/`); **pending** on current `results_v5/` once 7B finishes | `analyze_v5.py`, `archive/results_v5_Prev_backup/analysis_dev/` |
 | Pre-freeze decisions (D1–D5), gate revisions, F2/F3/F5–F13 & `lit-audit` §1.3/§4 | **Applied** in pre-registration & code; ChartQA `max_pixels` (R8.4: `200704` vs `501760`) open | `PREREGISTRATION_VERDICT_TRANSPLANT.md` §10–§11 |
 | ChartQA render gate & `verdict_nll` span GPU check | Open | [RUNBOOK_v5.md](RUNBOOK_v5.md) |
 | Human coding of verdict & flip labels | Sheets generated (`200` verdicts + `150` flips; instructions ready), not yet coded | `coding_v5/`, `coding_v3/` |

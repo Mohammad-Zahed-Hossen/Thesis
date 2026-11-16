@@ -4,10 +4,16 @@
   "taken": 0,
   "no_donor": 0,
   "passed": 0,
+  "edit_gate_pass_rate": null,
+  "edit_gate_ok": false,
+  "meets_min_items": false,
   "jaccard_multiset_flip_min": null,
   "jaccard_multiset_flip_mean": null,
   "swaps_per_flip": {},
+  "swap_scope": "sentence",
+  "source_nouns_outside_swap_scope": {},
   "own_source_by_order": {},
   "fail_reasons_by_order": {},
+  "competency_parser": "structured",
   "passed_ids": []
 }
