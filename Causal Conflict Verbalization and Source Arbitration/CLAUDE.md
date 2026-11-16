@@ -16,8 +16,8 @@ The full design is in `Docs/PREREGISTRATION_VERDICT_TRANSPLANT.md`, with a quick
 
 - **Done:** v3 pilot (N = 1,619) and v4 dev runs, both exploratory.
 - **Done:** 18-paper + CMC-Bench literature audit (`Docs/Paper/THESIS_LITERATURE_KNOWLEDGE_BASE.md`), pre-registration freeze audit (`Docs/Paper/prereg-freeze-audit/`), and pre-freeze literature audit (`Docs/Paper/lit-audit-2026-11-15/lit-audit-2026-11-15.md`, `Docs/RESEARCH_OBJECTIVE.md`).
-- **Done:** v5 dev pass across all three models on an L4 in `bfloat16` (29,880 rows in `Experiment/results_v5/`), audited in `Thesis/docs/Archive/`, `analyze_v5.py` run on dev (`Experiment/results_v5/analysis_dev/`), pre-freeze decisions D1–D5 + gate revisions, Fable 5.2 forensic audit fixes (`F2`, `F3`, `F5`–`F13`, `Upgrades 1–5`, `Experiment/preflight_v5.py`), and `lit-audit-2026-11-15` §1.3/§4 + title/scope alignment synced into the draft.
-- **Now:** complete double human coding (`Experiment/coding_v5/`), close ChartQA `max_pixels` (R8.4: `200704` vs `501760`) + GPU `--print_example` render & `--limit 20` `verdict_nll` span smoke checks, verify Fable 5.2 final sign-off, and commit + tag `prereg-v5`.
+- **Done:** fresh `2026-11-15/16` post-fix v5 dev rerun across all three models on an L4 in `bfloat16` (**34,920 rows** in `Experiment/results_v5/`, including `px501k` R8.4 comparison, verified `verdict_nll` spans, and `resolved_model_commit` manifests; initial `29,880`-row pass archived in `Experiment/archive/results_v5_Prev_backup/` and audited in `Thesis/docs/Archive/dev v5/`), `analyze_v5.py` + `lme4` run on dev (`Experiment/results_v5/analysis_dev/` incl. `lme4_out.txt`), pre-freeze decisions D1–D5 + gate revisions, Fable 5.2 forensic audit fixes (`F2`, `F3`, `F5`–`F13`, `Upgrades 1–5`, `Experiment/preflight_v5.py`), and `lit-audit-2026-11-15` §1.3/§4 + title/scope alignment synced into the draft.
+- **Now:** complete double human coding (`Experiment/coding_v5/`, `0`-diff donor match verified), lock ChartQA `max_pixels` (`200704` vs `501760`) in `PREREGISTRATION_VERDICT_TRANSPLANT.md` §3.4, and commit + tag `prereg-v5`.
 - **No confirmatory data exists yet.**
 
 For current status and next steps, read `Experiment/README.md` first.
@@ -98,12 +98,12 @@ Recomputed from `Experiment/results_v4/dev2_*.jsonl` with `score_v4.py`, or read
 ├── Experiment/          ← CODE + DATA (ground truth); start at its README.md
 │   ├── *.py, tests/     ← Active v4/v5 code, preflight_v5.py, and tests
 │   ├── RUNBOOK_v4.md, RUNBOOK_v5.md ← Execution runbooks
-│   ├── results_v5/      ← v5 dev pass outputs (29,880 rows)
+│   ├── results_v5/      ← v5 post-fix dev rerun (34,920 rows) + px501k + analysis_dev/ (incl. lme4_out.txt)
 │   ├── results_v4/      ← v4 runs and dev analysis
 │   ├── results_v3/      ← v3 pilot outputs and re-analysis (read-only)
 │   ├── coding_v5/       ← v5 human-coding sheets (verdicts + flips)
 │   ├── coding_v3/       ← v3 human-coding sheets
-│   └── archive/         ← v3 harness and early pilots
+│   └── archive/         ← v3 harness, v1/v2 pilots, and results_v5_Prev_backup/ (29,880 rows)
 ├── Docs/                ← AI-GENERATED TRACKING (reference only)
 │   ├── RESEARCH_OBJECTIVE.md                 ← Onboarding brief: RQ, estimand, narrowed novelty, reading order
 │   ├── PREREGISTRATION_VERDICT_TRANSPLANT.md ← Design spec (draft, not frozen)

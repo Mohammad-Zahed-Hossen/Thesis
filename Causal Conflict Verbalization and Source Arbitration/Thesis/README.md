@@ -2,8 +2,8 @@
 
 Writing guides, conceptual FAQs, execution runbooks, compute evaluations, and v5 dev-pass audits for the BSc CSE thesis (*Does the Verdict Decide? Testing Whether Stated Source Reliability Steers Vision-Language Models under Image–Text Conflict*).
 
-**Last updated:** 2026-11-15
-**Status:** The v5 dev pass has run on all three models (39 root files in [../Experiment/results_v5/](../Experiment/results_v5/) + `analysis_dev/`) and `analyze_v5.py` has been run after pre-freeze decisions D1–D5 and the 2026-11-14 gate updates ([../Experiment/results_v5/analysis_dev/](../Experiment/results_v5/analysis_dev/)). All **248** CPU unit tests pass (`Experiment/tests/`) and `Experiment/preflight_v5.py` (`8/8` scripts) passes cleanly after Fable 5.2 forensic fixes (`F2`, `F3`, `F5`–`F13`, `Upgrades 1–5`). The 18-paper + CMC-Bench literature base is consolidated in [../Docs/Paper/THESIS_LITERATURE_KNOWLEDGE_BASE.md](../Docs/Paper/THESIS_LITERATURE_KNOWLEDGE_BASE.md), alongside the 2026-11-15 literature audit and Fable 5.2 forensic audit + 16 related-work repo snapshots. The pre-registration is **not frozen**, and **no confirmatory data exists**. No dissertation chapters have been drafted here yet.
+**Last updated:** 2026-11-16
+**Status:** The post-fix v5 dev rerun (`2026-11-15/16`) is complete across all three models (**34,920 rows** across `20` `.jsonl` files in [../Experiment/results_v5/](../Experiment/results_v5/README.md), including the `px501k` ChartQA R8.4 comparison and `analyze_v5.py` + `lme4` outputs in `analysis_dev/` incl. `lme4_out.txt`). The initial `2026-11-12/13` dev pass (`29,880` rows + its `analysis_dev/` and dev audits) is archived in [../Experiment/archive/results_v5_Prev_backup/](../Experiment/archive/results_v5_Prev_backup/README.md). All **248** CPU unit tests pass (`Experiment/tests/`) and `Experiment/preflight_v5.py` (`8/8` scripts) passes cleanly after Fable 5.2 forensic fixes (`F2`, `F3`, `F5`–`F13`, `Upgrades 1–5`). The 18-paper + CMC-Bench literature base is consolidated in [../Docs/Paper/THESIS_LITERATURE_KNOWLEDGE_BASE.md](../Docs/Paper/THESIS_LITERATURE_KNOWLEDGE_BASE.md), alongside the 2026-11-15 literature audit and Fable 5.2 forensic audit + 16 related-work repo snapshots. The pre-registration is **not frozen**, and **no confirmatory data exists**. No dissertation chapters have been drafted here yet.
 **Ground truth:** Active code and raw outputs live in [../Experiment/](../Experiment/) (start at [../Experiment/README.md](../Experiment/README.md)). The pre-registration draft is [../Docs/PREREGISTRATION_VERDICT_TRANSPLANT.md](../Docs/PREREGISTRATION_VERDICT_TRANSPLANT.md).
 
 > [!NOTE]
@@ -36,7 +36,8 @@ Thesis/
     │   └── Thesis Understanding FAQ (Gemini 3.8 Flash).md
     ├── RUNBOOK/
     │   ├── RUNBOOK_V4.md
-    │   └── RUNBOOK_V5.md
+    │   ├── RUNBOOK_V5.md
+    │   └── RUNBOOK_V5_DEV_LATEST.md
     ├── Compute/
     │   ├── Compute_Platform_Evaluation_2026-11-11.md
     │   └── Thesis Cloude Compute Evaluation.md
@@ -69,7 +70,8 @@ Two harmonized Q&A guides (AI-generated and audited on 2026-11-11 against code, 
 ### `docs/RUNBOOK/` — Thesis-Side Execution Guides
 
 - **[RUNBOOK_V4.md](docs/RUNBOOK/RUNBOOK_V4.md)** — End-to-end local and GPU execution guide for v4 (mirrors/extends [../Experiment/RUNBOOK_v4.md](../Experiment/RUNBOOK_v4.md)).
-- **[RUNBOOK_V5.md](docs/RUNBOOK/RUNBOOK_V5.md)** — Colab Pro guide for the v5 dev pass. **Note:** Audits in `docs/Archive/dev v5/` flag discrepancies between this file and [../Experiment/RUNBOOK_v5.md](../Experiment/RUNBOOK_v5.md) (for example, missing ChartQA render checks and omitted `--base` / `--donor` flags in the local `analyze_v5.py` command); defer to the `Experiment/` runbook.
+- **[RUNBOOK_V5.md](docs/RUNBOOK/RUNBOOK_V5.md)** — Initial Colab Pro guide for the `2026-11-12/13` v5 dev pass (kept as historical record; defer to [../Experiment/RUNBOOK_v5.md](../Experiment/RUNBOOK_v5.md)).
+- **[RUNBOOK_V5_DEV_LATEST.md](docs/RUNBOOK/RUNBOOK_V5_DEV_LATEST.md)** — End-to-end fail-fast Colab Pro runbook (`Option 3: v5dev_latest`) used for the `2026-11-15/16` post-fix dev rerun, `F1`/`R8.4` checks, and `lme4` execution.
 
 ### `docs/Compute/` — GPU Infrastructure Evaluations
 
@@ -78,7 +80,7 @@ Two harmonized Q&A guides (AI-generated and audited on 2026-11-11 against code, 
 
 ### `docs/Archive/dev v5/` — v5 Dev-Pass Logs & Audits (Dev Only)
 
-Records and independent AI audits of the v5 development run stored in [../Experiment/results_v5/](../Experiment/results_v5/) (39 artifacts, 29,880 rows). **Every number in these files comes from spent dev items; none are confirmatory findings.**
+Records and independent AI audits of the **initial `2026-11-12/13` v5 dev pass** (now archived in [../Experiment/archive/results_v5_Prev_backup/](../Experiment/archive/results_v5_Prev_backup/README.md); 39 root artifacts, 29,880 rows). **Every number in these files comes from spent dev items; none are confirmatory findings.** (For the newer `2026-11-15/16` post-fix rerun, see [../Experiment/results_v5/README.md](../Experiment/results_v5/README.md) and its `analysis_dev/`.)
 
 - **[v5_dev_output.md](<docs/Archive/dev v5/v5_dev_output.md>)** — Raw Colab notebook command/output transcript from the v5 dev run.
 - **[v5_antigravity_analysis.md](<docs/Archive/dev v5/v5_antigravity_analysis.md>)** — File-by-file inventory and analysis of `results_v5/` and environment versions.

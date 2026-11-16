@@ -416,44 +416,44 @@ The decision table has seven rows; condensed ([lines 92–105](../../../Docs/PRE
 
 Constants in code: `EPSILON = 0.05`, `RHO_BOUND = 0.25`, 10,000 bootstrap resamples and permutation draws, seed 42, minimum 150 (math) / 100 (ChartQA) items ([`analyze_v5.py`, lines 48–56](../../../Experiment/analyze_v5.py#L48-L56)). [Verified]
 
-### 10.4 The v5 dev pass and the pre-freeze decisions *[New 2026-11-14]*
+### 10.4 The v5 dev pass and the pre-freeze decisions *[Updated 2026-11-16]*
 
-All of this is **v5 dev data**: spent development items (200 GSM8K/SVAMP, 30 ChartQA), one run per model on an NVIDIA L4 in `bfloat16` on 2026-11-12, below the minimum sample, and with verdict labels not yet checked by human coders. It is for tuning and for the freeze record. None of it is a finding. Sources: `Experiment/results_v5/` (rows, manifests, gate reports), `Experiment/results_v5/analysis_dev/analysis_v5.md` (analysis, 2026-11-14), and the audits in `Thesis/docs/Archive/`. [Verified against the rows]
+All of this is **v5 dev data**: spent development items (200 GSM8K/SVAMP, 30 ChartQA), run on an NVIDIA L4 in `bfloat16` (the `2026-11-15/16` post-fix rerun in `Experiment/results_v5/`, `34,920` rows; the initial `2026-11-12/13` pass is archived in `Experiment/archive/results_v5_Prev_backup/`), below the minimum sample, and with verdict labels not yet checked by human coders. It is for tuning and for the freeze record. None of it is a finding. Sources: `Experiment/results_v5/` (rows, manifests, gate reports), `Experiment/results_v5/analysis_dev/analysis_v5.md` (analysis, `2026-11-16`), `lme4_out.txt`, and the initial-pass audits in `Thesis/docs/Archive/dev v5/`. [Verified against the rows]
 
-**What survived each filter** (competency under the `structured` parser, then the edit gates as run in the dev pass):
+**What survived each filter** (competency under the `structured` parser, then the edit gates as run in the `2026-11-15/16` dev rerun):
 
-| Model | GSM8K/SVAMP (200 items) | ChartQA-Conflict (30 items) |
+| Model | GSM8K/SVAMP (200 items) | ChartQA-Conflict (30 items, `200704` / `px501k`) |
 |:---|:---|:---|
 | Qwen2-VL-2B | 0 competent: it never writes `####` (0 of 1,200 Math generations) | 10 competent, 0 pass the gates |
-| Qwen2.5-VL-3B | 80 competent, 80 pass | 13 competent, 6 pass |
-| Qwen2.5-VL-7B | 124 competent, 115 pass | 13 competent, 2 pass; both state an answer before the verdict |
+| Qwen2.5-VL-3B | 95 competent, 95 pass | 13 competent, 5 pass (`16` competent, `1` pass at `501760`) |
+| Qwen2.5-VL-7B | 154 competent, 140 pass | 13 competent, 0 pass (`17` competent, `0` pass at `501760`) |
 
-**What the dev pass showed about the two outcomes** (binding instruction unless stated):
+**What the dev pass showed about the two outcomes** (binding instruction unless stated; `2026-11-16` rerun):
 
 | Quantity | Qwen2.5-VL-3B Math | Qwen2.5-VL-7B Math |
 |:---|:---|:---|
-| Δℓ sign matches the answer the model then solves (strict parser) | 51.6% | 56.6% |
-| … what always guessing the commoner answer source would score | 55.2% | 75.9% |
-| Δℓ's ability to separate image from text answers within one evidence order (AUC, across parsers) | 0.53–0.56 | 0.68–0.76 |
-| Δℓ effect of flipping the verdict (`flip − own`) | 0.233 | 1.619 |
-| … of which deleting the own verdict alone (`none − own`) | 0.137 | 1.515 |
-| … and adding the flipped one (`flip − none`) | 0.096 | 0.103 (95% CI −0.09 to 0.29) |
-| Behaviour: answers following the reversed verdict, `flip − own` (structured parser, k = 1) | +49.4 pp | +43.9 pp |
-| Behaviour: matched template pair, `para_flip − para` | +63.7 pp | +64.3 pp |
-| Explicit-instruction benchmark B_beh (§2.3 of the prereg; image / text direction) | 0.48 (0.46 / 0.51) | 0.69 (0.62 / 0.76) |
-| ρ_beh under binding (`flip − own` ÷ B_beh; descriptive only, can exceed 1) | 1.02 | 0.64 |
-| Replay noise: the own verdict regenerated unchanged, answer flips image↔text | 3.2% | 1.1% |
+| Δℓ sign matches the answer the model then solves (strict parser) | 52.9% | 56.2% |
+| … what always guessing the commoner answer source would score | 55.4% | 77.0% |
+| Δℓ's ability to separate image from text answers within one evidence order (AUC, across parsers) | 0.533–0.568 | 0.690–0.759 |
+| Δℓ effect of flipping the verdict (`flip − own`) | 0.229 | 1.569 |
+| … of which deleting the own verdict alone (`none − own`) | 0.137 | 1.456 |
+| … and adding the flipped one (`flip − none`) | 0.092 | 0.114 (95% CI −0.044 to 0.270) |
+| Behaviour: answers following the reversed verdict, `flip − own` (structured parser, k = 1) | +50.5 pp | +45.7 pp |
+| Behaviour: matched template pair, `para_flip − para` | +60.5 pp | +66.8 pp |
+| Explicit-instruction benchmark B_beh (§2.3 of the prereg; image / text direction) | 0.471 (0.447 / 0.495) | 0.811 (0.804 / 0.818) |
+| ρ_beh under binding (`flip − own` ÷ B_beh; descriptive only, can exceed 1) | 1.073 | 0.564 |
+| Replay noise: the own verdict regenerated unchanged, answer flips image↔text | 2.6% | 0.9% |
 
 How to read this, without overclaiming:
 
-1. **In Math, Δℓ at `####` mostly did not measure the answer.** It is read before the model has done any arithmetic. For 3B it predicted the eventual answer no better than guessing; for 7B it carried some signal once evidence order was held fixed. Δℓ mainly followed evidence order: it favoured whichever source came last by about 1.5 to 2.0 nats per token. [Verified, dev only]
-2. **In 7B Math, the Δℓ effect was mostly the removal of the model's own verdict**, not attraction to the reversed one. A clean template sentence naming the other source did move Δℓ (`para_flip − none` = 0.72). [Verified, dev only]
+1. **In Math, Δℓ at `####` mostly did not measure the answer.** It is read before the model has done any arithmetic. For 3B it predicted the eventual answer no better than guessing; for 7B it carried some signal once evidence order was held fixed. Δℓ mainly followed evidence order: it favoured whichever source came last. [Verified, dev only]
+2. **In 7B Math, the Δℓ effect was mostly the removal of the model's own verdict**, not attraction to the reversed one. A clean template sentence naming the other source did move Δℓ (`para_flip − none` = 0.705). [Verified, dev only]
 3. **Behaviourally, the reversed verdict moved answers a lot**, in both models and under both instructions. That is a dev observation on spent items below the minimum sample. It is not evidence for H₁. [Verified as a number; not a finding]
-4. **Strict `####` parsing hid most of 7B's answers.** After a prefilled verbalization, 7B ended with "The final answer is X." instead of `#### X` in 58% of generations, so 62.7% of its behavioural rows scored as "neither" under the strict parser. The `structured` parser brings that to 22.2%. [Verified]
-5. **The behavioural `none` arm is not a no-verdict condition.** Given only the first sentence, the model usually writes a verdict of its own before solving (in 58–99.6% of rows, depending on model and instruction). So the behavioural deletion/insertion split is descriptive only. [Verified]
-6. **Evidence order matters, in two different ways.** The models' stated verdicts named the typed text almost always when it came **first** (3B 199/200, 7B 200/200), while Δℓ favoured the source that came **last**. Counterbalancing was needed. [Verified]
+4. **Strict `####` parsing hid most of 7B's answers.** After a prefilled verbalization, 7B frequently ended with `"The final answer is X."` instead of `#### X`, so `61.9%` of its behavioural rows scored as `"neither"` under `strict`. The `structured` parser brings that down to `18.2%`. [Verified]
+5. **The behavioural `none` arm is not a no-verdict condition.** Given only the first sentence, the model usually writes a verdict of its own before solving. So the behavioural deletion/insertion split is descriptive only. [Verified]
+6. **Evidence order matters, in two different ways.** On donor generations, models named the typed text almost always when it came first, while Δℓ favoured the source that came last. Counterbalancing was needed. [Verified]
 
-**Pre-freeze decisions D1–D5 (approved 2026-11-13; written into the prereg on 2026-11-13 and made consistent on 2026-11-14):**
+**Pre-freeze decisions D1–D5 (approved 2026-11-13; written into the prereg on 2026-11-13 and made consistent on 2026-11-14; verified in the `2026-11-15/16` rerun):**
 
 | Decision | What it says | Consequence for the claims |
 |:---|:---|:---|
@@ -461,9 +461,9 @@ How to read this, without overclaiming:
 | **D2** | The matched template pair (`para_flip − para`) is co-primary with `flip − own`; the deletion/insertion split is reported. | A Math claim needs both contrasts to agree. The behavioural split is descriptive only (point 5 above). |
 | **D3** | The `structured` parser (`####`, else "the final answer is X" or `\boxed{X}`) is used for competency and behaviour, with strict and lenient reported beside it. Qwen2-VL-2B is diagnostic only. | Two confirmatory models, both Qwen2.5-VL (3B and 7B). No claim about the older generation. |
 | **D4** | ChartQA-Conflict is exploratory. | The only confirmatory regime is GSM8K/SVAMP, where neither source is wrong: confirmatory claims are about **source following**, not reliability judgement. |
-| **D5** | Wording churn counts image↔text flips among comparable answers. *Revised 2026-11-14:* the limit is a fixed 5 pp (the replay-noise clause was dropped), and a neither shift within ±10 pp is added. | On dev the gate passed under binding for both models (3B's signed mean −4.4 pp is near the limit) and failed under non-binding for both. |
+| **D5** | Wording churn counts image↔text flips among comparable answers. *Revised 2026-11-14:* the limit is a fixed 5 pp (the replay-noise clause was dropped), and a neither shift within ±10 pp is added. | On the `2026-11-15/16` dev rerun, the gate passed under binding for both models (3B signed mean `−4.7 pp`, churn `4.5%`; 7B `−1.1 pp`, `0.0%`) and failed under non-binding for both (`6.1%` churn on 3B; `−5.4 pp` and `5.8%` churn on 7B). |
 
-**Still open before the freeze:** human coding of verdict labels (`Experiment/coding_v5/`); the ChartQA `max_pixels` comparison (prereg §3.4, R8.4); a short GPU check that the new `verdict_nll` span is exact; the ChartQA render check, which the dev pass skipped. Also known: the Math primary outcome rests on template k = 1 only.
+**Still open before the freeze:** double human coding of verdict labels (`Experiment/coding_v5/`, `0`-diff donor match verified against the fresh rerun); locking the ChartQA `max_pixels` choice (`200704` vs `501760`) in prereg §3.4 based on the completed `px501k` comparison; and committing/tagging `prereg-v5`. (The GPU `verdict_nll` span check and `px501k` run are now complete.) Also known: the Math primary outcome rests on template k = 1 only.
 
 ---
 

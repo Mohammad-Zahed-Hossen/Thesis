@@ -21,7 +21,7 @@
   - Evidence conflict (exploratory/secondary, D4): `vlm-modality-research/chartqa-evidence-conflict-v2` (229 analysed items; the 230-row release minus `conflict_id` 45).
   - Both come from *Which Source Wins?* (arXiv:2608.17205).
 - **Design Spec:** `Docs/PREREGISTRATION_VERDICT_TRANSPLANT.md` (draft, not yet frozen), with a concise onboarding brief in `Docs/RESEARCH_OBJECTIVE.md`. Evidence base: `Docs/Paper/THESIS_LITERATURE_KNOWLEDGE_BASE.md` (18 core papers + CMC-Bench; 29 local PDFs: 20 core/lead + 6 audit A-papers + 3 cited B-papers; 0 core missing, listed in `Docs/Paper/README.md`) alongside `Docs/Paper/lit-audit-2026-11-15/lit-audit-2026-11-15.md`, `Docs/Paper/fable52-prefreeze-audit-2026-11-15.md` (with `Docs/Paper/related_repos/`, 16 public repo snapshots), `Docs/Paper/post-v5-pdf-audit/post-v5-pdf-audit.md`, and `Docs/Paper/lit-dossier-verdict-transplant/lit-dossier-verdict-transplant.md`.
-- **Current Phase:** v3 pilot and v4 dev runs are done (exploratory only), and the 18-paper + CMC-Bench literature KB, the 2026-11-15 pre-freeze literature audit (`lit-audit-2026-11-15/`), and the Fable 5.2 forensic audit fixes (`F2`, `F3`, `F5`–`F13`, `Upgrades 1–5`, `Experiment/preflight_v5.py`, plus `lit-audit-2026-11-15` §1.3/§4 sync and title/scope alignment) are applied. The v5 dev pass has run on an L4 in `bfloat16` for all three models (29,880 rows in `Experiment/results_v5/`), `Experiment/analyze_v5.py` has been run on dev (`Experiment/results_v5/analysis_dev/`), and pre-freeze decisions D1–D5 + gate revisions are written into the pre-registration. Next: complete double human coding (`Experiment/coding_v5/`), close ChartQA `max_pixels` (R8.4: `200704` vs `501760`) + GPU `--print_example` render & `--limit 20` `verdict_nll` span smoke checks, verify Fable 5.2 final sign-off, and commit + tag `prereg-v5`. **No confirmatory data exists.**
+- **Current Phase:** v3 pilot and v4 dev runs are done (exploratory only), and the 18-paper + CMC-Bench literature KB, the 2026-11-15 pre-freeze literature audit (`lit-audit-2026-11-15/`), and the Fable 5.2 forensic audit fixes (`F2`, `F3`, `F5`–`F13`, `Upgrades 1–5`, `Experiment/preflight_v5.py`, plus `lit-audit-2026-11-15` §1.3/§4 sync and title/scope alignment) are applied. The fresh `2026-11-15/16` post-fix v5 dev rerun has completed on an L4 in `bfloat16` across all three models (**34,920 rows** in `Experiment/results_v5/`, including `px501k` ChartQA `max_pixels` comparison, verified `verdict_nll` spans, and `resolved_model_commit` manifests; the initial `29,880`-row pass is archived in `Experiment/archive/results_v5_Prev_backup/`), `Experiment/analyze_v5.py` and `lme4` have been run on the fresh dev pass (`Experiment/results_v5/analysis_dev/` incl. `lme4_out.txt`), and pre-freeze decisions D1–D5 + gate revisions are written into the pre-registration. Next: complete double human coding (`Experiment/coding_v5/`, `0`-diff donor match verified), lock ChartQA `max_pixels` (`200704` vs `501760`) in `PREREGISTRATION_VERDICT_TRANSPLANT.md` §3.4, and commit + tag `prereg-v5`. **No confirmatory data exists.**
 
 ### What the Pilot Does and Does Not Show
 - The pipeline works on `Qwen/Qwen2.5-VL-3B-Instruct` on a T4 [Verified].
@@ -81,12 +81,12 @@
 ├── Experiment/          ← CODE + DATA (ground truth)
 │   ├── README.md        ← Current status; read first
 │   ├── *.py, tests/     ← Active v4/v5 code, preflight_v5.py, and tests
-│   ├── results_v5/      ← v5 dev pass outputs (29,880 rows)
+│   ├── results_v5/      ← v5 post-fix dev rerun (34,920 rows) + px501k + analysis_dev/ (incl. lme4_out.txt)
 │   ├── results_v4/      ← v4 runs and dev analysis
 │   ├── results_v3/      ← v3 pilot outputs and re-analysis
 │   ├── coding_v5/       ← v5 human-coding sheets (verdicts + flips)
 │   ├── coding_v3/       ← v3 human-coding sheets
-│   └── archive/         ← v3 harness and early pilots
+│   └── archive/         ← v3 harness, v1/v2 pilots, and results_v5_Prev_backup/ (29,880 rows)
 ├── Docs/                ← AI-generated tracking (reference only)
 │   ├── RESEARCH_OBJECTIVE.md                 ← Onboarding brief (post-2026-11-15 audit)
 │   ├── PREREGISTRATION_VERDICT_TRANSPLANT.md ← Design spec (draft)

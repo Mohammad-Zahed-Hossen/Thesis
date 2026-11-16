@@ -139,11 +139,15 @@ Copy `results_v5/` to the local machine. For each block, record these into the p
 | GPU, dtype, peak VRAM                               | Each manifest: `gpu`, `dtype` (must be `torch.bfloat16`), `peak_vram_gb`, `batch_size`                                                                 |
 | Competency intersection                             | Item ids that pass competency for all three models, per regime (from the three `gates.json` files or base files)                                       |
 
-Then run the analysis locally. It reports most of the quantities above, plus T1, ρ, TOST and every secondary analysis:
+Then run the analysis locally (using explicit split globs so `v5dev_chartqa_px501k_*` comparison files are excluded and do not trigger the duplicate-row guard). It reports most of the quantities above, plus T1, ρ, TOST and every secondary analysis:
 
 ```bash
-python analyze_v5.py --runs results_v5/v5dev_*_tp_*.jsonl --gates results_v5/v5dev_*_tp_*.gates.json \
-  --base results_v5/v5dev_*_base_*.jsonl --donor results_v5/v5dev_*_donor_*.jsonl --output_dir results_v5/analysis_dev
+python analyze_v5.py \
+  --runs results_v5/v5dev_conflict_tp_*.jsonl results_v5/v5dev_chartqa_tp_*.jsonl \
+  --gates results_v5/v5dev_conflict_tp_*.gates.json results_v5/v5dev_chartqa_tp_*.gates.json \
+  --base results_v5/v5dev_conflict_base_*.jsonl results_v5/v5dev_chartqa_base_*.jsonl \
+  --donor results_v5/v5dev_conflict_donor_*.jsonl results_v5/v5dev_chartqa_donor_*.jsonl \
+  --output_dir results_v5/analysis_dev
 ```
 
 On Windows PowerShell the `*` patterns are not expanded; list the files or run the command from Git Bash. The script refuses output from the fake `echo` model unless `--allow_dry_run` is given.
