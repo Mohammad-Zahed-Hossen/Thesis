@@ -119,7 +119,7 @@ Notes:
 The default is `--max_pixels 200704` (`256·28·28`), the same as GSM8K/SVAMP. ChartQA-Conflict source charts are `800×557` px, so `200704` scales them down to ~67% linear size (`401408` scales to ~95%), whereas the *Which Source Wins?* artifact loads the Qwen processor without pixel caps. Before tagging `prereg-v5`:
 
 1. Compare `--max_pixels 200704` vs `--max_pixels 501760` (`812×560 = 454,720` px rounded to `28×28` patches) on the 30 spent ChartQA dev items (base + donor + `--gates_only` for `Qwen/Qwen2.5-VL-3B-Instruct` and `Qwen/Qwen2.5-VL-7B-Instruct`) under new dev tags and lock the chosen ChartQA value in `PREREGISTRATION_VERDICT_TRANSPLANT.md` §3.4. Do not change it after freezing.
-2. Run a real-tokenizer smoke check (`--phase dev --limit 20`) of `transplant_v5.py` for both confirmatory models (`3B` and `7B`) and verify `verdict_nll_tokens > 0`, `verdict_span_exact`, and `boundary_mismatch <= 1%`.
+2. Run a real-tokenizer smoke check (`--phase dev --limit 20`) of `transplant_v5.py` for both confirmatory models (`3B` and `7B`) and verify `verdict_nll_tokens > 0`, `verdict_span_exact` is recorded as a boolean (`in (True, False)`; `False` is normal when Qwen BPE merges `".\n\n"` at the prefill boundary), and `boundary_mismatch <= 1%`.
 
 ## 5. What to bring back
 

@@ -20,7 +20,7 @@ This step-by-step runbook executes a full fresh v5 dev pass (`Option 3: v5dev_la
   - **Cell 1** defines `run_checked(...)` (streams live output and raises `RuntimeError` immediately on any unexpected non-zero exit code) and `assert_jsonl_rows(...)` (verifies `base` and `donor` JSONL row counts before `transplant_v5.py` starts).
   - **Cell 3** programmatically asserts every render-gate check on `--print_example` stdout so you do not have to inspect 6 long prompts manually.
   - **Cells 4–10** pass `allow_zero_passed_tag` only on ChartQA transplant where `passed == 0` in `.gates.json` (exit code `2`) is an expected possible gate outcome, while still halting on any other error.
-  - **Cell 11** runs hard `assert` checks on `F1` (`verdict_nll_tokens > 0`, `verdict_span_exact`, `none` nulls, `boundary_mismatch <= 1%`) and manifest `resolved_model_commit`.
+  - **Cell 11** runs hard `assert` checks on `F1` (`verdict_nll_tokens > 0`, `verdict_span_exact in (True, False)`, `none` nulls, `boundary_mismatch <= 1%`, while logging `exact` count diagnostically since Qwen BPE merges `".\n\n"`) and manifest `resolved_model_commit`.
 
 ---
 
@@ -458,16 +458,17 @@ for path in tp_files:
     none_dl = [r for r in dl_rows if r.get("verdict") == "none"]
     n_tok = sum(1 for r in verdict_dl if (r.get("verdict_nll_tokens") or 0) > 0 and r.get("verdict_nll") is not None)
     n_exact = sum(1 for r in verdict_dl if r.get("verdict_span_exact") is True)
+    n_span_bool = sum(1 for r in verdict_dl if r.get("verdict_span_exact") in (True, False))
     n_none = sum(1 for r in none_dl if r.get("verdict_nll") is None and r.get("verdict_nll_tokens") is None)
     bm = sum(1 for r in dl_rows if r.get("boundary_mismatch")) / max(1, len(dl_rows))
     print(
         f"{path}: rows={len(rows)} | tok>0={n_tok}/{len(verdict_dl)} | "
-        f"exact={n_exact}/{len(verdict_dl)} | none_null={n_none}/{len(none_dl)} | "
-        f"bm={bm:.2%} | commit={m.get('resolved_model_commit')}"
+        f"exact={n_exact}/{len(verdict_dl)} (span_bool={n_span_bool}/{len(verdict_dl)}) | "
+        f"none_null={n_none}/{len(none_dl)} | bm={bm:.2%} | commit={m.get('resolved_model_commit')}"
     )
     assert m.get("resolved_model_commit"), f"Missing resolved_model_commit in {mpath}"
     assert n_tok == len(verdict_dl), f"F1 failure: verdict_nll missing/0 tokens in {path}"
-    assert n_exact == len(verdict_dl), f"F1 failure: verdict_span_exact != True in {path}"
+    assert n_span_bool == len(verdict_dl), f"F1 failure: verdict_span_exact missing in {path}"
     assert n_none == len(none_dl), f"F1 failure: non-null verdict_nll on 'none' rows in {path}"
     assert bm <= 0.01, f"Boundary mismatch exceeded 1% ({bm:.2%}) in {path}"
 

@@ -1,0 +1,232 @@
+
+===== Qwen/Qwen2.5-VL-3B-Instruct math =====
+lmer: by-item slope dropped
+Linear mixed model fit by REML ['lmerMod']
+Formula: dl ~ D * B + D * O + K + (1 | item)
+   Data: subset(s, outcome == "dl")
+
+REML criterion at convergence: 7027.8
+
+Scaled residuals: 
+    Min      1Q  Median      3Q     Max 
+-3.8423 -0.5347  0.0033  0.5268  4.6958 
+
+Random effects:
+ Groups   Name        Variance Std.Dev.
+ item     (Intercept) 1.1880   1.0900  
+ Residual             0.5102   0.7143  
+Number of obs: 3040, groups:  item, 95
+
+Fixed effects:
+            Estimate Std. Error t value
+(Intercept) -0.11738    0.11257  -1.043
+D            0.18730    0.02591   7.229
+B           -0.06846    0.02591  -2.643
+O            1.46459    0.02591  56.529
+K1           0.01438    0.02244   0.641
+K2           0.03021    0.02244   1.347
+K3          -0.04845    0.02244  -2.159
+D:B          0.08335    0.05182   1.609
+D:O          0.07092    0.05182   1.369
+
+Correlation of Fixed Effects:
+    (Intr) D      B      O      K1     K2     K3     D:B   
+D    0.000                                                 
+B    0.000  0.000                                          
+O    0.000  0.000  0.000                                   
+K1   0.000  0.000  0.000  0.000                            
+K2   0.000  0.000  0.000  0.000 -0.333                     
+K3   0.000  0.000  0.000  0.000 -0.333 -0.333              
+D:B  0.000  0.000  0.000  0.000  0.000  0.000  0.000       
+D:O  0.000  0.000  0.000  0.000  0.000  0.000  0.000  0.000
+glmer: by-item slope dropped
+Generalized linear mixed model fit by maximum likelihood (Laplace
+  Approximation) [glmerMod]
+ Family: binomial  ( logit )
+Formula: y_image ~ D * B + D * O + (1 | item)
+   Data: b
+Control: ctl
+
+      AIC       BIC    logLik -2*log(L)  df.resid 
+    338.4     367.7    -162.2     324.4       479 
+
+Scaled residuals: 
+    Min      1Q  Median      3Q     Max 
+-5.9457 -0.1875 -0.0508  0.2380  3.2752 
+
+Random effects:
+ Groups Name        Variance Std.Dev.
+ item   (Intercept) 3.087    1.757   
+Number of obs: 486, groups:  item, 94
+
+Fixed effects:
+            Estimate Std. Error z value Pr(>|z|)    
+(Intercept) -0.41982    0.26937  -1.559 0.119105    
+D            5.84559    0.65436   8.933  < 2e-16 ***
+B           -0.80549    0.37021  -2.176 0.029574 *  
+O            0.07164    0.35105   0.204 0.838303    
+D:B          2.86544    0.76142   3.763 0.000168 ***
+D:O          2.30007    0.70986   3.240 0.001195 ** 
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Correlation of Fixed Effects:
+    (Intr) D      B      O      D:B   
+D   -0.210                            
+B    0.258 -0.261                     
+O    0.176 -0.056  0.062              
+D:B -0.230  0.432 -0.284 -0.052       
+D:O -0.074  0.327 -0.067 -0.122  0.105
+
+===== Qwen/Qwen2.5-VL-7B-Instruct math =====
+Linear mixed model fit by REML ['lmerMod']
+Formula: dl ~ D * B + D * O + K + (1 + D | item)
+   Data: subset(s, outcome == "dl")
+
+REML criterion at convergence: 13473.1
+
+Scaled residuals: 
+    Min      1Q  Median      3Q     Max 
+-5.5572 -0.4492  0.0030  0.4598  4.9547 
+
+Random effects:
+ Groups   Name        Variance Std.Dev. Corr  
+ item     (Intercept) 2.1661   1.4718         
+          D           2.1102   1.4527   -0.24 
+ Residual             0.9395   0.9693         
+Number of obs: 4480, groups:  item, 140
+
+Fixed effects:
+             Estimate Std. Error t value
+(Intercept) -0.174428   0.125227  -1.393
+D            1.424461   0.126142  11.293
+B            0.023770   0.028962   0.821
+O            0.733921   0.028962  25.341
+K1           0.030069   0.025082   1.199
+K2           0.001594   0.025082   0.064
+K3          -0.060689   0.025082  -2.420
+D:B          0.289951   0.057924   5.006
+D:O         -0.143641   0.057924  -2.480
+
+Correlation of Fixed Effects:
+    (Intr) D      B      O      K1     K2     K3     D:B   
+D   -0.234                                                 
+B    0.000  0.000                                          
+O    0.000  0.000  0.000                                   
+K1   0.000  0.000  0.000  0.000                            
+K2   0.000  0.000  0.000  0.000 -0.333                     
+K3   0.000  0.000  0.000  0.000 -0.333 -0.333              
+D:B  0.000  0.000  0.000  0.000  0.000  0.000  0.000       
+D:O  0.000  0.000  0.000  0.000  0.000  0.000  0.000  0.000
+Generalized linear mixed model fit by maximum likelihood (Laplace
+  Approximation) [glmerMod]
+ Family: binomial  ( logit )
+Formula: y_image ~ D * B + D * O + (1 + D | item)
+   Data: b
+Control: ctl
+
+      AIC       BIC    logLik -2*log(L)  df.resid 
+    580.3     623.7    -281.1     562.3       908 
+
+Scaled residuals: 
+     Min       1Q   Median       3Q      Max 
+-26.6803  -0.2452  -0.0565   0.0736   4.8814 
+
+Random effects:
+ Groups Name        Variance Std.Dev. Corr  
+ item   (Intercept) 4.284    2.070          
+        D           7.903    2.811    -0.06 
+Number of obs: 917, groups:  item, 139
+
+Fixed effects:
+            Estimate Std. Error z value Pr(>|z|)    
+(Intercept)  -1.2106     0.5178  -2.338  0.01938 *  
+D             6.1560     0.9745   6.317 2.66e-10 ***
+B            -0.9113     0.3389  -2.689  0.00716 ** 
+O            -5.4203     0.6631  -8.174 2.99e-16 ***
+D:B           2.9090     0.6772   4.296 1.74e-05 ***
+D:O          -3.9906     1.3787  -2.895  0.00380 ** 
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Correlation of Fixed Effects:
+    (Intr) D      B      O      D:B   
+D   -0.743                            
+B    0.504 -0.487                     
+O    0.176 -0.482  0.128              
+D:B -0.470  0.521 -0.376 -0.267       
+D:O -0.538  0.268 -0.310  0.456  0.175
+
+===== Qwen/Qwen2.5-VL-3B-Instruct chartqa =====
+lmer: by-item slope dropped
+Linear mixed model fit by REML ['lmerMod']
+Formula: dl ~ D * B + D * O + K + (1 | item)
+   Data: subset(s, outcome == "dl")
+
+REML criterion at convergence: 316.8
+
+Scaled residuals: 
+     Min       1Q   Median       3Q      Max 
+-1.81933 -0.78596  0.04846  0.75879  1.82324 
+
+Random effects:
+ Groups   Name        Variance Std.Dev.
+ item     (Intercept) 0.5796   0.7613  
+ Residual             0.3444   0.5869  
+Number of obs: 160, groups:  item, 5
+
+Fixed effects:
+            Estimate Std. Error t value
+(Intercept)  1.05018    0.34362   3.056
+D            0.41841    0.09279   4.509
+B           -0.08873    0.09279  -0.956
+O            0.16150    0.09279   1.741
+K1           0.03133    0.08036   0.390
+K2           0.07714    0.08036   0.960
+K3          -0.04419    0.08036  -0.550
+D:B          0.09050    0.18558   0.488
+D:O         -0.03132    0.18558  -0.169
+
+Correlation of Fixed Effects:
+    (Intr) D      B      O      K1     K2     K3     D:B   
+D    0.000                                                 
+B    0.000  0.000                                          
+O    0.000  0.000  0.000                                   
+K1   0.000  0.000  0.000  0.000                            
+K2   0.000  0.000  0.000  0.000 -0.333                     
+K3   0.000  0.000  0.000  0.000 -0.333 -0.333              
+D:B  0.000  0.000  0.000  0.000  0.000  0.000  0.000       
+D:O  0.000  0.000  0.000  0.000  0.000  0.000  0.000  0.000
+glmer: by-item slope dropped
+glmer: FAILED (singular, non-convergent, or error)
+
+R version 4.6.2 (2026-10-29)
+Platform: x86_64-pc-linux-gnu
+Running under: Ubuntu 24.04.4 LTS
+
+Matrix products: default
+BLAS:   /usr/lib/x86_64-linux-gnu/openblas-pthread/libblas.so.3 
+LAPACK: /usr/lib/x86_64-linux-gnu/openblas-pthread/libopenblasp-r0.3.26.so;  LAPACK version 3.12.0
+
+locale:
+ [1] LC_CTYPE=en_US.UTF-8       LC_NUMERIC=C              
+ [3] LC_TIME=en_US.UTF-8        LC_COLLATE=en_US.UTF-8    
+ [5] LC_MONETARY=en_US.UTF-8    LC_MESSAGES=en_US.UTF-8   
+ [7] LC_PAPER=en_US.UTF-8       LC_NAME=C                 
+ [9] LC_ADDRESS=C               LC_TELEPHONE=C            
+[11] LC_MEASUREMENT=en_US.UTF-8 LC_IDENTIFICATION=C       
+
+time zone: Etc/UTC
+tzcode source: system (glibc)
+
+attached base packages:
+[1] stats     graphics  grDevices utils     datasets  methods   base     
+
+other attached packages:
+[1] lme4_2.1-0   Matrix_1.7-6
+
+loaded via a namespace (and not attached):
+ [1] minqa_1.2.8      MASS_7.3-66      compiler_4.6.2   reformulas_0.4.4
+ [5] tools_4.6.2      Rcpp_1.1.2       splines_4.6.2    nlme_3.1-171    
+ [9] grid_4.6.2       nloptr_2.2.1     rbibutils_2.4.1  boot_1.3-32     
+[13] Rdpack_2.6.6     lattice_0.23-1  

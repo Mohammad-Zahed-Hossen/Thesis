@@ -1,0 +1,33 @@
+{
+  "items": 30,
+  "competent": 16,
+  "taken": 16,
+  "no_donor": 0,
+  "passed": 1,
+  "edit_gate_pass_rate": 0.0625,
+  "edit_gate_ok": false,
+  "meets_min_items": false,
+  "jaccard_multiset_flip_min": 0.8667,
+  "jaccard_multiset_flip_mean": 0.9333,
+  "swaps_per_flip": {
+    "1": 1,
+    "2": 1
+  },
+  "swap_scope": "sentence",
+  "source_nouns_outside_swap_scope": {
+    "0": 2
+  },
+  "own_source_by_order": {
+    "image_first:report": 1,
+    "text_first:report": 1
+  },
+  "fail_reasons_by_order": {
+    "own_absent": 27,
+    "gate_answer_leakage": 1,
+    "gate3_too_many_swaps": 1
+  },
+  "competency_parser": "structured",
+  "passed_ids": [
+    "8"
+  ]
+}
