@@ -111,3 +111,55 @@ date,tool,axis,query,filters,hits,screened,kept_A,kept_B
 2026-11-15,OpenAlex API works/{doi},Snowball-backward,referenced_works of 8 anchors (W7171977092 W7203754652 W7223797229 W7222116393 W7211996385 W7214155163 W7224966819 W7154733047),select=referenced_works,81,81,1,4
 2026-11-15,OpenAlex API works?filter=cites:,Snowball-forward,cites:<anchor W-id> for the 8 anchors,per-page=50,5,5,0,1
 2026-11-15,Reference list of 2609.07596 (full text),Snowball hop-2,Nemitz et al. 2026 -> arXiv 2604.06422,manual,1,1,0,1
+2026-11-17,Aurelle (alphaXiv web UI; transcript attached by user) discover_papers,Turn 1 Tasks 1-2 combined,Hidden Commitment; pick a side; multimodal RAG conflict; vision-language sycophancy; medical VLM CoT faithfulness; ChartQA conflict; assistant prefill/self-attribution; named anchor papers,published_after=2022-01-01; prioritize=recency,16,16,0,2
+2026-11-17,Aurelle (alphaXiv web UI; transcript attached by user) researcher-paper lookup,Turn 1 Task 3 anchor authors,"batched lookup of 21 authors (no confident match for Rodela Ghosh, Nikolaos Aletras)",batched,[Unknown],title-level,0,1
+2026-11-17,Aurelle (alphaXiv web UI; transcript attached by user) citation lookup,Turn 1 Task 3 hop-2 forward,7 batched citation lookups for anchors,batched,unattributable to anchors,0,0,0
+2026-11-17,Aurelle (alphaXiv web UI; transcript attached by user) PDF read,Turn 1,full-text read 2610.17989 and 2610.38296,id lookup,2,2,0,1
+2026-11-17,Aurelle (alphaXiv web UI; transcript attached by user) citation lookup,Turn 2 hop-2 forward,citing papers of 2609.00550,one ID per call,2,2,0,0
+2026-11-17,Aurelle (alphaXiv web UI; transcript attached by user) citation lookup,Turn 2 hop-2 forward,citing papers of 2610.30953,one ID per call,0,0,0,0
+2026-11-17,Aurelle (alphaXiv web UI; transcript attached by user) citation lookup,Turn 2 hop-2 forward,citing papers of 2610.20805,one ID per call,0,0,0,0
+2026-11-17,Aurelle (alphaXiv web UI; transcript attached by user) citation lookup,Turn 2 hop-2 forward,citing papers of 2609.29278,one ID per call,0,0,0,0
+2026-11-17,Aurelle (alphaXiv web UI; transcript attached by user) citation lookup,Turn 2 hop-2 forward,citing papers of 2606.12747,one ID per call,2,2,0,0
+2026-11-17,Aurelle (alphaXiv web UI; transcript attached by user) citation lookup,Turn 2 hop-2 forward,citing papers of 2610.37070,one ID per call,0,0,0,0
+2026-11-17,Aurelle (alphaXiv web UI; transcript attached by user) discover_papers,Turn 2 G1,multimodal RAG conflict,separate call per theme,[Unknown],2 new candidates reported,0,0
+2026-11-17,Aurelle (alphaXiv web UI; transcript attached by user) discover_papers,Turn 2 G2,VLM sycophancy versus visual evidence,separate call per theme,[Unknown],0 new candidates reported,0,0
+2026-11-17,Aurelle (alphaXiv web UI; transcript attached by user) discover_papers,Turn 2 G3,medical VLM CoT faithfulness under conflict,separate call per theme,[Unknown],1 new candidates reported,0,1
+2026-11-17,Aurelle (alphaXiv web UI; transcript attached by user) discover_papers,Turn 2 G4,ChartQA / counterfactual conflict,separate call per theme,[Unknown],1 new candidates reported,0,0
+2026-11-17,Aurelle (alphaXiv web UI; transcript attached by user) discover_papers,Turn 2 G5,assistant prefill / self-attribution,separate call per theme,ERROR (no result set returned),0,0,0
+2026-11-17,Aurelle (alphaXiv web UI; transcript attached by user) PDF read,Turn 2,full-text read of 9 papers (2607.21090 2601.05201 2608.21819 2608.23474 2610.23469 2608.29464 2610.00601 2609.37656 2610.03509),id lookup,9,9,0,3
+2026-11-17,alphaXiv keyword (full-text BM25),Row-69 retry,Hidden Commitment,none (unquoted two-word query),"ERROR (decode failure, reproduced)",0,0,0
+2026-11-17,alphaXiv keyword (full-text BM25),Row-69 retry,Hidden Commitment,--published-after 2026-05-01 (unquoted two-word query),"ERROR (decode failure, reproduced)",0,0,0
+2026-11-17,alphaXiv keyword (full-text BM25),G1 second-tool,multimodal RAG knowledge conflict,--published-after 2022-01-01,15,15,0,0
+2026-11-17,OpenAlex search,G1 second-tool,multimodal retrieval-augmented generation conflicting image text evidence,--published-after 2022-01-01,15,15,0,0
+2026-11-17,alphaXiv keyword (full-text BM25),G2 second-tool,visual sycophancy,--published-after 2022-01-01,15,15,0,0
+2026-11-17,OpenAlex search,G2 second-tool,vision-language model sycophancy user claim contradicts image,--published-after 2022-01-01,15,15,0,1
+2026-11-17,alphaXiv keyword (full-text BM25),G3 second-tool,medical VLM chain-of-thought faithfulness,--published-after 2022-01-01,15,15,0,1
+2026-11-17,OpenAlex search,G3 second-tool,medical vision-language model chain-of-thought faithfulness perturbation,--published-after 2022-01-01,15,15,0,2
+2026-11-17,alphaXiv keyword (full-text BM25),G4 second-tool,ChartQA counterfactual,--published-after 2022-01-01,15,15,0,0
+2026-11-17,OpenAlex search,G4 second-tool,chart question answering counterfactual text report conflicts with chart,--published-after 2022-01-01,15,15,0,0
+2026-11-17,alphaXiv embedding (semantic),G5 recency (semantic),assistant prefill self-attribution: model treats its own reasoning trace versus the user prompt differently,--published-after 2026-05-01,15,15,0,0
+2026-11-17,alphaXiv keyword (full-text BM25),G5 second-tool,prefill self-attribution,--published-after 2022-01-01,15,15,0,0
+2026-11-17,alphaXiv keyword (full-text BM25),G5 second-tool,assistant prefill own reasoning,--published-after 2022-01-01,15,15,0,0
+2026-11-17,OpenAlex search,G5 second-tool,assistant prefill self-attribution own reasoning trace versus user prompt,--published-after 2022-01-01,15,15,0,3
+2026-11-17,alphaXiv embedding (semantic),Row-69 retry,language models silently commit to one of two conflicting documents and steering surfaces the hidden choice,--published-after 2026-05-01,15,15,0,0
+2026-11-17,alphaXiv keyword (full-text BM25),Row-69 retry,silently pick a side,--published-after 2026-05-01,15,15,0,0
+2026-11-17,alphaXiv keyword (full-text BM25),Row-69 retry,hidden commitment steering,--published-after 2026-05-01,15,15,0,0
+2026-11-17,OpenAlex API works/doi:{arXiv DOI},Snowball-forward hop-2,resolve W-ids for 2609.00550 2610.30953 2610.20805 2609.29278 2606.12747 2610.37070 2610.38296 2610.17989,"select=id,title,cited_by_count",8,8,0,0
+2026-11-17,OpenAlex API works?filter=cites:,Snowball-forward hop-2,cites:<W-id of 2606.12747>,per-page=50,7,7,0,1
+2026-11-17,OpenAlex API works?filter=cites:,Snowball-forward hop-2,cites:<W-id of 2609.00550>,per-page=50,2,2,0,0
+2026-11-17,OpenAlex API works?filter=cites:,Snowball-forward hop-2,cites:<W-id of 2609.29278>,per-page=50,0,0,0,0
+2026-11-17,OpenAlex API works?filter=cites:,Snowball-forward hop-2,cites:<W-id of 2610.20805>,per-page=50,0,0,0,0
+2026-11-17,OpenAlex API works?filter=cites:,Snowball-forward hop-2,cites:<W-id of 2610.30953>,per-page=50,0,0,0,0
+2026-11-17,OpenAlex API works?filter=cites:,Snowball-forward hop-2,cites:<W-id of 2610.37070>,per-page=50,0,0,0,0
+2026-11-17,OpenAlex API works?filter=cites:,Row-69 retry (forward cites),cites:<W-id of 2610.38296>,per-page=50,0,0,0,0
+2026-11-17,arXiv API query (au:),Anchor-author,"au:""Bayar Menzat"" (2025-01-01 onward kept)",sortBy=submittedDate; max_results=40,2,2,0,0
+2026-11-17,arXiv API query (au:),Anchor-author,"au:""Josh Barua"" (2025-01-01 onward kept)",sortBy=submittedDate; max_results=40,2,2,0,0
+2026-11-17,arXiv API query (au:),Anchor-author,"au:""Maxime Dassen"" (2025-01-01 onward kept)",sortBy=submittedDate; max_results=40,2,2,0,0
+2026-11-17,arXiv API query (au:),Anchor-author,"au:""Nikolaos Aletras"" (2025-01-01 onward kept)",sortBy=submittedDate; max_results=40,31,31,0,0
+2026-11-17,arXiv API query (au:),Anchor-author,"au:""Rodela Ghosh"" (2025-01-01 onward kept)",sortBy=submittedDate; max_results=40,1,1,0,0
+2026-11-17,arXiv API query (au:),Anchor-author,"au:""Samuel Dawit Assefa"" (2025-01-01 onward kept)",sortBy=submittedDate; max_results=40,1,1,0,0
+2026-11-17,arXiv API query (au:),Anchor-author,"au:""Supratik Bhowal"" (2025-01-01 onward kept)",sortBy=submittedDate; max_results=40,1,1,0,0
+2026-11-17,arXiv API query (au:),Anchor-author,"au:""Zhuoyun Li"" (2025-01-01 onward kept)",sortBy=submittedDate; max_results=40,21,21,0,0
+2026-11-17,arXiv API id_list,Metadata verification,23 candidate IDs from Aurelle transcript + this pass,id lookup,23,23,0,0
+2026-11-17,OpenAlex API works/doi:,Metadata verification,10.18653/2026.emnlp-main.1113 findings-emnlp.1368 emnlp-main.334 emnlp-main.1732,"select=authorships,primary_location",4,4,0,2
+2026-11-17,orx paper --full (alphaXiv full text),Full-text verification,2608.24790 2610.17989 2601.05201 2507.02778 2603.18373 2610.00601,id lookup,6,6,0,5

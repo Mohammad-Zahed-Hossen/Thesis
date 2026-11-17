@@ -14,7 +14,7 @@
 
 ## 0. Local PDF Inventory (`Docs/Paper/`)
 
-> **2026-11-15 audit:** a pre-freeze literature audit screened 1,260 more records and added 6 A-graded and 33 B-graded papers. Those papers are **not** core sources and are not merged into the matrix below. See §6 and [lit-audit-2026-11-15.md](lit-audit-2026-11-15/lit-audit-2026-11-15.md). `Docs/Paper/` now holds 29 PDFs: the 20 listed here plus the 6 A papers and 3 cited B papers (`2603.20172.pdf`, `2610.23700.pdf`, `2610.00054.pdf`).
+> **2026-11-15 audit (+ 2026-11-17 addendum):** a pre-freeze literature audit screened `1,452` unique records (`1,260` on 2026-11-15 + `192` on 2026-11-17) and added `6` A-graded and `41` B-graded papers (`33` on 2026-11-15 + `8` new/upgraded on 2026-11-17; `0` new A papers, `0` new novelty threats). Those papers are **not** core sources and are not merged into the matrix below. See §6 and [lit-audit-2026-11-15.md](lit-audit-2026-11-15/lit-audit-2026-11-15.md). `Docs/Paper/` holds `29` active PDFs: the `20` listed here plus the `6` A papers and `3` cited B papers (`2603.20172.pdf`, `2610.23700.pdf`, `2610.00054.pdf`).
 
 ### A. 20 PDFs Currently Present in `Docs/Paper/` (19 Core + 1 Ch. 2 Lead; 0 Core Missing)
 | # | Local File | arXiv / Anthology ID | Short Name | Audit Coverage |
@@ -255,14 +255,14 @@
 
 ---
 
-## 6. Pre-Freeze Literature Audit (2026-11-15) — pointer
+## 6. Pre-Freeze Literature Audit (2026-11-15 + 2026-11-17 Addendum) — pointer
 
-**Full report:** [lit-audit-2026-11-15/lit-audit-2026-11-15.md](lit-audit-2026-11-15/lit-audit-2026-11-15.md). **Data:** `papers.csv` (1,260 screened records), `search_log.csv` (112 rows: 108 queries + 4 lookup/snowball retrieval steps), `references.bib` (39 entries). **Brief for new agents:** [../RESEARCH_OBJECTIVE.md](../RESEARCH_OBJECTIVE.md).
+**Full report:** [lit-audit-2026-11-15/lit-audit-2026-11-15.md](lit-audit-2026-11-15/lit-audit-2026-11-15.md). **Data:** `papers.csv` (`1,452` unique screened records, `0` duplicates), `search_log.csv` (`164` rows: `112` on 2026-11-15 + `52` in the 2026-11-17 gap-closure pass), `references.bib` (`47` entries: `6` A + `41` B). **Brief for new agents:** [../RESEARCH_OBJECTIVE.md](../RESEARCH_OBJECTIVE.md).
 
-- **Novelty verdict:** intact, but needs narrowing. No screened paper fully overlaps any of the prereg §1.1 components.
-  - *When Reasoning Traces Conflict with Evidence* (arXiv:2610.20805, text-only) is a formal threat under the audit rule: it is partial on component (a), own-turn trace under conflict, and on component (c), an instruction contrast.
-  - Manalu et al. (arXiv:2610.30953) is a partial precedent for the minimal-edit-plus-paraphrase design.
-  - A rewording of §1.1 is proposed in audit §1.3.
+- **Novelty verdict:** intact, narrowed. Still only `2610.20805` meets the formal two-partial threat rule; the 2026-11-17 pass closed Row 69, Axis G second-tool coverage, OpenAlex hop-2 forward snowballing on the 6 A papers, and anchor-author checks, adding `0` new A papers and `8` new/upgraded B papers (`2610.00601`, `2608.24790`, `2507.02778` as single-component `(a)` partials; `2610.17989` and `2601.05201` as `(b)` partials; `2608.29464`, `10.18653/2026.emnlp-main.1113`, `10.18653/2026.findings-emnlp.1368`).
+  - *When Reasoning Traces Conflict with Evidence* (arXiv:2610.20805, text-only) remains the only formal threat under the audit rule: partial on component (a), own-turn trace under conflict, and on component (c), an instruction contrast.
+  - Manalu et al. (arXiv:2610.30953), Karnik et al. (arXiv:2610.00601), Xu et al. (arXiv:2608.24790), and Tsui (arXiv:2507.02778) are single-component precedents on (a).
+  - §1.1 in `PREREGISTRATION_VERDICT_TRANSPLANT.md` is updated with the `1,452`-record scope and single-component precedents.
 - **New A papers:** 2609.00550, 2610.30953, 2610.20805, 2609.29278, 2606.12747, 2610.37070. PDFs are in `Docs/Paper/` (bringing local PDFs to 26: 20 core/lead + 6 audit A-papers).
 - **Correction to §4.2 of this file (applied above):** Replaced the overstatement that prefix-forcing "eliminates self-attribution discounting and external-authority sycophancy" (`2607.27304`) with the PDF-verified wording from audit §5 (sycophancy was model-specific: MedGemma +9.0 pp under the deference instruction, p. 2, and an authority gradient of −3.6 pp, p. 7).
 - **Design implications (audit §4):**

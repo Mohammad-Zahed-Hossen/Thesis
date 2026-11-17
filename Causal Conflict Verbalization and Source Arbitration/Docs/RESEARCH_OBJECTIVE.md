@@ -1,6 +1,6 @@
 # Research objective: read this first
 
-**Date:** 2026-11-15. **AI-generated** (Claude Code, OpenResearch session) from the repo at commit `9ad1853`.
+**Date:** 2026-11-15 (synced 2026-11-17 with gap-closure addendum). **AI-generated** (Claude Code, OpenResearch session) from the repo at commit `9ad1853` + post-fix literature sync.
 
 **Verified against:**
 - the PDFs in `Docs/Paper/`: the 20 earlier ones plus 2609.00550, 2610.30953, 2610.20805, 2609.29278, 2606.12747, 2610.37070;
@@ -35,7 +35,7 @@ When an image and a typed text support different answers, does a vision-language
 
 ## 3. Defensible novelty claim (after the 2026-11-15 audit)
 
-> Within the 18 core sources, CMC-Bench, two Chapter 2 leads, and the 1,260 records screened in `Docs/Paper/lit-audit-2026-11-15/`, no study:
+> Within the 18 core sources, CMC-Bench, two Chapter 2 leads, and the 1,452 records screened in `Docs/Paper/lit-audit-2026-11-15/` (2026-11-15 audit + 2026-11-17 gap-closure addendum), no study:
 > - prefix-forces a minimally edited version of a VLM's **own source-reliability verdict**, with a matched-template control;
 > - measures which source the answer follows under **image–text** conflict with counterbalanced order;
 > - tests whether a **binding instruction** changes that effect.
@@ -112,6 +112,6 @@ New from this audit:
 
 - Design spec: `Docs/PREREGISTRATION_VERDICT_TRANSPLANT.md` (§1.1 rewording and §4 audit updates from `lit-audit-2026-11-15` are integrated).
 - Knowledge base: `Docs/Paper/THESIS_LITERATURE_KNOWLEDGE_BASE.md`
-- This audit: `Docs/Paper/lit-audit-2026-11-15/` (report, `papers.csv`, `search_log.csv`, `references.bib`)
+- This audit: `Docs/Paper/lit-audit-2026-11-15/` (report + §7 addendum, `1,452`-row `papers.csv`, `164`-row `search_log.csv`, `47`-entry `references.bib`)
 - Status and next steps: `Experiment/README.md`
 - Rules: `CLAUDE.md`
