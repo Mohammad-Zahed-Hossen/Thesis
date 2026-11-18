@@ -1,4 +1,4 @@
-sample_id,item_id,model_id,regime,family,order,verbalization_text,full_text,coder_stated_source,coder_notes
+﻿sample_id,item_id,model_id,regime,family,order,verbalization_text,full_text,coder_stated_source,coder_notes
 V0001,svamp-image-L0-0033,Qwen/Qwen2.5-VL-7B-Instruct,math,donor,image_first,"The image and the typed text do not present the same problem. The image is a math problem about people on a bus, while the typed text is a problem about balloons brought to a park. The image is more reliable as it is a clear and direct math problem, whereas the typed text seems to be a mix-up between two different problems.","The image and the typed text do not present the same problem. The image is a math problem about people on a bus, while the typed text is a problem about balloons brought to a park. The image is more reliable as it is a clear and direct math problem, whereas the typed text seems to be a mix-up between two different problems.
 
 To solve the problem from the image:
@@ -7,8 +7,8 @@ To solve the problem from the image:
 2. Add the number of people who got on the bus at the next stop: 12 + 4 = 16.
 3. Since the bus can have no more than 36 people, the number of people on the bus now is 16 (as it is within the limit).
 
-The final answer is 16.",,
-V0002,0,Qwen/Qwen2.5-VL-3B-Instruct,chartqa,donor,image_first,4.10 million U.S. dollars,4.10 million U.S. dollars,,
+The final answer is 16.",image,.
+V0002,0,Qwen/Qwen2.5-VL-3B-Instruct,chartqa,donor,image_first,4.10 million U.S. dollars,4.10 million U.S. dollars,unclear,
 V0003,gsm8k-image-L0-0058,Qwen/Qwen2.5-VL-7B-Instruct,math,donor,text_first,"The image and the typed text do not present the same problem. The typed text is a math problem about the total number of raspberries on a bush, while the image is a word problem about the final price of groceries after additional fees. The typed text is more reliable as it is a clear and straightforward math problem.","The image and the typed text do not present the same problem. The typed text is a math problem about the total number of raspberries on a bush, while the image is a word problem about the final price of groceries after additional fees. The typed text is more reliable as it is a clear and straightforward math problem.
 
 To solve the problem from the typed text:
@@ -16,8 +16,8 @@ To solve the problem from the typed text:
 1. Calculate the total number of clusters: 6 clusters * 20 fruit per cluster = 120 fruit.
 2. Add the individual fruit: 120 fruit + 67 fruit = 187 raspberries.
 
-The final number is 187.",,
-V0004,22,Qwen/Qwen2.5-VL-7B-Instruct,chartqa,free_binding,text_first,,####2100,,
+The final number is 187.",text,
+V0004,22,Qwen/Qwen2.5-VL-7B-Instruct,chartqa,free_binding,text_first,,####2100,unclear,
 V0005,gsm8k-image-L0-0048,Qwen/Qwen2.5-VL-7B-Instruct,math,free_binding,image_first,"The image and the typed text present different problems. The image involves cutting a wire into pieces, while the typed text involves calculating the number of unoccupied units in an apartment building. The image is more reliable as it is a clear mathematical problem related to the given image.","The image and the typed text present different problems. The image involves cutting a wire into pieces, while the typed text involves calculating the number of unoccupied units in an apartment building. The image is more reliable as it is a clear mathematical problem related to the given image.
 
 To solve the problem from the image:
@@ -25,8 +25,8 @@ To solve the problem from the image:
 1. Convert the length of the wire from feet to inches: 4 feet * 12 inches/foot = 48 inches.
 2. Divide the total length of the wire by the length of each piece: 48 inches / 6 inches/piece = 8 pieces.
 
-The final answer is 8.",,
-V0006,6,Qwen/Qwen2.5-VL-3B-Instruct,chartqa,donor,image_first,The chart and the report give the same answer. The report is more reliable.,The chart and the report give the same answer. The report is more reliable. 4.9,,
+The final answer is 8.",image,
+V0006,6,Qwen/Qwen2.5-VL-3B-Instruct,chartqa,donor,image_first,The chart and the report give the same answer. The report is more reliable.,The chart and the report give the same answer. The report is more reliable. 4.9,report,
 V0007,gsm8k-image-L0-0011,Qwen/Qwen2.5-VL-7B-Instruct,math,free_binding,text_first,"The image and the typed text present different problems. The typed text is more reliable as it provides a clear and specific question about Carlos's lemon tree investment. The image, while a word problem, is not directly related to the typed text's problem.","The image and the typed text present different problems. The typed text is more reliable as it provides a clear and specific question about Carlos's lemon tree investment. The image, while a word problem, is not directly related to the typed text's problem.
 
 To solve the problem from the typed text:
@@ -36,8 +36,8 @@ To solve the problem from the typed text:
 3. Calculate the net profit per year: $10.5/year - $3/year = $7.5/year.
 4. Determine how many years it will take to cover the initial cost of $90: $90 / $7.5/year = 12 years.
 
-####12",,
-V0008,3,Qwen/Qwen2-VL-2B-Instruct,chartqa,free_binding,image_first,Statista 2021,Statista 2021,,
+####12",text,
+V0008,3,Qwen/Qwen2-VL-2B-Instruct,chartqa,free_binding,image_first,Statista 2021,Statista 2021,unclear,doesn't identify any preferred source 
 V0009,gsm8k-image-L0-0003,Qwen/Qwen2.5-VL-3B-Instruct,math,donor,text_first,"The typed text and the image present different problems. The typed text is about Wendi's chickens and their feed, while the image is about James running sprints. I consider the typed text more reliable as it provides specific details about the problem.","The typed text and the image present different problems. The typed text is about Wendi's chickens and their feed, while the image is about James running sprints. I consider the typed text more reliable as it provides specific details about the problem.
 
 To solve the problem in the typed text:
@@ -45,8 +45,8 @@ To solve the problem in the typed text:
 2. Subtract the total amount of feed given in the morning and afternoon meals from the total amount of feed needed for the day: 3 cups/chicken * 20 chickens = 60 cups.
 3. Subtract the total amount of feed given in the morning and afternoon meals from the total amount of feed needed for the day: 60 cups - 40 cups = 20 cups.
 
-The final number is 20.",,
-V0010,22,Qwen/Qwen2.5-VL-3B-Instruct,chartqa,free_binding,image_first,,#### 2411,,
+The final number is 20.",text,
+V0010,22,Qwen/Qwen2.5-VL-3B-Instruct,chartqa,free_binding,image_first,,#### 2411,unclear,
 V0011,svamp-image-L0-0034,Qwen/Qwen2.5-VL-7B-Instruct,math,free_binding,image_first,"The image and the typed text present different problems. The image is about the number of balloons Jake brought to the park, while the typed text is about the number of shirts an industrial machine made. The typed text is more reliable as it provides a clear and specific problem. ","The image and the typed text present different problems. The image is about the number of balloons Jake brought to the park, while the typed text is about the number of shirts an industrial machine made. The typed text is more reliable as it provides a clear and specific problem. 
 
 To solve the problem from the typed text:
@@ -56,7 +56,7 @@ The machine worked for 5 minutes and can make 4 shirts a minute.
 Step 1: Multiply the number of minutes by the number of shirts made per minute.
 5 minutes * 4 shirts/minute = 20 shirts
 
-Final answer: ####20",,
+Final answer: ####20",text,
 V0012,gsm8k-image-L0-0155,Qwen/Qwen2.5-VL-3B-Instruct,math,donor,text_first,"The typed text and the image present different problems. The typed text is about bananas for apes, while the image is about baking goods. I consider the typed text more reliable as it is a mathematical problem that can be solved with a clear set of instructions.","The typed text and the image present different problems. The typed text is about bananas for apes, while the image is about baking goods. I consider the typed text more reliable as it is a mathematical problem that can be solved with a clear set of instructions.
 
 To solve the problem in the typed text:
@@ -69,9 +69,9 @@ To solve the problem in the typed text:
 
 2. The zookeeper needs to order 1400 bananas to last for 2 months.
 
-#### 1400",,
-V0013,23,Qwen/Qwen2.5-VL-3B-Instruct,chartqa,donor,text_first,28706 thousand,28706 thousand,,
-V0014,17,Qwen/Qwen2.5-VL-3B-Instruct,chartqa,donor,image_first,,#### 428.08,,
+#### 1400",text,
+V0013,23,Qwen/Qwen2.5-VL-3B-Instruct,chartqa,donor,text_first,28706 thousand,28706 thousand,unclear,doesn't identify any preferred source 
+V0014,17,Qwen/Qwen2.5-VL-3B-Instruct,chartqa,donor,image_first,,#### 428.08,unclear,
 V0015,svamp-image-L0-0001,Qwen/Qwen2.5-VL-3B-Instruct,math,free_binding,image_first,"The image and the typed text do not present the same problem. The image presents a problem about fish disappearing, while the typed text presents a problem about strawberries. I consider the image more reliable as it is a real-life scenario, while the typed text is a hypothetical scenario. ","The image and the typed text do not present the same problem. The image presents a problem about fish disappearing, while the typed text presents a problem about strawberries. I consider the image more reliable as it is a real-life scenario, while the typed text is a hypothetical scenario. 
 
 To solve the problem from the image, we need to find out how many fish disappeared. We can do this by subtracting the number of fish left from the original number of fish. 
@@ -80,9 +80,9 @@ Original number of fish: 7 goldfish + 12 catfish = 19 fish
 Number of fish left: 15 fish
 Number of fish that disappeared: 19 fish - 15 fish = 4 fish
 
-#### 4",,
-V0016,6,Qwen/Qwen2.5-VL-3B-Instruct,chartqa,free_binding,image_first,,#### 9.23,,
-V0017,14,Qwen/Qwen2.5-VL-3B-Instruct,chartqa,donor,text_first,The chart and the report give the same answer. The report is more reliable.,The chart and the report give the same answer. The report is more reliable. 51.1,,
+#### 4",image,
+V0016,6,Qwen/Qwen2.5-VL-3B-Instruct,chartqa,free_binding,image_first,,#### 9.23,unclear,
+V0017,14,Qwen/Qwen2.5-VL-3B-Instruct,chartqa,donor,text_first,The chart and the report give the same answer. The report is more reliable.,The chart and the report give the same answer. The report is more reliable. 51.1,report,
 V0018,gsm8k-image-L0-0013,Qwen/Qwen2.5-VL-3B-Instruct,math,donor,image_first,The image and the typed text present the same problem. The typed text is more reliable as it is a mathematical problem that can be solved with clear instructions and a straightforward approach.,"The image and the typed text present the same problem. The typed text is more reliable as it is a mathematical problem that can be solved with clear instructions and a straightforward approach.
 
 To solve the problem:
@@ -113,7 +113,7 @@ To solve the problem:
    x - \frac{2x}{3} - 1 = 5
    \]
    \[
-   \frac{3x}{3} - \frac{2x}{",,
+   \frac{3x}{3} - \frac{2x}{", text,
 V0019,gsm8k-image-L0-0045,Qwen/Qwen2.5-VL-3B-Instruct,math,donor,image_first,"The image and the typed text do not present the same problem. The image presents a problem about calculating the total number of hours Meredith spent writing articles over three days, while the typed text presents a problem about calculating the number of post-it notes in a package that Candice purchased. I consider the image more reliable as it is a real-life scenario involving a freelance blogger, while the typed text is a hypothetical scenario involving a person at a coffee shop.","The image and the typed text do not present the same problem. The image presents a problem about calculating the total number of hours Meredith spent writing articles over three days, while the typed text presents a problem about calculating the number of post-it notes in a package that Candice purchased. I consider the image more reliable as it is a real-life scenario involving a freelance blogger, while the typed text is a hypothetical scenario involving a person at a coffee shop.
 
 To solve the problem in the image:
@@ -131,8 +131,8 @@ To solve the problem in the image:
 4. Calculate the total number of hours spent writing articles:
    - Total hours: 41 articles * 4 hours/article = 164 hours
 
-#### 164",,
-V0020,8,Qwen/Qwen2-VL-2B-Instruct,chartqa,free_binding,image_first,Pew Research Center,Pew Research Center,,
+#### 164",image,
+V0020,8,Qwen/Qwen2-VL-2B-Instruct,chartqa,free_binding,image_first,Pew Research Center,Pew Research Center,unclear,doesn't identify any preferred source 
 V0021,gsm8k-image-L0-0065,Qwen/Qwen2.5-VL-3B-Instruct,math,donor,image_first,The image and the typed text present the same problem. The typed text is more reliable as it provides a clear and specific question about the number of people sent by the schools.,"The image and the typed text present the same problem. The typed text is more reliable as it provides a clear and specific question about the number of people sent by the schools.
 
 To solve the problem:
@@ -147,7 +147,7 @@ So, the total number of people sent by each school is:
 Since there are 4 schools, the total number of people sent by all the schools is:
 \[ 4 \text{ schools} \times 11 \text{ people/school} = 44 \text{ people} \]
 
-#### 44",,
+#### 44", text,
 V0022,gsm8k-image-L0-0088,Qwen/Qwen2.5-VL-3B-Instruct,math,donor,text_first,"The typed text and the image do not present the same problem. The typed text is about a birthday party gift bag calculation, while the image is about a record sales problem. I consider the typed text more reliable as it is a straightforward arithmetic problem.","The typed text and the image do not present the same problem. The typed text is about a birthday party gift bag calculation, while the image is about a record sales problem. I consider the typed text more reliable as it is a straightforward arithmetic problem.
 
 To solve the problem in the typed text:
@@ -155,10 +155,10 @@ To solve the problem in the typed text:
 2. Calculate the number of gift bags needed: 12 guests * 0.75 gift bags/guest = 9 gift bags
 3. Calculate the total cost: 9 gift bags * $2/gift bag = $18
 
-#### 18",,
+#### 18", text,
 V0023,24,Qwen/Qwen2.5-VL-7B-Instruct,chartqa,donor,image_first,"The chart and the report do not give the same answer. The chart shows that 69% of males support private ownership of 3D printing technology, while the report states that 30% of males support it. The chart is considered more reliable as it directly presents the data from the survey.","The chart and the report do not give the same answer. The chart shows that 69% of males support private ownership of 3D printing technology, while the report states that 30% of males support it. The chart is considered more reliable as it directly presents the data from the survey.
 
-#### 36%",,
+#### 36%",chart,
 V0024,svamp-image-L0-0024,Qwen/Qwen2.5-VL-7B-Instruct,math,donor,text_first,"The image and the typed text do not present the same problem. The typed text is about baking a cake and calculating the remaining sugar needed, while the image is about dividing a collection of eggs into groups of 11, with each group having 2 eggs. The typed text is more reliable as it provides a clear and specific problem related to the given information.","The image and the typed text do not present the same problem. The typed text is about baking a cake and calculating the remaining sugar needed, while the image is about dividing a collection of eggs into groups of 11, with each group having 2 eggs. The typed text is more reliable as it provides a clear and specific problem related to the given information.
 
 To solve the problem from the typed text:
@@ -167,7 +167,7 @@ To solve the problem from the typed text:
 2. Mary has already put in 4 cups of sugar.
 3. To find out how many more cups of sugar she needs, subtract the amount she has already put in from the total required: 7 cups - 4 cups = 3 cups.
 
-The final answer is 3.",,
+The final answer is 3.", text,
 V0025,svamp-image-L0-0011,Qwen/Qwen2.5-VL-7B-Instruct,math,donor,image_first,"The image and the typed text do not present the same problem. The image is about Bryan's books and magazines, while the typed text is about Dave's apps on his phone. The image is more reliable as it is a clear and direct representation of the problem, whereas the typed text seems to be a mix-up of different problems.","The image and the typed text do not present the same problem. The image is about Bryan's books and magazines, while the typed text is about Dave's apps on his phone. The image is more reliable as it is a clear and direct representation of the problem, whereas the typed text seems to be a mix-up of different problems.
 
 To solve the problem from the typed text:
@@ -183,8 +183,8 @@ Number of apps added = Number of apps left - Initial number of apps
 Number of apps added = 18 - 17
 Number of apps added = 1
 
-The final number is: ####1",,
-V0026,gsm8k-image-L0-0098,Qwen/Qwen2-VL-2B-Instruct,math,donor,image_first,"The image and the typed text present the same problem. The source I consider more reliable is the typed text, as it provides a clear and concise solution to the problem.","The image and the typed text present the same problem. The source I consider more reliable is the typed text, as it provides a clear and concise solution to the problem. The image does not provide enough information to solve the problem, and the typed text provides a step-by-step solution that is easy to follow.",,
+The final number is: ####1", image,
+V0026,gsm8k-image-L0-0098,Qwen/Qwen2-VL-2B-Instruct,math,donor,image_first,"The image and the typed text present the same problem. The source I consider more reliable is the typed text, as it provides a clear and concise solution to the problem.","The image and the typed text present the same problem. The source I consider more reliable is the typed text, as it provides a clear and concise solution to the problem. The image does not provide enough information to solve the problem, and the typed text provides a step-by-step solution that is easy to follow.", text,
 V0027,gsm8k-image-L0-0062,Qwen/Qwen2.5-VL-7B-Instruct,math,free_binding,image_first,"The image and the typed text present different problems. The image involves a pension calculation, while the typed text involves a subscription fee calculation. I consider the image to be more reliable as it is a clear and straightforward problem related to pension benefits.","The image and the typed text present different problems. The image involves a pension calculation, while the typed text involves a subscription fee calculation. I consider the image to be more reliable as it is a clear and straightforward problem related to pension benefits.
 
 To solve the problem from the image:
@@ -200,7 +200,7 @@ For the next 10 years (from year 21 to year 30), she receives 5% of the pension:
 Adding these amounts together gives her total annual pension:
 \[ \$1,000,000 + \$250,000 = \$1,250,000 \]
 
-The final answer is 1250000.",,
+The final answer is 1250000.", image,
 V0028,gsm8k-image-L0-0117,Qwen/Qwen2.5-VL-3B-Instruct,math,donor,text_first,"The typed text and the image present different problems. The typed text is more reliable as it involves a mathematical calculation, while the image is a simple word problem.","The typed text and the image present different problems. The typed text is more reliable as it involves a mathematical calculation, while the image is a simple word problem.
 
 To solve the problem in the image:
@@ -215,17 +215,17 @@ Step-by-step working:
 4. Cost per pair of shoes: $60
 5. Total cost: 6 pairs * $60/pair = $360
 
-#### 360",,
+#### 360", text,
 V0029,gsm8k-image-L0-0054,Qwen/Qwen2.5-VL-3B-Instruct,math,donor,text_first,"The typed text and the image present different problems. The typed text is more reliable as it is a mathematical problem, while the image is a narrative about cats and kittens.","The typed text and the image present different problems. The typed text is more reliable as it is a mathematical problem, while the image is a narrative about cats and kittens.
 
 To solve the problem in the typed text:
 1. Jean starts with 30 lollipops.
 2. Jean eats 2 lollipops, so she has 30 - 2 = 28 lollipops left.
 3. Jean wants to package 2 lollipops in one bag.
-4. To find out how many bags Jean can fill, divide the remaining lollipops by the number of lollipops per bag: 28 ÷ 2 = 14.
+4. To find out how many bags Jean can fill, divide the remaining lollipops by the number of lollipops per bag: 28 Ã· 2 = 14.
 
-#### 14",,
-V0030,18,Qwen/Qwen2-VL-2B-Instruct,chartqa,donor,image_first,Yes,Yes,,
+#### 14", text,
+V0030,18,Qwen/Qwen2-VL-2B-Instruct,chartqa,donor,image_first,Yes,Yes,unclear, doesn't identify any preffered source
 V0031,gsm8k-image-L0-0076,Qwen/Qwen2.5-VL-7B-Instruct,math,donor,image_first,"The image and the typed text present different problems. The image is about calculating the amount of dog food needed for a puppy in the first year, while the typed text is about calculating the difference in laundry done by Raymond and David. Therefore, the image and the typed text do not present the same problem. I consider the image to be more reliable as it provides a clear and specific problem related to the amount of dog food needed for a puppy.","The image and the typed text present different problems. The image is about calculating the amount of dog food needed for a puppy in the first year, while the typed text is about calculating the difference in laundry done by Raymond and David. Therefore, the image and the typed text do not present the same problem. I consider the image to be more reliable as it provides a clear and specific problem related to the amount of dog food needed for a puppy.
 
 To solve the problem in the image:
@@ -237,7 +237,7 @@ To solve the problem in the image:
 
 Since you can't buy a fraction of a bag, you would need to round up to the next whole number, which is 9 bags.
 
-The final answer is 9.",,
+The final answer is 9.", image,
 V0032,gsm8k-image-L0-0099,Qwen/Qwen2.5-VL-7B-Instruct,math,free_binding,text_first,The image and the typed text present different problems. The typed text is more reliable as it provides a clear and straightforward problem to solve. ,"The image and the typed text present different problems. The typed text is more reliable as it provides a clear and straightforward problem to solve. 
 
 The problem from the typed text is: 
@@ -252,8 +252,8 @@ Step-by-step working:
 
 Total doorbell rings = 20 (first friend) + 25 (second friend) + 70 (third friend) + 60 (fourth friend) = 175 times.
 
-Final answer: 175",,
-V0033,gsm8k-image-L0-0161,Qwen/Qwen2-VL-2B-Instruct,math,free_binding,text_first,"The two problems presented are not related to each other. The first problem is about calculating the cost of a bag of marbles after a certain period, while the second problem is about calculating the total number of fish caught by Anakin and Locsin. Therefore, the source that is more reliable is the first problem, which is about calculating the cost of a bag of marbles.","The two problems presented are not related to each other. The first problem is about calculating the cost of a bag of marbles after a certain period, while the second problem is about calculating the total number of fish caught by Anakin and Locsin. Therefore, the source that is more reliable is the first problem, which is about calculating the cost of a bag of marbles.",,
+Final answer: 175", text,
+V0033,gsm8k-image-L0-0161,Qwen/Qwen2-VL-2B-Instruct,math,free_binding,text_first,"The two problems presented are not related to each other. The first problem is about calculating the cost of a bag of marbles after a certain period, while the second problem is about calculating the total number of fish caught by Anakin and Locsin. Therefore, the source that is more reliable is the first problem, which is about calculating the cost of a bag of marbles.","The two problems presented are not related to each other. The first problem is about calculating the cost of a bag of marbles after a certain period, while the second problem is about calculating the total number of fish caught by Anakin and Locsin. Therefore, the source that is more reliable is the first problem, which is about calculating the cost of a bag of marbles.",unclear,
 V0034,gsm8k-image-L0-0078,Qwen/Qwen2.5-VL-3B-Instruct,math,free_binding,text_first,"The typed text and the image present different problems. The typed text is more reliable as it is a straightforward math problem, while the image is a word problem that requires additional context and interpretation.","The typed text and the image present different problems. The typed text is more reliable as it is a straightforward math problem, while the image is a word problem that requires additional context and interpretation.
 
 Solving the problem from the typed text:
@@ -263,7 +263,7 @@ Solving the problem from the typed text:
 3. Calculate the discount amount: 0.30 * $100 = $30.
 4. Subtract the discount from the original cost: $100 - $30 = $70.
 
-#### 70",,
+#### 70", text,
 V0035,gsm8k-image-L0-0154,Qwen/Qwen2.5-VL-3B-Instruct,math,donor,text_first,"The typed text and the image present different problems. The typed text is about baking and measuring lengths, while the image is about calculating class hours for a college student. I consider the typed text more reliable as it is a straightforward mathematical problem.","The typed text and the image present different problems. The typed text is about baking and measuring lengths, while the image is about calculating class hours for a college student. I consider the typed text more reliable as it is a straightforward mathematical problem.
 
 To solve the problem in the typed text:
@@ -281,7 +281,7 @@ Total length in inches = 1200 + 720 + 1440 = 3360 inches
 Step 2: Convert the total length to feet.
 - 3360 inches / 12 inches/foot = 280 feet
 
-The final answer is 280 feet.",,
+The final answer is 280 feet.", text,
 V0036,gsm8k-image-L0-0008,Qwen/Qwen2.5-VL-7B-Instruct,math,free_binding,text_first,"The image and the typed text present different problems. The typed text is more reliable as it provides a clear and specific question about Eliza's earnings. The image, on the other hand, is a story about John's driving and does not present a clear mathematical problem.","The image and the typed text present different problems. The typed text is more reliable as it provides a clear and specific question about Eliza's earnings. The image, on the other hand, is a story about John's driving and does not present a clear mathematical problem.
 
 To solve the problem from the typed text:
@@ -295,7 +295,7 @@ For the overtime hours, she works 45 - 40 = 5 hours at 1.2 times her regular rat
 Her total earnings for the week are:
 $400 + $60 = $460
 
-####460",,
+####460", text,
 V0037,gsm8k-image-L0-0046,Qwen/Qwen2.5-VL-7B-Instruct,math,donor,text_first,"The image and the typed text do not present the same problem. The typed text is a word problem involving the cost of ties, while the image is a word problem involving the number of Post-it notes. The typed text is more reliable as it is a clear and specific problem statement.","The image and the typed text do not present the same problem. The typed text is a word problem involving the cost of ties, while the image is a word problem involving the number of Post-it notes. The typed text is more reliable as it is a clear and specific problem statement.
 
 To solve the problem from the typed text:
@@ -306,23 +306,23 @@ To solve the problem from the typed text:
 4. Therefore, the total cost of the red ties is 10 * $60 = $600.
 5. The total cost of all the ties is $200 (blue) + $600 (red) = $800.
 
-The final answer is ####800.",,
-V0038,29,Qwen/Qwen2.5-VL-7B-Instruct,chartqa,donor,text_first,"The chart and the report both indicate a household rating of 3.2 for TV news programming in Guatemala on March 22, 2020. The report is considered more reliable as it provides a specific date and value, while the chart only shows a general trend without a precise date for that specific value. ","The chart and the report both indicate a household rating of 3.2 for TV news programming in Guatemala on March 22, 2020. The report is considered more reliable as it provides a specific date and value, while the chart only shows a general trend without a precise date for that specific value. ####3.2",,
+The final answer is ####800.", text,
+V0038,29,Qwen/Qwen2.5-VL-7B-Instruct,chartqa,donor,text_first,"The chart and the report both indicate a household rating of 3.2 for TV news programming in Guatemala on March 22, 2020. The report is considered more reliable as it provides a specific date and value, while the chart only shows a general trend without a precise date for that specific value. ","The chart and the report both indicate a household rating of 3.2 for TV news programming in Guatemala on March 22, 2020. The report is considered more reliable as it provides a specific date and value, while the chart only shows a general trend without a precise date for that specific value. ####3.2",report,
 V0039,svamp-image-L0-0011,Qwen/Qwen2.5-VL-3B-Instruct,math,free_binding,image_first,"The image and the typed text do not present the same problem. The image presents a problem about books and magazines, while the typed text presents a problem about apps on a phone. I consider the image more reliable as it is a real-life scenario, while the typed text is a hypothetical problem.","The image and the typed text do not present the same problem. The image presents a problem about books and magazines, while the typed text presents a problem about apps on a phone. I consider the image more reliable as it is a real-life scenario, while the typed text is a hypothetical problem.
 
 To solve the problem from the image, we need to calculate the total number of magazines on all 10 bookshelves. We can do this by multiplying the number of magazines per bookshelf by the number of bookshelves:
 
 46 magazines/bookshelf * 10 bookshelves = 460 magazines
 
-So, the total number of magazines on all 10 bookshelves is 460.",,
-V0040,4,Qwen/Qwen2.5-VL-3B-Instruct,chartqa,free_binding,image_first,,#### 14.8%,,
+So, the total number of magazines on all 10 bookshelves is 460.",image,
+V0040,4,Qwen/Qwen2.5-VL-3B-Instruct,chartqa,free_binding,image_first,,#### 14.8%,unclear,
 V0041,svamp-image-L0-0036,Qwen/Qwen2.5-VL-7B-Instruct,math,donor,image_first,"The image and the typed text present different problems. The image is about Paco's cookies, while the typed text is about the total number of pages in a book. The typed text is more reliable as it is a clear and straightforward problem statement.","The image and the typed text present different problems. The image is about Paco's cookies, while the typed text is about the total number of pages in a book. The typed text is more reliable as it is a clear and straightforward problem statement.
 
 To solve the problem of the book's total pages:
 
 1. Add the number of pages in each chapter: 66 (first chapter) + 35 (second chapter) + 24 (third chapter) = 125 pages.
 
-The final number is: ####125",,
+The final number is: ####125", text,
 V0042,gsm8k-image-L0-0102,Qwen/Qwen2.5-VL-3B-Instruct,math,donor,image_first,"The image and the typed text present the same problem. The typed text is more reliable as it is a mathematical problem, while the image is a narrative problem.","The image and the typed text present the same problem. The typed text is more reliable as it is a mathematical problem, while the image is a narrative problem.
 
 To solve the problem:
@@ -333,7 +333,7 @@ To solve the problem:
 2. Calculate the total time to cover the city:
    14 segments * 10 minutes per segment = 140 minutes
 
-#### 140",,
+#### 140", text,
 V0043,gsm8k-image-L0-0138,Qwen/Qwen2.5-VL-7B-Instruct,math,donor,text_first,"The image and the typed text do not present the same problem. The image is a word problem about a test Mark took, while the typed text is a word problem about a candy machine. The typed text is more reliable as it is a clear and straightforward word problem.","The image and the typed text do not present the same problem. The image is a word problem about a test Mark took, while the typed text is a word problem about a candy machine. The typed text is more reliable as it is a clear and straightforward word problem.
 
 To solve the problem in the typed text:
@@ -342,13 +342,13 @@ To solve the problem in the typed text:
 2. The number of pink gumballs is \( 4B + 22 \).
 3. Given \( B = 12 \), we substitute this value into the equation for pink gumballs: \( 4(12) + 22 = 48 + 22 = 70 \).
 
-The final number is 70.",,
+The final number is 70.", text,
 V0044,2,Qwen/Qwen2.5-VL-7B-Instruct,chartqa,donor,text_first,"The report and the chart do not give the same answer. The report lists the categories below 30% as Other (12.8%), Cider (6.3%), Wine (13.6%), Spirits and spirit-based drinks (19.4%), and Food (29.0%), while the chart shows Spirits and spirit-based drinks at 15.7%. The chart is considered more reliable as it visually represents the data, which can be more accurate and less prone to misinterpretation than text alone.","The report and the chart do not give the same answer. The report lists the categories below 30% as Other (12.8%), Cider (6.3%), Wine (13.6%), Spirits and spirit-based drinks (19.4%), and Food (29.0%), while the chart shows Spirits and spirit-based drinks at 15.7%. The chart is considered more reliable as it visually represents the data, which can be more accurate and less prone to misinterpretation than text alone.
 
-#### 45.5",,
+#### 45.5",chart,
 V0045,6,Qwen/Qwen2.5-VL-7B-Instruct,chartqa,free_binding,text_first,"The chart and the report do not give the same answer. The report states 9.23 million unemployed men in May 2020, while the chart shows 9.96 million. The report is considered more reliable as it provides a specific number and context for the data.","The chart and the report do not give the same answer. The report states 9.23 million unemployed men in May 2020, while the chart shows 9.96 million. The report is considered more reliable as it provides a specific number and context for the data.
 
-####9.23",,
+####9.23",report,
 V0046,gsm8k-image-L0-0056,Qwen/Qwen2.5-VL-7B-Instruct,math,donor,text_first,"The image and the typed text do not present the same problem. The image is about Peter's movie ticket and popcorn expenses, while the typed text is about a delivery truck's weight limit. The typed text is more reliable as it provides a clear mathematical problem related to the bridge's weight limit.","The image and the typed text do not present the same problem. The image is about Peter's movie ticket and popcorn expenses, while the typed text is about a delivery truck's weight limit. The typed text is more reliable as it provides a clear mathematical problem related to the bridge's weight limit.
 
 To solve the problem from the typed text:
@@ -359,7 +359,7 @@ To solve the problem from the typed text:
 4. The total weight the truck can carry is 5000 - 3755 = 1245 pounds.
 5. The maximum number of boxes that can be loaded is 1245 / 15 = 83.
 
-####83",,
+####83",text,
 V0047,gsm8k-image-L0-0139,Qwen/Qwen2.5-VL-3B-Instruct,math,free_binding,image_first,The image and the typed text present the same problem. The typed text is more reliable as it provides a clear and specific problem to solve.,"The image and the typed text present the same problem. The typed text is more reliable as it provides a clear and specific problem to solve.
 
 To solve the problem from the typed text, we need to calculate the percentage of semi-automatic cars.
@@ -375,7 +375,7 @@ Step 2: Calculate the percentage of semi-automatic cars.
 Percentage of semi-automatic cars = (Semi-automatic cars / Total cars) * 100
 Percentage of semi-automatic cars = (4 / 20) * 100 = 20%
 
-#### 20",,
+#### 20",text,
 V0048,gsm8k-image-L0-0095,Qwen/Qwen2.5-VL-3B-Instruct,math,free_binding,text_first,"The typed text and the image present different problems. The typed text is more reliable as it involves a mathematical calculation, while the image involves a statistical question.","The typed text and the image present different problems. The typed text is more reliable as it involves a mathematical calculation, while the image involves a statistical question.
 
 To solve the problem from the typed text:
@@ -383,8 +383,8 @@ To solve the problem from the typed text:
 2. James slept 2/3 of what Harry slept, which is 2/3 * 9 = 6 hours.
 3. The difference in hours between Harry and James is 9 - 6 = 3 hours.
 
-#### 3",,
-V0049,13,Qwen/Qwen2-VL-2B-Instruct,chartqa,donor,text_first,Statista,Statista,,
+#### 3",text,
+V0049,13,Qwen/Qwen2-VL-2B-Instruct,chartqa,donor,text_first,Statista,Statista,unclear,doesn't identify any preferred source 
 V0050,gsm8k-image-L0-0152,Qwen/Qwen2.5-VL-7B-Instruct,math,donor,text_first,"The image and the typed text do not present the same problem. The image is a math problem about Carl buying cookies, while the typed text is a story about Dave and a seagull stealing fries. The typed text is more reliable as it provides a detailed narrative and a clear problem to solve, whereas the image is a simple math problem with no context.","The image and the typed text do not present the same problem. The image is a math problem about Carl buying cookies, while the typed text is a story about Dave and a seagull stealing fries. The typed text is more reliable as it provides a detailed narrative and a clear problem to solve, whereas the image is a simple math problem with no context.
 
 To solve the problem from the typed text:
@@ -399,7 +399,7 @@ To solve the problem from the typed text:
 8. Multiplying both sides by 3, we get: x - 30 = 15.
 9. Adding 30 to both sides, we get: x = 45.
 
-So, the total number of fries in the pack when Dave bought it was 45.",,
+So, the total number of fries in the pack when Dave bought it was 45.",text,
 V0051,gsm8k-image-L0-0083,Qwen/Qwen2.5-VL-7B-Instruct,math,free_binding,text_first,"The image and the typed text present different problems. The typed text is more reliable as it is a clear mathematical problem, while the image is a visual representation of a question that is not clearly stated. ","The image and the typed text present different problems. The typed text is more reliable as it is a clear mathematical problem, while the image is a visual representation of a question that is not clearly stated. 
 
 Let's solve the problem from the typed text:
@@ -430,7 +430,7 @@ So, the team lost 7 games. Therefore, the number of games they won is:
 
 The final answer is:
 
-####15",,
+####15",text,
 V0052,gsm8k-image-L0-0103,Qwen/Qwen2.5-VL-7B-Instruct,math,donor,text_first,"The image and the typed text do not present the same problem. The image is about a fog bank covering a city, while the typed text is about a jigsaw puzzle. The typed text is more reliable as it provides a clear mathematical problem.","The image and the typed text do not present the same problem. The image is about a fog bank covering a city, while the typed text is about a jigsaw puzzle. The typed text is more reliable as it provides a clear mathematical problem.
 
 To solve the problem in the typed text:
@@ -440,7 +440,7 @@ To solve the problem in the typed text:
 3. Her mom places a third of the remaining 750 pieces: \( \frac{1}{3} \times 750 = 250 \) pieces.
 4. The number of pieces left to be placed is \( 750 - 250 = 500 \) pieces.
 
-####500",,
+####500",text,
 V0053,gsm8k-image-L0-0049,Qwen/Qwen2.5-VL-7B-Instruct,math,free_binding,text_first,"The image and the typed text present different problems. The typed text is more reliable as it provides a clear and specific question about Lloyd's egg farm. The image, while also a math problem, is about the occupancy of an apartment building, which is not related to the typed text.","The image and the typed text present different problems. The typed text is more reliable as it provides a clear and specific question about Lloyd's egg farm. The image, while also a math problem, is about the occupancy of an apartment building, which is not related to the typed text.
 
 To solve the problem from the typed text:
@@ -449,7 +449,7 @@ To solve the problem from the typed text:
 2. Convert the number of eggs to dozens: 1764 eggs / 12 eggs/dozen = 147 dozens.
 3. Calculate the weekly earnings: 147 dozens * $2/dozen = $294.
 
-The final answer is ####294.",,
+The final answer is ####294.",text,
 V0054,gsm8k-image-L0-0095,Qwen/Qwen2.5-VL-3B-Instruct,math,donor,text_first,"The typed text and the image present different problems. The typed text is more reliable as it is a mathematical problem, while the image is a statistical problem.","The typed text and the image present different problems. The typed text is more reliable as it is a mathematical problem, while the image is a statistical problem.
 
 To solve the problem in the typed text:
@@ -457,8 +457,8 @@ To solve the problem in the typed text:
 2. James slept 2/3 of what Harry slept, which is 2/3 * 9 = 6 hours.
 3. The difference in hours between Harry and James is 9 - 6 = 3 hours.
 
-#### 3",,
-V0055,4,Qwen/Qwen2-VL-2B-Instruct,chartqa,free_binding,text_first,Statista 2021,Statista 2021,,
+#### 3",text,
+V0055,4,Qwen/Qwen2-VL-2B-Instruct,chartqa,free_binding,text_first,Statista 2021,Statista 2021,unclear,
 V0056,gsm8k-image-L0-0043,Qwen/Qwen2.5-VL-3B-Instruct,math,free_binding,image_first,"The image and the typed text do not present the same problem. The image presents a problem related to nutrition and calorie intake, while the typed text presents a problem related to business and profit. I consider the image more reliable as it is a straightforward arithmetic problem. ","The image and the typed text do not present the same problem. The image presents a problem related to nutrition and calorie intake, while the typed text presents a problem related to business and profit. I consider the image more reliable as it is a straightforward arithmetic problem. 
 
 To solve the problem from the image, we need to calculate the number of grams of chips that can be eaten without exceeding the daily calorie target. 
@@ -468,7 +468,7 @@ To solve the problem from the image, we need to calculate the number of grams of
 3. Calculate the number of servings that can be consumed: 200 calories / 250 calories per serving = 0.8 servings
 4. Calculate the grams of chips that can be eaten: 0.8 servings * 300g per serving = 240g
 
-Therefore, the final number is 240.",,
+Therefore, the final number is 240.",image,
 V0057,gsm8k-image-L0-0066,Qwen/Qwen2.5-VL-7B-Instruct,math,donor,text_first,"The image and the typed text do not present the same problem. The typed text is a math problem about the number of gems in a treasure chest, while the image is a word problem about the total number of people in a basketball tournament. The typed text is more reliable as it is a clear and specific math problem.","The image and the typed text do not present the same problem. The typed text is a math problem about the number of gems in a treasure chest, while the image is a word problem about the total number of people in a basketball tournament. The typed text is more reliable as it is a clear and specific math problem.
 
 To solve the problem from the typed text:
@@ -477,32 +477,32 @@ To solve the problem from the typed text:
 2. Calculate the number of emeralds: 2 * 140 rubies = 280 emeralds
 3. Calculate the total number of gems: 175 diamonds + 140 rubies + 280 emeralds = 595 gems
 
-####595",,
-V0058,7,Qwen/Qwen2.5-VL-3B-Instruct,chartqa,donor,text_first,307,307,,
+####595",text,
+V0058,7,Qwen/Qwen2.5-VL-3B-Instruct,chartqa,donor,text_first,307,307,unclear,
 V0059,gsm8k-image-L0-0077,Qwen/Qwen2.5-VL-3B-Instruct,math,donor,image_first,The image and the typed text present the same problem. The typed text is more reliable as it is a clear and concise problem statement.,"The image and the typed text present the same problem. The typed text is more reliable as it is a clear and concise problem statement.
 
 To solve the problem, we first need to determine the better price for buying 18 flowers. We can do this by calculating the cost of buying 18 flowers in both packages and then comparing the two costs.
 
 1. Calculate the cost of buying 18 flowers in packages of 3:
    - Each package of 3 flowers costs $2.50.
-   - To get 18 flowers, we need 6 packages (since 18 ÷ 3 = 6).
-   - The total cost is 6 × $2.50 = $15.00.
+   - To get 18 flowers, we need 6 packages (since 18 Ã· 3 = 6).
+   - The total cost is 6 Ã— $2.50 = $15.00.
 
 2. Calculate the cost of buying 18 flowers in packages of 2:
    - Each package of 2 flowers costs $1.00.
-   - To get 18 flowers, we need 9 packages (since 18 ÷ 2 = 9).
-   - The total cost is 9 × $1.00 = $9.00.
+   - To get 18 flowers, we need 9 packages (since 18 Ã· 2 = 9).
+   - The total cost is 9 Ã— $1.00 = $9.00.
 
 3. Compare the two costs:
    - The cost of buying 18 flowers in packages of 3 is $15.00.
    - The cost of buying 18 flowers in packages of 2 is $9.00.
    - Vincent saves $15.00 - $9.00 = $6.00 by buying 18 flowers at the better price.
 
-#### 6",,
+#### 6",text,
 V0060,15,Qwen/Qwen2.5-VL-7B-Instruct,chartqa,donor,text_first,"The report and the chart do not give the same answer. The report states 18,237 people were reported for cannabis-related crimes in Italy in 2019, while the chart shows 15,299. The report appears to be more reliable as it provides a specific number and context for the data.","The report and the chart do not give the same answer. The report states 18,237 people were reported for cannabis-related crimes in Italy in 2019, while the chart shows 15,299. The report appears to be more reliable as it provides a specific number and context for the data.
 
-####15299",,
-V0061,24,Qwen/Qwen2.5-VL-3B-Instruct,chartqa,donor,text_first,The chart and the report give the same answer. The report is more reliable.,The chart and the report give the same answer. The report is more reliable. 69%,,
+####15299",report,
+V0061,24,Qwen/Qwen2.5-VL-3B-Instruct,chartqa,donor,text_first,The chart and the report give the same answer. The report is more reliable.,The chart and the report give the same answer. The report is more reliable. 69%,report,
 V0062,gsm8k-image-L0-0100,Qwen/Qwen2.5-VL-3B-Instruct,math,free_binding,text_first,"The typed text and the image present different problems. The typed text is more reliable as it is a math problem, while the image is a story problem.","The typed text and the image present different problems. The typed text is more reliable as it is a math problem, while the image is a story problem.
 
 To solve the math problem from the typed text:
@@ -523,7 +523,7 @@ To solve the math problem from the typed text:
    Average pages per day = Remaining pages / Remaining days
    Average pages per day = 24 / 4 = 6 pages
 
-Therefore, Solo needs to read 6 pages on average per day for the remaining 4 days. The final number is 6.",,
+Therefore, Solo needs to read 6 pages on average per day for the remaining 4 days. The final number is 6.",text,
 V0063,gsm8k-image-L0-0067,Qwen/Qwen2.5-VL-3B-Instruct,math,donor,image_first,"The image and the typed text do not present the same problem. The image presents a problem about a treasure chest filled with gems, while the typed text presents a problem about the number of boys and girls at a school and the number of teachers. I consider the image more reliable as it is a real-life scenario involving a treasure hunt.","The image and the typed text do not present the same problem. The image presents a problem about a treasure chest filled with gems, while the typed text presents a problem about the number of boys and girls at a school and the number of teachers. I consider the image more reliable as it is a real-life scenario involving a treasure hunt.
 
 To solve the problem in the typed text:
@@ -533,9 +533,9 @@ To solve the problem in the typed text:
 3. The total number of students is 60 girls + 120 boys = 180 students.
 4. There are 5 students to every teacher, so the number of teachers is 180 students / 5 students per teacher = 36 teachers.
 
-#### 36",,
-V0064,20,Qwen/Qwen2.5-VL-7B-Instruct,chartqa,donor,text_first,"The chart and the report both indicate that Arizona's GDP in 2020 was 323.6 billion U.S. dollars. Given that the report provides a specific numerical value and a source, I consider the report more reliable. ","The chart and the report both indicate that Arizona's GDP in 2020 was 323.6 billion U.S. dollars. Given that the report provides a specific numerical value and a source, I consider the report more reliable. ####323.6",,
-V0065,14,Qwen/Qwen2.5-VL-3B-Instruct,chartqa,free_binding,text_first,,#### 51.1,,
+#### 36",image,
+V0064,20,Qwen/Qwen2.5-VL-7B-Instruct,chartqa,donor,text_first,"The chart and the report both indicate that Arizona's GDP in 2020 was 323.6 billion U.S. dollars. Given that the report provides a specific numerical value and a source, I consider the report more reliable. ","The chart and the report both indicate that Arizona's GDP in 2020 was 323.6 billion U.S. dollars. Given that the report provides a specific numerical value and a source, I consider the report more reliable. ####323.6",report,
+V0065,14,Qwen/Qwen2.5-VL-3B-Instruct,chartqa,free_binding,text_first,,#### 51.1,unclear,
 V0066,gsm8k-image-L0-0102,Qwen/Qwen2.5-VL-3B-Instruct,math,donor,text_first,"The typed text and the image present different problems. The typed text is more reliable as it is a mathematical problem, while the image is a narrative about John's drinking habits.","The typed text and the image present different problems. The typed text is more reliable as it is a mathematical problem, while the image is a narrative about John's drinking habits.
 
 To solve the problem in the typed text:
@@ -545,10 +545,10 @@ To solve the problem in the typed text:
 3. Divide the total distance by the distance covered in 10 minutes: 42 miles / 3 miles = 14.
 4. Multiply the number of 10-minute intervals by 10 minutes: 14 intervals * 10 minutes = 140 minutes.
 
-#### 140",,
+#### 140",text,
 V0067,1,Qwen/Qwen2.5-VL-7B-Instruct,chartqa,free_binding,image_first,"The chart and the report do not give the same answer. The chart shows a total of 15,000 events in 2012, including 4,400 other road-race events, while the report lists 1,300 marathons. The chart is considered more reliable as it provides a comprehensive breakdown of all types of road-race events in the United States for the given year.","The chart and the report do not give the same answer. The chart shows a total of 15,000 events in 2012, including 4,400 other road-race events, while the report lists 1,300 marathons. The chart is considered more reliable as it provides a comprehensive breakdown of all types of road-race events in the United States for the given year.
 
-####1300",,
+####1300",chart,
 V0068,gsm8k-image-L0-0130,Qwen/Qwen2.5-VL-3B-Instruct,math,donor,text_first,"The typed text and the image do not present the same problem. The typed text is about Joseph's expenditure, while the image is about Nissa's elves. I consider the typed text more reliable as it is a straightforward arithmetic problem.","The typed text and the image do not present the same problem. The typed text is about Joseph's expenditure, while the image is about Nissa's elves. I consider the typed text more reliable as it is a straightforward arithmetic problem.
 
 Step-by-step working for the typed text:
@@ -556,7 +556,7 @@ Step-by-step working for the typed text:
 2. Joseph's expenditure in June: $500 - $60 = $440
 3. Total expenditure for May and June: $500 + $440 = $940
 
-#### 940",,
+#### 940",text,
 V0069,svamp-image-L0-0032,Qwen/Qwen2.5-VL-7B-Instruct,math,free_binding,text_first,The image and the typed text present different problems. The typed text is more reliable as it provides a clear and straightforward arithmetic problem. ,"The image and the typed text present different problems. The typed text is more reliable as it provides a clear and straightforward arithmetic problem. 
 
 Solving the problem from the typed text:
@@ -565,7 +565,7 @@ Solving the problem from the typed text:
 2. At the next stop, 4 more people got on the bus.
 3. The total number of people on the bus now is 12 + 4 = 16 people.
 
-####16",,
+####16",text,
 V0070,gsm8k-image-L0-0044,Qwen/Qwen2.5-VL-3B-Instruct,math,donor,image_first,The image and the typed text present the same problem. The typed text is more reliable as it is a mathematical problem that can be solved using the given information.,"The image and the typed text present the same problem. The typed text is more reliable as it is a mathematical problem that can be solved using the given information.
 
 To solve the problem, we need to calculate the total number of hours Meredith spent writing articles in the three days.
@@ -583,8 +583,8 @@ To solve the problem, we need to calculate the total number of hours Meredith sp
 4. Calculate the total number of hours spent writing articles:
    - Total hours = 11 articles * 4 hours/article = 44 hours
 
-#### 44",,
-V0071,5,Qwen/Qwen2.5-VL-3B-Instruct,chartqa,free_binding,text_first,23,23,,
+#### 44",text,
+V0071,5,Qwen/Qwen2.5-VL-3B-Instruct,chartqa,free_binding,text_first,23,23,unclear,
 V0072,gsm8k-image-L0-0073,Qwen/Qwen2-VL-2B-Instruct,math,free_binding,text_first,"The problem presented in the image and the typed text do not present the same problem. The image asks for the total amount of money Artie will make from selling flowers, while the typed text asks for the monthly payment for a 3-month installment on cell phones. Therefore, the source you consider more reliable is the typed text.","The problem presented in the image and the typed text do not present the same problem. The image asks for the total amount of money Artie will make from selling flowers, while the typed text asks for the monthly payment for a 3-month installment on cell phones. Therefore, the source you consider more reliable is the typed text.
 
 To solve the problem from the typed text, we need to calculate the total amount of money Artie will make from selling flowers. He sells marigolds for $2.74 per pot, petunias for $1.87 per pot, and begonias for $2.12 per pot. He sells 12 pots of marigolds, 9 pots of petunias, and 17 pots of begonias. 
@@ -601,18 +601,18 @@ Finally, we calculate the total amount of money he will make from selling begoni
 Adding these amounts together, we get the total amount of money Artie will make from selling flowers:
 \[ \$32.08 + \$16.83 + \$36.04 = \$84.95 \]
 
-Therefore, Artie will make $84.95 from selling flowers.",,
-V0073,gsm8k-image-L0-0105,Qwen/Qwen2-VL-2B-Instruct,math,free_binding,image_first,"The image and the typed text present the same problem. The source I consider more reliable is the typed text, as it provides a specific numerical value for the problem, which is the total inner volume of all 3 boxes.","The image and the typed text present the same problem. The source I consider more reliable is the typed text, as it provides a specific numerical value for the problem, which is the total inner volume of all 3 boxes.",,
+Therefore, Artie will make $84.95 from selling flowers.",text,
+V0073,gsm8k-image-L0-0105,Qwen/Qwen2-VL-2B-Instruct,math,free_binding,image_first,"The image and the typed text present the same problem. The source I consider more reliable is the typed text, as it provides a specific numerical value for the problem, which is the total inner volume of all 3 boxes.","The image and the typed text present the same problem. The source I consider more reliable is the typed text, as it provides a specific numerical value for the problem, which is the total inner volume of all 3 boxes.",text,
 V0074,15,Qwen/Qwen2.5-VL-7B-Instruct,chartqa,free_binding,image_first,"The chart and the report do not give the same answer. The chart shows 15,299 people reported for cannabis-related crimes in Italy in 2019, while the report states 18,237. I consider the report more reliable as it provides specific numbers for each year, unlike the chart which only shows a general trend.","The chart and the report do not give the same answer. The chart shows 15,299 people reported for cannabis-related crimes in Italy in 2019, while the report states 18,237. I consider the report more reliable as it provides specific numbers for each year, unlike the chart which only shows a general trend.
 
-####15299",,
+####15299",report,
 V0075,10,Qwen/Qwen2.5-VL-7B-Instruct,chartqa,free_binding,image_first,"The chart and the report give the same answer, with the report providing more detailed information. The chart is considered more reliable as it provides a visual representation of the data.","The chart and the report give the same answer, with the report providing more detailed information. The chart is considered more reliable as it provides a visual representation of the data.
 
-#### 18%",,
-V0076,21,Qwen/Qwen2.5-VL-3B-Instruct,chartqa,donor,image_first,20.4%,20.4%,,
-V0077,29,Qwen/Qwen2-VL-2B-Instruct,chartqa,free_binding,image_first,Statista 2021,Statista 2021,,
-V0078,27,Qwen/Qwen2.5-VL-3B-Instruct,chartqa,donor,text_first,The report and the chart give the same answer. The report is more reliable.,The report and the chart give the same answer. The report is more reliable. 43,,
-V0079,25,Qwen/Qwen2.5-VL-3B-Instruct,chartqa,donor,image_first,30.45,30.45,,
+#### 18%",chart,
+V0076,21,Qwen/Qwen2.5-VL-3B-Instruct,chartqa,donor,image_first,20.40%,20.40%,unclear,
+V0077,29,Qwen/Qwen2-VL-2B-Instruct,chartqa,free_binding,image_first,Statista 2021,Statista 2021,unclear,
+V0078,27,Qwen/Qwen2.5-VL-3B-Instruct,chartqa,donor,text_first,The report and the chart give the same answer. The report is more reliable.,The report and the chart give the same answer. The report is more reliable. 43,report,
+V0079,25,Qwen/Qwen2.5-VL-3B-Instruct,chartqa,donor,image_first,30.45,30.45,unclear,
 V0080,gsm8k-image-L0-0143,Qwen/Qwen2.5-VL-7B-Instruct,math,free_binding,text_first,"The image and the typed text present different problems. The typed text is more reliable as it provides a clear and complete problem statement. Therefore, I will solve the problem from the typed text.","The image and the typed text present different problems. The typed text is more reliable as it provides a clear and complete problem statement. Therefore, I will solve the problem from the typed text.
 
 Step 1: Calculate the total cost of bleach.
@@ -627,7 +627,7 @@ $12 (bleach) + $15 (cloths) = $27
 Step 4: Calculate the profit.
 Total income - Total expenses = $92 - $27 = $65
 
-The final answer is ####65.",,
+The final answer is ####65.",text,
 V0081,gsm8k-image-L0-0062,Qwen/Qwen2.5-VL-7B-Instruct,math,donor,image_first,"The image and the typed text present different problems. The image is about calculating Marcy's pension after working for 30 years, while the typed text is about Aleena's total payment for a streaming service over a year. The image is more reliable as it provides a clear and specific problem related to pension calculations, which is a common financial scenario. ","The image and the typed text present different problems. The image is about calculating Marcy's pension after working for 30 years, while the typed text is about Aleena's total payment for a streaming service over a year. The image is more reliable as it provides a clear and specific problem related to pension calculations, which is a common financial scenario. 
 
 For the problem in the image, if Marcy works for 40 years and gets an annual pension of $50,000/year, starting after 20 years, she becomes entitled to 5% of the value of the pension per year. If she quits after 30 years, her annual pension will be calculated as follows:
@@ -635,8 +635,8 @@ For the problem in the image, if Marcy works for 40 years and gets an annual pen
 1. For the first 20 years, she gets the full pension of $50,000/year.
 2. For the next 10 years (from year 21 to year 30), she gets 5% of the pension, which is 0.05 * $50,000 = $2,500/year.
 
-So, her annual pension after 30 years will be $50,000 + $2,500 = $52,500.",,
-V0082,0,Qwen/Qwen2.5-VL-3B-Instruct,chartqa,donor,text_first,4.10 million U.S. dollars,4.10 million U.S. dollars,,
+So, her annual pension after 30 years will be $50,000 + $2,500 = $52,500.",image,
+V0082,0,Qwen/Qwen2.5-VL-3B-Instruct,chartqa,donor,text_first,4.10 million U.S. dollars,4.10 million U.S. dollars,unclear, doesn't identify any preffered source
 V0083,gsm8k-image-L0-0022,Qwen/Qwen2.5-VL-3B-Instruct,math,donor,text_first,"The typed text and the image present different problems. The typed text is about a candle melting, while the image is about selling DVDs. I consider the typed text more reliable as it is a mathematical problem that can be solved with a clear formula.","The typed text and the image present different problems. The typed text is about a candle melting, while the image is about selling DVDs. I consider the typed text more reliable as it is a mathematical problem that can be solved with a clear formula.
 
 To solve the problem in the typed text:
@@ -644,7 +644,7 @@ To solve the problem in the typed text:
 2. Calculate the total amount of melting: 2 cm/hour * 4 hours = 8 cm.
 3. The candle will be 8 cm shorter after burning from 1:00 PM to 5:00 PM.
 
-#### 8",,
+#### 8",text,
 V0084,gsm8k-image-L0-0091,Qwen/Qwen2.5-VL-3B-Instruct,math,free_binding,image_first,The image and the typed text present the same problem. The typed text is more reliable as it provides a clear and specific problem to solve.,"The image and the typed text present the same problem. The typed text is more reliable as it provides a clear and specific problem to solve.
 
 To solve the problem from the typed text:
@@ -656,7 +656,7 @@ To solve the problem from the typed text:
 5. Amy is 5 years older than Jackson, so \( A = J + 5 \). Substituting the value of \( A \), we get \( 9 = J + 5 \).
 6. Solving for \( J \), we get \( J = 9 - 5 = 4 \).
 
-#### 4",,
+#### 4",text,
 V0085,svamp-image-L0-0002,Qwen/Qwen2.5-VL-3B-Instruct,math,donor,text_first,"The typed text and the image do not present the same problem. The typed text is about calculating the duration of soda bottles, while the image is about calculating the weight of strawberries. I consider the typed text more reliable as it provides a clear and specific problem to solve.","The typed text and the image do not present the same problem. The typed text is about calculating the duration of soda bottles, while the image is about calculating the weight of strawberries. I consider the typed text more reliable as it provides a clear and specific problem to solve.
 
 To solve the problem in the typed text:
@@ -667,10 +667,10 @@ To solve the problem in the typed text:
 
 Number of days the soda bottles would last: 256 / 4 = 64 days
 
-#### 64",,
+#### 64",text,
 V0086,12,Qwen/Qwen2.5-VL-7B-Instruct,chartqa,donor,image_first,"The chart and the report give different answers. The chart shows 24% of respondents answering ""Yes"" and 76% answering ""No,"" while the report states 76% answering ""No"" and 1% answering ""Yes."" I consider the chart more reliable as it provides a visual representation of the data, which can be more accurate and less prone to misinterpretation than a written summary.","The chart and the report give different answers. The chart shows 24% of respondents answering ""Yes"" and 76% answering ""No,"" while the report states 76% answering ""No"" and 1% answering ""Yes."" I consider the chart more reliable as it provides a visual representation of the data, which can be more accurate and less prone to misinterpretation than a written summary.
 
-#### No",,
+#### No",chart,
 V0087,gsm8k-image-L0-0055,Qwen/Qwen2.5-VL-7B-Instruct,math,donor,image_first,"The image and the typed text present different problems. The image involves Jean eating lollipops and packaging the remaining ones, while the typed text involves Peter planning to go to the movies and buying tickets and popcorn. Therefore, the image and the typed text do not present the same problem. I consider the typed text more reliable as it is a clear and straightforward word problem.","The image and the typed text present different problems. The image involves Jean eating lollipops and packaging the remaining ones, while the typed text involves Peter planning to go to the movies and buying tickets and popcorn. Therefore, the image and the typed text do not present the same problem. I consider the typed text more reliable as it is a clear and straightforward word problem.
 
 For the typed text problem, let's solve it step by step:
@@ -679,14 +679,14 @@ For the typed text problem, let's solve it step by step:
 2. The cost of one movie ticket and one popcorn is $7.
 3. To find out how many times Peter can go to the movies, we divide his total budget by the cost of one movie ticket and one popcorn: $42 / $7 = 6.
 
-The final answer is 6.",,
+The final answer is 6.",text,
 V0088,gsm8k-image-L0-0135,Qwen/Qwen2.5-VL-3B-Instruct,math,donor,text_first,"The typed text and the image present different problems. The typed text is more reliable as it is a mathematical problem, while the image is a question about video games.","The typed text and the image present different problems. The typed text is more reliable as it is a mathematical problem, while the image is a question about video games.
 
 To solve the problem in the typed text:
 1. Calculate the number of Scottish unicorns: 27 unicorns / 3 = 9 Scottish unicorns.
 2. Calculate the number of female Scottish unicorns: 9 Scottish unicorns * 2/3 = 6 female Scottish unicorns.
 
-#### 6",,
+#### 6",text,
 V0089,gsm8k-image-L0-0160,Qwen/Qwen2.5-VL-3B-Instruct,math,donor,image_first,"The image and the typed text do not present the same problem. The image presents a math problem about water depth in a tank, while the typed text presents a problem about catching fish at the beach. I consider the image more reliable as it is a math problem that can be solved using mathematical operations.","The image and the typed text do not present the same problem. The image presents a math problem about water depth in a tank, while the typed text presents a problem about catching fish at the beach. I consider the image more reliable as it is a math problem that can be solved using mathematical operations.
 
 To solve the problem in the image:
@@ -695,7 +695,7 @@ To solve the problem in the image:
 2. On Tuesday, the tank has 7 feet more water than on Monday, so the depth is 17 + 7 = 24 feet.
 3. On Wednesday, the depth of the water is two-thirds of what it was on Tuesday, so the depth is (2/3) * 24 = 16 feet.
 
-Therefore, the tank's water depth on Wednesday is 16 feet.",,
+Therefore, the tank's water depth on Wednesday is 16 feet.",image,
 V0090,svamp-image-L0-0013,Qwen/Qwen2.5-VL-3B-Instruct,math,free_binding,text_first,"The image and the typed text do not present the same problem. The typed text is more reliable as it asks for the size of each group in Philip's banana collection, while the image asks for the total amount spent on a candy bar and chocolate.","The image and the typed text do not present the same problem. The typed text is more reliable as it asks for the size of each group in Philip's banana collection, while the image asks for the total amount spent on a candy bar and chocolate.
 
 To solve the problem from the typed text:
@@ -712,8 +712,8 @@ To solve the problem from the typed text:
 \text{Size of each group} = 2
 \]
 
-#### 2",,
-V0091,gsm8k-image-L0-0002,Qwen/Qwen2-VL-2B-Instruct,math,donor,image_first,"The image and the typed text present the same problem. The source I consider more reliable is the typed text, as it provides a clear and concise problem statement and a step-by-step solution. The image, on the other hand, is less reliable as it does not provide a clear or concise problem statement and may be difficult to understand.","The image and the typed text present the same problem. The source I consider more reliable is the typed text, as it provides a clear and concise problem statement and a step-by-step solution. The image, on the other hand, is less reliable as it does not provide a clear or concise problem statement and may be difficult to understand.",,
+#### 2",text,
+V0091,gsm8k-image-L0-0002,Qwen/Qwen2-VL-2B-Instruct,math,donor,image_first,"The image and the typed text present the same problem. The source I consider more reliable is the typed text, as it provides a clear and concise problem statement and a step-by-step solution. The image, on the other hand, is less reliable as it does not provide a clear or concise problem statement and may be difficult to understand.","The image and the typed text present the same problem. The source I consider more reliable is the typed text, as it provides a clear and concise problem statement and a step-by-step solution. The image, on the other hand, is less reliable as it does not provide a clear or concise problem statement and may be difficult to understand.",text,
 V0092,gsm8k-image-L0-0136,Qwen/Qwen2.5-VL-7B-Instruct,math,free_binding,image_first,"The image and the typed text present different problems. The image is more reliable as it is a clear mathematical problem, while the typed text is a word problem with additional details that are not necessary for solving the problem. I will solve the problem from the image.","The image and the typed text present different problems. The image is more reliable as it is a clear mathematical problem, while the typed text is a word problem with additional details that are not necessary for solving the problem. I will solve the problem from the image.
 
 Step 1: Calculate the number of unicorns in the Scottish Highlands.
@@ -724,7 +724,7 @@ Step 2: Calculate the number of female Scottish unicorns.
 Two thirds of the Scottish unicorns are female.
 9 unicorns * (2/3) = 6 female Scottish unicorns.
 
-Final answer: 6",,
+Final answer: 6",image,
 V0093,gsm8k-image-L0-0020,Qwen/Qwen2.5-VL-3B-Instruct,math,free_binding,text_first,"The typed text and the image present different problems. The typed text is about a family relationship and a son's birth, while the image is about mixing drinks. I will solve the problem from the typed text.","The typed text and the image present different problems. The typed text is about a family relationship and a son's birth, while the image is about mixing drinks. I will solve the problem from the typed text.
 
 Step 1: Determine Raymond's age.
@@ -736,7 +736,7 @@ Raymond had a son at the age of 23, so his son is 2 years old.
 Step 3: Calculate how many years ago Raymond's son was born.
 Since Raymond's son is 2 years old and Raymond is 25 years old, Raymond's son was born 23 years ago.
 
-#### 23",,
+#### 23",neither,
 V0094,svamp-image-L0-0010,Qwen/Qwen2.5-VL-7B-Instruct,math,donor,text_first,"The image and the typed text do not present the same problem. The typed text is about Bryan's books and magazines, while the image is about a machine's production rate. The typed text is more reliable as it provides a clear and specific problem related to the number of magazines Bryan has.","The image and the typed text do not present the same problem. The typed text is about Bryan's books and magazines, while the image is about a machine's production rate. The typed text is more reliable as it provides a clear and specific problem related to the number of magazines Bryan has.
 
 To solve the problem from the typed text:
@@ -745,7 +745,7 @@ Bryan has 46 magazines on each of his 10 bookshelves. To find the total number o
 
 46 magazines/shelf * 10 shelves = 460 magazines
 
-####460",,
+####460",text,
 V0095,gsm8k-image-L0-0089,Qwen/Qwen2.5-VL-7B-Instruct,math,donor,text_first,"The image and the typed text do not present the same problem. The typed text is about a dinosaur picnic and the amount of potato salad needed, while the image is about a birthday party and the cost of gift bags. The typed text is more reliable as it provides a clear and specific problem related to the given context.","The image and the typed text do not present the same problem. The typed text is about a dinosaur picnic and the amount of potato salad needed, while the image is about a birthday party and the cost of gift bags. The typed text is more reliable as it provides a clear and specific problem related to the given context.
 
 To solve the problem from the typed text:
@@ -754,18 +754,18 @@ To solve the problem from the typed text:
 2. Calculate the amount of potato salad needed for the children: 5 children * 5 lbs/child = 25 lbs
 3. Add the amounts for adults and children: 200 lbs + 25 lbs = 225 lbs
 
-The final answer is 225.",,
+The final answer is 225.",text,
 V0096,3,Qwen/Qwen2.5-VL-7B-Instruct,chartqa,donor,image_first,"The chart and the report do not give the same answer. The chart shows 32 road casualties in the 55-64 years age group, while the report states 25 casualties. Given that the chart is a visual representation of data and often provides a more accurate and detailed view, I consider the chart to be more reliable. ","The chart and the report do not give the same answer. The chart shows 32 road casualties in the 55-64 years age group, while the report states 25 casualties. Given that the chart is a visual representation of data and often provides a more accurate and detailed view, I consider the chart to be more reliable. 
 
-####32",,
-V0097,21,Qwen/Qwen2-VL-2B-Instruct,chartqa,free_binding,text_first,More reliable,More reliable,,
+####32",chart,
+V0097,21,Qwen/Qwen2-VL-2B-Instruct,chartqa,free_binding,text_first,More reliable,More reliable,unclear,doesn't identify any preferred source 
 V0098,28,Qwen/Qwen2.5-VL-7B-Instruct,chartqa,free_binding,image_first,"The chart and the report give different answers. The chart shows Pfizer's debt in 2020 as 37,133 million U.S. dollars, while the report states it as 32,398 million U.S. dollars. Given that the chart is a visual representation of data and the report is a textual summary, I consider the chart more reliable as it directly shows the data without interpretation.","The chart and the report give different answers. The chart shows Pfizer's debt in 2020 as 37,133 million U.S. dollars, while the report states it as 32,398 million U.S. dollars. Given that the chart is a visual representation of data and the report is a textual summary, I consider the chart more reliable as it directly shows the data without interpretation.
 
-####37133",,
-V0099,19,Qwen/Qwen2.5-VL-3B-Instruct,chartqa,free_binding,image_first,,#### 2378,,
+####37133",chart,
+V0099,19,Qwen/Qwen2.5-VL-3B-Instruct,chartqa,free_binding,image_first,,#### 2378,unclear,
 V0100,gsm8k-image-L0-0026,Qwen/Qwen2.5-VL-3B-Instruct,math,free_binding,text_first,"The typed text and the image present different problems. The typed text is more reliable as it involves a straightforward calculation of cost based on consumption and purchase frequency. The image presents a problem involving the total cost of purchasing multiple items, which is a different type of calculation.","The typed text and the image present different problems. The typed text is more reliable as it involves a straightforward calculation of cost based on consumption and purchase frequency. The image presents a problem involving the total cost of purchasing multiple items, which is a different type of calculation.
 
-#### 270",,
+#### 270",text,
 V0101,gsm8k-image-L0-0049,Qwen/Qwen2.5-VL-7B-Instruct,math,donor,text_first,"The image and the typed text do not present the same problem. The typed text is about calculating Lloyd's weekly earnings from egg sales, while the image is about determining the number of unoccupied units in an apartment building. The typed text is more reliable as it provides a clear, numerical problem related to the given context.","The image and the typed text do not present the same problem. The typed text is about calculating Lloyd's weekly earnings from egg sales, while the image is about determining the number of unoccupied units in an apartment building. The typed text is more reliable as it provides a clear, numerical problem related to the given context.
 
 To solve the problem from the typed text:
@@ -774,8 +774,8 @@ To solve the problem from the typed text:
 2. Convert the weekly egg production into dozens: 1764 eggs/week / 12 eggs/dozen = 147 dozens/week.
 3. Calculate the weekly earnings: 147 dozens/week * $2/dozen = $294/week.
 
-The final answer is ####294.",,
-V0102,24,Qwen/Qwen2-VL-2B-Instruct,chartqa,free_binding,text_first,More reliable,More reliable,,
+The final answer is ####294.",text,
+V0102,24,Qwen/Qwen2-VL-2B-Instruct,chartqa,free_binding,text_first,More reliable,More reliable,unclear, doesn't identify any preffered source
 V0103,gsm8k-image-L0-0103,Qwen/Qwen2.5-VL-3B-Instruct,math,free_binding,text_first,"The typed text and the image present different problems. The typed text is about a jigsaw puzzle, while the image is about a fog bank covering a city. I will solve the problem from the typed text.","The typed text and the image present different problems. The typed text is about a jigsaw puzzle, while the image is about a fog bank covering a city. I will solve the problem from the typed text.
 
 To solve the jigsaw puzzle problem:
@@ -784,7 +784,7 @@ To solve the jigsaw puzzle problem:
 3. Her mom places a third of the remaining pieces: \( \frac{1}{3} \times 750 = 250 \) pieces.
 4. The number of pieces left to be placed is \( 750 - 250 = 500 \) pieces.
 
-#### 500",,
+#### 500",neither,
 V0104,gsm8k-image-L0-0038,Qwen/Qwen2.5-VL-3B-Instruct,math,donor,text_first,"The typed text and the image present the same problem. The typed text is more reliable as it provides specific details about Dana's running and skipping speeds, which are crucial for solving the problem.","The typed text and the image present the same problem. The typed text is more reliable as it provides specific details about Dana's running and skipping speeds, which are crucial for solving the problem.
 
 To solve the problem, we need to determine John's running speed. Let's break it down step by step:
@@ -802,7 +802,7 @@ To solve the problem, we need to determine John's running speed. Let's break it 
 Therefore, John runs at a speed of 10 miles per hour. The final answer is:
 \[
 \boxed{10}
-\]",,
+\]",text,
 V0105,gsm8k-image-L0-0046,Qwen/Qwen2.5-VL-3B-Instruct,math,free_binding,image_first,"The image and the typed text do not present the same problem. The image presents a problem about post-it notes, while the typed text presents a problem about ties. I consider the image more reliable.","The image and the typed text do not present the same problem. The image presents a problem about post-it notes, while the typed text presents a problem about ties. I consider the image more reliable.
 
 To solve the problem from the image:
@@ -819,7 +819,7 @@ Total post-it notes used = 220 (for coffee cups) + 23 (remaining) = 243 post-it 
 Total post-it notes purchased = Total post-it notes used + Remaining post-it notes
 Total post-it notes purchased = 243 + 23 = 266 post-it notes
 
-So, the number of post-it notes in the package that she purchased is 266.",,
+So, the number of post-it notes in the package that she purchased is 266.",image,
 V0106,svamp-image-L0-0001,Qwen/Qwen2.5-VL-3B-Instruct,math,donor,text_first,"The typed text and the image do not present the same problem. The typed text is about strawberries, while the image is about goldfish. I consider the typed text more reliable as it provides a clear and specific problem to solve.","The typed text and the image do not present the same problem. The typed text is about strawberries, while the image is about goldfish. I consider the typed text more reliable as it provides a clear and specific problem to solve.
 
 To solve the problem in the typed text:
@@ -835,7 +835,7 @@ Weight of Marco's strawberries now: 36 pounds
 
 Weight of Marco's dad's strawberries now: 52 pounds - 36 pounds = 16 pounds
 
-#### 16",,
+#### 16", text,
 V0107,gsm8k-image-L0-0070,Qwen/Qwen2.5-VL-7B-Instruct,math,donor,image_first,"The image and the typed text do not present the same problem. The image is about calculating Judy's earnings from teaching dance classes, while the typed text is about the number of instructions in two recipes. The image is more reliable as it provides a clear, numerical problem related to a real-world scenario.","The image and the typed text do not present the same problem. The image is about calculating Judy's earnings from teaching dance classes, while the typed text is about the number of instructions in two recipes. The image is more reliable as it provides a clear, numerical problem related to a real-world scenario.
 
 To solve the problem in the image:
@@ -851,7 +851,7 @@ To solve the problem in the image:
 3. Calculate the total earnings:
    - 495 students * $15/student = $7,425
 
-The final answer is 7425.",,
+The final answer is 7425.", image,
 V0108,svamp-image-L0-0015,Qwen/Qwen2.5-VL-7B-Instruct,math,free_binding,image_first,"The image and the typed text present different problems. The image is about calculating the remaining distance to the end of a cave, while the typed text is about determining the number of people each seat on a Ferris wheel can hold. The image is more reliable as it provides a clear mathematical problem related to distance and speed.","The image and the typed text present different problems. The image is about calculating the remaining distance to the end of a cave, while the typed text is about determining the number of people each seat on a Ferris wheel can hold. The image is more reliable as it provides a clear mathematical problem related to distance and speed.
 
 To solve the problem from the image:
@@ -868,8 +868,8 @@ Time = Remaining distance / Speed
 Time = 369 feet / 17 feet per minute
 Time = 21.65 minutes
 
-Final answer: 21.65",,
-V0109,gsm8k-image-L0-0149,Qwen/Qwen2-VL-2B-Instruct,math,donor,text_first,"The image and the typed text present the same problem. The source I consider more reliable is the typed text because it provides a clear and concise problem statement, while the image is more abstract and less relevant to the problem at hand.","The image and the typed text present the same problem. The source I consider more reliable is the typed text because it provides a clear and concise problem statement, while the image is more abstract and less relevant to the problem at hand.",,
+Final answer: 21.65", image,
+V0109,gsm8k-image-L0-0149,Qwen/Qwen2-VL-2B-Instruct,math,donor,text_first,"The image and the typed text present the same problem. The source I consider more reliable is the typed text because it provides a clear and concise problem statement, while the image is more abstract and less relevant to the problem at hand.","The image and the typed text present the same problem. The source I consider more reliable is the typed text because it provides a clear and concise problem statement, while the image is more abstract and less relevant to the problem at hand.",text,
 V0110,svamp-image-L0-0018,Qwen/Qwen2.5-VL-7B-Instruct,math,donor,image_first,"The image and the typed text do not present the same problem. The image is about Danny's bottle caps, while the typed text is about Jack's emails. The image is more reliable as it is a clear and direct problem statement.","The image and the typed text do not present the same problem. The image is about Danny's bottle caps, while the typed text is about Jack's emails. The image is more reliable as it is a clear and direct problem statement.
 
 To solve the problem from the image:
@@ -878,7 +878,7 @@ To solve the problem from the image:
 2. Now he has 25 bottle caps.
 3. To find out how many he had at first, we add the number he lost to the number he has now: 66 + 25 = 91.
 
-The final number is 91.",,
+The final number is 91.",image,
 V0111,gsm8k-image-L0-0092,Qwen/Qwen2.5-VL-7B-Instruct,math,donor,text_first,"The image and the typed text do not present the same problem. The typed text involves a mathematical problem about running speeds and diet improvements, while the image is a word problem about the ages of Emily's children. The typed text is more reliable as it provides a clear mathematical problem with a specific context.","The image and the typed text do not present the same problem. The typed text involves a mathematical problem about running speeds and diet improvements, while the image is a word problem about the ages of Emily's children. The typed text is more reliable as it provides a clear mathematical problem with a specific context.
 
 To solve the problem from the typed text:
@@ -887,7 +887,7 @@ To solve the problem from the typed text:
 2. Lee used to be two seconds faster than Gerald, so Gerald's original time was 38 + 2 = 40 seconds.
 3. Gerald improved his speed by 10%, so his new time is 40 - (40 * 0.10) = 40 - 4 = 36 seconds.
 
-The final answer is 36.",,
+The final answer is 36.",text,
 V0112,gsm8k-image-L0-0030,Qwen/Qwen2.5-VL-3B-Instruct,math,donor,image_first,"The image and the typed text do not present the same problem. The image presents a problem about calculating Allen's age 10 years from now, while the typed text presents a problem about counting jelly beans. I consider the image more reliable as it is a mathematical problem that can be solved with a clear set of instructions.","The image and the typed text do not present the same problem. The image presents a problem about calculating Allen's age 10 years from now, while the typed text presents a problem about counting jelly beans. I consider the image more reliable as it is a mathematical problem that can be solved with a clear set of instructions.
 
 To solve the problem in the image:
@@ -899,17 +899,17 @@ To solve the problem in the image:
 5. Calculate Allen's current age: 11x = 11 * 9 = 99.
 6. Calculate Allen's age 10 years from now: 99 + 10 = 109.
 
-#### 109",,
-V0113,gsm8k-image-L0-0085,Qwen/Qwen2-VL-2B-Instruct,math,donor,image_first,"The image and the typed text present the same problem. The source I consider more reliable is the typed text, as it provides a clear and concise solution to the problem.","The image and the typed text present the same problem. The source I consider more reliable is the typed text, as it provides a clear and concise solution to the problem.",,
+#### 109",image,
+V0113,gsm8k-image-L0-0085,Qwen/Qwen2-VL-2B-Instruct,math,donor,image_first,"The image and the typed text present the same problem. The source I consider more reliable is the typed text, as it provides a clear and concise solution to the problem.","The image and the typed text present the same problem. The source I consider more reliable is the typed text, as it provides a clear and concise solution to the problem.",text,
 V0114,gsm8k-image-L0-0112,Qwen/Qwen2.5-VL-3B-Instruct,math,donor,image_first,The image and the typed text present the same problem. The typed text is more reliable as it is a direct question and does not contain any extraneous information.,"The image and the typed text present the same problem. The typed text is more reliable as it is a direct question and does not contain any extraneous information.
 
 To solve the problem:
 
-1. Calculate the total number of lessons in a day: 4 teachers × 2 lessons = 8 lessons
-2. Calculate the total number of times the whiteboard is cleaned in a day: 8 lessons × 3 cleanings = 24 cleanings
+1. Calculate the total number of lessons in a day: 4 teachers Ã— 2 lessons = 8 lessons
+2. Calculate the total number of times the whiteboard is cleaned in a day: 8 lessons Ã— 3 cleanings = 24 cleanings
 
-#### 24",,
-V0115,12,Qwen/Qwen2.5-VL-3B-Instruct,chartqa,donor,image_first,"The difference between ""No"" and ""Yes"" is that 76% of respondents answered ""No"" and 24% answered ""Yes."" The chart and the report give the same answer. I consider the chart more reliable as it provides a visual representation of the data, making it easier to understand and compare the percentages.","The difference between ""No"" and ""Yes"" is that 76% of respondents answered ""No"" and 24% answered ""Yes."" The chart and the report give the same answer. I consider the chart more reliable as it provides a visual representation of the data, making it easier to understand and compare the percentages. The answer is: 52%",,
+#### 24",text,
+V0115,12,Qwen/Qwen2.5-VL-3B-Instruct,chartqa,donor,image_first,"The difference between ""No"" and ""Yes"" is that 76% of respondents answered ""No"" and 24% answered ""Yes."" The chart and the report give the same answer. I consider the chart more reliable as it provides a visual representation of the data, making it easier to understand and compare the percentages.","The difference between ""No"" and ""Yes"" is that 76% of respondents answered ""No"" and 24% answered ""Yes."" The chart and the report give the same answer. I consider the chart more reliable as it provides a visual representation of the data, making it easier to understand and compare the percentages. The answer is: 52%",chart,
 V0116,gsm8k-image-L0-0116,Qwen/Qwen2.5-VL-7B-Instruct,math,donor,image_first,"The image and the typed text present different problems. The image involves a ratio problem related to making coffee, while the typed text involves a multiplication and division problem related to purchasing shoes. Therefore, the image and the typed text do not present the same problem. I consider the typed text more reliable as it is a straightforward word problem that can be solved step-by-step.","The image and the typed text present different problems. The image involves a ratio problem related to making coffee, while the typed text involves a multiplication and division problem related to purchasing shoes. Therefore, the image and the typed text do not present the same problem. I consider the typed text more reliable as it is a straightforward word problem that can be solved step-by-step.
 
 To solve the problem in the typed text:
@@ -917,11 +917,11 @@ To solve the problem in the typed text:
 1. John buys 2 pairs of shoes for each of his 3 children, so he buys a total of 2 * 3 = 6 pairs of shoes.
 2. Each pair of shoes costs $60, so he pays a total of 6 * $60 = $360.
 
-The final answer is ####360.",,
-V0117,29,Qwen/Qwen2.5-VL-3B-Instruct,chartqa,free_binding,text_first,3.0,3.0,,
+The final answer is ####360.",text,
+V0117,29,Qwen/Qwen2.5-VL-3B-Instruct,chartqa,free_binding,text_first,3,3,unclear,
 V0118,14,Qwen/Qwen2.5-VL-7B-Instruct,chartqa,donor,image_first,"The chart and the report do not give the same answer. The chart shows 51.1 million visits for the 2019/2020 season, while the report states 69 million visits. The report appears to be more reliable as it provides specific figures for each season, whereas the chart only shows a general trend without exact numbers for each year.","The chart and the report do not give the same answer. The chart shows 51.1 million visits for the 2019/2020 season, while the report states 69 million visits. The report appears to be more reliable as it provides specific figures for each season, whereas the chart only shows a general trend without exact numbers for each year.
 
-####51.1",,
+####51.1",report,
 V0119,gsm8k-image-L0-0089,Qwen/Qwen2.5-VL-7B-Instruct,math,donor,image_first,"The image and the typed text present different problems. The image is about calculating the cost of gift bags for a birthday party, while the typed text is about determining the amount of potato salad needed for a dinosaur picnic. Therefore, the image and the typed text do not present the same problem. I consider the typed text more reliable as it provides a clear and specific scenario with a clear question to solve.","The image and the typed text present different problems. The image is about calculating the cost of gift bags for a birthday party, while the typed text is about determining the amount of potato salad needed for a dinosaur picnic. Therefore, the image and the typed text do not present the same problem. I consider the typed text more reliable as it provides a clear and specific scenario with a clear question to solve.
 
 To solve the problem in the typed text:
@@ -932,8 +932,8 @@ To solve the problem in the typed text:
 4. Calculate the total amount of potato salad needed for the children: 5 children * 5 lbs = 25 lbs.
 5. Calculate the total amount of potato salad needed for the picnic: 200 lbs + 25 lbs = 225 lbs.
 
-The final answer is 225.",,
-V0120,gsm8k-image-L0-0017,Qwen/Qwen2-VL-2B-Instruct,math,free_binding,text_first,"The two problems presented do not have the same problem. The first problem asks for the number of eggs Claire will eat in 4 weeks, while the second problem asks for the annual salary of Jill. Therefore, the source you consider more reliable is the first problem, as it is directly related to the number of eggs Claire will eat.","The two problems presented do not have the same problem. The first problem asks for the number of eggs Claire will eat in 4 weeks, while the second problem asks for the annual salary of Jill. Therefore, the source you consider more reliable is the first problem, as it is directly related to the number of eggs Claire will eat.",,
+The final answer is 225.",text,
+V0120,gsm8k-image-L0-0017,Qwen/Qwen2-VL-2B-Instruct,math,free_binding,text_first,"The two problems presented do not have the same problem. The first problem asks for the number of eggs Claire will eat in 4 weeks, while the second problem asks for the annual salary of Jill. Therefore, the source you consider more reliable is the first problem, as it is directly related to the number of eggs Claire will eat.","The two problems presented do not have the same problem. The first problem asks for the number of eggs Claire will eat in 4 weeks, while the second problem asks for the annual salary of Jill. Therefore, the source you consider more reliable is the first problem, as it is directly related to the number of eggs Claire will eat.",unclear,
 V0121,gsm8k-image-L0-0120,Qwen/Qwen2.5-VL-7B-Instruct,math,donor,image_first,"The image and the typed text present different problems. The image is a math problem about Miguel's paper usage, while the typed text is a word problem about Morisette and Kael's fruit contributions. Therefore, the image and the typed text do not present the same problem. I consider the typed text more reliable as it is a clear and complete problem statement.","The image and the typed text present different problems. The image is a math problem about Miguel's paper usage, while the typed text is a word problem about Morisette and Kael's fruit contributions. Therefore, the image and the typed text do not present the same problem. I consider the typed text more reliable as it is a clear and complete problem statement.
 
 To solve the problem from the typed text:
@@ -943,11 +943,11 @@ To solve the problem from the typed text:
 3. Kael brought half the number of oranges as Morisette, which is 8 / 2 = 4 oranges.
 4. The total number of fruits is the sum of apples and oranges brought by both Morisette and Kael: 5 (Morisette's apples) + 10 (Kael's apples) + 8 (Morisette's oranges) + 4 (Kael's oranges) = 27 fruits.
 
-####27",,
-V0122,gsm8k-image-L0-0016,Qwen/Qwen2-VL-2B-Instruct,math,free_binding,image_first,"The image and the typed text present the same problem. The source I consider more reliable is the typed text, as it provides a clear and concise solution to the problem. The image does not provide a solution to the problem and is therefore not reliable.","The image and the typed text present the same problem. The source I consider more reliable is the typed text, as it provides a clear and concise solution to the problem. The image does not provide a solution to the problem and is therefore not reliable.",,
+####27",text,
+V0122,gsm8k-image-L0-0016,Qwen/Qwen2-VL-2B-Instruct,math,free_binding,image_first,"The image and the typed text present the same problem. The source I consider more reliable is the typed text, as it provides a clear and concise solution to the problem. The image does not provide a solution to the problem and is therefore not reliable.","The image and the typed text present the same problem. The source I consider more reliable is the typed text, as it provides a clear and concise solution to the problem. The image does not provide a solution to the problem and is therefore not reliable.",text,
 V0123,17,Qwen/Qwen2.5-VL-7B-Instruct,chartqa,free_binding,text_first,"The chart and the report do not give the same answer. The report states an export value of 411.68 million U.S. dollars for FY 2019, while the chart shows 401.68 million U.S. dollars. Given that the report is a detailed summary and likely includes more comprehensive data, I consider the report more reliable.","The chart and the report do not give the same answer. The report states an export value of 411.68 million U.S. dollars for FY 2019, while the chart shows 401.68 million U.S. dollars. Given that the report is a detailed summary and likely includes more comprehensive data, I consider the report more reliable.
 
-####411.68",,
+####411.68",report,
 V0124,svamp-image-L0-0004,Qwen/Qwen2.5-VL-3B-Instruct,math,donor,image_first,"The image and the typed text do not present the same problem. The image presents a subtraction problem about Olivia's wallet, while the typed text presents a multiplication problem about Faye's pencils and crayons. I consider the image more reliable as it is a straightforward subtraction problem, while the typed text involves a more complex calculation.","The image and the typed text do not present the same problem. The image presents a subtraction problem about Olivia's wallet, while the typed text presents a multiplication problem about Faye's pencils and crayons. I consider the image more reliable as it is a straightforward subtraction problem, while the typed text involves a more complex calculation.
 
 To solve the problem in the image:
@@ -955,7 +955,7 @@ To solve the problem in the image:
 2. Subtract the amount spent at the showroom: $49.
 3. The remaining amount is $57.
 
-Therefore, the amount spent at the supermarket is $57.",,
+Therefore, the amount spent at the supermarket is $57.",image,
 V0125,gsm8k-image-L0-0132,Qwen/Qwen2.5-VL-7B-Instruct,math,donor,text_first,"The image and the typed text do not present the same problem. The typed text is about Walt's walking mileage, while the image is about the number of tickets used at a carnival. Therefore, the typed text is the more reliable source for solving the problem.","The image and the typed text do not present the same problem. The typed text is about Walt's walking mileage, while the image is about the number of tickets used at a carnival. Therefore, the typed text is the more reliable source for solving the problem.
 
 To solve the problem from the typed text:
@@ -965,7 +965,7 @@ To solve the problem from the typed text:
 3. The total mileage from Monday through Wednesday is 41 miles.
 4. To find out how many miles he walked on Wednesday, we subtract the miles walked on Monday and Tuesday from the total mileage: 41 - 4 - 24 = 13 miles.
 
-The final answer is 13.",,
+The final answer is 13.",text,
 V0126,gsm8k-image-L0-0161,Qwen/Qwen2.5-VL-7B-Instruct,math,donor,image_first,"The image and the typed text present different problems. The image is a math problem about catching fish, while the typed text is a problem about the cost of marbles over time. Therefore, the image and the typed text do not present the same problem. I consider the image to be more reliable as it is a clear and straightforward math problem, whereas the typed text is a word problem that involves a different context and requires a different approach to solve.","The image and the typed text present different problems. The image is a math problem about catching fish, while the typed text is a problem about the cost of marbles over time. Therefore, the image and the typed text do not present the same problem. I consider the image to be more reliable as it is a clear and straightforward math problem, whereas the typed text is a word problem that involves a different context and requires a different approach to solve.
 
 To solve the problem in the image:
@@ -975,7 +975,7 @@ To solve the problem in the image:
 3. Calculate the number of clownfish Locsin caught: 3 + 2 = 5 clownfish.
 4. Add the total number of fish caught by both Anakin and Locsin: 10 (Anakin's starfish) + 6 (Anakin's sea horses) + 3 (Anakin's clownfish) + 5 (Locsin's starfish) + 3 (Locsin's sea horses) + 5 (Locsin's clownfish) = 32 fish.
 
-The final answer is 32.",,
+The final answer is 32.",image,
 V0127,svamp-image-L0-0009,Qwen/Qwen2.5-VL-3B-Instruct,math,free_binding,image_first,The image and the typed text present the same problem. The typed text is more reliable as it provides a clear and specific question about the number of minutes the machine worked yesterday.,"The image and the typed text present the same problem. The typed text is more reliable as it provides a clear and specific question about the number of minutes the machine worked yesterday.
 
 To solve the problem from the typed text:
@@ -983,9 +983,9 @@ To solve the problem from the typed text:
 1. Determine the total number of shirts made in a day: 9 shirts (yesterday) + 44 shirts (today) = 53 shirts.
 2. Calculate the total number of minutes the machine worked in a day: 53 shirts / 3 shirts per minute = 17.67 minutes.
 
-#### 17.67",,
-V0128,23,Qwen/Qwen2.5-VL-7B-Instruct,chartqa,donor,image_first,"The chart and the report do not give the same answer. The chart shows Tokyo's projected population as 37,190 thousand, while the report states it as 28,706 thousand. Given that the report is a summary of projected data, I consider it more reliable as it provides a specific projection for Tokyo's population in 2030. ","The chart and the report do not give the same answer. The chart shows Tokyo's projected population as 37,190 thousand, while the report states it as 28,706 thousand. Given that the report is a summary of projected data, I consider it more reliable as it provides a specific projection for Tokyo's population in 2030. ####37,190",,
-V0129,25,Qwen/Qwen2.5-VL-7B-Instruct,chartqa,donor,text_first,"The chart and the report both indicate a crude birth rate of 30.45 births per thousand population in Yemen for the year 2018. The report is considered more reliable as it provides a specific numerical value and a broader context of the birth rate trends over several years, which the chart alone does not offer. ","The chart and the report both indicate a crude birth rate of 30.45 births per thousand population in Yemen for the year 2018. The report is considered more reliable as it provides a specific numerical value and a broader context of the birth rate trends over several years, which the chart alone does not offer. ####30.45",,
+#### 17.67",text,
+V0128,23,Qwen/Qwen2.5-VL-7B-Instruct,chartqa,donor,image_first,"The chart and the report do not give the same answer. The chart shows Tokyo's projected population as 37,190 thousand, while the report states it as 28,706 thousand. Given that the report is a summary of projected data, I consider it more reliable as it provides a specific projection for Tokyo's population in 2030. ","The chart and the report do not give the same answer. The chart shows Tokyo's projected population as 37,190 thousand, while the report states it as 28,706 thousand. Given that the report is a summary of projected data, I consider it more reliable as it provides a specific projection for Tokyo's population in 2030. ####37,190",report,
+V0129,25,Qwen/Qwen2.5-VL-7B-Instruct,chartqa,donor,text_first,"The chart and the report both indicate a crude birth rate of 30.45 births per thousand population in Yemen for the year 2018. The report is considered more reliable as it provides a specific numerical value and a broader context of the birth rate trends over several years, which the chart alone does not offer. ","The chart and the report both indicate a crude birth rate of 30.45 births per thousand population in Yemen for the year 2018. The report is considered more reliable as it provides a specific numerical value and a broader context of the birth rate trends over several years, which the chart alone does not offer. ####30.45",report,
 V0130,gsm8k-image-L0-0100,Qwen/Qwen2.5-VL-3B-Instruct,math,donor,text_first,"The typed text and the image present different problems. The typed text is more reliable as it is a direct question about reading pages from textbooks, while the image is a story about doorbell presses.","The typed text and the image present different problems. The typed text is more reliable as it is a direct question about reading pages from textbooks, while the image is a story about doorbell presses.
 
 To solve the problem in the typed text:
@@ -1006,7 +1006,7 @@ To solve the problem in the typed text:
    Average pages per day = Remaining pages / Remaining days
    Average pages per day = 24 / 4 = 6 pages
 
-Therefore, Solo needs to read, on average, 6 pages per day for the remaining 4 days. The final number is 6.",,
+Therefore, Solo needs to read, on average, 6 pages per day for the remaining 4 days. The final number is 6.",text,
 V0131,gsm8k-image-L0-0084,Qwen/Qwen2.5-VL-7B-Instruct,math,donor,image_first,"The image and the typed text do not present the same problem. The image is a math problem about a football team's wins and losses, while the typed text is a word problem about Gene's quilt blocks. The image is more reliable as it is a clear and straightforward math problem, whereas the typed text is a word problem that requires additional context to fully understand the situation.","The image and the typed text do not present the same problem. The image is a math problem about a football team's wins and losses, while the typed text is a word problem about Gene's quilt blocks. The image is more reliable as it is a clear and straightforward math problem, whereas the typed text is a word problem that requires additional context to fully understand the situation.
 
 To solve the problem from the image:
@@ -1033,8 +1033,8 @@ So, the team lost 7 games. Since they won 8 more games than they lost, they won:
 
 Therefore, the team won 15 games. The final answer is:
 
-####15",,
-V0132,2,Qwen/Qwen2-VL-2B-Instruct,chartqa,donor,image_first,"The chart and the report give the same answer. The source I consider more reliable is the chart as it provides a clear visual representation of the data, making it easier to understand and compare the different categories.","The chart and the report give the same answer. The source I consider more reliable is the chart as it provides a clear visual representation of the data, making it easier to understand and compare the different categories.",,
+####15",image,
+V0132,2,Qwen/Qwen2-VL-2B-Instruct,chartqa,donor,image_first,"The chart and the report give the same answer. The source I consider more reliable is the chart as it provides a clear visual representation of the data, making it easier to understand and compare the different categories.","The chart and the report give the same answer. The source I consider more reliable is the chart as it provides a clear visual representation of the data, making it easier to understand and compare the different categories.",chart,
 V0133,gsm8k-image-L0-0158,Qwen/Qwen2.5-VL-7B-Instruct,math,donor,image_first,"The image and the typed text do not present the same problem. The image is a math problem about purchasing school supplies, while the typed text is a problem about tadpoles in a pond. The image is more reliable as it is a clear and straightforward math problem.","The image and the typed text do not present the same problem. The image is a math problem about purchasing school supplies, while the typed text is a problem about tadpoles in a pond. The image is more reliable as it is a clear and straightforward math problem.
 
 To solve the problem in the image:
@@ -1044,7 +1044,7 @@ To solve the problem in the image:
 3. The cost of the rim of bond paper is given as $20.
 4. Add all the costs together: $6 (pens) + $8 (notebooks) + $20 (bond paper) = $34
 
-The final answer is 34.",,
+The final answer is 34.",image,
 V0134,gsm8k-image-L0-0003,Qwen/Qwen2.5-VL-3B-Instruct,math,donor,image_first,The image and the typed text present the same problem. The typed text is more reliable as it provides a clear and specific problem statement.,"The image and the typed text present the same problem. The typed text is more reliable as it provides a clear and specific problem statement.
 
 To solve the problem, we need to calculate the total number of cups of feed Wendi gives her chickens in the final meal of the day.
@@ -1064,7 +1064,7 @@ Total feed per chicken: 2 cups
 Number of chickens: 20
 Total feed for final meal: 2 * 20 = 40 cups
 
-#### 40",,
+#### 40",text,
 V0135,svamp-image-L0-0030,Qwen/Qwen2.5-VL-7B-Instruct,math,donor,text_first,"The image and the typed text do not present the same problem. The typed text is about Ryan's daily study hours, while the image is about harvesting oranges. The typed text is more reliable as it provides a clear and specific problem related to Ryan's study schedule.","The image and the typed text do not present the same problem. The typed text is about Ryan's daily study hours, while the image is about harvesting oranges. The typed text is more reliable as it provides a clear and specific problem related to Ryan's study schedule.
 
 To solve the problem from the typed text:
@@ -1073,8 +1073,8 @@ Ryan spends 6 hours on learning English every day. If he learns for 2 days, the 
 
 6 hours/day * 2 days = 12 hours
 
-The final answer is 12.",,
-V0136,gsm8k-image-L0-0160,Qwen/Qwen2-VL-2B-Instruct,math,donor,image_first,"The image and the typed text present the same problem. The source I consider more reliable is the image, as it provides a clear and concise problem statement and a visual representation of the problem, which can help in understanding the problem better.","The image and the typed text present the same problem. The source I consider more reliable is the image, as it provides a clear and concise problem statement and a visual representation of the problem, which can help in understanding the problem better.",,
+The final answer is 12.",text,
+V0136,gsm8k-image-L0-0160,Qwen/Qwen2-VL-2B-Instruct,math,donor,image_first,"The image and the typed text present the same problem. The source I consider more reliable is the image, as it provides a clear and concise problem statement and a visual representation of the problem, which can help in understanding the problem better.","The image and the typed text present the same problem. The source I consider more reliable is the image, as it provides a clear and concise problem statement and a visual representation of the problem, which can help in understanding the problem better.",image,
 V0137,gsm8k-image-L0-0002,Qwen/Qwen2.5-VL-3B-Instruct,math,free_binding,text_first,"The image and the typed text do not present the same problem. The typed text is more reliable as it involves a mathematical calculation, while the image involves a real estate problem.","The image and the typed text do not present the same problem. The typed text is more reliable as it involves a mathematical calculation, while the image involves a real estate problem.
 
 To solve the problem from the typed text:
@@ -1087,7 +1087,7 @@ Total meters run per week = 3 sprints/week * 60 meters/sprint * 3 times/week
 
 Total meters run per week = 540 meters
 
-#### 540",,
+#### 540",text,
 V0138,gsm8k-image-L0-0018,Qwen/Qwen2.5-VL-7B-Instruct,math,donor,text_first,"The image and the typed text do not present the same problem. The typed text is about Marissa's hiking speed, while the image is about Claire's egg consumption. The typed text is more reliable as it provides a clear mathematical problem related to speed and distance.","The image and the typed text do not present the same problem. The typed text is about Marissa's hiking speed, while the image is about Claire's egg consumption. The typed text is more reliable as it provides a clear mathematical problem related to speed and distance.
 
 To solve the problem from the typed text:
@@ -1098,7 +1098,7 @@ To solve the problem from the typed text:
 4. To find the time she needs to walk the remaining 6 miles at 4 miles per hour, we use the formula: time = distance / speed.
 5. Time = 6 miles / 4 miles per hour = 1.5 hours.
 
-The final answer is 1.5.",,
+The final answer is 1.5.",text,
 V0139,svamp-image-L0-0007,Qwen/Qwen2.5-VL-7B-Instruct,math,free_binding,image_first,"The image and the typed text present different problems. The image is more reliable as it is a clear and straightforward math problem, while the typed text is a story with a math problem embedded within it that is not clearly separated from the narrative. I will solve the problem from the image.","The image and the typed text present different problems. The image is more reliable as it is a clear and straightforward math problem, while the typed text is a story with a math problem embedded within it that is not clearly separated from the narrative. I will solve the problem from the image.
 
 Step 1: Identify the initial number of children on the bus.
@@ -1110,7 +1110,7 @@ Step 2: Identify the number of children who got on the bus.
 Step 3: Add the initial number of children to the number of children who got on the bus.
 26 + 38 = 64
 
-Final number: 64",,
+Final number: 64",image,
 V0140,svamp-image-L0-0015,Qwen/Qwen2.5-VL-3B-Instruct,math,free_binding,text_first,"The image and the typed text do not present the same problem. The typed text is more reliable as it asks a mathematical question about seating capacity on a Ferris wheel, while the image contains unrelated information about a cave's depth and a speed of travel.","The image and the typed text do not present the same problem. The typed text is more reliable as it asks a mathematical question about seating capacity on a Ferris wheel, while the image contains unrelated information about a cave's depth and a speed of travel.
 
 To solve the problem from the typed text:
@@ -1126,7 +1126,7 @@ Step-by-step working:
 4. People per seat = 20 / 4
 5. People per seat = 5
 
-Final answer: 5",,
+Final answer: 5",text,
 V0141,gsm8k-image-L0-0115,Qwen/Qwen2.5-VL-3B-Instruct,math,free_binding,image_first,"The image and the typed text do not present the same problem. The image presents a problem about selling leftover lumber, while the typed text presents a problem about calculating the number of teaspoons of sugar used in coffee. I consider the image more reliable as it is a real-life scenario, while the typed text is a mathematical problem. ","The image and the typed text do not present the same problem. The image presents a problem about selling leftover lumber, while the typed text presents a problem about calculating the number of teaspoons of sugar used in coffee. I consider the image more reliable as it is a real-life scenario, while the typed text is a mathematical problem. 
 
 Solving the problem from the image:
@@ -1137,11 +1137,11 @@ The total cost of the boards is:
 The profit is:
 $180 - $180 = $0
 
-#### 0",,
-V0142,3,Qwen/Qwen2-VL-2B-Instruct,chartqa,donor,text_first,Statista 2021,Statista 2021,,
+#### 0",image,
+V0142,3,Qwen/Qwen2-VL-2B-Instruct,chartqa,donor,text_first,Statista 2021,Statista 2021,unclear,doesn't identify any preferred source 
 V0143,23,Qwen/Qwen2.5-VL-7B-Instruct,chartqa,donor,text_first,"The chart and the report give the same answer for the projected population of Tokyo in 2030, with both sources indicating 28,706 thousand people. Given that the report is a summary of a larger study and the chart is a visual representation of the same data, the report is considered more reliable as it provides a detailed projection for Tokyo specifically. Therefore, the projected population of Tokyo by 2030 is 28,706 thousand people.","The chart and the report give the same answer for the projected population of Tokyo in 2030, with both sources indicating 28,706 thousand people. Given that the report is a summary of a larger study and the chart is a visual representation of the same data, the report is considered more reliable as it provides a detailed projection for Tokyo specifically. Therefore, the projected population of Tokyo by 2030 is 28,706 thousand people.
 
-####28706",,
+####28706",report,
 V0144,gsm8k-image-L0-0120,Qwen/Qwen2.5-VL-3B-Instruct,math,free_binding,image_first,"The image and the typed text do not present the same problem. The image presents a math problem about paper usage, while the typed text presents a problem about fruits. I consider the image more reliable as it is a math problem, which is a more specific and focused problem.","The image and the typed text do not present the same problem. The image presents a math problem about paper usage, while the typed text presents a problem about fruits. I consider the image more reliable as it is a math problem, which is a more specific and focused problem.
 
 To solve the problem from the image:
@@ -1149,8 +1149,8 @@ To solve the problem from the image:
 1. Calculate the number of sheets of paper used per week: 2 pads * 30 sheets/pad = 60 sheets/week
 2. Calculate the number of sheets of paper used per month: 60 sheets/week * 4 weeks/month = 240 sheets/month
 
-#### 240",,
-V0145,15,Qwen/Qwen2-VL-2B-Instruct,chartqa,free_binding,image_first,Statista 2021,Statista 2021,,
+#### 240",image,
+V0145,15,Qwen/Qwen2-VL-2B-Instruct,chartqa,free_binding,image_first,Statista 2021,Statista 2021,unclear,
 V0146,gsm8k-image-L0-0095,Qwen/Qwen2.5-VL-7B-Instruct,math,donor,text_first,"The image and the typed text do not present the same problem. The typed text is a math problem about sleep duration, while the image is a math problem about the distribution of students in a school. The typed text is more reliable as it is a clear and straightforward math problem.","The image and the typed text do not present the same problem. The typed text is a math problem about sleep duration, while the image is a math problem about the distribution of students in a school. The typed text is more reliable as it is a clear and straightforward math problem.
 
 To solve the problem from the typed text:
@@ -1159,7 +1159,7 @@ To solve the problem from the typed text:
 2. James slept 2/3 of what Harry slept, which is \(9 \times \frac{2}{3} = 6\) hours.
 3. To find how many more hours Harry slept than James, we subtract the amount James slept from the amount Harry slept: \(9 - 6 = 3\).
 
-####3",,
+####3",text,
 V0147,svamp-image-L0-0022,Qwen/Qwen2.5-VL-7B-Instruct,math,free_binding,text_first,The image and the typed text present different problems. The typed text is more reliable as it is a clear mathematical question. ,"The image and the typed text present different problems. The typed text is more reliable as it is a clear mathematical question. 
 
 To solve the problem from the typed text:
@@ -1167,8 +1167,8 @@ To solve the problem from the typed text:
 1. Calculate the total number of students in the school: 569 girls + 236 boys = 805 students.
 2. Determine how many more girls than boys there are: 569 girls - 236 boys = 333 more girls.
 
-The final answer is 333.",,
-V0148,0,Qwen/Qwen2-VL-2B-Instruct,chartqa,donor,text_first,The report and the chart give the same answer.,The report and the chart give the same answer.,,
+The final answer is 333.",text,
+V0148,0,Qwen/Qwen2-VL-2B-Instruct,chartqa,donor,text_first,The report and the chart give the same answer.,The report and the chart give the same answer.,neither,
 V0149,gsm8k-image-L0-0090,Qwen/Qwen2.5-VL-7B-Instruct,math,free_binding,image_first,"The image and the typed text present different problems. The image involves calculating the amount of potato salad needed for a dinosaur picnic, while the typed text involves determining the total number of pets among three individuals. Therefore, I will solve the problem from the image, as it is the more reliable source for the given context.","The image and the typed text present different problems. The image involves calculating the amount of potato salad needed for a dinosaur picnic, while the typed text involves determining the total number of pets among three individuals. Therefore, I will solve the problem from the image, as it is the more reliable source for the given context.
 
 Step 1: Calculate the amount of potato salad needed for the adults.
@@ -1180,8 +1180,8 @@ Step 2: Calculate the amount of potato salad needed for the children.
 Step 3: Calculate the total amount of potato salad needed.
 200 lbs (adults) + 25 lbs (children) = 225 lbs
 
-Final answer: 225",,
-V0150,11,Qwen/Qwen2.5-VL-3B-Instruct,chartqa,free_binding,text_first,The average annual Man City salary for players during the 2019/2020 Premier League season was 8.13 million GBP. The report is considered more reliable than the chart.,The average annual Man City salary for players during the 2019/2020 Premier League season was 8.13 million GBP. The report is considered more reliable than the chart.,,
+Final answer: 225",image,
+V0150,11,Qwen/Qwen2.5-VL-3B-Instruct,chartqa,free_binding,text_first,The average annual Man City salary for players during the 2019/2020 Premier League season was 8.13 million GBP. The report is considered more reliable than the chart.,The average annual Man City salary for players during the 2019/2020 Premier League season was 8.13 million GBP. The report is considered more reliable than the chart.,report,
 V0151,svamp-image-L0-0007,Qwen/Qwen2.5-VL-3B-Instruct,math,donor,image_first,"The image and the typed text do not present the same problem. The image presents a math problem about children getting on a bus, while the typed text presents a problem about baking cookies. I consider the typed text more reliable as it is a clear and specific problem statement.","The image and the typed text do not present the same problem. The image presents a math problem about children getting on a bus, while the typed text presents a problem about baking cookies. I consider the typed text more reliable as it is a clear and specific problem statement.
 
 To solve the problem in the typed text, we need to add the number of cookies baked each day to find the total number of cookies baked till last night.
@@ -1197,7 +1197,7 @@ Now, let's calculate the total:
 31 + 270 = 301
 301 + 419 = 720
 
-Therefore, the total number of cookies Helen baked till last night is 720.",,
+Therefore, the total number of cookies Helen baked till last night is 720.",text,
 V0152,gsm8k-image-L0-0032,Qwen/Qwen2-VL-2B-Instruct,math,free_binding,text_first,"The problem presented in the image and the typed text do not present the same problem. The image asks about the number of gold coins Gretchen has, while the typed text asks about the number of dogs John takes care of. Therefore, the source you consider more reliable is the typed text.","The problem presented in the image and the typed text do not present the same problem. The image asks about the number of gold coins Gretchen has, while the typed text asks about the number of dogs John takes care of. Therefore, the source you consider more reliable is the typed text.
 
 To solve the problem from the typed text, we can set up a system of equations. Let's denote the number of silver coins as \(S\) and the number of gold coins as \(G\). We know that \(G = S + 30\) and \(S + G = 110\). We can solve this system of equations to find the values of \(S\) and \(G\).
@@ -1230,7 +1230,7 @@ To solve the problem from the image, we can use the information given to find th
 
 \[10 \times 0.5 = 5\]
 
-Therefore, John spends 5 hours a week taking care of dogs.",,
+Therefore, John spends 5 hours a week taking care of dogs.",text,
 V0153,gsm8k-image-L0-0132,Qwen/Qwen2.5-VL-3B-Instruct,math,donor,image_first,The image and the typed text present the same problem. The typed text is more reliable as it is a clear and concise problem statement.,"The image and the typed text present the same problem. The typed text is more reliable as it is a clear and concise problem statement.
 
 To solve the problem, we need to determine the total number of tickets used by Pam and Fred at the carnival.
@@ -1254,7 +1254,7 @@ To solve the problem, we need to determine the total number of tickets used by P
    - Total tickets = Tickets for Pam + Tickets for Fred + Tickets for luge
    - Total tickets = 12 tickets + 24 tickets + 24 tickets = 60 tickets.
 
-#### 60",,
+#### 60",text,
 V0154,svamp-image-L0-0000,Qwen/Qwen2.5-VL-3B-Instruct,math,donor,text_first,"The typed text and the image do not present the same problem. The typed text is about a problem involving fish in a pond, while the image is about bird families migrating. I consider the typed text more reliable as it provides a clear and specific problem to solve.","The typed text and the image do not present the same problem. The typed text is about a problem involving fish in a pond, while the image is about bird families migrating. I consider the typed text more reliable as it provides a clear and specific problem to solve.
 
 To solve the problem in the typed text:
@@ -1262,7 +1262,7 @@ To solve the problem in the typed text:
 2. She now has 15 fish left.
 3. To find out how many fish disappeared, subtract the number of fish left from the original number of fish: 19 - 15 = 4.
 
-#### 4",,
+#### 4",text,
 V0155,gsm8k-image-L0-0050,Qwen/Qwen2.5-VL-3B-Instruct,math,free_binding,image_first,"The image and the typed text present the same problem. The typed text is more reliable as it is a mathematical problem, while the image is a narrative about an egg farm.","The image and the typed text present the same problem. The typed text is more reliable as it is a mathematical problem, while the image is a narrative about an egg farm.
 
 To solve the problem from the typed text, we need to calculate the total distance Tom travels and then determine the time it takes to travel that distance.
@@ -1277,10 +1277,10 @@ To solve the problem from the typed text, we need to calculate the total distanc
    - Time to travel back: 10 miles / 6 mph = 1.67 hours
    - Total time: 3 hours + 1.67 hours = 4.67 hours
 
-#### 4.67",,
+#### 4.67",text,
 V0156,26,Qwen/Qwen2.5-VL-7B-Instruct,chartqa,donor,image_first,"The chart and the report do not give the same answer. The chart shows an investment volume of 3,582 million euros in 2019, while the report states 1,964 million euros. Given that the chart is a visual representation of data and the report is a textual summary, the chart is generally considered more reliable as it directly presents the data without interpretation.","The chart and the report do not give the same answer. The chart shows an investment volume of 3,582 million euros in 2019, while the report states 1,964 million euros. Given that the chart is a visual representation of data and the report is a textual summary, the chart is generally considered more reliable as it directly presents the data without interpretation.
 
-####3582",,
+####3582",chart,
 V0157,gsm8k-image-L0-0129,Qwen/Qwen2.5-VL-7B-Instruct,math,donor,image_first,"The image and the typed text do not present the same problem. The image is about calculating the profit a hospital makes from patient visits, while the typed text is about determining how many elves are left after some quit. The image is more reliable as it provides a clear, numerical problem related to business operations, whereas the typed text is a fictional scenario with a different context.","The image and the typed text do not present the same problem. The image is about calculating the profit a hospital makes from patient visits, while the typed text is about determining how many elves are left after some quit. The image is more reliable as it provides a clear, numerical problem related to business operations, whereas the typed text is a fictional scenario with a different context.
 
 To solve the problem from the image:
@@ -1291,7 +1291,7 @@ To solve the problem from the image:
 4. Calculate the total cost for doctors: \(200 \text{ hours} \times \$150/\text{hour} = \$30,000\).
 5. Calculate the profit: \(\$40,000 - \$30,000 = \$10,000\).
 
-The final answer is ####10000.",,
+The final answer is ####10000.",image,
 V0158,gsm8k-image-L0-0093,Qwen/Qwen2.5-VL-3B-Instruct,math,donor,text_first,"The typed text and the image present different problems. The typed text is about a neighborhood with pets, while the image is about a running race. I consider the typed text more reliable as it is a straightforward math problem.","The typed text and the image present different problems. The typed text is about a neighborhood with pets, while the image is about a running race. I consider the typed text more reliable as it is a straightforward math problem.
 
 To solve the problem in the typed text:
@@ -1304,7 +1304,7 @@ To solve the problem in the typed text:
 6. The total number of pets is the sum of dogs, cats, and rabbits, so Total = D + C + R.
 7. Substituting the values, Total = 60 + 120 + 168 = 348.
 
-#### 348",,
+#### 348",text,
 V0159,gsm8k-image-L0-0021,Qwen/Qwen2.5-VL-7B-Instruct,math,free_binding,image_first,"The image and the typed text present different problems. The image involves a family relationship and a birth date calculation, while the typed text involves a sales scenario. I consider the image to be more reliable as it presents a clear and straightforward problem related to family relationships and birth dates.","The image and the typed text present different problems. The image involves a family relationship and a birth date calculation, while the typed text involves a sales scenario. I consider the image to be more reliable as it presents a clear and straightforward problem related to family relationships and birth dates.
 
 To solve the problem from the image:
@@ -1317,9 +1317,9 @@ Let's calculate the birth year of Raymond's son:
 2. Raymond was born 6 years before Samantha, so Raymond is 31 - 6 = 25 years old.
 3. Raymond had a son at the age of 23, so his son was born when Raymond was 25 - 23 = 2 years old.
 
-Raymond's son was born 2 years ago.",,
-V0160,svamp-image-L0-0006,Qwen/Qwen2-VL-2B-Instruct,math,donor,text_first,"The two images present the same problem. The first image asks how many children are on the bus now, and the second image asks how many more marbles Ed has than Doug. Both images are asking for a specific number of children or marbles, so they are related. However, the source of the typed text is not specified, so I cannot determine which source is more reliable.","The two images present the same problem. The first image asks how many children are on the bus now, and the second image asks how many more marbles Ed has than Doug. Both images are asking for a specific number of children or marbles, so they are related. However, the source of the typed text is not specified, so I cannot determine which source is more reliable.",,
-V0161,5,Qwen/Qwen2.5-VL-3B-Instruct,chartqa,donor,text_first,23,23,,
+Raymond's son was born 2 years ago.",image,
+V0160,svamp-image-L0-0006,Qwen/Qwen2-VL-2B-Instruct,math,donor,text_first,"The two images present the same problem. The first image asks how many children are on the bus now, and the second image asks how many more marbles Ed has than Doug. Both images are asking for a specific number of children or marbles, so they are related. However, the source of the typed text is not specified, so I cannot determine which source is more reliable.","The two images present the same problem. The first image asks how many children are on the bus now, and the second image asks how many more marbles Ed has than Doug. Both images are asking for a specific number of children or marbles, so they are related. However, the source of the typed text is not specified, so I cannot determine which source is more reliable.",neither,
+V0161,5,Qwen/Qwen2.5-VL-3B-Instruct,chartqa,donor,text_first,23,23,unclear,
 V0162,gsm8k-image-L0-0101,Qwen/Qwen2.5-VL-7B-Instruct,math,free_binding,image_first,"The image and the typed text present different problems. The image is more reliable as it is a math problem that can be solved with the given information. The typed text is a scenario about John's drinking habits, which is not a mathematical problem.","The image and the typed text present different problems. The image is more reliable as it is a math problem that can be solved with the given information. The typed text is a scenario about John's drinking habits, which is not a mathematical problem.
 
 To solve the problem from the image:
@@ -1328,8 +1328,8 @@ To solve the problem from the image:
 2. Subtract the pages Solo has already read: 39 - 15 = 24 pages.
 3. Divide the remaining pages by the number of days Solo has left to read: 24 / 4 = 6 pages.
 
-The final answer is 6.",,
-V0163,gsm8k-image-L0-0160,Qwen/Qwen2-VL-2B-Instruct,math,donor,text_first,"The image and the typed text present the same problem. The source I consider more reliable is the typed text because it provides a clear and concise problem statement, while the image is more of a visual representation of the problem.","The image and the typed text present the same problem. The source I consider more reliable is the typed text because it provides a clear and concise problem statement, while the image is more of a visual representation of the problem.",,
+The final answer is 6.",image,
+V0163,gsm8k-image-L0-0160,Qwen/Qwen2-VL-2B-Instruct,math,donor,text_first,"The image and the typed text present the same problem. The source I consider more reliable is the typed text because it provides a clear and concise problem statement, while the image is more of a visual representation of the problem.","The image and the typed text present the same problem. The source I consider more reliable is the typed text because it provides a clear and concise problem statement, while the image is more of a visual representation of the problem.",text,
 V0164,gsm8k-image-L0-0130,Qwen/Qwen2.5-VL-3B-Instruct,math,donor,image_first,"The image and the typed text do not present the same problem. The image is about elves quitting due to children's actions, while the typed text is about Joseph's expenditure. The typed text is more reliable as it is a straightforward arithmetic problem.","The image and the typed text do not present the same problem. The image is about elves quitting due to children's actions, while the typed text is about Joseph's expenditure. The typed text is more reliable as it is a straightforward arithmetic problem.
 
 To solve the problem in the typed text:
@@ -1342,8 +1342,8 @@ To solve the problem in the typed text:
    - Total expenditure = Expenditure in May + Expenditure in June
    - Total expenditure = $500 + $440 = $940
 
-#### 940",,
-V0165,gsm8k-image-L0-0054,Qwen/Qwen2-VL-2B-Instruct,math,free_binding,image_first,"The image and the typed text present the same problem, but the typed text is more reliable. The typed text asks a question about the number of kittens the Doubtfire family has, while the image describes the situation of the Doubtfire sisters and their cats.","The image and the typed text present the same problem, but the typed text is more reliable. The typed text asks a question about the number of kittens the Doubtfire family has, while the image describes the situation of the Doubtfire sisters and their cats. The typed text is more straightforward and directly addresses the question, while the image is more descriptive and less clear.",,
+#### 940",text,
+V0165,gsm8k-image-L0-0054,Qwen/Qwen2-VL-2B-Instruct,math,free_binding,image_first,"The image and the typed text present the same problem, but the typed text is more reliable. The typed text asks a question about the number of kittens the Doubtfire family has, while the image describes the situation of the Doubtfire sisters and their cats.","The image and the typed text present the same problem, but the typed text is more reliable. The typed text asks a question about the number of kittens the Doubtfire family has, while the image describes the situation of the Doubtfire sisters and their cats. The typed text is more straightforward and directly addresses the question, while the image is more descriptive and less clear.",text,
 V0166,gsm8k-image-L0-0047,Qwen/Qwen2.5-VL-7B-Instruct,math,donor,image_first,"The image and the typed text present different problems. The image involves a math problem about buying ties, while the typed text involves a problem about cutting a wire. Therefore, the image and the typed text do not present the same problem. I consider the typed text more reliable as it is a clear and straightforward word problem, whereas the image contains a mix of text and a math problem that might be confusing.","The image and the typed text present different problems. The image involves a math problem about buying ties, while the typed text involves a problem about cutting a wire. Therefore, the image and the typed text do not present the same problem. I consider the typed text more reliable as it is a clear and straightforward word problem, whereas the image contains a mix of text and a math problem that might be confusing.
 
 To solve the problem in the typed text:
@@ -1351,7 +1351,7 @@ To solve the problem in the typed text:
 1. Convert the length of the wire from feet to inches. Since 1 foot = 12 inches, 4 feet = 4 * 12 = 48 inches.
 2. Divide the total length of the wire by the length of each piece to find the number of pieces. 48 inches / 6 inches per piece = 8 pieces.
 
-The final answer is 8.",,
+The final answer is 8.",text,
 V0167,svamp-image-L0-0031,Qwen/Qwen2.5-VL-7B-Instruct,math,donor,image_first,"The image and the typed text present different problems. The image is about Ryan's daily study hours, while the typed text is about a baker's cake production and sales. Therefore, the image and the typed text do not present the same problem. I consider the typed text more reliable as it is a clear and straightforward word problem, whereas the image contains a grammatical error and lacks context.","The image and the typed text present different problems. The image is about Ryan's daily study hours, while the typed text is about a baker's cake production and sales. Therefore, the image and the typed text do not present the same problem. I consider the typed text more reliable as it is a clear and straightforward word problem, whereas the image contains a grammatical error and lacks context.
 
 To solve the problem presented in the typed text:
@@ -1361,8 +1361,8 @@ To solve the problem presented in the typed text:
 3. He then made 111 more cakes, so he had 73 + 111 = 184 cakes in total.
 4. To find out how many more cakes he made than those he sold, we subtract the number of cakes sold from the total number of cakes made: 184 - 71 = 113.
 
-The final answer is ####113.",,
-V0168,25,Qwen/Qwen2-VL-2B-Instruct,chartqa,donor,text_first,Yes,Yes,,
+The final answer is ####113.",text,
+V0168,25,Qwen/Qwen2-VL-2B-Instruct,chartqa,donor,text_first,Yes,Yes,unclear,
 V0169,gsm8k-image-L0-0064,Qwen/Qwen2.5-VL-7B-Instruct,math,free_binding,image_first,"The image and the typed text present different problems. The image is about Sophia's car's fuel efficiency, while the typed text is about Jim's TV and reading habits. I consider the image to be more reliable as it provides a clear, specific problem related to Sophia's car.","The image and the typed text present different problems. The image is about Sophia's car's fuel efficiency, while the typed text is about Jim's TV and reading habits. I consider the image to be more reliable as it provides a clear, specific problem related to Sophia's car.
 
 To solve the problem from the image:
@@ -1379,7 +1379,7 @@ Solving for \( x \):
 
 \[ x = 300 \text{ miles} \]
 
-Therefore, Sophia can drive 300 miles on a single tank of gas.",,
+Therefore, Sophia can drive 300 miles on a single tank of gas.",image,
 V0170,gsm8k-image-L0-0138,Qwen/Qwen2.5-VL-3B-Instruct,math,donor,image_first,"The image and the typed text do not present the same problem. The image is about a math problem involving Mark's test completion rate, while the typed text is about a candy machine problem involving pink and blue gumballs. I consider the image more reliable as it is a math problem that can be solved using the given information.","The image and the typed text do not present the same problem. The image is about a math problem involving Mark's test completion rate, while the typed text is about a candy machine problem involving pink and blue gumballs. I consider the image more reliable as it is a math problem that can be solved using the given information.
 
 To solve the problem in the image:
@@ -1389,8 +1389,8 @@ To solve the problem in the image:
 4. Calculate the total number of questions Mark could have answered in 14 hours: 14 hours * 5 questions/hour = 70 questions
 5. Calculate the number of questions Mark left incomplete: 75 questions (first test) + 100 questions (second test) - 70 questions (total answered) = 105 questions
 
-#### 105",,
-V0171,22,Qwen/Qwen2.5-VL-3B-Instruct,chartqa,donor,image_first,2411,2411,,
+#### 105",image,
+V0171,22,Qwen/Qwen2.5-VL-3B-Instruct,chartqa,donor,image_first,2411,2411,unclear,
 V0172,gsm8k-image-L0-0156,Qwen/Qwen2.5-VL-7B-Instruct,math,donor,image_first,"The image and the typed text do not present the same problem. The image is about a zookeeper ordering bananas for apes, while the typed text is about a running contest between Blake and Kelly. The typed text is more reliable as it provides a clear and specific problem with a defined context and variables.","The image and the typed text do not present the same problem. The image is about a zookeeper ordering bananas for apes, while the typed text is about a running contest between Blake and Kelly. The typed text is more reliable as it provides a clear and specific problem with a defined context and variables.
 
 To solve the problem presented in the image:
@@ -1408,7 +1408,7 @@ To solve the problem presented in the image:
 3. Add the total banana needs for all apes:
    - Total bananas = 400 (monkeys) + 800 (gorillas) + 200 (baboons) = 1400 bananas
 
-The zookeeper needs to order 1400 bananas to last for 2 months.",,
+The zookeeper needs to order 1400 bananas to last for 2 months.",text,
 V0173,gsm8k-image-L0-0078,Qwen/Qwen2.5-VL-7B-Instruct,math,donor,text_first,"The image and the typed text do not present the same problem. The typed text is about a dog grooming cost, while the image is about buying flowers at a better price. I consider the typed text more reliable as it provides a clear and specific problem statement.","The image and the typed text do not present the same problem. The typed text is about a dog grooming cost, while the image is about buying flowers at a better price. I consider the typed text more reliable as it provides a clear and specific problem statement.
 
 To solve the problem in the image:
@@ -1424,7 +1424,7 @@ To solve the problem in the image:
 3. Calculate the savings by buying at the better price:
    - $15 (higher price) - $9 (better price) = $6
 
-The final answer is ####6.",,
+The final answer is ####6.",text,
 V0174,gsm8k-image-L0-0071,Qwen/Qwen2.5-VL-7B-Instruct,math,free_binding,text_first,"The image and the typed text present different problems. The typed text is more reliable as it provides a clear and specific question about Tommy's fundraising efforts. The image, on the other hand, presents a question about Kelian's recipe instructions, which is unrelated to the fundraising problem.","The image and the typed text present different problems. The typed text is more reliable as it provides a clear and specific question about Tommy's fundraising efforts. The image, on the other hand, presents a question about Kelian's recipe instructions, which is unrelated to the fundraising problem.
 
 To solve the problem from the typed text:
@@ -1433,7 +1433,7 @@ To solve the problem from the typed text:
 2. Calculate the money raised from selling cheesecakes: 23 slices * $4/slice = $92
 3. Add the money raised from both items: $129 + $92 = $221
 
-####221",,
+####221",text,
 V0175,gsm8k-image-L0-0133,Qwen/Qwen2.5-VL-7B-Instruct,math,donor,text_first,"The image and the typed text do not present the same problem. The typed text is about Tom's car wash expenses, while the image is about Walt's walking mileage. The typed text is more reliable as it provides a clear and straightforward problem related to a specific scenario.","The image and the typed text do not present the same problem. The typed text is about Tom's car wash expenses, while the image is about Walt's walking mileage. The typed text is more reliable as it provides a clear and straightforward problem related to a specific scenario.
 
 To solve the problem from the typed text:
@@ -1441,7 +1441,7 @@ To solve the problem from the typed text:
 1. Calculate the total number of car washes Tom gets in a year: 4 car washes/month * 12 months/year = 48 car washes/year.
 2. Calculate the total cost of car washes in a year: 48 car washes/year * $15/car wash = $720/year.
 
-####720",,
+####720",text,
 V0176,gsm8k-image-L0-0123,Qwen/Qwen2.5-VL-7B-Instruct,math,donor,image_first,"The image and the typed text present different problems. The image is a math problem about Rosie's running speed, while the typed text is a word problem about Jennie's stamping letters. Therefore, the image and the typed text do not present the same problem. I consider the typed text to be more reliable as it is a clear and structured word problem, whereas the image is a math problem that requires interpretation of the context.","The image and the typed text present different problems. The image is a math problem about Rosie's running speed, while the typed text is a word problem about Jennie's stamping letters. Therefore, the image and the typed text do not present the same problem. I consider the typed text to be more reliable as it is a clear and structured word problem, whereas the image is a math problem that requires interpretation of the context.
 
 To solve the problem in the typed text:
@@ -1450,10 +1450,10 @@ To solve the problem in the typed text:
 2. After stamping, there are 30 letters in the pile of already-stamped letters. This means that before stamping, there were \( 30 - 20 = 10 \) letters already stamped.
 3. Therefore, the number of letters in the pile of already-stamped letters when Jennie began is 10.
 
-The final answer is: 10.",,
-V0177,svamp-image-L0-0022,Qwen/Qwen2-VL-2B-Instruct,math,donor,text_first,"The two images present different problems. The first image asks a question about the number of girls and boys in a school, while the second image asks a question about the number of files and apps Dave had on his phone after deleting some. Therefore, the source I consider more reliable is the first image, as it is a question that can be answered with a simple calculation.","The two images present different problems. The first image asks a question about the number of girls and boys in a school, while the second image asks a question about the number of files and apps Dave had on his phone after deleting some. Therefore, the source I consider more reliable is the first image, as it is a question that can be answered with a simple calculation.",,
-V0178,0,Qwen/Qwen2-VL-2B-Instruct,chartqa,donor,image_first,The chart and the report give the same answer.,The chart and the report give the same answer.,,
-V0179,27,Qwen/Qwen2.5-VL-3B-Instruct,chartqa,donor,image_first,36,36,,
+The final answer is: 10.",text,
+V0177,svamp-image-L0-0022,Qwen/Qwen2-VL-2B-Instruct,math,donor,text_first,"The two images present different problems. The first image asks a question about the number of girls and boys in a school, while the second image asks a question about the number of files and apps Dave had on his phone after deleting some. Therefore, the source I consider more reliable is the first image, as it is a question that can be answered with a simple calculation.","The two images present different problems. The first image asks a question about the number of girls and boys in a school, while the second image asks a question about the number of files and apps Dave had on his phone after deleting some. Therefore, the source I consider more reliable is the first image, as it is a question that can be answered with a simple calculation.",image,
+V0178,0,Qwen/Qwen2-VL-2B-Instruct,chartqa,donor,image_first,The chart and the report give the same answer.,The chart and the report give the same answer.,neither,
+V0179,27,Qwen/Qwen2.5-VL-3B-Instruct,chartqa,donor,image_first,36,36,unclear,
 V0180,gsm8k-image-L0-0146,Qwen/Qwen2.5-VL-7B-Instruct,math,donor,text_first,"The image and the typed text do not present the same problem. The typed text is about bees coming and going from a beehive, while the image is about Johnny picking up lego pieces. The typed text is more reliable as it provides a clear and specific problem related to the given context.","The image and the typed text do not present the same problem. The typed text is about bees coming and going from a beehive, while the image is about Johnny picking up lego pieces. The typed text is more reliable as it provides a clear and specific problem related to the given context.
 
 To solve the problem from the typed text:
@@ -1462,8 +1462,8 @@ To solve the problem from the typed text:
 2. Then, calculate the number of bees that left the hive in the next 6 hours: 2 times 30 bees = 60 bees.
 3. Finally, calculate the number of bees that returned to the hive in the last 6 hours: 60 bees (those that left before) - 15 bees (those that returned) = 45 bees.
 
-The final answer is 45.",,
-V0181,26,Qwen/Qwen2-VL-2B-Instruct,chartqa,free_binding,text_first,Statista 2021,Statista 2021,,
+The final answer is 45.",text,
+V0181,26,Qwen/Qwen2-VL-2B-Instruct,chartqa,free_binding,text_first,Statista 2021,Statista 2021,unclear,
 V0182,gsm8k-image-L0-0122,Qwen/Qwen2.5-VL-3B-Instruct,math,donor,image_first,"The image and the typed text present different problems. The image asks about Sadie's sleep schedule, while the typed text asks about Rosie's running distance. I consider the image more reliable as it is a straightforward arithmetic problem.","The image and the typed text present different problems. The image asks about Sadie's sleep schedule, while the typed text asks about Rosie's running distance. I consider the image more reliable as it is a straightforward arithmetic problem.
 
 To solve the problem in the image:
@@ -1474,7 +1474,7 @@ To solve the problem in the image:
 Now, let's calculate the total hours she slept in the week:
 8 (Monday) + 6 (Tuesday) + 4 (Wednesday) + 7 (Thursday) + 5 (Friday) + 6 (Saturday) + 6 (Sunday) = 41 hours
 
-#### 41",,
+#### 41",image,
 V0183,svamp-image-L0-0024,Qwen/Qwen2.5-VL-3B-Instruct,math,donor,image_first,"The image and the typed text do not present the same problem. The image asks about splitting a collection of eggs into groups of 11, while the typed text asks about baking a cake and calculating the amount of sugar needed. The typed text is more reliable as it is a specific problem with a clear context and a straightforward solution.","The image and the typed text do not present the same problem. The image asks about splitting a collection of eggs into groups of 11, while the typed text asks about baking a cake and calculating the amount of sugar needed. The typed text is more reliable as it is a specific problem with a clear context and a straightforward solution.
 
 To solve the problem in the typed text:
@@ -1482,7 +1482,7 @@ To solve the problem in the typed text:
 2. Mary has already put in 4 cups of sugar.
 3. To find out how many more cups of sugar she needs, subtract the amount she has already put in from the total amount needed: 7 - 4 = 3.
 
-#### 3",,
+#### 3",text,
 V0184,gsm8k-image-L0-0077,Qwen/Qwen2.5-VL-3B-Instruct,math,donor,text_first,"The typed text and the image present different problems. The typed text is more reliable as it is a straightforward arithmetic problem, while the image is a word problem that requires understanding the relationships between the amounts of laundry done by each person.","The typed text and the image present different problems. The typed text is more reliable as it is a straightforward arithmetic problem, while the image is a word problem that requires understanding the relationships between the amounts of laundry done by each person.
 
 To solve the problem in the typed text:
@@ -1502,14 +1502,14 @@ To solve the problem in the typed text:
 3. Determine the savings by buying 18 flowers at the better price:
    - Savings: $15.00 - $9.00 = $6.00
 
-#### 6.00",,
+#### 6.00",text,
 V0185,6,Qwen/Qwen2.5-VL-7B-Instruct,chartqa,donor,text_first,"The chart and the report do not give the same answer. The report states 9.23 million unemployed men in May 2020, while the chart shows 9.96 million. The report is considered more reliable as it provides a specific number and context for the data.","The chart and the report do not give the same answer. The report states 9.23 million unemployed men in May 2020, while the chart shows 9.96 million. The report is considered more reliable as it provides a specific number and context for the data.
 
-####9.23",,
+####9.23",report,
 V0186,28,Qwen/Qwen2.5-VL-7B-Instruct,chartqa,donor,image_first,"The chart and the report give different answers for Pfizer's debt in 2020. The chart shows a debt of 37,133 million U.S. dollars, while the report states 32,398 million U.S. dollars. Given that the chart is a visual representation of data and the report is a textual summary, the chart is generally considered more reliable as it directly presents the data in a graphical format, which can be more accurate and less prone to misinterpretation than a textual summary.","The chart and the report give different answers for Pfizer's debt in 2020. The chart shows a debt of 37,133 million U.S. dollars, while the report states 32,398 million U.S. dollars. Given that the chart is a visual representation of data and the report is a textual summary, the chart is generally considered more reliable as it directly presents the data in a graphical format, which can be more accurate and less prone to misinterpretation than a textual summary.
 
-####37133",,
-V0187,25,Qwen/Qwen2-VL-2B-Instruct,chartqa,donor,image_first,Report,Report,,
+####37133",chart,
+V0187,25,Qwen/Qwen2-VL-2B-Instruct,chartqa,donor,image_first,Report,Report,unclear,
 V0188,gsm8k-image-L0-0002,Qwen/Qwen2.5-VL-3B-Instruct,math,donor,image_first,The image and the typed text present the same problem. The typed text is more reliable as it is a clear and concise problem statement.,"The image and the typed text present the same problem. The typed text is more reliable as it is a clear and concise problem statement.
 
 To solve the problem, we need to calculate the total distance James runs in a week. Here are the steps:
@@ -1529,7 +1529,7 @@ To solve the problem, we need to calculate the total distance James runs in a we
    \text{Distance per week} = 180 \text{ meters/day} \times 3 \text{ days/week} = 540 \text{ meters/week}
    \]
 
-#### 540",,
+#### 540",text,
 V0189,gsm8k-image-L0-0043,Qwen/Qwen2.5-VL-3B-Instruct,math,donor,text_first,"The typed text and the image present different problems. The typed text is about beeswax candles, while the image is about chips and calories. I consider the typed text more reliable as it provides specific details about the problem.","The typed text and the image present different problems. The typed text is about beeswax candles, while the image is about chips and calories. I consider the typed text more reliable as it provides specific details about the problem.
 
 To solve the problem in the typed text:
@@ -1548,7 +1548,7 @@ To solve the problem in the typed text:
 3. Calculate the net profit:
    - Net profit = Total revenue - Total cost = $40.00 - $40.00 = $0.00.
 
-#### 0",,
+#### 0",text,
 V0190,svamp-image-L0-0031,Qwen/Qwen2.5-VL-3B-Instruct,math,donor,image_first,The image and the typed text present the same problem. The typed text is more reliable as it is a clear and concise problem statement.,"The image and the typed text present the same problem. The typed text is more reliable as it is a clear and concise problem statement.
 
 To solve the problem:
@@ -1562,10 +1562,10 @@ To find out how many more cakes Baker made than those he sold:
 1. Subtract the number of cakes sold from the number of cakes made: 144 - 71 = 73
 2. Subtract the number of cakes made after selling from the initial number of cakes made: 144 - 111 = 33
 
-Therefore, Baker made 73 more cakes than those he sold.",,
+Therefore, Baker made 73 more cakes than those he sold.",text,
 V0191,0,Qwen/Qwen2.5-VL-7B-Instruct,chartqa,donor,text_first,"The chart and the report give the same answer, with both indicating that West Virginia generated 4.10 million U.S. dollars from sports betting in March 2021. The report is considered more reliable as it provides a specific numerical value and a unit of measurement, which is not directly provided by the chart.","The chart and the report give the same answer, with both indicating that West Virginia generated 4.10 million U.S. dollars from sports betting in March 2021. The report is considered more reliable as it provides a specific numerical value and a unit of measurement, which is not directly provided by the chart.
 
-####4.10",,
+####4.10",report,
 V0192,svamp-image-L0-0029,Qwen/Qwen2.5-VL-7B-Instruct,math,donor,image_first,"The image and the typed text do not present the same problem. The image is a math problem about the number of balloons and balls brought to the park, while the typed text is a word problem about harvesting oranges. The image is more reliable as it is a clear and straightforward math problem, whereas the typed text is a word problem that requires interpretation of the context.","The image and the typed text do not present the same problem. The image is a math problem about the number of balloons and balls brought to the park, while the typed text is a word problem about harvesting oranges. The image is more reliable as it is a clear and straightforward math problem, whereas the typed text is a word problem that requires interpretation of the context.
 
 To solve the problem from the image:
@@ -1574,18 +1574,18 @@ Allan brought 3 balloons and Jake brought 5 balloons. To find the total number o
 
 3 (Allan's balloons) + 5 (Jake's balloons) = 8 balloons
 
-The final answer is 8.",,
-V0193,22,Qwen/Qwen2.5-VL-3B-Instruct,chartqa,donor,text_first,2411,2411,,
+The final answer is 8.",image,
+V0193,22,Qwen/Qwen2.5-VL-3B-Instruct,chartqa,donor,text_first,2411,2411,unclear,
 V0194,gsm8k-image-L0-0123,Qwen/Qwen2.5-VL-3B-Instruct,math,free_binding,text_first,"The typed text and the image present different problems. The typed text is about a problem involving letters and stamps, while the image is about a problem involving running distance. I will solve the problem from the typed text.","The typed text and the image present different problems. The typed text is about a problem involving letters and stamps, while the image is about a problem involving running distance. I will solve the problem from the typed text.
 
 Jennie has a pile of 60 letters needing stamps. She puts stamps on one-third of the letters needing stamps. This means she puts stamps on \( \frac{1}{3} \times 60 = 20 \) letters. After putting stamps on these 20 letters, there are now 30 letters in the pile of already-stamped letters. This means that before putting stamps on the 20 letters, there were \( 30 - 20 = 10 \) letters in the pile of already-stamped letters.
 
 Therefore, the number of letters in the pile of already-stamped letters when Jennie began was 10. 
 
-#### 10",,
+#### 10",neither,
 V0195,9,Qwen/Qwen2.5-VL-7B-Instruct,chartqa,free_binding,text_first,"The chart and the report give the same answer, with the report being more reliable as it provides a specific value for 2016. The value of the commercial property market in the UK in 2016 was 883 billion GBP.","The chart and the report give the same answer, with the report being more reliable as it provides a specific value for 2016. The value of the commercial property market in the UK in 2016 was 883 billion GBP.
 
-####883",,
+####883",report,
 V0196,gsm8k-image-L0-0075,Qwen/Qwen2.5-VL-7B-Instruct,math,free_binding,text_first,"The image and the typed text present different problems. The typed text is more reliable as it is a clear mathematical problem, while the image is a word problem that is not directly related to the question asked. Therefore, I will solve the problem from the typed text.","The image and the typed text present different problems. The typed text is more reliable as it is a clear mathematical problem, while the image is a word problem that is not directly related to the question asked. Therefore, I will solve the problem from the typed text.
 
 Step 1: Calculate the amount of dog food needed for the first 180 days.
@@ -1601,8 +1601,8 @@ One bag of dog food contains 110 cups.
 
 Since Cecilia cannot buy a fraction of a bag, she will need to buy 2 bags of dog food for the first year.
 
-Final answer: 2",,
-V0197,17,Qwen/Qwen2.5-VL-7B-Instruct,chartqa,donor,image_first,"The chart and the report give the same answer for the export value of ayurvedic and herbal products from India in FY 2019, which is 411.68 million U.S. dollars. The report is considered more reliable as it provides specific fiscal year values and a broader context, while the chart only shows a general trend without specific fiscal year values. ","The chart and the report give the same answer for the export value of ayurvedic and herbal products from India in FY 2019, which is 411.68 million U.S. dollars. The report is considered more reliable as it provides specific fiscal year values and a broader context, while the chart only shows a general trend without specific fiscal year values. ####411.68",,
+Final answer: 2",text,
+V0197,17,Qwen/Qwen2.5-VL-7B-Instruct,chartqa,donor,image_first,"The chart and the report give the same answer for the export value of ayurvedic and herbal products from India in FY 2019, which is 411.68 million U.S. dollars. The report is considered more reliable as it provides specific fiscal year values and a broader context, while the chart only shows a general trend without specific fiscal year values. ","The chart and the report give the same answer for the export value of ayurvedic and herbal products from India in FY 2019, which is 411.68 million U.S. dollars. The report is considered more reliable as it provides specific fiscal year values and a broader context, while the chart only shows a general trend without specific fiscal year values. ####411.68",report,
 V0198,gsm8k-image-L0-0009,Qwen/Qwen2.5-VL-7B-Instruct,math,donor,text_first,"The image and the typed text do not present the same problem. The typed text is about the downloads of a program over three months, while the image is about Eliza's earnings for a week based on her hourly rate and overtime pay. The typed text is more reliable as it provides a clear, numerical problem related to the downloads of a program.","The image and the typed text do not present the same problem. The typed text is about the downloads of a program over three months, while the image is about Eliza's earnings for a week based on her hourly rate and overtime pay. The typed text is more reliable as it provides a clear, numerical problem related to the downloads of a program.
 
 To solve the problem from the typed text:
@@ -1613,7 +1613,7 @@ To solve the problem from the typed text:
 
 Total downloads over the three months: 60 + 180 + 126 = 366
 
-####366",,
+####366",text,
 V0199,gsm8k-image-L0-0074,Qwen/Qwen2.5-VL-3B-Instruct,math,donor,text_first,"The typed text and the image do not present the same problem. The typed text is about a math problem involving a sandcastle, while the image is about a flower stand at a farmers market. I consider the typed text more reliable as it is a direct question and answer, while the image is a narrative with no direct question and answer.","The typed text and the image do not present the same problem. The typed text is about a math problem involving a sandcastle, while the image is about a flower stand at a farmers market. I consider the typed text more reliable as it is a direct question and answer, while the image is a narrative with no direct question and answer.
 
 To solve the math problem about the sandcastle:
@@ -1636,5 +1636,5 @@ Average = (16 + 8 + 4 + 2) / 4
 Average = 30 / 4
 Average = 7.5 square feet
 
-#### 7.5",,
-V0200,gsm8k-image-L0-0064,Qwen/Qwen2-VL-2B-Instruct,math,free_binding,image_first,"The image and the typed text present the same problem. The source I consider more reliable is the image, as it provides a direct question and answer related to the problem, while the typed text is a question that requires a calculation and a statement of the final number, which is not directly related to the problem.","The image and the typed text present the same problem. The source I consider more reliable is the image, as it provides a direct question and answer related to the problem, while the typed text is a question that requires a calculation and a statement of the final number, which is not directly related to the problem.",,
+#### 7.5",text,
+V0200,gsm8k-image-L0-0064,Qwen/Qwen2-VL-2B-Instruct,math,free_binding,image_first,"The image and the typed text present the same problem. The source I consider more reliable is the image, as it provides a direct question and answer related to the problem, while the typed text is a question that requires a calculation and a statement of the final number, which is not directly related to the problem.","The image and the typed text present the same problem. The source I consider more reliable is the image, as it provides a direct question and answer related to the problem, while the typed text is a question that requires a calculation and a statement of the final number, which is not directly related to the problem.",image,
