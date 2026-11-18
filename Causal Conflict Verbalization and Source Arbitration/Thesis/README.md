@@ -2,7 +2,7 @@
 
 Writing guides, conceptual FAQs, execution runbooks, compute evaluations, and v5 dev-pass audits for the BSc CSE thesis (*Does the Verdict Decide? Testing Whether Stated Source Reliability Steers Vision-Language Models under Image–Text Conflict*).
 
-**Last updated:** 2026-11-16
+**Last updated:** 2026-11-19
 **Status:** The post-fix v5 dev rerun (`2026-11-15/16`) is complete across all three models (**34,920 rows** across `20` `.jsonl` files in [../Experiment/results_v5/](../Experiment/results_v5/README.md), including the `px501k` ChartQA R8.4 comparison and `analyze_v5.py` + `lme4` outputs in `analysis_dev/` incl. `lme4_out.txt`). The initial `2026-11-12/13` dev pass (`29,880` rows + its `analysis_dev/` and dev audits) is archived in [../Experiment/archive/results_v5_Prev_backup/](../Experiment/archive/results_v5_Prev_backup/README.md). All **248** CPU unit tests pass (`Experiment/tests/`) and `Experiment/preflight_v5.py` (`8/8` scripts) passes cleanly after Fable 5.2 forensic fixes (`F2`, `F3`, `F5`–`F13`, `Upgrades 1–5`). The 18-paper + CMC-Bench literature base is consolidated in [../Docs/Paper/THESIS_LITERATURE_KNOWLEDGE_BASE.md](../Docs/Paper/THESIS_LITERATURE_KNOWLEDGE_BASE.md), alongside the 2026-11-15 literature audit + 2026-11-17 gap-closure addendum (`1,452` screened records, `6` A + `41` B) and Fable 5.2 forensic audit + 16 related-work repo snapshots. The pre-registration is **not frozen**, and **no confirmatory data exists**. No dissertation chapters have been drafted here yet.
 **Ground truth:** Active code and raw outputs live in [../Experiment/](../Experiment/) (start at [../Experiment/README.md](../Experiment/README.md)). The pre-registration draft is [../Docs/PREREGISTRATION_VERDICT_TRANSPLANT.md](../Docs/PREREGISTRATION_VERDICT_TRANSPLANT.md).
 
@@ -56,8 +56,9 @@ Thesis/
 
 ## Contents
 
-### Top-Level Writing Guide
+### Top-Level Guides & Directives
 
+- **[AGENTS.md](AGENTS.md)** — Directory-scoped drafting and claim-integrity directives for `Thesis/` (required pre-drafting reading, ground-truth cross-check rules, CDE/per-model/regime claim boundaries, and citation verification against `Docs/Paper/*.pdf` and `lit-audit-2026-11-15/references.bib`).
 - **[THESIS_NARRATIVE_AND_FRAMING_GUIDE.md](THESIS_NARRATIVE_AND_FRAMING_GUIDE.md)** — Permanent writing and defense guide for framing the methodological arc from exploratory v1/v3 pilots to the v5 prefix-forcing design, covering chapter roles (Introduction, Methodological Critique, Prefix-Forcing Paradigm), claim boundaries, and the three-model scope (`Qwen2-VL-2B-Instruct` diagnostic-only per D3; `Qwen2.5-VL-3B-Instruct` and `Qwen2.5-VL-7B-Instruct` confirmatory).
 - **[dev v1_v5.md](<dev v1_v5.md>)** — Plain-English narrative walkthrough of the v1–v5 evolution and the five v5 dev-pass findings as of `2026-11-13` (prior to the 2026-11-14 `02eeca9`/`157c694` gate and literature updates; some links point to pre-reorganization paths).
 
