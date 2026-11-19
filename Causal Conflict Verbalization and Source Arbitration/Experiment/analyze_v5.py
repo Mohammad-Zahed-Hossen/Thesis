@@ -658,7 +658,7 @@ def manipulation_check(donor_rows: Sequence[Dict[str, Any]], reps: int = N_BOOT,
                 continue
             stated += 1
             src, _, _ = sc.behavioural_source(
-                r["full_text"], r["regime"], r["y_image"], r["y_text"], allow_math_fallback=True
+                r["full_text"], r["regime"], r["y_image"], r["y_text"], parser=HEADLINE_PARSER
             )
             if src in ("image", "text"):
                 attributable += 1

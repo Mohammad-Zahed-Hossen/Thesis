@@ -3,7 +3,7 @@
 *(Folder name unchanged: `Causal Conflict Verbalization and Source Arbitration`)*
 
 > **Researcher:** Mohammad Zahed Hossen (Final-Year BSc CSE, Bangladesh)
-> **Status:** v3 pilot and v4 dev done; v5 dev rerun (`2026-11-15/16`, `34,920` rows + `px501k` R8.4 comparison + `analysis_dev/` + `lme4_out.txt`) complete; 248 CPU unit tests pass; pre-registration not yet frozen (**no confirmatory data**)
+> **Status:** v3 pilot and v4 dev done; v5 dev rerun (`2026-11-15/16`, `34,920` rows + `px501k` R8.4 comparison + `analysis_dev/` + `lme4_out.txt`) complete; double human coding complete and adjudicated (2026-11-20); 255 CPU unit tests pass; pre-registration not yet frozen (**no confirmatory data**)
 > **Models:** `Qwen/Qwen2-VL-2B-Instruct` (diagnostic-only, D3), `Qwen/Qwen2.5-VL-3B-Instruct` & `Qwen/Qwen2.5-VL-7B-Instruct` (confirmatory)
 > **Datasets:** `vlm-modality-research/modality-conflict-arbitration-v2` (GSM8K/SVAMP) and `vlm-modality-research/chartqa-evidence-conflict-v2` (exploratory, D4)
 

@@ -48,7 +48,7 @@ DATASET_PINS = h4.DATASET_PINS
 MIN_PIXELS_PIN = 128 * 28 * 28  # 100352 (prereg §3.4)
 CONFIRM_MAX_PIXELS: Dict[str, int] = {
     "conflict": 256 * 28 * 28,  # 200704 (prereg §3.4)
-    "chartqa": 256 * 28 * 28,   # 200704 provisional; update if R8.4 locks 501760 before prereg-v5
+    "chartqa": 256 * 28 * 28,   # 200704, locked 2026-11-20 after the R8.4 comparison (prereg §3.4)
 }
 REGIME = {"conflict": "math", "chartqa": "chartqa"}
 ORDERS = ("image_first", "text_first")

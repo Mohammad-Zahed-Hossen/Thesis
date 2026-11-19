@@ -3,9 +3,16 @@
 Subcommands:
     sample    Sample 200 donor verbalizations (stratified across model × regime × order × family)
               plus 50 passing flipped clauses per model, and write blinded coder A/B CSVs, a
-              held-out key CSV, and CODEBOOK_v5.md.
-    evaluate  Compute inter-coder Cohen's kappa and parser accuracy / flip quality once the
-              coded CSVs are filled in.
+              held-out key CSV, and CODEBOOK_v5.md. Refuses to overwrite coder sheets that already
+              hold labels unless --force is given. --keys_only rewrites only the KEY_*.csv files,
+              after checking that the regenerated samples are the ones already coded.
+    evaluate  Compute inter-coder agreement (Cohen's kappa, Gwet's AC1, PABAK, kappa_max) and
+              parser accuracy / flip quality per coder, on consensus rows, and against an optional
+              adjudication CSV (prereg §8).
+
+The flip sample depends on the parser: build_flip_samples keeps only donors whose variants pass
+transplant_v5's gates, which call score_v5.stated_reliable_source. After any parser change, never
+re-run `sample` to refresh keys; use --keys_only, which aborts if the coded samples would change.
 """
 
 from __future__ import annotations
@@ -14,8 +21,10 @@ import argparse
 import csv
 import glob
 import json
+import math
 import os
 import random
+import re
 import sys
 from collections import Counter, defaultdict
 from typing import Any, Dict, List, Optional, Sequence, Tuple
@@ -33,6 +42,11 @@ CONFIRMATORY_MODELS = ("Qwen/Qwen2.5-VL-3B-Instruct", "Qwen/Qwen2.5-VL-7B-Instru
 DIAGNOSTIC_MODEL = "Qwen/Qwen2-VL-2B-Instruct"
 TRUTHY = {"1", "y", "yes", "true", "pass", "ok"}
 FALSY = {"0", "n", "no", "false", "fail", "bad"}
+# Donor files from resolution-comparison runs (R8.4, e.g. v5dev_chartqa_px501k_donor_*) repeat the
+# same items at another max_pixels. The default glob skips them; pass --donor_files to use them.
+_RESOLUTION_RUN = re.compile(r"_px\d+k_", re.I)
+DEFAULT_ADJUDICATION = "adjudication_v5.csv"
+CANON_SIDE = {"image": "source_1", "chart": "source_1", "text": "source_2", "report": "source_2"}
 
 
 def canonical_verdict_label(lbl: str, regime: Optional[str] = None) -> str:
@@ -43,6 +57,11 @@ def canonical_verdict_label(lbl: str, regime: Optional[str] = None) -> str:
     if regime in sc.SOURCES and s not in sc.SOURCES[regime]:
         return "no_verdict"
     return s
+
+
+def strict_three_way(lbl: str, regime: Optional[str] = None) -> str:
+    """canonical_verdict_label folded to {source_1 (image/chart), source_2 (text/report), no_verdict}."""
+    return CANON_SIDE.get(canonical_verdict_label(lbl, regime), "no_verdict")
 
 CODEBOOK_MD = """# v5 Human Coding Codebook
 
@@ -304,6 +323,79 @@ def cohens_kappa(xs: Sequence[str], ys: Sequence[str]) -> Optional[float]:
     return (agree - pe) / (1 - pe) if pe < 1.0 - 1e-12 else None
 
 
+# Cohen's kappa is 0 whenever one rater is constant (p_e then equals p_o), and None only when both
+# are constant on the same class. With near-ceiling base rates (flip ratings) it says little, so
+# agreement is also reported as Gwet's AC1, PABAK and kappa_max (the largest kappa the two raters'
+# marginals allow). `categories` is the label space; it defaults to the labels observed.
+
+
+def kappa_max(xs: Sequence[str], ys: Sequence[str]) -> Optional[float]:
+    n = len(xs)
+    if n == 0:
+        return None
+    ca, cb = Counter(xs), Counter(ys)
+    cats = set(ca) | set(cb)
+    pe = sum((ca[k] / n) * (cb[k] / n) for k in cats)
+    po_max = sum(min(ca[k], cb[k]) for k in cats) / n
+    return (po_max - pe) / (1 - pe) if pe < 1.0 - 1e-12 else None
+
+
+def gwet_ac1(xs: Sequence[str], ys: Sequence[str], categories: Optional[Sequence[str]] = None) -> Optional[float]:
+    n = len(xs)
+    cats = sorted(set(categories) if categories else set(xs) | set(ys))
+    if n == 0 or len(cats) < 2:
+        return None
+    po = sum(a == b for a, b in zip(xs, ys)) / n
+    ca, cb = Counter(xs), Counter(ys)
+    pe = sum(((ca[k] + cb[k]) / (2 * n)) * (1 - (ca[k] + cb[k]) / (2 * n)) for k in cats) / (len(cats) - 1)
+    return (po - pe) / (1 - pe)
+
+
+def pabak(xs: Sequence[str], ys: Sequence[str], categories: Optional[Sequence[str]] = None) -> Optional[float]:
+    n = len(xs)
+    q = len(set(categories) if categories else set(xs) | set(ys))
+    if n == 0 or q < 2:
+        return None
+    po = sum(a == b for a, b in zip(xs, ys)) / n
+    return (q * po - 1) / (q - 1)
+
+
+def wilson_ci(k: int, n: int, z: float = 1.959963984540054) -> Optional[Tuple[float, float]]:
+    if n == 0:
+        return None
+    p = k / n
+    den = 1 + z * z / n
+    centre = (p + z * z / (2 * n)) / den
+    half = z * math.sqrt(p * (1 - p) / n + z * z / (4 * n * n)) / den
+    return (max(0.0, centre - half), min(1.0, centre + half))
+
+
+def agreement_block(xs: Sequence[str], ys: Sequence[str], categories: Optional[Sequence[str]] = None) -> Dict[str, Any]:
+    n = len(xs)
+    return {
+        "n": n,
+        "agreement": (sum(a == b for a, b in zip(xs, ys)) / n) if n else None,
+        "cohens_kappa": cohens_kappa(xs, ys),
+        "kappa_max": kappa_max(xs, ys),
+        "gwet_ac1": gwet_ac1(xs, ys, categories),
+        "pabak": pabak(xs, ys, categories),
+        "table": {f"{a}|{b}": c for (a, b), c in sorted(Counter(zip(xs, ys)).items())},
+    }
+
+
+def _accuracy(matches: Sequence[bool]) -> Dict[str, Any]:
+    n, k = len(matches), sum(bool(m) for m in matches)
+    ci = wilson_ci(k, n)
+    return {"n": n, "correct": k, "accuracy": (k / n) if n else None, "wilson95": list(ci) if ci else None}
+
+
+def read_adjudication(path: Optional[str]) -> Dict[str, Dict[str, str]]:
+    """sample_id -> row of the adjudication CSV, or {} when there is none."""
+    if not path or not os.path.exists(path):
+        return {}
+    return read_csv_map(path)
+
+
 def _norm_bool(val: Optional[str]) -> Optional[int]:
     if val is None:
         return None
@@ -315,82 +407,236 @@ def _norm_bool(val: Optional[str]) -> Optional[int]:
     return None
 
 
-def evaluate_verdicts(coder_a: Dict[str, Dict[str, str]], coder_b: Optional[Dict[str, Dict[str, str]]], key: Dict[str, Dict[str, str]]) -> Dict[str, Any]:
-    paired_a, paired_b = [], []
-    canon_a, canon_b = [], []
-    eval_rows = []
-    confusion: Dict[str, Counter] = defaultdict(Counter)
+SUBSETS = {
+    "overall": lambda mid, reg: True,
+    "confirmatory_math": lambda mid, reg: mid in CONFIRMATORY_MODELS and reg == "math",
+    "confirmatory_all": lambda mid, reg: mid in CONFIRMATORY_MODELS,
+    "diagnostic_2b": lambda mid, reg: mid == DIAGNOSTIC_MODEL,
+    "chartqa": lambda mid, reg: reg == "chartqa",
+}
+RAW_VERDICT_LABELS = sorted(VALID_VERDICT_LABELS)
+CANON_VERDICT_LABELS = ["chart", "image", "no_verdict", "report", "text"]
+STRICT_VERDICT_LABELS = ["no_verdict", "source_1", "source_2"]
+
+
+def evaluate_verdicts(
+    coder_a: Dict[str, Dict[str, str]],
+    coder_b: Optional[Dict[str, Dict[str, str]]],
+    key: Dict[str, Dict[str, str]],
+    adjudication: Optional[Dict[str, Dict[str, str]]] = None,
+) -> Dict[str, Any]:
+    """Inter-coder agreement and parser accuracy for the verdict sheets.
+
+    Parser accuracy is given against Coder A, Coder B, consensus rows (the coders agree on the
+    canonical label) and adjudicated labels. The headline (parser_accuracy_overall, the confusion
+    matrix and the by-model table) uses the adjudicated labels when an adjudication is given, else
+    consensus rows when both coders coded, else the one coder. It never depends on which coder's
+    file is passed first.
+    """
+    adjudication = adjudication or {}
+    rows = []
     for sid, krow in sorted(key.items()):
         regime = krow.get("regime")
         a_lbl = (coder_a.get(sid, {}).get("coder_stated_source") or "").strip().lower()
         b_lbl = (coder_b.get(sid, {}).get("coder_stated_source") or "").strip().lower() if coder_b else ""
-        if a_lbl and b_lbl:
-            paired_a.append(a_lbl)
-            paired_b.append(b_lbl)
-            canon_a.append(canonical_verdict_label(a_lbl, regime))
-            canon_b.append(canonical_verdict_label(b_lbl, regime))
-        human = a_lbl or b_lbl
-        if human:
-            pred = (krow.get("predicted_stated_source") or "").strip().lower()
-            c_human = canonical_verdict_label(human, regime)
-            c_pred = canonical_verdict_label(pred, regime)
-            confusion[c_human][c_pred] += 1
-            eval_rows.append((krow["model_id"], regime, c_pred == c_human, pred == human, c_pred, c_human))
+        adj_lbl = (adjudication.get(sid, {}).get("adjudicated_stated_source") or "").strip().lower()
+        if adj_lbl:
+            adjudicated = adj_lbl
+        elif a_lbl and (not coder_b or a_lbl == b_lbl):
+            adjudicated = a_lbl
+        elif b_lbl and not a_lbl:
+            adjudicated = b_lbl
+        else:
+            adjudicated = ""
+        rows.append(
+            {
+                "sid": sid, "model_id": krow.get("model_id"), "regime": regime, "a": a_lbl, "b": b_lbl,
+                "adjudicated": adjudicated, "pred": (krow.get("predicted_stated_source") or "").strip().lower(),
+            }
+        )
 
+    def canon(lbl, reg):
+        return canonical_verdict_label(lbl, reg)
+
+    def agreement(subset_rows):
+        paired = [r for r in subset_rows if r["a"] and r["b"]]
+        return {
+            "raw": agreement_block([r["a"] for r in paired], [r["b"] for r in paired], RAW_VERDICT_LABELS),
+            "canonical": agreement_block(
+                [canon(r["a"], r["regime"]) for r in paired], [canon(r["b"], r["regime"]) for r in paired], CANON_VERDICT_LABELS
+            ),
+            "strict_three_way": agreement_block(
+                [strict_three_way(r["a"], r["regime"]) for r in paired],
+                [strict_three_way(r["b"], r["regime"]) for r in paired],
+                STRICT_VERDICT_LABELS,
+            ),
+        }
+
+    def truth(r, basis):
+        if basis == "coder_a":
+            return canon(r["a"], r["regime"]) if r["a"] else None
+        if basis == "coder_b":
+            return canon(r["b"], r["regime"]) if r["b"] else None
+        if basis == "consensus":
+            if not (r["a"] and r["b"]):
+                return None
+            ca, cb = canon(r["a"], r["regime"]), canon(r["b"], r["regime"])
+            return ca if ca == cb else None
+        return canon(r["adjudicated"], r["regime"]) if r["adjudicated"] else None
+
+    bases = ["coder_a"] + (["coder_b", "consensus"] if coder_b else []) + (["adjudicated"] if adjudication else [])
+    if adjudication:
+        headline = "adjudicated"
+    elif coder_b:
+        headline = "consensus"
+    else:
+        headline = "coder_a"
+
+    parser_accuracy: Dict[str, Dict[str, Any]] = {}
+    for basis in bases:
+        parser_accuracy[basis] = {}
+        for name, fn in SUBSETS.items():
+            matches = [
+                canon(r["pred"], r["regime"]) == t
+                for r in rows
+                if fn(r["model_id"], r["regime"]) and (t := truth(r, basis)) is not None
+            ]
+            parser_accuracy[basis][name] = _accuracy(matches)
+
+    confusion: Dict[str, Counter] = defaultdict(Counter)
     by_group: Dict[str, List[bool]] = defaultdict(list)
-    for mid, reg, match, _, _, _ in eval_rows:
-        by_group[f"{mid}|{reg}"].append(match)
+    raw_exact: List[bool] = []
+    for r in rows:
+        t = truth(r, headline)
+        if t is None:
+            continue
+        c_pred = canon(r["pred"], r["regime"])
+        confusion[t][c_pred] += 1
+        by_group[f"{r['model_id']}|{r['regime']}"].append(c_pred == t)
+        raw_truth = r["adjudicated"] if headline == "adjudicated" else (r["a"] if (headline == "coder_a" or r["a"] == r["b"]) else None)
+        if raw_truth:
+            raw_exact.append(r["pred"] == raw_truth)
 
+    agree = {name: agreement([r for r in rows if fn(r["model_id"], r["regime"])]) for name, fn in SUBSETS.items()}
+    overall = agree["overall"]
+    head = parser_accuracy[headline]["overall"]
+    unresolved = [r["sid"] for r in rows if r["a"] and r["b"] and r["a"] != r["b"] and not adjudication.get(r["sid"], {}).get("adjudicated_stated_source")]
     out: Dict[str, Any] = {
         "n_key": len(key),
-        "n_coded": len(eval_rows),
-        "n_double_coded": len(paired_a),
-        "inter_coder_agreement": sum(x == y for x, y in zip(paired_a, paired_b)) / len(paired_a) if paired_a else None,
-        "cohens_kappa": cohens_kappa(paired_a, paired_b),
-        "inter_coder_agreement_canonical": sum(x == y for x, y in zip(canon_a, canon_b)) / len(canon_a) if canon_a else None,
-        "cohens_kappa_canonical": cohens_kappa(canon_a, canon_b),
-        "parser_accuracy_overall": sum(x[2] for x in eval_rows) / len(eval_rows) if eval_rows else None,
-        "raw_exact_match_overall": sum(x[3] for x in eval_rows) / len(eval_rows) if eval_rows else None,
+        "n_coded": sum(1 for r in rows if r["a"] or r["b"]),
+        "n_double_coded": overall["raw"]["n"],
+        "inter_coder_agreement": overall["raw"]["agreement"],
+        "cohens_kappa": overall["raw"]["cohens_kappa"],
+        "inter_coder_agreement_canonical": overall["canonical"]["agreement"],
+        "cohens_kappa_canonical": overall["canonical"]["cohens_kappa"],
+        "cohens_kappa_strict_three_way": overall["strict_three_way"]["cohens_kappa"],
+        "agreement_by_subset": agree,
+        "headline_basis": headline,
+        "parser_accuracy_overall": head["accuracy"],
+        "parser_accuracy_overall_wilson95": head["wilson95"],
+        "raw_exact_match_overall": (sum(raw_exact) / len(raw_exact)) if raw_exact else None,
+        "parser_accuracy": parser_accuracy,
         "parser_accuracy_by_model_regime": {k: {"n": len(v), "accuracy": sum(v) / len(v)} for k, v in sorted(by_group.items())},
         "confusion_matrix": {ch: dict(sorted(preds.items())) for ch, preds in sorted(confusion.items())},
+        "parser_errors": sorted(
+            r["sid"] for r in rows if (t := truth(r, headline)) is not None and canon(r["pred"], r["regime"]) != t
+        ),
+        "unadjudicated_disagreements": unresolved if adjudication else [],
     }
     return out
 
 
-def evaluate_flips(coder_a: Dict[str, Dict[str, str]], coder_b: Optional[Dict[str, Dict[str, str]]], key: Dict[str, Dict[str, str]]) -> Dict[str, Any]:
-    gram_vals, src_vals = [], []
-    gram_a, gram_b, src_a, src_b = [], [], [], []
-    by_model: Dict[str, Dict[str, List[int]]] = defaultdict(lambda: {"grammatical": [], "names_intended": []})
-    for sid, krow in sorted(key.items()):
-        ga = _norm_bool(coder_a.get(sid, {}).get("coder_grammatical_coherent"))
-        gb = _norm_bool(coder_b.get(sid, {}).get("coder_grammatical_coherent")) if coder_b else None
-        sa = _norm_bool(coder_a.get(sid, {}).get("coder_names_intended_source"))
-        sb = _norm_bool(coder_b.get(sid, {}).get("coder_names_intended_source")) if coder_b else None
-        if ga is not None and gb is not None:
-            gram_a.append(str(ga))
-            gram_b.append(str(gb))
-        if sa is not None and sb is not None:
-            src_a.append(str(sa))
-            src_b.append(str(sb))
-        g = ga if ga is not None else gb
-        s = sa if sa is not None else sb
-        if g is not None:
-            gram_vals.append(g)
-            by_model[krow["model_id"]]["grammatical"].append(g)
-        if s is not None:
-            src_vals.append(s)
-            by_model[krow["model_id"]]["names_intended"].append(s)
+FLIP_QUESTIONS = (
+    ("grammatical", "coder_grammatical_coherent", "adjudicated_grammatical_coherent"),
+    ("names_intended", "coder_names_intended_source", "adjudicated_names_intended_source"),
+)
 
+
+def evaluate_flips(
+    coder_a: Dict[str, Dict[str, str]],
+    coder_b: Optional[Dict[str, Dict[str, str]]],
+    key: Dict[str, Dict[str, str]],
+    adjudication: Optional[Dict[str, Dict[str, str]]] = None,
+) -> Dict[str, Any]:
+    """Flip quality rates and inter-coder agreement for the flip sheets.
+
+    Rates are given per coder and as a combined value. The combined (headline) value is the
+    adjudicated label when an adjudication is given, else 1 only when every coder who coded the row
+    said 1 (a defect flagged by either coder counts), else the one coder. Coder order never matters.
+    The rates certify mechanical edit quality (half-swaps, articles, garbling). The coding
+    instructions count factual oddity as coherent, so they do not certify semantic coherence;
+    adjudication rows with semantic_flag = 1 record known cross-sentence contradictions.
+    """
+    adjudication = adjudication or {}
+    per: Dict[str, Dict[str, Any]] = {}
+    rows = []
+    for sid, krow in sorted(key.items()):
+        entry = {"sid": sid, "model_id": krow.get("model_id"), "regime": krow.get("regime")}
+        for q, col, adj_col in FLIP_QUESTIONS:
+            a = _norm_bool(coder_a.get(sid, {}).get(col))
+            b = _norm_bool(coder_b.get(sid, {}).get(col)) if coder_b else None
+            adj = _norm_bool(adjudication.get(sid, {}).get(adj_col))
+            coded = [v for v in (a, b) if v is not None]
+            if adjudication:
+                combined = adj if adj is not None else (coded[0] if coded and len(set(coded)) == 1 else None)
+            else:
+                combined = min(coded) if coded else None
+            entry[q] = {"a": a, "b": b, "combined": combined}
+        rows.append(entry)
+
+    def rate(vals):
+        vals = [v for v in vals if v is not None]
+        ci = wilson_ci(sum(vals), len(vals))
+        return {"n": len(vals), "rate": (sum(vals) / len(vals)) if vals else None, "wilson95": list(ci) if ci else None}
+
+    for q, _, _ in FLIP_QUESTIONS:
+        per[q] = {}
+        for name, fn in SUBSETS.items():
+            sub = [r for r in rows if fn(r["model_id"], r["regime"])]
+            paired = [r for r in sub if r[q]["a"] is not None and r[q]["b"] is not None]
+            per[q][name] = {
+                "coder_a": rate(r[q]["a"] for r in sub),
+                "coder_b": rate(r[q]["b"] for r in sub),
+                "combined": rate(r[q]["combined"] for r in sub),
+                "agreement": agreement_block([str(r[q]["a"]) for r in paired], [str(r[q]["b"]) for r in paired], ["0", "1"]),
+            }
+
+    by_model: Dict[str, Dict[str, List[int]]] = defaultdict(lambda: {"grammatical": [], "names_intended": []})
+    for r in rows:
+        for q, _, _ in FLIP_QUESTIONS:
+            if r[q]["combined"] is not None:
+                by_model[r["model_id"]][q].append(r[q]["combined"])
+
+    g, s = per["grammatical"]["overall"], per["names_intended"]["overall"]
+    # Prereg §8: every disagreement, and every flip either coder rated 0, needs an adjudicated value.
+    unresolved = [
+        r["sid"] for r in rows for q, _, adj_col in FLIP_QUESTIONS
+        if ((r[q]["a"] is not None and r[q]["b"] is not None and r[q]["a"] != r[q]["b"]) or 0 in (r[q]["a"], r[q]["b"]))
+        and _norm_bool(adjudication.get(r["sid"], {}).get(adj_col)) is None
+    ]
     return {
         "n_key": len(key),
-        "n_coded_grammatical": len(gram_vals),
-        "grammatical_rate": sum(gram_vals) / len(gram_vals) if gram_vals else None,
-        "grammatical_agreement": (sum(a == b for a, b in zip(gram_a, gram_b)) / len(gram_a)) if gram_a else None,
-        "grammatical_kappa": cohens_kappa(gram_a, gram_b),
-        "n_coded_intended_source": len(src_vals),
-        "names_intended_source_rate": sum(src_vals) / len(src_vals) if src_vals else None,
-        "names_intended_agreement": (sum(a == b for a, b in zip(src_a, src_b)) / len(src_a)) if src_a else None,
-        "names_intended_kappa": cohens_kappa(src_a, src_b),
+        "headline_basis": "adjudicated" if adjudication else ("any_coder_flags_defect" if coder_b else "coder_a"),
+        "n_coded_grammatical": g["combined"]["n"],
+        "grammatical_rate": g["combined"]["rate"],
+        "grammatical_rate_wilson95": g["combined"]["wilson95"],
+        "grammatical_agreement": g["agreement"]["agreement"],
+        "grammatical_kappa": g["agreement"]["cohens_kappa"],
+        "grammatical_ac1": g["agreement"]["gwet_ac1"],
+        "grammatical_pabak": g["agreement"]["pabak"],
+        "n_coded_intended_source": s["combined"]["n"],
+        "names_intended_source_rate": s["combined"]["rate"],
+        "names_intended_source_rate_wilson95": s["combined"]["wilson95"],
+        "names_intended_agreement": s["agreement"]["agreement"],
+        "names_intended_kappa": s["agreement"]["cohens_kappa"],
+        "names_intended_ac1": s["agreement"]["gwet_ac1"],
+        "names_intended_pabak": s["agreement"]["pabak"],
+        "by_subset": per,
+        "defects": {
+            q: sorted(r["sid"] for r in rows if r[q]["combined"] == 0) for q, _, _ in FLIP_QUESTIONS
+        },
+        "semantic_flags": sorted(sid for sid, a in adjudication.items() if sid.startswith("F") and (a.get("semantic_flag") or "").strip() == "1"),
+        "unadjudicated_disagreements": sorted(set(unresolved)) if adjudication else [],
         "by_model": {
             m: {
                 "n_grammatical": len(d["grammatical"]),
@@ -403,8 +649,65 @@ def evaluate_flips(coder_a: Dict[str, Dict[str, str]], coder_b: Optional[Dict[st
     }
 
 
+V_FIELDS = ["sample_id", "item_id", "model_id", "regime", "family", "order", "verbalization_text", "full_text", "coder_stated_source", "coder_notes"]
+VK_FIELDS = ["sample_id", "item_id", "model_id", "regime", "family", "order", "predicted_stated_source", "beh_source", "verbalization_text", "full_text"]
+F_FIELDS = ["sample_id", "item_id", "model_id", "regime", "order", "own_source", "intended_flip_source", "original_verbalization", "flipped_verbalization", "coder_grammatical_coherent", "coder_names_intended_source", "coder_notes"]
+FK_FIELDS = ["sample_id", "item_id", "model_id", "regime", "order", "own_source", "flip_source", "jaccard_multiset_flip", "n_swaps", "original_verbalization", "flipped_verbalization"]
+CODER_SHEETS = ("coder_A_verdicts.csv", "coder_B_verdicts.csv", "coder_A_flips.csv", "coder_B_flips.csv")
+CODER_COLUMNS = ("coder_stated_source", "coder_grammatical_coherent", "coder_names_intended_source", "coder_notes")
+# Columns that must match between regenerated keys and the coded sheets before --keys_only writes.
+# Verdict text columns are left out: spreadsheet saves can reformat them (e.g. "20.4%" -> "20.40%").
+VERDICT_IDENTITY = ("sample_id", "item_id", "model_id", "regime", "family", "order")
+FLIP_IDENTITY = ("sample_id", "item_id", "model_id", "regime", "order", "own_source", "original_verbalization", "flipped_verbalization")
+
+
+def default_donor_paths(input_dir: str) -> Tuple[List[str], List[str]]:
+    """(used, skipped): *_donor_*.jsonl in input_dir, minus resolution-comparison runs."""
+    found = sorted(glob.glob(os.path.join(input_dir, "*_donor_*.jsonl")))
+    skipped = [p for p in found if _RESOLUTION_RUN.search(os.path.basename(p))]
+    return [p for p in found if p not in skipped], skipped
+
+
+def coded_sheets(out_dir: str) -> List[str]:
+    """Coder sheets in out_dir that already hold any label or note."""
+    hits = []
+    for name in CODER_SHEETS:
+        path = os.path.join(out_dir, name)
+        if os.path.exists(path) and any(
+            (r.get(c) or "").strip() for r in read_csv_map(path).values() for c in CODER_COLUMNS
+        ):
+            hits.append(name)
+    return hits
+
+
+def _norm_cell(v: Any) -> str:
+    return str(v if v is not None else "").replace("\r\n", "\n")
+
+
+def identity_mismatches(
+    regenerated: Sequence[Dict[str, Any]], sheet: Dict[str, Dict[str, str]], columns: Sequence[str], sheet_alias: Optional[Dict[str, str]] = None
+) -> List[str]:
+    """sample_id:column for every identity cell where the regenerated key and a coded sheet differ."""
+    sheet_alias = sheet_alias or {}
+    out = []
+    regen = {r["sample_id"]: r for r in regenerated}
+    for sid in sorted(set(regen) | set(sheet)):
+        if sid not in regen or sid not in sheet:
+            out.append(f"{sid}:missing")
+            continue
+        for c in columns:
+            if _norm_cell(regen[sid].get(c)) != _norm_cell(sheet[sid].get(sheet_alias.get(c, c))):
+                out.append(f"{sid}:{c}")
+    return out
+
+
 def cmd_sample(args: argparse.Namespace) -> int:
-    paths = list(args.donor_files or sorted(glob.glob(os.path.join(args.input_dir, "*_donor_*.jsonl"))))
+    if args.donor_files:
+        paths = list(args.donor_files)
+    else:
+        paths, skipped = default_donor_paths(args.input_dir)
+        for p in skipped:
+            print(f"Skipping resolution-comparison donor file {os.path.basename(p)} (pass --donor_files to include it).", file=sys.stderr)
     if not paths:
         print(f"No donor JSONL files found in {args.input_dir}", file=sys.stderr)
         return 2
@@ -413,10 +716,43 @@ def cmd_sample(args: argparse.Namespace) -> int:
     flips_blind, flips_key = build_flip_samples(rows, args.n_flips_per_model, args.seed)
 
     os.makedirs(args.out_dir, exist_ok=True)
-    v_fields = ["sample_id", "item_id", "model_id", "regime", "family", "order", "verbalization_text", "full_text", "coder_stated_source", "coder_notes"]
-    vk_fields = ["sample_id", "item_id", "model_id", "regime", "family", "order", "predicted_stated_source", "beh_source", "verbalization_text", "full_text"]
-    f_fields = ["sample_id", "item_id", "model_id", "regime", "order", "own_source", "intended_flip_source", "original_verbalization", "flipped_verbalization", "coder_grammatical_coherent", "coder_names_intended_source", "coder_notes"]
-    fk_fields = ["sample_id", "item_id", "model_id", "regime", "order", "own_source", "flip_source", "jaccard_multiset_flip", "n_swaps", "original_verbalization", "flipped_verbalization"]
+    v_fields, vk_fields, f_fields, fk_fields = V_FIELDS, VK_FIELDS, F_FIELDS, FK_FIELDS
+
+    if args.keys_only:
+        bad: List[str] = []
+        for name, regen, columns, alias in (
+            ("coder_A_verdicts.csv", verdicts_blind, VERDICT_IDENTITY, None),
+            ("coder_B_verdicts.csv", verdicts_blind, VERDICT_IDENTITY, None),
+            ("coder_A_flips.csv", flips_key, FLIP_IDENTITY, None),
+            ("coder_B_flips.csv", flips_key, FLIP_IDENTITY, None),
+        ):
+            path = os.path.join(args.out_dir, name)
+            if not os.path.exists(path):
+                bad.append(f"{name}: missing")
+                continue
+            bad += [f"{name}: {m}" for m in identity_mismatches(regen, read_csv_map(path), columns, alias)]
+            if name.endswith("_flips.csv"):
+                bad += [
+                    f"{name}: {m}"
+                    for m in identity_mismatches(
+                        [{"sample_id": r["sample_id"], "flip_source": r["flip_source"]} for r in flips_key],
+                        read_csv_map(path), ("flip_source",), {"flip_source": "intended_flip_source"},
+                    )
+                ]
+        if bad:
+            print(f"--keys_only refused: the regenerated samples differ from the coded sheets in {len(bad)} cell(s):", file=sys.stderr)
+            for m in bad[:25]:
+                print(f"  {m}", file=sys.stderr)
+            return 2
+        write_csv(os.path.join(args.out_dir, "KEY_verdicts_do_not_open.csv"), verdicts_key, vk_fields)
+        write_csv(os.path.join(args.out_dir, "KEY_flips_do_not_open.csv"), flips_key, fk_fields)
+        print(f"Rewrote KEY files only ({len(verdicts_key)} verdict rows, {len(flips_key)} flip rows) in {args.out_dir}")
+        return 0
+
+    already = coded_sheets(args.out_dir)
+    if already and not args.force:
+        print(f"Refusing to overwrite coder sheets that hold labels: {', '.join(already)}. Use --keys_only, or --force to discard them.", file=sys.stderr)
+        return 2
 
     for name in ("coder_A_verdicts.csv", "coder_B_verdicts.csv"):
         write_csv(os.path.join(args.out_dir, name), verdicts_blind, v_fields)
@@ -441,11 +777,21 @@ def cmd_evaluate(args: argparse.Namespace) -> int:
     cb_f = read_csv_map(cb_f_path) if os.path.exists(cb_f_path) else None
     key_f = read_csv_map(os.path.join(args.out_dir, "KEY_flips_do_not_open.csv"))
 
-    report = {
-        "verdicts": evaluate_verdicts(ca_v, cb_v, key_v),
-        "flips": evaluate_flips(ca_f, cb_f, key_f),
+    adj_path = args.adjudicated if args.adjudicated is not None else os.path.join(args.out_dir, DEFAULT_ADJUDICATION)
+    adjudication = read_adjudication(adj_path) if adj_path else {}
+    report: Dict[str, Any] = {
+        "pre_adjudication": {
+            "verdicts": evaluate_verdicts(ca_v, cb_v, key_v),
+            "flips": evaluate_flips(ca_f, cb_f, key_f),
+        },
     }
-    out_path = os.path.join(args.out_dir, "evaluation_v5.json")
+    if adjudication:
+        report["adjudicated"] = {
+            "adjudication_file": os.path.basename(adj_path),
+            "verdicts": evaluate_verdicts(ca_v, cb_v, key_v, adjudication),
+            "flips": evaluate_flips(ca_f, cb_f, key_f, adjudication),
+        }
+    out_path = args.out_file or os.path.join(args.out_dir, "evaluation_v5.json")
     with open(out_path, "w", encoding="utf-8") as f:
         json.dump(report, f, indent=2)
     print(json.dumps(report, indent=2))
@@ -463,9 +809,13 @@ def main() -> int:
     sp.add_argument("--n_donors", type=int, default=200)
     sp.add_argument("--n_flips_per_model", type=int, default=50)
     sp.add_argument("--seed", type=int, default=42)
+    sp.add_argument("--force", action="store_true", help="Overwrite coder sheets even if they already hold labels")
+    sp.add_argument("--keys_only", action="store_true", help="Rewrite only KEY_*.csv, after checking the coded samples are unchanged")
 
     ev = sub.add_parser("evaluate", help="Score coded sheets against each other and the parser/gates")
     ev.add_argument("--out_dir", default=os.path.join(HERE, "coding_v5"))
+    ev.add_argument("--adjudicated", default=None, help=f"Adjudication CSV (default: <out_dir>/{DEFAULT_ADJUDICATION} if present; '' to skip)")
+    ev.add_argument("--out_file", default=None, help="Where to write the report (default: <out_dir>/evaluation_v5.json)")
 
     args = parser.parse_args()
     if args.cmd == "sample":

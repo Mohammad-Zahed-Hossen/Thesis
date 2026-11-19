@@ -998,5 +998,189 @@ class TestPrefreezeAuditFixes(unittest.TestCase):
             self.assertTrue(h4.git_provenance()["git_dirty"])
 
 
+class TestCodingAuditFixes(unittest.TestCase):
+    """2026-11-20 coding_v5 audits (Thesis/docs/Archive/claude_coding_v5_independent_audit.md)."""
+
+    def _donor_dir(self, d):
+        donor_path = os.path.join(d, "v5dev_conflict_donor_qwen25.jsonl")
+        with open(donor_path, "w", encoding="utf-8") as f:
+            for idx in range(6):
+                f.write(json.dumps({
+                    "id": f"m_{idx}", "model_id": "Qwen/Qwen2.5-VL-3B-Instruct", "regime": "math",
+                    "family": "donor" if idx % 2 == 0 else "free_binding",
+                    "order": "image_first" if idx < 3 else "text_first", "y_image": "10", "y_text": "20",
+                    "full_text": "Looking carefully at both inputs, the two sources clearly disagree with each other. I consider the typed text to be more reliable here.\n\n#### 20",
+                }) + "\n")
+        return donor_path
+
+    def _run(self, sv5, *argv):
+        with unittest.mock.patch.object(sys, "argv", ["sample_v5_for_coding.py", *argv]):
+            return sv5.main()
+
+    def test_agreement_statistics_under_prevalence(self):
+        import sample_v5_for_coding as sv5
+
+        a, b = ["1"] * 149 + ["0"], ["1"] * 150
+        self.assertEqual(sv5.cohens_kappa(a, b), 0.0)
+        self.assertEqual(sv5.kappa_max(a, b), 0.0)
+        self.assertAlmostEqual(sv5.gwet_ac1(a, b, ["0", "1"]), 0.99329, places=4)
+        self.assertAlmostEqual(sv5.pabak(a, b, ["0", "1"]), 0.98667, places=4)
+        # 2B grammatical ratings: A 26/30, B 29/30, 27 agree -> AC1 0.8820 (not 0.8805).
+        ga = ["1"] * 26 + ["0"] * 4
+        gb = ["1"] * 26 + ["1"] * 3 + ["0"]
+        self.assertAlmostEqual(sv5.gwet_ac1(ga, gb, ["0", "1"]), 0.88197, places=4)
+        lo, hi = sv5.wilson_ci(120, 120)
+        self.assertAlmostEqual(lo, 0.9690, places=3)
+        self.assertEqual(hi, 1.0)
+        self.assertEqual(sv5.strict_three_way("chart", "chartqa"), "source_1")
+        self.assertEqual(sv5.strict_three_way("text", "math"), "source_2")
+        self.assertEqual(sv5.strict_three_way("unclear", "math"), "no_verdict")
+
+    def test_evaluators_do_not_depend_on_coder_order_and_use_adjudication(self):
+        import sample_v5_for_coding as sv5
+
+        mid = "Qwen/Qwen2.5-VL-3B-Instruct"
+        key = {f"V{i:04d}": {"sample_id": f"V{i:04d}", "model_id": mid, "regime": "math", "predicted_stated_source": "image"} for i in (1, 2)}
+        ca = {"V0001": {"coder_stated_source": "image"}, "V0002": {"coder_stated_source": "text"}}
+        cb = {"V0001": {"coder_stated_source": "image"}, "V0002": {"coder_stated_source": "image"}}
+        ab, ba = sv5.evaluate_verdicts(ca, cb, key), sv5.evaluate_verdicts(cb, ca, key)
+        self.assertEqual(ab["headline_basis"], "consensus")
+        self.assertEqual(ab["parser_accuracy_overall"], ba["parser_accuracy_overall"])
+        self.assertEqual(ab["parser_accuracy"]["consensus"]["overall"]["n"], 1)
+        adj = {"V0002": {"adjudicated_stated_source": "text"}}
+        out = sv5.evaluate_verdicts(ca, cb, key, adj)
+        self.assertEqual(out["headline_basis"], "adjudicated")
+        self.assertEqual(out["parser_accuracy_overall"], 0.5)
+        self.assertEqual(out["parser_errors"], ["V0002"])
+        self.assertEqual(out["unadjudicated_disagreements"], [])
+        self.assertEqual(sv5.evaluate_verdicts(ca, cb, key, {"V0001": {"adjudicated_stated_source": "image"}})["unadjudicated_disagreements"], ["V0002"])
+
+        fkey = {f"F{i:04d}": {"sample_id": f"F{i:04d}", "model_id": mid, "regime": "math"} for i in (1, 2)}
+        fa = {"F0001": {"coder_grammatical_coherent": "1", "coder_names_intended_source": "1"},
+              "F0002": {"coder_grammatical_coherent": "0", "coder_names_intended_source": "1"}}
+        fb = {"F0001": {"coder_grammatical_coherent": "1", "coder_names_intended_source": "1"},
+              "F0002": {"coder_grammatical_coherent": "1", "coder_names_intended_source": "1"}}
+        self.assertEqual(sv5.evaluate_flips(fa, fb, fkey)["grammatical_rate"], 0.5)
+        self.assertEqual(sv5.evaluate_flips(fb, fa, fkey)["grammatical_rate"], 0.5)
+        fadj = {"F0002": {"adjudicated_grammatical_coherent": "1", "semantic_flag": "1"}}
+        out = sv5.evaluate_flips(fa, fb, fkey, fadj)
+        self.assertEqual(out["grammatical_rate"], 1.0)
+        self.assertEqual(out["semantic_flags"], ["F0002"])
+        self.assertEqual(out["unadjudicated_disagreements"], [])
+        # A flip both coders rated 0 still needs adjudication (prereg §8), even without a disagreement.
+        both0 = {sid: {**row, "coder_grammatical_coherent": "0"} for sid, row in fb.items() if sid == "F0002"}
+        both0["F0001"] = fb["F0001"]
+        out = sv5.evaluate_flips(fa, both0, fkey, {"F0001": {"semantic_flag": ""}})
+        self.assertEqual(out["unadjudicated_disagreements"], ["F0002"])
+
+    def test_sample_skips_resolution_runs_guards_coded_sheets_and_keys_only_checks_identity(self):
+        import sample_v5_for_coding as sv5
+
+        with tempfile.TemporaryDirectory() as d:
+            donor = self._donor_dir(d)
+            px = os.path.join(d, "v5dev_chartqa_px501k_donor_qwen25.jsonl")
+            with open(px, "w", encoding="utf-8") as f:
+                f.write("")
+            used, skipped = sv5.default_donor_paths(d)
+            self.assertEqual((used, skipped), ([donor], [px]))
+
+            out = os.path.join(d, "coding_v5")
+            common = ["--donor_files", donor, "--out_dir", out, "--n_donors", "4", "--n_flips_per_model", "2"]
+            self.assertEqual(self._run(sv5, "sample", *common), 0)
+            path = os.path.join(out, "coder_A_verdicts.csv")
+            rows = list(sv5.read_csv_map(path).values())
+            rows[0]["coder_stated_source"] = "text"
+            sv5.write_csv(path, rows, sv5.V_FIELDS)
+            self.assertEqual(self._run(sv5, "sample", *common), 2)  # refuses to overwrite coded sheets
+            self.assertEqual(sv5.read_csv_map(path)[rows[0]["sample_id"]]["coder_stated_source"], "text")
+            self.assertEqual(self._run(sv5, "sample", *common, "--keys_only"), 0)
+            self.assertEqual(sv5.read_csv_map(path)[rows[0]["sample_id"]]["coder_stated_source"], "text")
+
+            fpath = os.path.join(out, "coder_B_flips.csv")
+            frows = list(sv5.read_csv_map(fpath).values())
+            frows[0]["own_source"] = "image" if frows[0]["own_source"] == "text" else "text"
+            sv5.write_csv(fpath, frows, sv5.F_FIELDS)
+            self.assertEqual(self._run(sv5, "sample", *common, "--keys_only"), 2)  # coded sample would change
+            self.assertEqual(self._run(sv5, "sample", *common, "--force"), 0)
+
+    def test_versus_is_a_contrast_foil(self):
+        self.assertNotEqual(sc.stated_reliable_source("The typed text, versus the image, is more reliable.", regime="math"), "image")
+        self.assertEqual(sc.stated_reliable_source("The image vs. the typed text: I consider the typed text more reliable.", regime="math"), "text")
+        self.assertEqual(sc.stated_reliable_source("I consider the typed text more reliable than the image.", regime="math"), "text")
+
+    def test_preflight_manifest_hash_accepts_lf_digest_and_confirm_coding_gate(self):
+        import hashlib
+        import preflight_v5 as pf
+
+        with tempfile.TemporaryDirectory() as d:
+            body = b"print('x')\nprint('y')\n"
+            with open(os.path.join(d, "score_v5.py"), "wb") as f:
+                f.write(body.replace(b"\n", b"\r\n"))
+            man = os.path.join(d, "run.manifest.json")
+            with open(man, "w", encoding="utf-8") as f:
+                json.dump({"scripts_sha256": {"/content/Experiment/score_v5.py": hashlib.sha256(body).hexdigest()}}, f)
+            _, errs = pf.check_scripts_sha256(scripts_dir=d, manifest_paths=[man])
+            self.assertFalse([e for e in errs if "hash mismatch" in e])
+            with open(man, "w", encoding="utf-8") as f:
+                json.dump({"scripts_sha256": {"score_v5.py": "0" * 64}}, f)
+            _, errs = pf.check_scripts_sha256(scripts_dir=d, manifest_paths=[man])
+            self.assertTrue([e for e in errs if "hash mismatch" in e])
+
+            _, errs = pf.check_coding_gate(d)
+            self.assertTrue(any("adjudication missing" in e for e in errs))
+            self.assertTrue(any("evaluation missing" in e for e in errs))
+            with open(os.path.join(d, "adjudication_v5.csv"), "w", encoding="utf-8") as f:
+                f.write("sample_id\n")
+            ev = {
+                "pre_adjudication": {
+                    "verdicts": {"cohens_kappa_canonical": 0.97},
+                    "flips": {"grammatical_agreement": 0.97, "grammatical_ac1": 0.97, "names_intended_agreement": 0.99, "names_intended_ac1": 0.99},
+                },
+                "adjudicated": {"verdicts": {"unadjudicated_disagreements": []}, "flips": {"unadjudicated_disagreements": []}},
+            }
+            with open(os.path.join(d, "evaluation_v5.json"), "w", encoding="utf-8") as f:
+                json.dump(ev, f)
+            self.assertEqual(pf.check_coding_gate(d)[1], [])
+            ev["pre_adjudication"]["verdicts"]["cohens_kappa_canonical"] = 0.7
+            ev["adjudicated"]["flips"]["unadjudicated_disagreements"] = ["F0001"]
+            with open(os.path.join(d, "evaluation_v5.json"), "w", encoding="utf-8") as f:
+                json.dump(ev, f)
+            errs = pf.check_coding_gate(d)[1]
+            self.assertTrue(any("below the prereg §8 minimum 0.8" in e for e in errs))
+            self.assertTrue(any("not adjudicated" in e for e in errs))
+
+    def test_manipulation_check_uses_headline_parser(self):
+        row = {
+            "family": "donor", "regime": "math", "y_image": "10", "y_text": "20", "model_id": "Qwen/Qwen2.5-VL-3B-Instruct",
+            "full_text": "The two problems differ. I consider the typed text more reliable.\n\nShe ends up with 20 apples.",
+        }
+        self.assertEqual(an.manipulation_check([row], reps=10)["donor"]["attributable_answers"], 0)
+        row["full_text"] = row["full_text"].replace("She ends up with 20 apples.", "The final answer is 20.")
+        self.assertEqual(an.manipulation_check([row], reps=10)["donor"]["attributable_answers"], 1)
+
+    @unittest.skipUnless(
+        os.path.exists(os.path.join(EXPERIMENT, "coding_v5", "KEY_verdicts_do_not_open.csv")),
+        "held-out coding keys are not on this machine",
+    )
+    def test_committed_coding_sheets_reproduce_audit_numbers(self):
+        import sample_v5_for_coding as sv5
+
+        d = os.path.join(EXPERIMENT, "coding_v5")
+        r = lambda n: sv5.read_csv_map(os.path.join(d, n))
+        adj = sv5.read_adjudication(os.path.join(d, sv5.DEFAULT_ADJUDICATION))
+        v = sv5.evaluate_verdicts(r("coder_A_verdicts.csv"), r("coder_B_verdicts.csv"), r("KEY_verdicts_do_not_open.csv"), adj)
+        self.assertAlmostEqual(v["cohens_kappa"], 0.8803, places=4)
+        self.assertAlmostEqual(v["cohens_kappa_canonical"], 0.9783, places=4)
+        self.assertAlmostEqual(v["cohens_kappa_strict_three_way"], 0.9742, places=4)
+        self.assertEqual(v["parser_errors"], ["V0177"])
+        self.assertEqual(v["parser_accuracy"]["adjudicated"]["confirmatory_all"]["correct"], 168)
+        f = sv5.evaluate_flips(r("coder_A_flips.csv"), r("coder_B_flips.csv"), r("KEY_flips_do_not_open.csv"), adj)
+        self.assertAlmostEqual(f["grammatical_kappa"], 0.3258, places=4)
+        self.assertAlmostEqual(f["grammatical_ac1"], 0.9722, places=4)
+        self.assertEqual(f["names_intended_kappa"], 0.0)
+        self.assertEqual(f["defects"]["names_intended"], ["F0081"])
+        self.assertEqual(f["unadjudicated_disagreements"], [])
+
+
 if __name__ == "__main__":
     unittest.main()

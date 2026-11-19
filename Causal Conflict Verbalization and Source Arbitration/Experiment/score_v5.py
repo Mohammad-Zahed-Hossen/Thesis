@@ -60,7 +60,7 @@ _REL_NEG_BEFORE = re.compile(r"(?:\b(?:less|no more|not(?:\s+(?:as|very|fully|so
 SOURCES = {"math": ("image", "text"), "chartqa": ("chart", "report")}
 _RELIABLE_WORD = re.compile(r"\b(?:un)?reliable\b", re.I)
 _FOIL_BEFORE = re.compile(
-    r"\b(?:unlike|rather than|instead of|as opposed to|compared (?:to|with)|over)\s+(?:the\s+|a\s+|an\s+)?$",
+    r"\b(?:unlike|rather than|instead of|as opposed to|compared (?:to|with)|over|versus|vs\.?)\s+(?:the\s+|a\s+|an\s+)?$",
     re.I,
 )
 _CLAUSE_SPLIT = re.compile(r"[,;:]|\b(?:as|because|since|while|whereas|although|though|but)\b", re.I)

@@ -5,6 +5,7 @@ Checks:
 2. Presence and SHA-256 inventory of active Experiment/*_v5 scripts (and optional manifest hash matching).
 3. Git cleanliness and tag resolution (required before confirmatory runs).
 4. Optional GPU/CUDA/bfloat16/VRAM and package version checks (--check_gpu).
+5. Confirm phase only: the prereg §8 human-coding gate (coding_v5/evaluation_v5.json + adjudication_v5.csv).
 """
 
 from __future__ import annotations
@@ -30,6 +31,7 @@ import transplant_v5 as tp5  # noqa: E402
 
 DEFAULT_PREREG = os.path.join(REPO_ROOT, "Docs", "PREREGISTRATION_VERDICT_TRANSPLANT.md")
 DEFAULT_PIP_FREEZE = os.path.join(HERE, "results_v5", "pip_freeze.txt")
+DEFAULT_CODING_DIR = os.path.join(HERE, "coding_v5")
 
 CORE_SCRIPTS: Tuple[str, ...] = (
     "harness_v4.py",
@@ -166,7 +168,15 @@ def check_prereg_consistency(
     return errors
 
 
-def _sha256_file(path: str) -> str:
+def _sha256_file(path: str, normalize_eol: bool = False) -> str:
+    """SHA-256 of a file. normalize_eol hashes it with CRLF turned into LF.
+
+    Manifests are written on the GPU host (Linux, LF). A Windows checkout with core.autocrlf=true
+    holds the same commit with CRLF, so manifest checks accept either digest.
+    """
+    if normalize_eol:
+        with open(path, "rb") as fh:
+            return hashlib.sha256(fh.read().replace(b"\r\n", b"\n")).hexdigest()
     h = hashlib.sha256()
     with open(path, "rb") as fh:
         for chunk in iter(lambda: fh.read(65536), b""):
@@ -201,14 +211,13 @@ def check_scripts_sha256(
             continue
         for script_key, recorded_sha in recorded.items():
             base = os.path.basename(script_key)
+            candidate = os.path.join(scripts_dir, base)
             current_sha = hashes.get(base)
-            if current_sha is None:
-                candidate = os.path.join(scripts_dir, base)
-                if os.path.isfile(candidate):
-                    current_sha = _sha256_file(candidate)
+            if current_sha is None and os.path.isfile(candidate):
+                current_sha = _sha256_file(candidate)
             if current_sha is None:
                 errors.append(f"Manifest {mpath} references missing script: {script_key}")
-            elif current_sha != recorded_sha:
+            elif current_sha != recorded_sha and _sha256_file(candidate, normalize_eol=True) != recorded_sha:
                 errors.append(
                     f"Manifest {mpath} hash mismatch for {base}: recorded {recorded_sha[:12]} != disk {current_sha[:12]}"
                 )
@@ -334,6 +343,46 @@ def check_gpu_env(pip_freeze_path: str = DEFAULT_PIP_FREEZE) -> Tuple[Dict[str, 
     return info, errors
 
 
+CODING_KAPPA_MIN = 0.80  # prereg §8: verdict labels, canonical, pooled
+FLIP_AGREEMENT_MIN = 0.90  # prereg §8: flip ratings, raw agreement
+FLIP_AC1_MIN = 0.80  # prereg §8: flip ratings, Gwet's AC1
+
+
+def check_coding_gate(coding_dir: str = DEFAULT_CODING_DIR) -> Tuple[Dict[str, Any], List[str]]:
+    """Prereg §8 human-coding gate, from coding_v5/evaluation_v5.json and adjudication_v5.csv."""
+    errors: List[str] = []
+    info: Dict[str, Any] = {}
+    eval_path = os.path.join(coding_dir, "evaluation_v5.json")
+    if not os.path.isfile(os.path.join(coding_dir, "adjudication_v5.csv")):
+        errors.append(f"Human-coding adjudication missing: {os.path.join(coding_dir, 'adjudication_v5.csv')}")
+    if not os.path.isfile(eval_path):
+        errors.append(f"Human-coding evaluation missing: {eval_path} (run sample_v5_for_coding.py evaluate)")
+        return info, errors
+    with open(eval_path, "r", encoding="utf-8") as fh:
+        report = json.load(fh)
+    pre, adj = report.get("pre_adjudication") or {}, report.get("adjudicated")
+    if not pre or adj is None:
+        errors.append(f"{eval_path} lacks pre_adjudication and adjudicated sections; re-run evaluate with adjudication_v5.csv present")
+        return info, errors
+    kappa = (pre.get("verdicts") or {}).get("cohens_kappa_canonical")
+    info["verdict_kappa_canonical"] = kappa
+    if kappa is None or kappa < CODING_KAPPA_MIN:
+        errors.append(f"Verdict canonical kappa {kappa} is below the prereg §8 minimum {CODING_KAPPA_MIN}")
+    flips = pre.get("flips") or {}
+    for q in ("grammatical", "names_intended"):
+        agree, ac1 = flips.get(f"{q}_agreement"), flips.get(f"{q}_ac1")
+        info[f"flip_{q}_agreement"], info[f"flip_{q}_ac1"] = agree, ac1
+        if agree is None or agree < FLIP_AGREEMENT_MIN or ac1 is None or ac1 < FLIP_AC1_MIN:
+            errors.append(
+                f"Flip {q} agreement {agree} / AC1 {ac1} below the prereg §8 minimum ({FLIP_AGREEMENT_MIN} / {FLIP_AC1_MIN})"
+            )
+    for part in ("verdicts", "flips"):
+        left = (adj.get(part) or {}).get("unadjudicated_disagreements") or []
+        if left:
+            errors.append(f"{len(left)} {part} disagreement(s) not adjudicated: {', '.join(left[:10])}")
+    return info, errors
+
+
 def run_preflight(
     phase: str = "dev",
     require_tag: Optional[str] = None,
@@ -342,8 +391,12 @@ def run_preflight(
     prereg_path: str = DEFAULT_PREREG,
     manifest_paths: Optional[Sequence[str]] = None,
     pip_freeze_path: str = DEFAULT_PIP_FREEZE,
+    coding_dir: str = DEFAULT_CODING_DIR,
 ) -> Dict[str, Any]:
-    """Run all requested v5 pre-flight checks and return a structured report."""
+    """Run all requested v5 pre-flight checks and return a structured report.
+
+    The confirm phase also requires the prereg §8 human-coding gate (check_coding_gate).
+    """
     effective_tag = require_tag
     if phase == "confirm" and not effective_tag and not allow_untagged:
         effective_tag = "prereg-v5"
@@ -358,6 +411,11 @@ def run_preflight(
     git_prov, git_errors = check_git_tag(require_tag=effective_tag)
     errors.extend(git_errors)
 
+    coding_info: Optional[Dict[str, Any]] = None
+    if phase == "confirm":
+        coding_info, coding_errors = check_coding_gate(coding_dir)
+        errors.extend(coding_errors)
+
     gpu_info: Dict[str, Any] = {}
     if check_gpu:
         gpu_info, gpu_errors = check_gpu_env(pip_freeze_path=pip_freeze_path)
@@ -371,6 +429,7 @@ def run_preflight(
         "git": git_prov,
         "scripts_sha256": script_hashes,
         "gpu": gpu_info if check_gpu else None,
+        "coding": coding_info,
     }
 
 
@@ -383,6 +442,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     parser.add_argument("--check_manifests", nargs="*", default=None, help="Optional manifest JSON files to verify against disk script hashes.")
     parser.add_argument("--prereg", default=DEFAULT_PREREG)
     parser.add_argument("--pip_freeze", default=DEFAULT_PIP_FREEZE)
+    parser.add_argument("--coding_dir", default=DEFAULT_CODING_DIR, help="Human-coding directory checked in the confirm phase (prereg §8).")
     parser.add_argument("--json", action="store_true", help="Emit JSON report.")
     args = parser.parse_args(argv)
 
@@ -394,6 +454,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         prereg_path=args.prereg,
         manifest_paths=args.check_manifests,
         pip_freeze_path=args.pip_freeze,
+        coding_dir=args.coding_dir,
     )
 
     if args.json:
