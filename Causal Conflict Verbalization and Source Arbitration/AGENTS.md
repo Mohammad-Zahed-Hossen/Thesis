@@ -84,7 +84,7 @@
 │   ├── results_v5/      ← v5 post-fix dev rerun (34,920 rows) + px501k + analysis_dev/ (incl. lme4_out.txt)
 │   ├── results_v4/      ← v4 runs and dev analysis
 │   ├── results_v3/      ← v3 pilot outputs and re-analysis
-│   ├── coding_v5/       ← v5 human-coding sheets (verdicts + flips)
+│   ├── coding_v5/       ← v5 human-coding sheets (verdicts + flips), adjudicated (adjudication_v5.csv, evaluation_v5.json)
 │   ├── coding_v3/       ← v3 human-coding sheets
 │   └── archive/         ← v3 harness, v1/v2 pilots, and results_v5_Prev_backup/ (29,880 rows)
 ├── Docs/                ← AI-generated tracking (reference only)
@@ -94,7 +94,7 @@
 │   ├── Context/         ← Historical context
 │   ├── Decision_Audits/ ← Topic selection audits
 │   └── Parked_Proposals/← Deprecated proposals
-├── Thesis/              ← Writing guides, FAQs, runbooks, compute evals, v5 dev audits (chapters not yet drafted)
+├── Thesis/              ← Writing guides, FAQs, runbooks, compute evals, v5 dev & coding audits (chapters not yet drafted)
 ├── Archive/             ← Parked exploration domains
 ├── CLAUDE.md            ← Claude-specific directives
 └── .agents/             ← Antigravity agent config

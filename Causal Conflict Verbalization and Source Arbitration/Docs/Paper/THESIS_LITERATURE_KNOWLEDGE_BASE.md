@@ -1,6 +1,6 @@
 # Complete Thesis Literature Report & Knowledge Base (18 Papers + CMC-Bench)
 
-**Last updated:** 2026-11-14
+**Last updated:** 2026-11-14 (pre-freeze status in §5–§6 synced 2026-11-20)
 **Purpose:** Complete, evidence-grounded literature dossier for all future thesis design, statistical, and dissertation-writing decisions. Every AI agent working on this thesis should consult this file alongside [PREREGISTRATION_VERDICT_TRANSPLANT.md](../PREREGISTRATION_VERDICT_TRANSPLANT.md) and [Experiment/README.md](../../Experiment/README.md).
 **Sources merged:**
 1. Local primary-PDF audits: [lit-dossier-verdict-transplant.md](lit-dossier-verdict-transplant/lit-dossier-verdict-transplant.md) & [prereg-freeze-audit.md](prereg-freeze-audit/prereg-freeze-audit.md) (2026-11-10)
@@ -248,10 +248,10 @@
 
 ## 5. Pre-Freeze Checklist Before Tagging `prereg-v5`
 
-1. **Human Coding (`Experiment/coding_v5/`):** Double-code `200` verdict rows (`V0001`–`V0200`; `1,640` raw text lines post-F3 confirmatory-weighted resampling due to multi-line `full_text` cells) + `150` flip rows (`F0001`–`F0150`, `151` raw lines) and verify Cohen's $\kappa \ge 0.80$ / raw agreement.
-2. **ChartQA `max_pixels` & GPU Checks (`Experiment/README.md`):** Close R8.4 (`200704` vs `501760`), run `--print_example` render check on GPU, and verify `verdict_nll_tokens > 0` / `verdict_span_exact` / `boundary_mismatch` in a `--limit 20` smoke run.
-3. **Sync Pre-Registration Before Freeze:** §1.1, §4 citations (`2609.29278`/`2603.01437`, `2603.20172`, `2610.29318`, `2610.20805`, per-order sign check, prefill-resistance / `verdict_nll` caveat on H₀, competency-population scope, rendered-text Math channel), §11, Fable 5.2 audit fixes (`F2`, `F3`, `F5`–`F13`, `Upgrades 1–5`), and title/scope alignment are integrated into `PREREGISTRATION_VERDICT_TRANSPLANT.md`; complete final verification before freezing.
-4. **Commit, tag `prereg-v5`, and run `--phase confirm`.**
+1. **[Done 2026-11-20] Human Coding (`Experiment/coding_v5/`):** Double-coded `200` verdict rows + `150` flip rows, adjudicated in `adjudication_v5.csv` with results in `evaluation_v5.json` (canonical verdict κ = `0.978`, parser `168/168` on 3B+7B and `199/200` overall; flip agreement `97.3%` / `99.3%`, AC1 `0.972` / `0.993`; prereg §8 revised and logged in §11).
+2. **[Done 2026-11-15/16 & locked 2026-11-20] ChartQA `max_pixels` & GPU Checks (`Experiment/results_v5/`):** Completed fresh `34,920`-row L4 `bfloat16` rerun + R8.4 `px501k` (`501760`) comparison (`0` `boundary_mismatch`, `verdict_nll_tokens > 0` on all verdict rows) and locked ChartQA `max_pixels` at `200704` in `PREREGISTRATION_VERDICT_TRANSPLANT.md` §3.4 and `harness_v5.CONFIRM_MAX_PIXELS`.
+3. **[Done 2026-11-20] Sync Pre-Registration Before Freeze:** §1.1, §3.4, §4, §8, §10–§11, Fable 5.2 fixes (`F2`, `F3`, `F5`–`F13`, `Upgrades 1–5`), and `lit-audit-2026-11-15` gap-closure sync (`1,452` records) are integrated (`255` CPU tests pass; `preflight_v5.py --phase confirm --allow_untagged` passes).
+4. **[Pending] Commit, merge/tag `prereg-v5`, and run `--phase confirm`.**
 
 ---
 
@@ -263,7 +263,7 @@
   - *When Reasoning Traces Conflict with Evidence* (arXiv:2610.20805, text-only) remains the only formal threat under the audit rule: partial on component (a), own-turn trace under conflict, and on component (c), an instruction contrast.
   - Manalu et al. (arXiv:2610.30953), Karnik et al. (arXiv:2610.00601), Xu et al. (arXiv:2608.24790), and Tsui (arXiv:2507.02778) are single-component precedents on (a).
   - §1.1 in `PREREGISTRATION_VERDICT_TRANSPLANT.md` is updated with the `1,452`-record scope and single-component precedents.
-- **New A papers:** 2609.00550, 2610.30953, 2610.20805, 2609.29278, 2606.12747, 2610.37070. PDFs are in `Docs/Paper/` (bringing local PDFs to 26: 20 core/lead + 6 audit A-papers).
+- **New A papers:** 2609.00550, 2610.30953, 2610.20805, 2609.29278, 2606.12747, 2610.37070. PDFs are in `Docs/Paper/` (bringing local PDFs to 26 on 2026-11-15; 29 total after adding the 3 cited B-paper PDFs listed in §0).
 - **Correction to §4.2 of this file (applied above):** Replaced the overstatement that prefix-forcing "eliminates self-attribution discounting and external-authority sycophancy" (`2607.27304`) with the PDF-verified wording from audit §5 (sycophancy was model-specific: MedGemma +9.0 pp under the deference instruction, p. 2, and an authority gradient of −3.6 pp, p. 7).
 - **Design implications (audit §4):**
   - keep order counterbalancing and add a per-order sign rule;

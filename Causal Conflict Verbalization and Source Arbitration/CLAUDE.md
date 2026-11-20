@@ -55,7 +55,7 @@ Every v5 run and analysis must satisfy all of these. Details are in the pre-regi
 
 1. **Counterbalanced evidence order.** Run both `<image><text>` and `<text><image>`. The instruction stays fixed before both sources, and the format line stays after them. There are no "Source A/B" labels: sources get modality headers, and only their positions swap (prereg R2).
    - Why: with the instruction fixed, putting a source last moves Qwen2.5-VL-3B toward it by +16.7 / +15.0 pp (arXiv:2609.26986, natural images). If the instruction moves with the text, the sign reverses.
-   - v4 prompts always put the image first, so v4 dev never measured an order effect. v5 fixes this in `harness_v5.build_content`. Whether the literature's order effect appears on these stimuli is unknown until the v5 dev pass.
+   - v4 prompts always put the image first, so v4 dev never measured an order effect. v5 fixes this in `harness_v5.build_content`. v5 dev order diagnostics are in `Experiment/results_v5/analysis_dev/`; confirmatory order moderation awaits `--phase confirm`.
 2. **Binding arm plus explicit single-source ceilings.**
    - Binding: "…Then solve only the problem from the source you named as more reliable, and ignore the other problem."
    - Ceilings: `explicit_image` / `explicit_text`. Report any binding effect as a fraction of this ceiling.
@@ -102,7 +102,7 @@ Recomputed from `Experiment/results_v4/dev2_*.jsonl` with `score_v4.py`, or read
 │   ├── results_v5/      ← v5 post-fix dev rerun (34,920 rows) + px501k + analysis_dev/ (incl. lme4_out.txt)
 │   ├── results_v4/      ← v4 runs and dev analysis
 │   ├── results_v3/      ← v3 pilot outputs and re-analysis (read-only)
-│   ├── coding_v5/       ← v5 human-coding sheets (verdicts + flips)
+│   ├── coding_v5/       ← v5 human-coding sheets (verdicts + flips), adjudicated (adjudication_v5.csv, evaluation_v5.json)
 │   ├── coding_v3/       ← v3 human-coding sheets
 │   └── archive/         ← v3 harness, v1/v2 pilots, and results_v5_Prev_backup/ (29,880 rows)
 ├── Docs/                ← AI-GENERATED TRACKING (reference only)
@@ -113,7 +113,7 @@ Recomputed from `Experiment/results_v4/dev2_*.jsonl` with `score_v4.py`, or read
 │   ├── Context/         ← Historical context tracking
 │   ├── Decision_Audits/ ← Topic selection audit trail; Idea.md is current
 │   └── Parked_Proposals/← Deprecated proposal specs
-├── Thesis/              ← WHERE THESIS CHAPTERS WILL GO; docs/ holds Understanding FAQs, Compute evals, RUNBOOKs, and Archive/dev v5/ (v5 dev audits); dev v1_v5.md is a 2026-11-13 snapshot
+├── Thesis/              ← WHERE THESIS CHAPTERS WILL GO; docs/ holds Understanding FAQs, Compute evals, RUNBOOKs, and Archive/ (v5 dev audits in dev v5/ and 2026-11-20 coding_v5 audits); dev v1_v5.md is a 2026-11-13 snapshot
 ├── Archive/             ← Parked exploration domains (inactive)
 └── .agents/             ← Antigravity agent config
 ```

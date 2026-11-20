@@ -1,6 +1,6 @@
 # Research objective: read this first
 
-**Date:** 2026-11-15 (synced 2026-11-17 with gap-closure addendum). **AI-generated** (Claude Code, OpenResearch session) from the repo at commit `9ad1853` + post-fix literature sync.
+**Date:** 2026-11-15 (synced 2026-11-17 with gap-closure addendum; pointers updated 2026-11-20). **AI-generated** (Claude Code, OpenResearch session) from the repo at commit `9ad1853` + post-fix literature sync.
 
 **Verified against:**
 - the PDFs in `Docs/Paper/`: the 20 earlier ones plus 2609.00550, 2610.30953, 2610.20805, 2609.29278, 2606.12747, 2610.37070;
@@ -114,4 +114,5 @@ New from this audit:
 - Knowledge base: `Docs/Paper/THESIS_LITERATURE_KNOWLEDGE_BASE.md`
 - This audit: `Docs/Paper/lit-audit-2026-11-15/` (report + §7 addendum, `1,452`-row `papers.csv`, `164`-row `search_log.csv`, `47`-entry `references.bib`)
 - Status and next steps: `Experiment/README.md`
+- Human coding & ChartQA lock (2026-11-20): `Experiment/coding_v5/evaluation_v5.json`, `adjudication_v5.csv` (prereg §8 revised, logged in §11; ChartQA `max_pixels` locked at `200704` in §3.4; audits in `Thesis/docs/Archive/`)
 - Rules: `CLAUDE.md`

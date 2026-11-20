@@ -3,10 +3,10 @@
 Current v5 dev rerun (`2026-11-15/16`) across all three models (`Qwen2-VL-2B-Instruct`, `Qwen2.5-VL-3B-Instruct`, `Qwen2.5-VL-7B-Instruct`), run on an NVIDIA L4 in `torch.bfloat16` (`torch 2.14.1+cu130`, `transformers 5.22.1`, `cuda 13.0`, recorded in `pip_freeze.txt` and `*.manifest.json`) after the pre-freeze code/scorer/provenance fixes (`F2`, `F3`, `F5`–`F13`, `Upgrades 1–5`).
 
 **Status:** **Dev data only — do not cite as confirmatory findings.**
-- **Total stored root artifacts:** **48 files** (`20` `.jsonl`, `20` `.manifest.json`, `8` `.gates.json`, plus `pip_freeze.txt`), **34,920 rows**, covering the 6 main `200704` dev blocks plus the 2 `px501k` (`501760`) ChartQA R8.4 comparison blocks.
+- **Total stored root artifacts:** **49 data/env files** (`20` `.jsonl`, `20` `.manifest.json`, `8` `.gates.json`, and `pip_freeze.txt`, plus this `README.md`), **34,920 rows**, covering the 6 main `200704` dev blocks plus the 2 `px501k` (`501760`) ChartQA R8.4 comparison blocks.
 - **`analysis_dev/`:** Holds the current `analyze_v5.py` and `lme4` outputs computed on the 6 main `200704` dev blocks (`analysis_v5.md`, `analysis_v5.json`, `long_v5.csv`, `analyze_v5_lme4.R`, `lme4_out.txt`; excluding `px501k` to avoid duplicate dev-item pooling).
 - **Previous dev pass archived:** The initial `2026-11-12/13` dev pass (`29,880` rows + its `analysis_dev/` and dev audits) is preserved in [../archive/results_v5_Prev_backup/](../archive/results_v5_Prev_backup/README.md).
-- **Donor consistency:** All 6 main `donor` files (`120` ChartQA rows, `800` Math rows per model) are **0-diff byte-identical** to the archived `2026-11-12/13` donor generations, so the existing [../coding_v5/](../coding_v5/) human-coding sheets (`200` verdicts + `150` flips) match this rerun with zero drift.
+- **Donor consistency:** All 6 main `donor` files (`120` ChartQA rows, `800` Math rows per model) are **0-diff byte-identical** to the archived `2026-11-12/13` donor generations, so the existing [../coding_v5/](../coding_v5/) human-coding sheets (`200` verdicts + `150` flips) match this rerun with zero drift (coded and adjudicated 2026-11-20; see [../coding_v5/evaluation_v5.json](../coding_v5/evaluation_v5.json)).
 
 > **Token tip for agents:** Never `cat` the `.jsonl` files (the `*_tp_*` files are up to 23 MB). Read `*.gates.json`, `*.manifest.json`, `analysis_dev/analysis_v5.md`, or `analysis_dev/lme4_out.txt` instead.
 

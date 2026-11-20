@@ -116,6 +116,8 @@ Notes:
 
 ### ChartQA `max_pixels` (R8.4) and pre-freeze tokenizer smoke checks
 
+**Status (completed 2026-11-15/16; locked 2026-11-20):** Both checks below are complete. The R8.4 comparison ran in `results_v5/v5dev_chartqa_px501k_*`, ChartQA `max_pixels` is locked at `200704` in `PREREGISTRATION_VERDICT_TRANSPLANT.md` §3.4 and `harness_v5.CONFIRM_MAX_PIXELS`, and `verdict_nll_tokens > 0` with `0` `boundary_mismatch` was verified across all `23,136` `dl` rows in the `2026-11-15/16` rerun.
+
 The default is `--max_pixels 200704` (`256·28·28`), the same as GSM8K/SVAMP. ChartQA-Conflict source charts are `800×557` px, so `200704` scales them down to ~67% linear size (`401408` scales to ~95%), whereas the *Which Source Wins?* artifact loads the Qwen processor without pixel caps. Before tagging `prereg-v5`:
 
 1. Compare `--max_pixels 200704` vs `--max_pixels 501760` (`812×560 = 454,720` px rounded to `28×28` patches) on the 30 spent ChartQA dev items (base + donor + `--gates_only` for `Qwen/Qwen2.5-VL-3B-Instruct` and `Qwen/Qwen2.5-VL-7B-Instruct`) under new dev tags and lock the chosen ChartQA value in `PREREGISTRATION_VERDICT_TRANSPLANT.md` §3.4. Do not change it after freezing.
@@ -177,8 +179,8 @@ Dev numbers go into the freeze record. They are not findings, and they don't cha
    cd Experiment
    python preflight_v5.py --phase confirm --require_tag prereg-v5 --check_gpu
    ```
-   (Untracked new confirm files written under `Experiment/results_v5/` or `Experiment/results_v4/` are ignored by `git_provenance()`, so Stage 2 and Stage 3 remain unblocked while Stage 1 outputs sit on disk; you can also direct `--output_dir` to mounted Drive for persistence.)
-2. Confirmatory Math (`conflict`) runs execute on the two confirmatory models (`Qwen/Qwen2.5-VL-3B-Instruct` and `Qwen/Qwen2.5-VL-7B-Instruct`), on the same GPU class and with the batch size used in the dev pass. `Qwen/Qwen2-VL-2B-Instruct` is **diagnostic-only** (D3; 0/200 Math dev competency under `structured`) and is refused by `--phase confirm` unless `--allow_diagnostic_confirm` is explicitly passed; ChartQA-Conflict (`chartqa`) is exploratory (D4). Pixel bounds (`MIN_PIXELS_PIN` and `CONFIRM_MAX_PIXELS`) are enforced automatically in `--phase confirm`.
+   (`preflight_v5.py --phase confirm` also enforces the prereg §8 human-coding gate using `coding_v5/evaluation_v5.json` and `adjudication_v5.csv`, passed 2026-11-20. Untracked new confirm files written under `Experiment/results_v5/` or `Experiment/results_v4/` are ignored by `git_provenance()`, so Stage 2 and Stage 3 remain unblocked while Stage 1 outputs sit on disk; you can also direct `--output_dir` to mounted Drive for persistence.)
+2. Confirmatory Math (`conflict`) runs execute on the two confirmatory models (`Qwen/Qwen2.5-VL-3B-Instruct` and `Qwen/Qwen2.5-VL-7B-Instruct`), on the same GPU class and with the batch size used in the dev pass. `Qwen/Qwen2-VL-2B-Instruct` is **diagnostic-only** (D3; 0/200 Math dev competency under `structured`) and is refused by `--phase confirm` unless `--allow_diagnostic_confirm` is explicitly passed; ChartQA-Conflict (`chartqa`) is exploratory (D4). Pixel bounds (`MIN_PIXELS_PIN = 100352` and `CONFIRM_MAX_PIXELS = 200704` for both `conflict` and `chartqa`, locked 2026-11-20) are enforced automatically in `--phase confirm`.
 3. For each confirmatory model, run the base stage with `--phase confirm` over the whole confirm pool.
 4. Run the donor stage (`--phase confirm`).
 5. Run `transplant_v5.py --phase confirm --n_competent 250`. Every confirmatory manifest automatically records `git` commit/tag provenance, append-only `invocations[]`, `requested_model_revision`, and `resolved_model_commit` (resolved from model config or local HF cache `snapshots/`/`refs/`), and refuses non-pinned settings (revisions, pixel caps, limits, parser) unless explicitly overridden.

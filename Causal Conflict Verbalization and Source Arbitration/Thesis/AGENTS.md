@@ -8,7 +8,7 @@
 3. Ground all citations in `Docs/Paper/THESIS_LITERATURE_KNOWLEDGE_BASE.md` (`18` core + CMC-Bench), `Docs/Paper/lit-audit-2026-11-15/lit-audit-2026-11-15.md` (`1,452` screened records; `references.bib` with `47` entries), and local PDFs in `Docs/Paper/`.
 
 ## 2. Ground-Truth & Numeric Integrity Rules
-- **Verify every number from ground truth:** Cross-check counts, CIs, $p$-values, and model metrics against `Experiment/results_v5/` (or confirmatory outputs once `--phase confirm` runs), `*.manifest.json` / `*.gates.json`, and `Experiment/*.py`. Never copy numbers blindly from narrative `.md` files.
+- **Verify every number from ground truth:** Cross-check counts, CIs, $p$-values, and model metrics against `Experiment/results_v5/` (or confirmatory outputs once `--phase confirm` runs), `Experiment/coding_v5/evaluation_v5.json`, `Experiment/coding_v5/adjudication_v5.csv`, `*.manifest.json` / `*.gates.json`, and `Experiment/*.py`. Never copy numbers blindly from narrative `.md` files.
 - **Dev vs. confirmatory boundary:** Never present v3 pilot (`results_v3/`), v4 dev (`results_v4/`), or v5 dev (`results_v5/v5dev_*`) numbers as confirmatory findings. Label them explicitly as exploratory/dev-tuning only.
 - **Do not cite deprecated material:** Never cite `Docs/Paper/Archive/` papers or superseded v3 reports (`results_v3/statistical_report v3.0.md`, `thesis_contingency_table v3.0.tex`).
 

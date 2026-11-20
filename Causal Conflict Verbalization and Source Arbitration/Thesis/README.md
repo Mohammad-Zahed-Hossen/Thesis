@@ -2,8 +2,8 @@
 
 Writing guides, conceptual FAQs, execution runbooks, compute evaluations, and v5 dev-pass audits for the BSc CSE thesis (*Does the Verdict Decide? Testing Whether Stated Source Reliability Steers Vision-Language Models under Image–Text Conflict*).
 
-**Last updated:** 2026-11-19
-**Status:** The post-fix v5 dev rerun (`2026-11-15/16`) is complete across all three models (**34,920 rows** across `20` `.jsonl` files in [../Experiment/results_v5/](../Experiment/results_v5/README.md), including the `px501k` ChartQA R8.4 comparison and `analyze_v5.py` + `lme4` outputs in `analysis_dev/` incl. `lme4_out.txt`). The initial `2026-11-12/13` dev pass (`29,880` rows + its `analysis_dev/` and dev audits) is archived in [../Experiment/archive/results_v5_Prev_backup/](../Experiment/archive/results_v5_Prev_backup/README.md). All **248** CPU unit tests pass (`Experiment/tests/`) and `Experiment/preflight_v5.py` (`8/8` scripts) passes cleanly after Fable 5.2 forensic fixes (`F2`, `F3`, `F5`–`F13`, `Upgrades 1–5`). The 18-paper + CMC-Bench literature base is consolidated in [../Docs/Paper/THESIS_LITERATURE_KNOWLEDGE_BASE.md](../Docs/Paper/THESIS_LITERATURE_KNOWLEDGE_BASE.md), alongside the 2026-11-15 literature audit + 2026-11-17 gap-closure addendum (`1,452` screened records, `6` A + `41` B) and Fable 5.2 forensic audit + 16 related-work repo snapshots. The pre-registration is **not frozen**, and **no confirmatory data exists**. No dissertation chapters have been drafted here yet.
+**Last updated:** 2026-11-20
+**Status:** The post-fix v5 dev rerun (`2026-11-15/16`) is complete across all three models (**34,920 rows** across `20` `.jsonl` files in [../Experiment/results_v5/](../Experiment/results_v5/README.md), including the `px501k` ChartQA R8.4 comparison and `analyze_v5.py` + `lme4` outputs in `analysis_dev/` incl. `lme4_out.txt`). The initial `2026-11-12/13` dev pass (`29,880` rows + its `analysis_dev/` and dev audits) is archived in [../Experiment/archive/results_v5_Prev_backup/](../Experiment/archive/results_v5_Prev_backup/README.md). All **255** CPU unit tests pass (`Experiment/tests/`) and `Experiment/preflight_v5.py` (`8/8` scripts) passes cleanly after Fable 5.2 forensic fixes (`F2`, `F3`, `F5`–`F13`, `Upgrades 1–5`). The 18-paper + CMC-Bench literature base is consolidated in [../Docs/Paper/THESIS_LITERATURE_KNOWLEDGE_BASE.md](../Docs/Paper/THESIS_LITERATURE_KNOWLEDGE_BASE.md), alongside the 2026-11-15 literature audit + 2026-11-17 gap-closure addendum (`1,452` screened records, `6` A + `41` B) and Fable 5.2 forensic audit + 16 related-work repo snapshots. Double human coding (`Experiment/coding_v5/`, `adjudication_v5.csv`, `evaluation_v5.json`; prereg §8 revised and logged in §11) and locking ChartQA `max_pixels` at `200704` (§3.4) completed on 2026-11-20 (audited in `docs/Archive/`). The pre-registration is **not frozen**, and **no confirmatory data exists**. No dissertation chapters have been drafted here yet.
 **Ground truth:** Active code and raw outputs live in [../Experiment/](../Experiment/) (start at [../Experiment/README.md](../Experiment/README.md)). The pre-registration draft is [../Docs/PREREGISTRATION_VERDICT_TRANSPLANT.md](../Docs/PREREGISTRATION_VERDICT_TRANSPLANT.md).
 
 > [!NOTE]
@@ -14,7 +14,7 @@ Writing guides, conceptual FAQs, execution runbooks, compute evaluations, and v5
 ## Quick start for AI agents (read in this order, stop when you have enough)
 
 1. **This file**: what is in `Thesis/`.
-2. [docs/Archive/dev v5/claude_v5_independent_deep_audit.md](<docs/Archive/dev v5/claude_v5_independent_deep_audit.md>) §1 and §10: the current evidence boundary and the blockers before freezing.
+2. [docs/Archive/claude_coding_v5_independent_audit.md](docs/Archive/claude_coding_v5_independent_audit.md) and [docs/Archive/dev v5/claude_v5_independent_deep_audit.md](<docs/Archive/dev v5/claude_v5_independent_deep_audit.md>) (§1 and §10): the latest pre-freeze coding/adjudication status, evidence boundary, and dev-pass blockers before freezing.
 3. [../Docs/PREREGISTRATION_VERDICT_TRANSPLANT.md](../Docs/PREREGISTRATION_VERDICT_TRANSPLANT.md): the design spec (freeze conditions §10, R8).
 4. [../Docs/RESEARCH_OBJECTIVE.md](../Docs/RESEARCH_OBJECTIVE.md) and [../Docs/Paper/README.md](../Docs/Paper/README.md): the post-2026-11-15 onboarding brief, complete 18-paper + CMC-Bench knowledge base ([THESIS_LITERATURE_KNOWLEDGE_BASE.md](../Docs/Paper/THESIS_LITERATURE_KNOWLEDGE_BASE.md)), pre-freeze literature audit ([lit-audit-2026-11-15/](../Docs/Paper/lit-audit-2026-11-15/lit-audit-2026-11-15.md)), Fable 5.2 pre-freeze forensic audit ([fable52-prefreeze-audit-2026-11-15.md](../Docs/Paper/fable52-prefreeze-audit-2026-11-15.md)) + 16 snapshotted repos ([related_repos/](../Docs/Paper/related_repos/README.md)), post-v5 direct PDF audit ([post-v5-pdf-audit.md](../Docs/Paper/post-v5-pdf-audit/post-v5-pdf-audit.md)), and **29 local PDFs** (20 core/lead + 6 audit A-papers + 3 cited B-papers; 0 core missing).
 5. [THESIS_NARRATIVE_AND_FRAMING_GUIDE.md](THESIS_NARRATIVE_AND_FRAMING_GUIDE.md): only when you are drafting thesis prose.
@@ -43,6 +43,8 @@ Thesis/
     │   ├── Compute_Platform_Evaluation_2026-11-11.md
     │   └── Thesis Cloude Compute Evaluation.md
     └── Archive/
+        ├── Antigravity Audit.md
+        ├── claude_coding_v5_independent_audit.md
         └── dev v5/
             ├── v5_dev_output.md
             ├── v5_antigravity_analysis.md
@@ -90,6 +92,11 @@ Records and independent AI audits of the **initial `2026-11-12/13` v5 dev pass**
 - **[claude_v5_independent_deep_audit.md](<docs/Archive/dev v5/claude_v5_independent_deep_audit.md>)** — Second-pass independent forensic audit (2026-11-13) cross-checking `results_v5/`, active v5 code, ChartQA Hub gold answers, `Δℓ` vs. behavior coupling, own-verdict replay stability, and pre-freeze feasibility blockers (2B `####` format failure, ChartQA retention, and behavioral churn).
 - **[claude_v5_forensic_code_and_construct_audit.md](<docs/Archive/dev v5/claude_v5_forensic_code_and_construct_audit.md>)** — Forensic code & construct audit motivating pre-freeze decisions D1–D5 (2026-11-13).
 - **[claude_v4_vs_v5_plan_audit.md](<docs/Archive/dev v5/claude_v4_vs_v5_plan_audit.md>)** — Objective comparison of the v4 dev plan vs. the post-v5 plan grounded in primary papers (2026-11-14), leading to the fixed 5% churn limit, `B_beh` benchmark renaming, and explicit inconclusive readings.
+
+### `docs/Archive/` — v5 Human-Coding Audits (2026-11-20)
+
+- **[Antigravity Audit.md](<docs/Archive/Antigravity Audit.md>)** — Initial end-to-end audit of `Experiment/coding_v5/` coder sheets, restored keys, κ/AC1 metrics, parser edge cases, and pipeline hazards.
+- **[claude_coding_v5_independent_audit.md](docs/Archive/claude_coding_v5_independent_audit.md)** — Independent cross-audit verifying every `coding_v5/` statistic from raw files, surfacing the §8 κ-gate freeze blocker and raw-sheet immutability rule, and guiding the 2026-11-20 adjudication and pre-freeze fixes.
 
 ---
 
