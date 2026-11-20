@@ -75,10 +75,10 @@ From [analysis_dev/analysis_v5.md](analysis_dev/analysis_v5.md) and [analysis_de
    - **Mixed-effects (`lme4_out.txt`):** On 7B Math both `lmer` and `glmer` converged with the full `(1 + D | item)` random slope; on 3B Math and 3B ChartQA the by-item random slope was dropped cleanly to `(1 | item)`.
 3. **ChartQA-Conflict & R8.4 `max_pixels` comparison (exploratory, D4):**
    - Raising `max_pixels` from `200704` to `501760` raised single-source competency slightly (`13 → 16` on 3B; `13 → 17` on 7B) but reduced gate-passing survival (`5 → 1` on 3B due to `own_absent: 27`; `0 → 0` on 7B due to `gate_answer_leakage: 21`, `gate3_too_many_swaps: 12`).
-4. **Before freezing `prereg-v5`:**
+4. **Pre-registration freeze (`prereg-v5`, 2026-11-20):**
    - Done (2026-11-20): double human coding in [../coding_v5/](../coding_v5/), adjudicated (`adjudication_v5.csv`, `evaluation_v5.json`; prereg §8 as revised, §11).
    - Done (2026-11-20): ChartQA `max_pixels` locked at `200704` in [../../Docs/PREREGISTRATION_VERDICT_TRANSPLANT.md](../../Docs/PREREGISTRATION_VERDICT_TRANSPLANT.md) §3.4.
-   - Open: commit and tag `prereg-v5`.
+   - Done (2026-11-20): merged to `main` and tagged `prereg-v5`; ready for `--phase confirm` on GPU.
    - Note: `analysis_dev/` was produced before `manipulation_check` switched to the `structured` parser (dev shift ≤ 0.8 pp); it was not re-run.
 
 To regenerate `analysis_dev/` locally (excluding `px501k` to avoid duplicate-item pooling), run from `Experiment/` (in Git Bash, or expand globs explicitly in PowerShell):

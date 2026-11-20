@@ -251,7 +251,7 @@
 1. **[Done 2026-11-20] Human Coding (`Experiment/coding_v5/`):** Double-coded `200` verdict rows + `150` flip rows, adjudicated in `adjudication_v5.csv` with results in `evaluation_v5.json` (canonical verdict κ = `0.978`, parser `168/168` on 3B+7B and `199/200` overall; flip agreement `97.3%` / `99.3%`, AC1 `0.972` / `0.993`; prereg §8 revised and logged in §11).
 2. **[Done 2026-11-15/16 & locked 2026-11-20] ChartQA `max_pixels` & GPU Checks (`Experiment/results_v5/`):** Completed fresh `34,920`-row L4 `bfloat16` rerun + R8.4 `px501k` (`501760`) comparison (`0` `boundary_mismatch`, `verdict_nll_tokens > 0` on all verdict rows) and locked ChartQA `max_pixels` at `200704` in `PREREGISTRATION_VERDICT_TRANSPLANT.md` §3.4 and `harness_v5.CONFIRM_MAX_PIXELS`.
 3. **[Done 2026-11-20] Sync Pre-Registration Before Freeze:** §1.1, §3.4, §4, §8, §10–§11, Fable 5.2 fixes (`F2`, `F3`, `F5`–`F13`, `Upgrades 1–5`), and `lit-audit-2026-11-15` gap-closure sync (`1,452` records) are integrated (`255` CPU tests pass; `preflight_v5.py --phase confirm --allow_untagged` passes).
-4. **[Pending] Commit, merge/tag `prereg-v5`, and run `--phase confirm`.**
+4. **[Frozen 2026-11-20 at `prereg-v5`]** Merged to `main` and tagged `prereg-v5`; next: run `--phase confirm` on GPU.
 
 ---
 

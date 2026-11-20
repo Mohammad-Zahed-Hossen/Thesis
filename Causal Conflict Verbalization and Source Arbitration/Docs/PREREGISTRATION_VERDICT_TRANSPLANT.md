@@ -2,14 +2,14 @@
 
 **Working title:** *Does the Verdict Decide? Testing Whether Stated Source Reliability Steers Vision-Language Models under Image–Text Conflict*
 
-**Status:** DRAFT, not frozen. It is frozen only when the conditions in §10, R8 are met:
+**Status:** **FROZEN** (`2026-11-20`, tag `prereg-v5`). All freeze conditions in §10, R8 are met:
 
-- literal templates;
-- the v5 harness with tests;
-- one v5 dev pass on all three models, on the GPU class and dtype of §3.4;
-- `max_pixels` fixed for ChartQA (done 2026-11-20: `200704`, §3.4).
+- literal templates (verified against `Experiment/harness_v5.py` and `Experiment/transplant_v5.py`);
+- the v5 harness with tests (`255` CPU unit tests passing; `Experiment/preflight_v5.py` passing);
+- one v5 dev pass on all three models, on the GPU class and dtype of §3.4 (`2026-11-15/16` L4 `bfloat16` rerun, `34,920` rows, `Experiment/results_v5/`);
+- `max_pixels` fixed for ChartQA (done `2026-11-20`: `200704`, §3.4) and §8 double human coding completed and adjudicated (`Experiment/coding_v5/evaluation_v5.json`, `adjudication_v5.csv`).
 
-To freeze it, commit this file, tag the commit `prereg-v5`, and record the tag hash in every confirmatory manifest. Confirmatory data collected before the freeze does not count as confirmatory.
+Frozen on `main` at annotated tag `prereg-v5` (`2026-11-20`); every confirmatory manifest records the tag commit hash. Confirmatory data collected before the freeze does not count as confirmatory.
 
 **Sources:**
 
@@ -675,7 +675,7 @@ three models alike. See §3.2, §7.2 and §11.)*
 
 *(Empty. Record every change made after the freeze, with date, reason, and whether it affects confirmatory tests.)*
 
-**Pre-freeze changes beyond the audit text, awaiting author confirmation:**
+**Pre-freeze changes beyond the audit text (confirmed by author before freeze, 2026-11-20):**
 
 - §5.2, para template 3 reworded so that it contains "reliable".
 - §6.2, behavioural cells limited to k = 1 for compute.

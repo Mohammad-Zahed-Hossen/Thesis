@@ -18,7 +18,8 @@ The full design is in `Docs/PREREGISTRATION_VERDICT_TRANSPLANT.md`, with a quick
 - **Done:** 18-paper + CMC-Bench literature audit (`Docs/Paper/THESIS_LITERATURE_KNOWLEDGE_BASE.md`), pre-registration freeze audit (`Docs/Paper/prereg-freeze-audit/`), and pre-freeze literature audit + 2026-11-17 gap-closure addendum (`Docs/Paper/lit-audit-2026-11-15/lit-audit-2026-11-15.md`, `1,452` screened records, `6` A + `41` B; `Docs/RESEARCH_OBJECTIVE.md`).
 - **Done:** fresh `2026-11-15/16` post-fix v5 dev rerun across all three models on an L4 in `bfloat16` (**34,920 rows** in `Experiment/results_v5/`, including `px501k` R8.4 comparison, verified `verdict_nll` spans, and `resolved_model_commit` manifests; initial `29,880`-row pass archived in `Experiment/archive/results_v5_Prev_backup/` and audited in `Thesis/docs/Archive/dev v5/`), `analyze_v5.py` + `lme4` run on dev (`Experiment/results_v5/analysis_dev/` incl. `lme4_out.txt`), pre-freeze decisions D1–D5 + gate revisions, Fable 5.2 forensic audit fixes (`F2`, `F3`, `F5`–`F13`, `Upgrades 1–5`, `Experiment/preflight_v5.py`), and `lit-audit-2026-11-15` §1.3/§4 + title/scope alignment synced into the draft.
 - **Done (2026-11-20):** double human coding (`Experiment/coding_v5/`), adjudicated in `adjudication_v5.csv` with results in `evaluation_v5.json` (verdict κ `0.978` canonical; parser `168/168` on 3B+7B; flip agreement + AC1 gate per revised prereg §8, logged in §11); ChartQA `max_pixels` locked at `200704` (§3.4). Audits: `Thesis/docs/Archive/Antigravity Audit.md`, `Thesis/docs/Archive/claude_coding_v5_independent_audit.md`.
-- **Now:** commit + tag `prereg-v5`.
+- **Done (2026-11-20):** merged to `main` and frozen at tag `prereg-v5`.
+- **Now:** run confirmatory phase (`--phase confirm`) on GPU (L4/A100, `bfloat16`).
 - **No confirmatory data exists yet.**
 
 For current status and next steps, read `Experiment/README.md` first.
@@ -107,7 +108,7 @@ Recomputed from `Experiment/results_v4/dev2_*.jsonl` with `score_v4.py`, or read
 │   └── archive/         ← v3 harness, v1/v2 pilots, and results_v5_Prev_backup/ (29,880 rows)
 ├── Docs/                ← AI-GENERATED TRACKING (reference only)
 │   ├── RESEARCH_OBJECTIVE.md                 ← Onboarding brief: RQ, estimand, narrowed novelty, reading order
-│   ├── PREREGISTRATION_VERDICT_TRANSPLANT.md ← Design spec (draft, not frozen)
+│   ├── PREREGISTRATION_VERDICT_TRANSPLANT.md ← Design spec (frozen at `prereg-v5`)
 │   ├── Paper/           ← 29 primary PDFs, 16 related_repos/ snapshots, lit KB, pre-freeze & Fable 5.2 audits, dossier, freeze audit
 │   ├── *.md             ← Older topic spec, master report, roadmap (stale)
 │   ├── Context/         ← Historical context tracking

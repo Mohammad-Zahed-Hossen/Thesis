@@ -172,7 +172,7 @@ Rscript results_v5/analysis_dev/analyze_v5_lme4.R results_v5/analysis_dev/long_v
 
 Dev numbers go into the freeze record. They are not findings, and they don't change R3, R4 or R7.
 
-## 6. After the freeze (not yet)
+## 6. Confirmatory phase (frozen at `prereg-v5`, 2026-11-20)
 
 1. Clone the repository on the GPU machine, check out the clean commit tagged `prereg-v5` (`git checkout prereg-v5`), and verify before every GPU command:
    ```bash

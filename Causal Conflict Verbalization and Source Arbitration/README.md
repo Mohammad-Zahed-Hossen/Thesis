@@ -3,7 +3,7 @@
 *(Folder name unchanged: `Causal Conflict Verbalization and Source Arbitration`)*
 
 > **Researcher:** Mohammad Zahed Hossen (Final-Year BSc CSE, Bangladesh)
-> **Status:** v3 pilot and v4 dev done; v5 dev rerun (`2026-11-15/16`, `34,920` rows + `px501k` R8.4 comparison + `analysis_dev/` + `lme4_out.txt`) complete; double human coding complete and adjudicated (2026-11-20); 255 CPU unit tests pass; pre-registration not yet frozen (**no confirmatory data**)
+> **Status:** v3 pilot and v4 dev done; v5 dev rerun (`2026-11-15/16`, `34,920` rows + `px501k` R8.4 comparison + `analysis_dev/` + `lme4_out.txt`) complete; double human coding complete and adjudicated (2026-11-20); 255 CPU unit tests pass; pre-registration **frozen** on `main` at tag `prereg-v5` (2026-11-20; **no confirmatory data yet**)
 > **Models:** `Qwen/Qwen2-VL-2B-Instruct` (diagnostic-only, D3), `Qwen/Qwen2.5-VL-3B-Instruct` & `Qwen/Qwen2.5-VL-7B-Instruct` (confirmatory)
 > **Datasets:** `vlm-modality-research/modality-conflict-arbitration-v2` (GSM8K/SVAMP) and `vlm-modality-research/chartqa-evidence-conflict-v2` (exploratory, D4)
 
@@ -31,7 +31,7 @@ When an image and a typed text support different answers, does a prefix-forced s
 │   ├── coding_v5/  v5 double human coding (200 verdicts, 150 flips), adjudicated (adjudication_v5.csv, evaluation_v5.json)
 │   └── archive/    Superseded v3 harness, v1/v2 pilots, and results_v5_Prev_backup/ (29,880 rows)
 ├── Thesis/         Writing guides, FAQs, runbooks, compute evaluations, and v5 dev & coding audits (chapters not yet drafted)
-├── Docs/           Onboarding brief (RESEARCH_OBJECTIVE.md), pre-registration draft, 18-paper + CMC-Bench knowledge base / 29 local PDFs + 16 repo snapshots + 2026-11-15 audits (Docs/Paper/), and historical decision records
+├── Docs/           Onboarding brief (RESEARCH_OBJECTIVE.md), pre-registration (frozen at `prereg-v5`), 18-paper + CMC-Bench knowledge base / 29 local PDFs + 16 repo snapshots + 2026-11-15 audits (Docs/Paper/), and historical decision records
 ├── Archive/        Parked explorations (Bengali VLM, medical imaging, multimodal agents, etc.)
 ├── CLAUDE.md       Claude directives
 ├── AGENTS.md       Instructions for other agents

@@ -4,7 +4,7 @@
 
 **Verified against:**
 - the PDFs in `Docs/Paper/`: the 20 earlier ones plus 2609.00550, 2610.30953, 2610.20805, 2609.29278, 2606.12747, 2610.37070;
-- `Docs/PREREGISTRATION_VERDICT_TRANSPLANT.md` (draft, not frozen) and `CLAUDE.md`.
+- `Docs/PREREGISTRATION_VERDICT_TRANSPLANT.md` (frozen at `prereg-v5`, 2026-11-20) and `CLAUDE.md`.
 
 If this brief contradicts the prereg, the code or a PDF, those win.
 
