@@ -38,7 +38,8 @@ Thesis/
     ├── RUNBOOK/
     │   ├── RUNBOOK_V4.md
     │   ├── RUNBOOK_V5.md
-    │   └── RUNBOOK_V5_DEV_LATEST.md
+    │   ├── RUNBOOK_V5_DEV_LATEST.md
+    │   └── RUNBOOK_V5_CONFIRM.md
     ├── Compute/
     │   ├── Compute_Platform_Evaluation_2026-11-11.md
     │   └── Thesis Cloude Compute Evaluation.md
@@ -76,6 +77,7 @@ Two harmonized Q&A guides (AI-generated and audited on 2026-11-11 against code, 
 - **[RUNBOOK_V4.md](docs/RUNBOOK/RUNBOOK_V4.md)** — End-to-end local and GPU execution guide for v4 (mirrors/extends [../Experiment/RUNBOOK_v4.md](../Experiment/RUNBOOK_v4.md)).
 - **[RUNBOOK_V5.md](docs/RUNBOOK/RUNBOOK_V5.md)** — Initial Colab Pro guide for the `2026-11-12/13` v5 dev pass (kept as historical record; defer to [../Experiment/RUNBOOK_v5.md](../Experiment/RUNBOOK_v5.md)).
 - **[RUNBOOK_V5_DEV_LATEST.md](docs/RUNBOOK/RUNBOOK_V5_DEV_LATEST.md)** — End-to-end fail-fast Colab Pro runbook (`Option 3: v5dev_latest`) used for the `2026-11-15/16` post-fix dev rerun, `F1`/`R8.4` checks, and `lme4` execution.
+- **[RUNBOOK_V5_CONFIRM.md](docs/RUNBOOK/RUNBOOK_V5_CONFIRM.md)** — End-to-end fail-fast confirmatory runbook (`--phase confirm` from frozen tag `prereg-v5`, `8bb6ca23`) covering Colab Pro notebook cells and the RunPod `tmux` variant, GPU/batch-size locking, provenance/row audits, `analyze_v5.py`, and `lme4`.
 
 ### `docs/Compute/` — GPU Infrastructure Evaluations
 
